@@ -1,26 +1,105 @@
 {
   "schema_version": 1,
-  "generated_at_utc": null,
+  "generated_at_utc": "2026-01-16T16:44:40.593Z",
   "repo": {
     "default_branch": "main"
   },
   "head": {
-    "sha": null,
-    "message": null,
-    "author_name": null,
-    "author_email": null,
-    "timestamp_utc": null
+    "sha": "d4aca114e21a63bddcc69defc897873a391042ca",
+    "message": "Update generate_repo_context.mjs",
+    "author_name": "thedoughmonster",
+    "author_email": "thedoughmonster@gmail.com",
+    "timestamp_utc": "2026-01-16T11:44:32-05:00"
   },
-  "commits": [],
+  "commits": [
+    {
+      "sha": "d4aca114e21a63bddcc69defc897873a391042ca",
+      "timestamp_utc": "2026-01-16T11:44:32-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update generate_repo_context.mjs"
+    },
+    {
+      "sha": "f37f8ae727ef0e6584c1b3eeb12d9397c6e440a3",
+      "timestamp_utc": "2026-01-16T11:39:52-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Create README.md"
+    },
+    {
+      "sha": "b5c4bd008f155d669675b67f7d4c74c1b1e1eb04",
+      "timestamp_utc": "2026-01-16T11:38:46-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Create repo_context.yml"
+    },
+    {
+      "sha": "fb3bce9c5d2b8601be3c2eff079d61f5f0c035f2",
+      "timestamp_utc": "2026-01-16T11:37:53-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Create generate_repo_context.mjs"
+    },
+    {
+      "sha": "907a721c52815361043bc5cbbd8774e343491867",
+      "timestamp_utc": "2026-01-16T11:36:43-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Create dm_repo_context.json"
+    },
+    {
+      "sha": "62407ba7e3c88dd16f1437cd58be0dee9834e492",
+      "timestamp_utc": "2026-01-16T10:59:09-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update db_migrate.yml"
+    },
+    {
+      "sha": "5ba4741ef95376fdcd078cb5657ccad82cc97232",
+      "timestamp_utc": "2026-01-16T10:47:04-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update db_query.yml"
+    },
+    {
+      "sha": "58646fd0d341b37abcac4425a36867838dacb60c",
+      "timestamp_utc": "2026-01-16T10:38:15-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update db_migrate.yml"
+    },
+    {
+      "sha": "d3be26c73aa04fa56cd895fc771a92d24f242643",
+      "timestamp_utc": "2026-01-16T10:34:12-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update db_migrate.yml"
+    },
+    {
+      "sha": "aa2f1c6c6c6d337ca8062e29969fff66f811b007",
+      "timestamp_utc": "2026-01-16T10:24:23-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update db_migrate.yml"
+    }
+  ],
   "changed_paths": {
-    "range_base_sha": null,
-    "range_head_sha": null,
-    "all": [],
-    "by_top_dir": {},
+    "range_base_sha": "f37f8ae727ef0e6584c1b3eeb12d9397c6e440a3",
+    "range_head_sha": "d4aca114e21a63bddcc69defc897873a391042ca",
+    "all": [
+      "scripts/generate_repo_context.mjs"
+    ],
+    "by_top_dir": {
+      "scripts": [
+        "scripts/generate_repo_context.mjs"
+      ]
+    },
     "by_area": {
       "db": [],
       "canon": [],
-      "scripts": [],
+      "scripts": [
+        "scripts/generate_repo_context.mjs"
+      ],
       "github": [],
       "other": []
     }
