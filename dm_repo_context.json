@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": null,
+  "repo": {
+    "default_branch": "main"
+  },
+  "head": {
+    "sha": null,
+    "message": null,
+    "author_name": null,
+    "author_email": null,
+    "timestamp_utc": null
+  },
+  "commits": [],
+  "changed_paths": {
+    "range_base_sha": null,
+    "range_head_sha": null,
+    "all": [],
+    "by_top_dir": {},
+    "by_area": {
+      "db": [],
+      "canon": [],
+      "scripts": [],
+      "github": [],
+      "other": []
+    }
+  },
+  "directories": [
+    {
+      "path": "canon",
+      "purpose": "Canonical JSON inputs: constitutions, object models, examples",
+      "authoritative": true,
+      "agents_md": "canon/AGENTS.md"
+    },
+    {
+      "path": "db",
+      "purpose": "Schema, invariants, migrations, queries",
+      "authoritative": true,
+      "agents_md": "db/AGENTS.md"
+    },
+    {
+      "path": "scripts",
+      "purpose": "Helpers and seed scripts, must not encode business rules",
+      "authoritative": false,
+      "agents_md": "scripts/AGENTS.md"
+    },
+    {
+      "path": ".github",
+      "purpose": "Automation surfaces, never authoritative for business rules",
+      "authoritative": false,
+      "agents_md": ".github/AGENTS.md"
+    }
+  ],
+  "invariants": {
+    "canonical_source_of_truth": "supabase_postgres",
+    "rules": [
+      "Canonical operational data lives in Postgres and canonical JSON",
+      "Migrations are authoritative, derived artifacts are disposable",
+      "Validation is enforced at lifecycle gates, server-side"
+    ]
+  }
+}
