@@ -1,17 +1,31 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-16T16:44:40.593Z",
+  "generated_at_utc": "2026-01-16T17:03:34.183Z",
   "repo": {
     "default_branch": "main"
   },
   "head": {
-    "sha": "d4aca114e21a63bddcc69defc897873a391042ca",
-    "message": "Update generate_repo_context.mjs",
+    "sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
+    "message": "Update repo_context.yml",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-16T11:44:32-05:00"
+    "timestamp_utc": "2026-01-16T12:03:24-05:00"
   },
   "commits": [
+    {
+      "sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
+      "timestamp_utc": "2026-01-16T12:03:24-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update repo_context.yml"
+    },
+    {
+      "sha": "9a99d090dcebc95dc3a8681c6a045cd75519f923",
+      "timestamp_utc": "2026-01-16T16:44:40Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "d4aca114e21a63bddcc69defc897873a391042ca",
       "timestamp_utc": "2026-01-16T11:44:32-05:00",
@@ -67,41 +81,33 @@
       "author_name": "thedoughmonster",
       "author_email": "thedoughmonster@gmail.com",
       "message": "Update db_migrate.yml"
-    },
-    {
-      "sha": "d3be26c73aa04fa56cd895fc771a92d24f242643",
-      "timestamp_utc": "2026-01-16T10:34:12-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Update db_migrate.yml"
-    },
-    {
-      "sha": "aa2f1c6c6c6d337ca8062e29969fff66f811b007",
-      "timestamp_utc": "2026-01-16T10:24:23-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Update db_migrate.yml"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "f37f8ae727ef0e6584c1b3eeb12d9397c6e440a3",
-    "range_head_sha": "d4aca114e21a63bddcc69defc897873a391042ca",
+    "range_base_sha": "d4aca114e21a63bddcc69defc897873a391042ca",
+    "range_head_sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
     "all": [
-      "scripts/generate_repo_context.mjs"
+      ".github/workflows/repo_context.yml",
+      "dm_repo_context.json"
     ],
     "by_top_dir": {
-      "scripts": [
-        "scripts/generate_repo_context.mjs"
+      ".github": [
+        ".github/workflows/repo_context.yml"
+      ],
+      "dm_repo_context.json": [
+        "dm_repo_context.json"
       ]
     },
     "by_area": {
       "db": [],
       "canon": [],
-      "scripts": [
-        "scripts/generate_repo_context.mjs"
+      "scripts": [],
+      "github": [
+        ".github/workflows/repo_context.yml"
       ],
-      "github": [],
-      "other": []
+      "other": [
+        "dm_repo_context.json"
+      ]
     }
   },
   "directories": [
