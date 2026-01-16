@@ -19,10 +19,24 @@ jobs:
       - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL_DIRECT }}
+          DB_HOST: db.loqnooocmcuthedsduch.supabase.co
         run: |
           set -euo pipefail
+
+          # Resolve IPv4 for the DB host
+          IPV4=$(getent ahostsv4 "$DB_HOST" | awk '{print $1; exit}')
+          if [ -z "$IPV4" ]; then
+            echo "Failed to resolve IPv4 for $DB_HOST"
+            exit 1
+          fi
+          echo "Resolved IPv4: $IPV4"
+
+          export PGHOST="$DB_HOST"
+          export PGHOSTADDR="$IPV4"
+
           FILES=$(ls db/migrations/*.sql | sort)
           for f in $FILES; do
             echo "APPLY $f"
-            psql -4 "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
           done
+
