@@ -17,7 +17,9 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Apply migrations
+        shell: bash
         env:
+          # Supabase Session Pooler (hardcoded)
           PGHOST: aws-1-us-east-2.pooler.supabase.com
           PGPORT: "5432"
           PGDATABASE: postgres
@@ -26,25 +28,80 @@ jobs:
           PGSSLMODE: require
         run: |
           set -euo pipefail
-          set -x
 
-          pwd
-          git rev-parse HEAD
-          ls -la
-          ls -la db || true
-          ls -la db/migrations || true
+          # Basic connectivity check
+          psql -v ON_ERROR_STOP=1 -c "select 1 as ok;" > /dev/null
 
+          # Ensure schema + ledger exist (idempotent bootstrap)
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+
+          create schema if not exists dm;
+
+          create table if not exists dm.migration_ledger (
+            id bigserial primary key,
+            filename text not null unique,
+            checksum text not null,
+            applied_at timestamptz not null default now()
+          );
+
+          commit;
+          SQL
+
+          # Discover migrations in repo
           mapfile -t files < <(find db/migrations -maxdepth 1 -type f -name '*.sql' | sort)
 
-          echo "Found ${#files[@]} migration file(s)"
+          echo "Found ${#files[@]} migration file(s) in repo"
           if [ ${#files[@]} -eq 0 ]; then
             echo "No migrations found. Exiting successfully."
             exit 0
           fi
 
-          psql -v ON_ERROR_STOP=1 -c "select 1 as ok;"
+          mkdir -p out
+          TS=$(date -u +"%Y%m%dT%H%M%SZ")
+          REPORT="out/${TS}__migration_status.csv"
+          echo "filename,repo_checksum,db_checksum,db_applied_at,status" > "$REPORT"
 
+          # Apply missing migrations, enforce checksum immutability for applied ones
           for f in "${files[@]}"; do
-            echo "APPLY $f"
+            base=$(basename "$f")
+            repo_checksum=$(sha256sum "$f" | awk '{print $1}')
+
+            db_row=$(psql -v ON_ERROR_STOP=1 -tA -F '|' -c \
+              "select checksum || '|' || applied_at from dm.migration_ledger where filename = '${base}' limit 1;")
+
+            if [ -n "$db_row" ]; then
+              db_checksum="${db_row%%|*}"
+              db_applied_at="${db_row#*|}"
+
+              if [ "$db_checksum" != "$repo_checksum" ]; then
+                echo "${base},${repo_checksum},${db_checksum},${db_applied_at},CHECKSUM_MISMATCH" >> "$REPORT"
+                echo "ERROR: checksum mismatch for ${base}"
+                echo "Do not edit existing migrations. Create a new migration file instead."
+                exit 1
+              fi
+
+              echo "${base},${repo_checksum},${db_checksum},${db_applied_at},ALREADY_APPLIED" >> "$REPORT"
+              echo "SKIP $base"
+              continue
+            fi
+
+            echo "APPLY $base"
+            psql -v ON_ERROR_STOP=1 -c "begin;"
             psql -v ON_ERROR_STOP=1 -f "$f"
+            psql -v ON_ERROR_STOP=1 -c \
+              "insert into dm.migration_ledger (filename, checksum) values ('${base}', '${repo_checksum}');"
+            psql -v ON_ERROR_STOP=1 -c "commit;"
+
+            applied_at=$(psql -v ON_ERROR_STOP=1 -tA -c \
+              "select applied_at from dm.migration_ledger where filename = '${base}' limit 1;")
+
+            echo "${base},${repo_checksum},${repo_checksum},${applied_at},APPLIED_NOW" >> "$REPORT"
           done
+
+          echo "Wrote migration report: $REPORT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: migration-report
+          path: out/*.csv
