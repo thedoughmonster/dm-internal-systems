@@ -1,0 +1,302 @@
+{
+  "$schema": "SOP_DATA_OBJECT_MODELS_V1",
+  "description": "Canonical data object models for authoring Data Reference blocks via rich text or structured forms. Data objects are non-procedural by definition.",
+
+  "rules": {
+    "non_procedural": true,
+    "no_steps": true,
+    "no_sequences": true,
+    "no_execution_guidance": true,
+    "no_interpretive_guidance": true,
+    "tables_must_not_encode_sequence": true,
+    "tables_must_not_encode_logic": true
+  },
+
+  "base_types": {
+    "id": {
+      "type": "string",
+      "format": "DATA-...",
+      "description": "Stable identifier for referencing this data object"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit token constrained by each model"
+    },
+    "numeric": {
+      "type": "number",
+      "description": "Numeric value"
+    },
+    "numeric_range": {
+      "type": "object",
+      "description": "A numeric value with optional bounds. Use for time, temperature, weight, volume, count, percentage.",
+      "required": ["target", "unit"],
+      "properties": {
+        "target": {"type": "number"},
+        "min": {"type": "number"},
+        "max": {"type": "number"},
+        "unit": {"type": "string"},
+        "critical": {"type": "boolean", "description": "Marks a value as safety-critical or moment-of-action critical"}
+      }
+    },
+    "reference_pointer": {
+      "type": "object",
+      "description": "Pointer to a non-SOP authority (manual, regulation, vendor spec).",
+      "required": ["ref_type", "source", "identifier"],
+      "properties": {
+        "ref_type": {"type": "string", "enum": ["manual", "regulation", "vendor_spec", "datasheet", "url", "image_asset"]},
+        "source": {"type": "string"},
+        "identifier": {"type": "string"},
+        "scope": {"type": "string", "description": "Narrow scope label only (no guidance)"}
+      }
+    }
+  },
+
+  "models": {
+    "glossary_term": {
+      "description": "Canonical term definition.",
+      "required": ["id", "term", "definition"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "term": {"type": "string"},
+        "definition": {"type": "string"},
+        "synonyms": {"type": "array", "items": {"type": "string"}},
+        "deprecated": {"type": "boolean"}
+      }
+    },
+
+    "acronym": {
+      "description": "Canonical acronym expansion.",
+      "required": ["id", "acronym", "expanded_form"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "acronym": {"type": "string"},
+        "expanded_form": {"type": "string"},
+        "definition": {"type": "string"}
+      }
+    },
+
+    "ingredient": {
+      "description": "Food ingredient identity and constraints.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "form": {"type": "string", "description": "e.g., powder, liquid, whole, diced"},
+        "supplier": {"type": "string"},
+        "allergens": {"type": "array", "items": {"type": "string"}},
+        "storage_location_ref": {"type": "string", "description": "DATA-... id of a location object"},
+        "spec_ref": {"type": "string", "description": "DATA-... id of a specification object"}
+      }
+    },
+
+    "material": {
+      "description": "Non-food consumable or supply.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "grade": {"type": "string"},
+        "food_safe": {"type": "boolean"},
+        "storage_location_ref": {"type": "string"},
+        "spec_ref": {"type": "string"}
+      }
+    },
+
+    "recipe": {
+      "description": "Authoritative formula expressed as ingredients and yield. No procedural steps.",
+      "required": ["id", "name", "version", "yield", "ingredients"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "parent_recipe_ref": {"type": "string", "description": "Optional DATA-... id of a parent recipe"},
+        "yield": {
+          "type": "object",
+          "required": ["amount", "unit"],
+          "properties": {
+            "amount": {"type": "number"},
+            "unit": {"type": "string"}
+          }
+        },
+        "ingredients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ingredient_ref", "amount", "unit"],
+            "properties": {
+              "ingredient_ref": {"type": "string", "description": "DATA-... id of ingredient"},
+              "amount": {"type": "number"},
+              "unit": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+
+    "parameter_set": {
+      "description": "Named grouping of numeric parameters.",
+      "required": ["id", "name", "version", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "range"],
+            "properties": {
+              "name": {"type": "string"},
+              "range": {"$ref": "#/base_types/numeric_range"}
+            }
+          }
+        }
+      }
+    },
+
+    "specification": {
+      "description": "Fixed requirements and limits.",
+      "required": ["id", "subject", "limits"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "subject": {"type": "string"},
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "range"],
+            "properties": {
+              "name": {"type": "string"},
+              "range": {"$ref": "#/base_types/numeric_range"}
+            }
+          }
+        }
+      }
+    },
+
+    "checklist": {
+      "description": "Non-sequential verification items.",
+      "required": ["id", "items"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "items": {"type": "array", "items": {"type": "string"}},
+        "critical_items": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+
+    "data_table": {
+      "description": "Structured reference data. Must not encode procedure, sequence, or decision logic.",
+      "required": ["id", "columns", "rows"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "columns": {"type": "array", "items": {"type": "string"}},
+        "rows": {"type": "array", "items": {"type": "object"}},
+        "units": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+
+    "equipment": {
+      "description": "Equipment identity and metadata.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "manufacturer": {"type": "string"},
+        "model": {"type": "string"},
+        "capacity": {"type": "string"},
+        "manual_ref": {"$ref": "#/base_types/reference_pointer"},
+        "location_ref": {"type": "string", "description": "DATA-... id of kitchen_location"}
+      }
+    },
+
+    "tool": {
+      "description": "Smallware or hand tool.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "name": {"type": "string"},
+        "tool_type": {"type": "string"},
+        "size": {"type": "string"},
+        "location_ref": {"type": "string"}
+      }
+    },
+
+    "kitchen_location": {
+      "description": "Hierarchical storage location model.",
+      "required": ["id", "level_1", "level_2", "level_3"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "level_1": {
+          "type": "string",
+          "enum": ["KITCHEN_SECTION", "FOH_SERVICE", "FOH_DINING", "BASEMENT", "WALK_IN"]
+        },
+        "level_2": {
+          "type": "string",
+          "enum": ["SHELF_UNIT", "REFRIGERATION", "FREEZER", "UNDERTABLE_SHELF", "RACK", "CART", "COUNTER", "DRAWER", "BIN"]
+        },
+        "level_3": {
+          "type": "object",
+          "required": ["identifier"],
+          "properties": {
+            "identifier": {"type": "string", "description": "e.g., A, B, C, D"},
+            "zone": {"type": "string"},
+            "position": {"type": "string"}
+          }
+        },
+        "notes": {"type": "string"}
+      }
+    },
+
+    "visual_reference": {
+      "description": "Pointer to a canonical image asset.",
+      "required": ["id", "asset_id"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "asset_id": {"type": "string"},
+        "alt_text": {"type": "string"}
+      }
+    },
+
+    "external_reference": {
+      "description": "Pointer to external authority.",
+      "required": ["id", "pointer"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "pointer": {"$ref": "#/base_types/reference_pointer"}
+      }
+    },
+
+    "log_template": {
+      "description": "Template for records captured during operations.",
+      "required": ["id", "fields"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "field_type"],
+            "properties": {
+              "name": {"type": "string"},
+              "field_type": {"type": "string", "enum": ["string", "number", "boolean", "datetime", "select"]},
+              "required": {"type": "boolean"},
+              "options": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "frequency": {"type": "string"},
+        "retention": {"type": "string"}
+      }
+    },
+
+    "label_template": {
+      "description": "Template for printable labels.",
+      "required": ["id", "fields"],
+      "properties": {
+        "id": {"$ref": "#/base_types/id"},
+        "fields": {"type": "array", "items": {"type": "string"}},
+        "format": {"type": "string"}
+      }
+    }
+  }
+}
