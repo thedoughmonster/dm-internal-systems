@@ -18,10 +18,10 @@ jobs:
 
       - name: Apply migrations
         env:
-          PGHOST: db.loqnooocmcuthedsduch.supabase.co
+          PGHOST: aws-1-us-east-2.pooler.supabase.com
           PGPORT: "5432"
           PGDATABASE: postgres
-          PGUSER: postgres
+          PGUSER: postgres.loqnooocmcuthedsduch
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           PGSSLMODE: require
         run: |
@@ -34,15 +34,6 @@ jobs:
           ls -la db || true
           ls -la db/migrations || true
 
-          IPV4=$(getent ahostsv4 "$PGHOST" | awk '{print $1; exit}')
-          if [ -z "$IPV4" ]; then
-            echo "Failed to resolve IPv4 for $PGHOST"
-            exit 1
-          fi
-
-          export PGHOSTADDR="$IPV4"
-          echo "Using IPv4 $PGHOSTADDR"
-
           mapfile -t files < <(find db/migrations -maxdepth 1 -type f -name '*.sql' | sort)
 
           echo "Found ${#files[@]} migration file(s)"
@@ -51,7 +42,9 @@ jobs:
             exit 0
           fi
 
+          psql -v ON_ERROR_STOP=1 -c "select 1 as ok;"
+
           for f in "${files[@]}"; do
             echo "APPLY $f"
-            psql -v ON_ERROR_STOP=1 -h "$PGHOSTADDR" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -f "$f"
+            psql -v ON_ERROR_STOP=1 -f "$f"
           done
