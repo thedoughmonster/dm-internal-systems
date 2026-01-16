@@ -32,13 +32,20 @@ jobs:
             echo "Failed to resolve IPv4 for $PGHOST"
             exit 1
           fi
+
           export PGHOSTADDR="$IPV4"
           echo "Using IPv4 $PGHOSTADDR"
 
-          FILES=$(ls db/migrations/*.sql | sort)
-          for f in $FILES; do
+          shopt -s nullglob
+          files=(db/migrations/*.sql)
+
+          echo "Found ${#files[@]} migration file(s)"
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No migrations found. Exiting successfully."
+            exit 0
+          fi
+
+          for f in "${files[@]}"; do
             echo "APPLY $f"
-            psql -v ON_ERROR_STOP=1 -f "$f"
+            psql -v ON_ERROR_STOP=1 -h "$PGHOSTADDR" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -f "$f"
           done
-
-
