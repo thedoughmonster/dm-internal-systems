@@ -18,25 +18,27 @@ jobs:
 
       - name: Apply migrations
         env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL_DIRECT }}
-          DB_HOST: db.loqnooocmcuthedsduch.supabase.co
+          PGHOST: db.loqnooocmcuthedsduch.supabase.co
+          PGPORT: "5432"
+          PGDATABASE: postgres
+          PGUSER: postgres
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGSSLMODE: require
         run: |
           set -euo pipefail
 
-          # Resolve IPv4 for the DB host
-          IPV4=$(getent ahostsv4 "$DB_HOST" | awk '{print $1; exit}')
+          IPV4=$(getent ahostsv4 "$PGHOST" | awk '{print $1; exit}')
           if [ -z "$IPV4" ]; then
-            echo "Failed to resolve IPv4 for $DB_HOST"
+            echo "Failed to resolve IPv4 for $PGHOST"
             exit 1
           fi
-          echo "Resolved IPv4: $IPV4"
-
-          export PGHOST="$DB_HOST"
           export PGHOSTADDR="$IPV4"
+          echo "Using IPv4 $PGHOSTADDR"
 
           FILES=$(ls db/migrations/*.sql | sort)
           for f in $FILES; do
             echo "APPLY $f"
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+            psql -v ON_ERROR_STOP=1 -f "$f"
           done
+
 
