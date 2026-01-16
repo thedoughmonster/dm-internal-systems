@@ -1,13 +1,7 @@
-
 name: DB Migrate
 
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: "Migration target (all or prefix like 001)"
-        required: true
-        default: "all"
 
 jobs:
   migrate:
@@ -25,16 +19,9 @@ jobs:
       - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL_DIRECT }}
-          TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
-
-          if [ "$TARGET" = "all" ]; then
-            FILES=$(ls db/migrations/*.sql | sort)
-          else
-            FILES=$(ls db/migrations/${TARGET}*.sql | sort)
-          fi
-
+          FILES=$(ls db/migrations/*.sql | sort)
           for f in $FILES; do
             echo "APPLY $f"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
