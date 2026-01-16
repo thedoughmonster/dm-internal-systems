@@ -26,6 +26,13 @@ jobs:
           PGSSLMODE: require
         run: |
           set -euo pipefail
+          set -x
+
+          pwd
+          git rev-parse HEAD
+          ls -la
+          ls -la db || true
+          ls -la db/migrations || true
 
           IPV4=$(getent ahostsv4 "$PGHOST" | awk '{print $1; exit}')
           if [ -z "$IPV4" ]; then
@@ -36,8 +43,7 @@ jobs:
           export PGHOSTADDR="$IPV4"
           echo "Using IPv4 $PGHOSTADDR"
 
-          shopt -s nullglob
-          files=(db/migrations/*.sql)
+          mapfile -t files < <(find db/migrations -maxdepth 1 -type f -name '*.sql' | sort)
 
           echo "Found ${#files[@]} migration file(s)"
           if [ ${#files[@]} -eq 0 ]; then
