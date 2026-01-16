@@ -1,17 +1,31 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-16T17:03:34.183Z",
+  "generated_at_utc": "2026-01-16T19:30:53.709Z",
   "repo": {
     "default_branch": "main"
   },
   "head": {
-    "sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
-    "message": "Update repo_context.yml",
+    "sha": "94eaadef59b8a0ece5b4baabd67eaaf847d0897b",
+    "message": "Update README.md",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-16T12:03:24-05:00"
+    "timestamp_utc": "2026-01-16T14:30:42-05:00"
   },
   "commits": [
+    {
+      "sha": "94eaadef59b8a0ece5b4baabd67eaaf847d0897b",
+      "timestamp_utc": "2026-01-16T14:30:42-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update README.md"
+    },
+    {
+      "sha": "d67485b9b509507a219503e9ee3dc7073930d8e2",
+      "timestamp_utc": "2026-01-16T17:03:34Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
       "timestamp_utc": "2026-01-16T12:03:24-05:00",
@@ -67,32 +81,18 @@
       "author_name": "thedoughmonster",
       "author_email": "thedoughmonster@gmail.com",
       "message": "Update db_migrate.yml"
-    },
-    {
-      "sha": "5ba4741ef95376fdcd078cb5657ccad82cc97232",
-      "timestamp_utc": "2026-01-16T10:47:04-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Update db_query.yml"
-    },
-    {
-      "sha": "58646fd0d341b37abcac4425a36867838dacb60c",
-      "timestamp_utc": "2026-01-16T10:38:15-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Update db_migrate.yml"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "d4aca114e21a63bddcc69defc897873a391042ca",
-    "range_head_sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
+    "range_base_sha": "5d7f3e7ce9b3445ef6c269fe0f0ae1e2b580637f",
+    "range_head_sha": "94eaadef59b8a0ece5b4baabd67eaaf847d0897b",
     "all": [
-      ".github/workflows/repo_context.yml",
+      "README.md",
       "dm_repo_context.json"
     ],
     "by_top_dir": {
-      ".github": [
-        ".github/workflows/repo_context.yml"
+      "README.md": [
+        "README.md"
       ],
       "dm_repo_context.json": [
         "dm_repo_context.json"
@@ -102,10 +102,9 @@
       "db": [],
       "canon": [],
       "scripts": [],
-      "github": [
-        ".github/workflows/repo_context.yml"
-      ],
+      "github": [],
       "other": [
+        "README.md",
         "dm_repo_context.json"
       ]
     }
