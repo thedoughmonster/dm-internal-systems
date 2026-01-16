@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       query_file:
-        description: "SQL file under db/queries"
+        description: "SQL file name under db/queries (example: my_query.sql)"
         required: true
+        type: string
 
 jobs:
   query:
@@ -22,17 +23,29 @@ jobs:
 
       - name: Run query
         env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL_DIRECT }}
+          PGHOST: aws-1-us-east-2.pooler.supabase.com
+          PGPORT: "5432"
+          PGDATABASE: postgres
+          PGUSER: postgres.loqnooocmcuthedsduch
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGSSLMODE: require
           QF: ${{ inputs.query_file }}
         run: |
           set -euo pipefail
+
+          # Reject path traversal and enforce simple filenames
+          if [[ ! "$QF" =~ ^[A-Za-z0-9._-]+\.sql$ ]]; then
+            echo "Invalid query_file. Use a filename like example.sql with no slashes."
+            exit 1
+          fi
+
           test -f "db/queries/$QF"
 
           mkdir -p out
           TS=$(date -u +"%Y%m%dT%H%M%SZ")
           OUT="out/${TS}__${QF%.sql}.csv"
 
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+          psql -v ON_ERROR_STOP=1 \
             -f "db/queries/$QF" \
             --csv > "$OUT"
 
