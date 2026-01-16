@@ -1,0 +1,44 @@
+name: DB Query
+
+on:
+  workflow_dispatch:
+    inputs:
+      query_file:
+        description: "SQL file under db/queries"
+        required: true
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    environment: supabase-db
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run query
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL_DIRECT }}
+          QF: ${{ inputs.query_file }}
+        run: |
+          set -euo pipefail
+          test -f "db/queries/$QF"
+
+          mkdir -p out
+          TS=$(date -u +"%Y%m%dT%H%M%SZ")
+          OUT="out/${TS}__${QF%.sql}.csv"
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -f "db/queries/$QF" \
+            --csv > "$OUT"
+
+          echo "Wrote $OUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: query-results
+          path: out/*.csv
