@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-16T19:32:11.086Z",
+  "generated_at_utc": "2026-01-17T13:39:44.972Z",
   "repo": {
     "owner": "thedoughmonster",
     "name": "dm-internal-systems",
@@ -9,17 +9,31 @@
   },
   "self": {
     "path": "dm_repo_context.json",
-    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/dm_repo_context.json",
+    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/dm_repo_context.json",
     "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
   },
   "head": {
-    "sha": "2dba26eed1ae8319d5fe66c111115c7bbf3f07db",
-    "message": "Update generate_repo_context.mjs",
+    "sha": "5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef",
+    "message": "Add README.md with directory instructions",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-16T14:32:01-05:00"
+    "timestamp_utc": "2026-01-17T08:39:34-05:00"
   },
   "commits": [
+    {
+      "sha": "5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef",
+      "timestamp_utc": "2026-01-17T08:39:34-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Add README.md with directory instructions"
+    },
+    {
+      "sha": "d462298fac1d4aac877aeb7462291af17a8093e8",
+      "timestamp_utc": "2026-01-16T19:32:11Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "2dba26eed1ae8319d5fe66c111115c7bbf3f07db",
       "timestamp_utc": "2026-01-16T14:32:01-05:00",
@@ -75,74 +89,59 @@
       "author_name": "thedoughmonster",
       "author_email": "thedoughmonster@gmail.com",
       "message": "Create README.md"
-    },
-    {
-      "sha": "b5c4bd008f155d669675b67f7d4c74c1b1e1eb04",
-      "timestamp_utc": "2026-01-16T11:38:46-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Create repo_context.yml"
-    },
-    {
-      "sha": "fb3bce9c5d2b8601be3c2eff079d61f5f0c035f2",
-      "timestamp_utc": "2026-01-16T11:37:53-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Create generate_repo_context.mjs"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "94eaadef59b8a0ece5b4baabd67eaaf847d0897b",
-    "range_head_sha": "2dba26eed1ae8319d5fe66c111115c7bbf3f07db",
+    "range_base_sha": "2dba26eed1ae8319d5fe66c111115c7bbf3f07db",
+    "range_head_sha": "5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef",
     "all": [
+      {
+        "path": "agents_ref/README.md",
+        "area": "other",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/agents_ref/README.md",
+        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/agents_ref/README.md"
+      },
       {
         "path": "dm_repo_context.json",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/dm_repo_context.json",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/dm_repo_context.json",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
-      },
-      {
-        "path": "scripts/generate_repo_context.mjs",
-        "area": "scripts",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/scripts/generate_repo_context.mjs",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/generate_repo_context.mjs"
       }
     ],
     "by_top_dir": {
+      "agents_ref": [
+        {
+          "path": "agents_ref/README.md",
+          "area": "other",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/agents_ref/README.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/agents_ref/README.md"
+        }
+      ],
       "(root)": [
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
-        }
-      ],
-      "scripts": [
-        {
-          "path": "scripts/generate_repo_context.mjs",
-          "area": "scripts",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/scripts/generate_repo_context.mjs",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/generate_repo_context.mjs"
         }
       ]
     },
     "by_area": {
       "db": [],
       "canon": [],
-      "scripts": [
-        {
-          "path": "scripts/generate_repo_context.mjs",
-          "area": "scripts",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/scripts/generate_repo_context.mjs",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/generate_repo_context.mjs"
-        }
-      ],
+      "scripts": [],
       "github": [],
       "other": [
         {
+          "path": "agents_ref/README.md",
+          "area": "other",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/agents_ref/README.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/agents_ref/README.md"
+        },
+        {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ]
@@ -155,10 +154,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "canon/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/canon/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/canon/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/canon/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/canon/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/"
     },
     {
@@ -167,10 +166,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "db/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/db/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/db/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/db/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/db/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/"
     },
     {
@@ -179,10 +178,10 @@
       "authoritative": false,
       "agents_md": {
         "path": "scripts/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/scripts/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/scripts/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/scripts/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/scripts/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/"
     },
     {
@@ -191,10 +190,10 @@
       "authoritative": false,
       "agents_md": {
         "path": ".github/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/.github/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/.github/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/2dba26eed1ae8319d5fe66c111115c7bbf3f07db/.github/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/5dc8682f4c775ac3b79942bf92e8ab8728cbe5ef/.github/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/"
     }
   ],
