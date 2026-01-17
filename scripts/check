@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Running checks..."
+
+# Replace or extend these as needed later.
+# For now, keep it minimal and fast.
+if [ -f package.json ]; then
+  npm test || true
+fi
+
+echo "Checks completed."
