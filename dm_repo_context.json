@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-17T17:00:54.819Z",
+  "generated_at_utc": "2026-01-17T17:02:41.005Z",
   "repo": {
     "owner": "thedoughmonster",
     "name": "dm-internal-systems",
@@ -9,17 +9,31 @@
   },
   "self": {
     "path": "dm_repo_context.json",
-    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/dm_repo_context.json",
+    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/dm_repo_context.json",
     "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
   },
   "head": {
-    "sha": "8d509fb7f81468e41989a60131bef847f89cabdd",
-    "message": "Add files via upload",
+    "sha": "8764b0234bc19e711bba74decff96f922ad52717",
+    "message": "Update default app path in scaffold_nextjs.yml",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-17T12:00:45-05:00"
+    "timestamp_utc": "2026-01-17T12:02:32-05:00"
   },
   "commits": [
+    {
+      "sha": "8764b0234bc19e711bba74decff96f922ad52717",
+      "timestamp_utc": "2026-01-17T12:02:32-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Update default app path in scaffold_nextjs.yml"
+    },
+    {
+      "sha": "452319aac4f6bf9e24756edf4f705a16d9d84ffa",
+      "timestamp_utc": "2026-01-17T17:00:54Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "8d509fb7f81468e41989a60131bef847f89cabdd",
       "timestamp_utc": "2026-01-17T12:00:45-05:00",
@@ -75,36 +89,22 @@
       "author_name": "dm-bot",
       "author_email": "dm-bot@users.noreply.github.com",
       "message": "chore(repo): update dm_repo_context.json"
-    },
-    {
-      "sha": "d2ea9750d10c5e4360eb9e9e743f0e4e8f02d66b",
-      "timestamp_utc": "2026-01-17T08:52:10-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Create AGENTS.md for internal agent instructions"
-    },
-    {
-      "sha": "36f58eddf6e97e11d6036d7f726767f48ae19467",
-      "timestamp_utc": "2026-01-17T13:45:08Z",
-      "author_name": "dm-bot",
-      "author_email": "dm-bot@users.noreply.github.com",
-      "message": "chore(repo): update dm_repo_context.json"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "83d0ba698085bb3bf8a50dbc194875eed85906a2",
-    "range_head_sha": "8d509fb7f81468e41989a60131bef847f89cabdd",
+    "range_base_sha": "8d509fb7f81468e41989a60131bef847f89cabdd",
+    "range_head_sha": "8764b0234bc19e711bba74decff96f922ad52717",
     "all": [
       {
         "path": ".github/workflows/scaffold_nextjs.yml",
         "area": "github",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/.github/workflows/scaffold_nextjs.yml",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/.github/workflows/scaffold_nextjs.yml",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/workflows/scaffold_nextjs.yml"
       },
       {
         "path": "dm_repo_context.json",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/dm_repo_context.json",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/dm_repo_context.json",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
       }
     ],
@@ -113,7 +113,7 @@
         {
           "path": ".github/workflows/scaffold_nextjs.yml",
           "area": "github",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/.github/workflows/scaffold_nextjs.yml",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/.github/workflows/scaffold_nextjs.yml",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/workflows/scaffold_nextjs.yml"
         }
       ],
@@ -121,7 +121,7 @@
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ]
@@ -134,7 +134,7 @@
         {
           "path": ".github/workflows/scaffold_nextjs.yml",
           "area": "github",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/.github/workflows/scaffold_nextjs.yml",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/.github/workflows/scaffold_nextjs.yml",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/workflows/scaffold_nextjs.yml"
         }
       ],
@@ -142,7 +142,7 @@
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ]
@@ -176,6 +176,20 @@
       "action": "MODIFIED",
       "path": "dm_repo_context.json",
       "from_path": null
+    },
+    {
+      "commit_sha": "8764b0234bc19e711bba74decff96f922ad52717",
+      "timestamp_utc": "2026-01-17T12:02:32-05:00",
+      "action": "MODIFIED",
+      "path": ".github/workflows/scaffold_nextjs.yml",
+      "from_path": null
+    },
+    {
+      "commit_sha": "8764b0234bc19e711bba74decff96f922ad52717",
+      "timestamp_utc": "2026-01-17T12:02:32-05:00",
+      "action": "MODIFIED",
+      "path": "dm_repo_context.json",
+      "from_path": null
     }
   ],
   "directories": [
@@ -185,10 +199,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "canon/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/canon/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/canon/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/canon/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/canon/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/"
     },
     {
@@ -197,10 +211,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "db/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/db/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/db/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/db/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/db/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/"
     },
     {
@@ -209,10 +223,10 @@
       "authoritative": false,
       "agents_md": {
         "path": "scripts/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/scripts/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/scripts/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/scripts/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/scripts/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/"
     },
     {
@@ -221,10 +235,10 @@
       "authoritative": false,
       "agents_md": {
         "path": ".github/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/.github/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/.github/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8d509fb7f81468e41989a60131bef847f89cabdd/.github/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/8764b0234bc19e711bba74decff96f922ad52717/.github/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/"
     }
   ],
