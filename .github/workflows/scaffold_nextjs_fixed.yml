@@ -7,10 +7,6 @@ on:
         description: "Where to scaffold the Next.js app (recommended: apps/web)"
         required: true
         default: "apps/web"
-      npm_install:
-        description: "Run npm install after scaffolding (recommended)"
-        required: true
-        default: "true"
       commit_message:
         description: "Commit message for scaffold commit"
         required: true
@@ -26,7 +22,6 @@ concurrency:
 jobs:
   scaffold:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,35 +33,14 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Resolve app path
-        id: vars
-        run: |
-          set -euo pipefail
-          APP_PATH="${{ inputs.app_path }}"
-          echo "app_path=$APP_PATH" >> "$GITHUB_OUTPUT"
-
-      - name: "Guard: skip if Next.js already present at app path"
-        run: |
-          set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
-          PKG="$APP_PATH/package.json"
-
-          if [ -f "$PKG" ]; then
-            if node -e "const p=require('./' + process.env.PKG); process.exit((p.dependencies&&p.dependencies.next)||(p.devDependencies&&p.devDependencies.next) ? 0 : 1)"; then
-              echo "Next.js already present at $APP_PATH. No scaffold needed."
-              exit 0
-            fi
-          fi
-        env:
-          PKG: ${{ steps.vars.outputs.app_path }}/package.json
-
       - name: Ensure target directory exists and is empty
         run: |
           set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
+          APP_PATH="${{ inputs.app_path }}"
 
           mkdir -p "$APP_PATH"
 
+          # create-next-app requires an empty directory (except .gitkeep)
           COUNT=$(find "$APP_PATH" -mindepth 1 -maxdepth 1 ! -name ".gitkeep" | wc -l | tr -d ' ')
           if [ "$COUNT" != "0" ]; then
             echo "Refusing to scaffold into $APP_PATH because it is not empty."
@@ -78,47 +52,33 @@ jobs:
       - name: Scaffold Next.js (TypeScript, App Router)
         run: |
           set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
+          APP_PATH="${{ inputs.app_path }}"
+
+          if [ -f "$APP_PATH/package.json" ]; then
+            echo "package.json already exists at $APP_PATH. No scaffold needed."
+            exit 0
+          fi
 
           npx --yes create-next-app@latest "$APP_PATH"             --ts             --eslint             --app             --no-src-dir             --no-tailwind             --no-import-alias             --use-npm
 
-      - name: Install dependencies
-        if: ${{ inputs.npm_install == 'true' }}
+      - name: Install and build
         run: |
           set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
+          APP_PATH="${{ inputs.app_path }}"
           cd "$APP_PATH"
           npm install
-
-      - name: Verify build
-        run: |
-          set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
-          cd "$APP_PATH"
           npm run build
-
-      - name: Debug: show git status
-        run: |
-          set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
-          echo "Top-level:"
-          ls -la
-          echo ""
-          echo "App path tree ($APP_PATH):"
-          ls -la "$APP_PATH" || true
-          echo ""
-          echo "Git status (porcelain):"
-          git status --porcelain=v1 || true
 
       - name: Commit and push scaffold
         run: |
           set -euo pipefail
-          APP_PATH="${{ steps.vars.outputs.app_path }}"
+          APP_PATH="${{ inputs.app_path }}"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Force-add scaffolded app in case of ignore rules or sparse checkout behavior
+          # Stage everything, but force-add the app directory in case it is ignored.
+          git add -A
           git add -f "$APP_PATH"
 
           if git diff --cached --quiet; then
