@@ -1,4 +1,3 @@
-
 # DOUGH MONSTER INTERNAL SYSTEMS
 
 # AGENT INSTRUCTION SET
@@ -37,13 +36,24 @@ This chat-level instruction set exists only to bootstrap the project. Once avail
 
 ## INSTRUCTION INGESTION RULE
 
-At the start of every session, and before planning or executing any work, the agent must:
+Required reading URLs (RAW):
 
-1. Read the current contents of `AGENTS.md` from the default branch of the canonical repository using its raw permalink.
-2. Resolve and ingest all canonical documents referenced by that file from the `/agents_ref/` directory using their raw, machine-readable permalinks.
-3. Treat the combined contents of `AGENTS.md` and all referenced files as binding project instructions for the duration of the session.
+* AGENTS.md: [https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/AGENTS.md](https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/AGENTS.md)
+* dm_repo_context.json: [https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json](https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json)
 
-If `AGENTS.md` or any referenced file cannot be accessed, the agent must stop and request that the missing contents be provided before proceeding.
+At the start of every session, and before planning, generating, or executing any work, the agent must:
+
+1. Fetch and read AGENTS.md from the RAW URL above.
+2. Fetch and read dm_repo_context.json from the RAW URL above.
+3. Use dm_repo_context.json only to:
+
+   * understand repository structure and recent changes
+   * discover directory-local AGENTS files, if present
+   * resolve pinned and latest raw URLs
+4. Resolve and ingest all canonical documents referenced by AGENTS.md from the `/agents_ref/` directory using their raw, machine-readable permalinks.
+5. Treat the combined contents of AGENTS.md and all referenced files as binding project instructions for the duration of the session.
+
+If AGENTS.md, dm_repo_context.json, or any referenced canonical file cannot be accessed, the agent must stop and request that the missing contents be provided before proceeding.
 
 ---
 
@@ -60,6 +70,23 @@ The following documents are authoritative and binding. Their hierarchy and confl
 * DM Internal Systems – Canonical Architecture Index
 * DM Internal Systems – Document Map
 * DM Internal Systems – Architecture Lock Declaration
+
+In addition, the repository context file is authoritative for repository navigation, automation context, and declared repository invariants:
+
+* dm_repo_context.json
+
+Role of dm_repo_context.json:
+
+* It is a machine-generated repository context snapshot that is updated by automation on commits.
+* It describes current repository state, recent commits, and changed paths.
+* It may provide raw pinned and raw latest URLs to repository files.
+* It may declare repository-level invariants and directory purposes.
+
+Limits of dm_repo_context.json:
+
+* It does not define system architecture.
+* It does not override canonical architecture documents.
+* It does not grant permissions.
 
 No document outside this set may override their behavior.
 
