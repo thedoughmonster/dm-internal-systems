@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       app_path:
-        description: "Where to scaffold the Next.js app (use '.' for repo root, or 'apps/web')"
+        description: "Where to scaffold the Next.js app (recommended: apps/web)"
         required: true
         default: "apps/web"
       npm_install:
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Set app path
+      - name: Resolve app path
         id: vars
         run: |
           set -euo pipefail
@@ -52,29 +52,27 @@ jobs:
           PKG="$APP_PATH/package.json"
 
           if [ -f "$PKG" ]; then
-            if node -e "const p=require('./'$PKG); process.exit((p.dependencies&&p.dependencies.next)||(p.devDependencies&&p.devDependencies.next) ? 0 : 1)"; then
+            if node -e "const p=require('./' + process.env.PKG); process.exit((p.dependencies&&p.dependencies.next)||(p.devDependencies&&p.devDependencies.next) ? 0 : 1)"; then
               echo "Next.js already present at $APP_PATH. No scaffold needed."
               exit 0
             fi
           fi
+        env:
+          PKG: ${{ steps.vars.outputs.app_path }}/package.json
 
       - name: Ensure target directory exists and is empty
         run: |
           set -euo pipefail
           APP_PATH="${{ steps.vars.outputs.app_path }}"
 
-          if [ "$APP_PATH" != "." ]; then
-            mkdir -p "$APP_PATH"
-            COUNT=$(find "$APP_PATH" -mindepth 1 -maxdepth 1 ! -name ".gitkeep" | wc -l | tr -d ' ')
-            if [ "$COUNT" != "0" ]; then
-              echo "Refusing to scaffold into $APP_PATH because it is not empty."
-              exit 1
-            fi
-          else
-            if [ -f "package.json" ]; then
-              echo "Refusing to scaffold into repo root because package.json already exists."
-              exit 1
-            fi
+          mkdir -p "$APP_PATH"
+
+          COUNT=$(find "$APP_PATH" -mindepth 1 -maxdepth 1 ! -name ".gitkeep" | wc -l | tr -d ' ')
+          if [ "$COUNT" != "0" ]; then
+            echo "Refusing to scaffold into $APP_PATH because it is not empty."
+            echo "Contents:"
+            ls -la "$APP_PATH"
+            exit 1
           fi
 
       - name: Scaffold Next.js (TypeScript, App Router)
@@ -82,14 +80,7 @@ jobs:
           set -euo pipefail
           APP_PATH="${{ steps.vars.outputs.app_path }}"
 
-          npx --yes create-next-app@latest "$APP_PATH" \
-            --ts \
-            --eslint \
-            --app \
-            --no-src-dir \
-            --no-tailwind \
-            --no-import-alias \
-            --use-npm
+          npx --yes create-next-app@latest "$APP_PATH"             --ts             --eslint             --app             --no-src-dir             --no-tailwind             --no-import-alias             --use-npm
 
       - name: Install dependencies
         if: ${{ inputs.npm_install == 'true' }}
@@ -106,18 +97,34 @@ jobs:
           cd "$APP_PATH"
           npm run build
 
+      - name: Debug: show git status
+        run: |
+          set -euo pipefail
+          APP_PATH="${{ steps.vars.outputs.app_path }}"
+          echo "Top-level:"
+          ls -la
+          echo ""
+          echo "App path tree ($APP_PATH):"
+          ls -la "$APP_PATH" || true
+          echo ""
+          echo "Git status (porcelain):"
+          git status --porcelain=v1 || true
+
       - name: Commit and push scaffold
         run: |
           set -euo pipefail
+          APP_PATH="${{ steps.vars.outputs.app_path }}"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to commit."
+          # Force-add scaffolded app in case of ignore rules or sparse checkout behavior
+          git add -f "$APP_PATH"
+
+          if git diff --cached --quiet; then
+            echo "No changes staged. Nothing to commit."
             exit 0
           fi
 
-          git add -A
           git commit -m "${{ inputs.commit_message }}"
-          git push
+          git push origin HEAD
