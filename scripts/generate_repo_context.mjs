@@ -27,6 +27,55 @@ function classifyArea(path) {
   return "other";
 }
 
+function parseNameStatus(lines) {
+  // Output formats:
+  // A<TAB>path
+  // M<TAB>path
+  // D<TAB>path
+  // R100<TAB>old<TAB>new
+  // R086<TAB>old<TAB>new
+  const out = [];
+  for (const line of lines) {
+    const parts = line.split("\t").filter(Boolean);
+    if (parts.length < 2) continue;
+
+    const code = parts[0];
+    const kind = code[0]; // A, M, D, R
+
+    if (kind === "R" && parts.length >= 3) {
+      out.push({
+        action: "RENAMED",
+        from_path: parts[1],
+        path: parts[2]
+      });
+      continue;
+    }
+
+    if (kind === "A") out.push({ action: "ADDED", path: parts[1] });
+    else if (kind === "M") out.push({ action: "MODIFIED", path: parts[1] });
+    else if (kind === "D") out.push({ action: "DELETED", path: parts[1] });
+  }
+  return out;
+}
+
+function dedupeBreadcrumbs(items) {
+  const seen = new Set();
+  const out = [];
+  for (const x of items) {
+    const key = [
+      x.commit_sha ?? "",
+      x.timestamp_utc ?? "",
+      x.action ?? "",
+      x.from_path ?? "",
+      x.path ?? ""
+    ].join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(x);
+  }
+  return out;
+}
+
 const nowUtc = new Date().toISOString();
 
 const repoSlug = process.env.GITHUB_REPOSITORY || "thedoughmonster/dm-internal-systems";
@@ -82,6 +131,7 @@ const commits = splitLines(commitRaw).map((line) => {
 
 // Compute changed files in the chosen range
 let changedEntries = [];
+let nameStatusActions = [];
 try {
   const changedPaths = splitLines(sh(`git diff --name-only ${baseSha}..${headSha}`));
   changedEntries = changedPaths.map((path) => {
@@ -93,8 +143,13 @@ try {
       raw_url_latest: rawUrlLatest(path)
     };
   });
+
+  // New: breadcrumb-friendly action list
+  const nsLines = splitLines(sh(`git diff --name-status -M ${baseSha}..${headSha}`));
+  nameStatusActions = parseNameStatus(nsLines);
 } catch {
   changedEntries = [];
+  nameStatusActions = [];
 }
 
 // Index changed paths by top dir and by area
@@ -112,6 +167,17 @@ for (const entry of changedEntries) {
 const directoriesExisting = Array.isArray(existing?.directories) ? existing.directories : [];
 const invariantsExisting =
   existing?.invariants && typeof existing.invariants === "object" ? existing.invariants : {};
+
+// New: preserve and append breadcrumbs
+const breadcrumbsExisting = Array.isArray(existing?.breadcrumbs) ? existing.breadcrumbs : [];
+const breadcrumbsNew = nameStatusActions.map((a) => ({
+  commit_sha: headSha,
+  timestamp_utc: headTimestampUtc || nowUtc,
+  action: a.action,
+  path: a.path,
+  from_path: a.from_path ?? null
+}));
+const breadcrumbs = dedupeBreadcrumbs([...breadcrumbsExisting, ...breadcrumbsNew]);
 
 // Enrich directories with raw URLs
 const directories = directoriesExisting.map((d) => {
@@ -165,6 +231,10 @@ const output = {
     by_top_dir: byTopDir,
     by_area: byArea
   },
+
+  // New: breadcrumb trail
+  breadcrumbs,
+
   directories,
   invariants: invariantsExisting
 };
