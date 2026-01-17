@@ -6,7 +6,7 @@ on:
       app_path:
         description: "Where to scaffold the Next.js app (use '.' for repo root, or 'apps/web')"
         required: true
-        default: "."
+        default: "apps/web"
       npm_install:
         description: "Run npm install after scaffolding (recommended)"
         required: true
