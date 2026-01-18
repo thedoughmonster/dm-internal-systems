@@ -1,0 +1,72 @@
+.
+├── .github
+│   └── workflows
+│       ├── db_migrate.yml
+│       ├── db_query.yml
+│       ├── repo_context.yml
+│       └── scaffold_nextjs_fixed.yml
+├── apps
+│   └── web
+│       ├── app
+│       │   ├── favicon.ico
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   ├── page.module.css
+│       │   └── page.tsx
+│       ├── public
+│       │   ├── file.svg
+│       │   ├── globe.svg
+│       │   ├── next.svg
+│       │   ├── vercel.svg
+│       │   └── window.svg
+│       ├── scripts
+│       ├── .gitignore
+│       ├── README.md
+│       ├── eslint.config.mjs
+│       ├── next-env.d.ts
+│       ├── next.config.ts
+│       ├── package-lock.json
+│       ├── package.json
+│       └── tsconfig.json
+├── archive
+│   ├── agents_ref
+│   │   ├── AGENTS.md
+│   │   ├── DM_Internal_Systems_Architecture_Lock_Declaration.md
+│   │   ├── DM_Internal_Systems_Canonical_Architecture_Index.md
+│   │   ├── DM_Internal_Systems_Document_Map.md
+│   │   ├── example_sop_full.json
+│   │   ├── sop_constitution.json
+│   │   └── sop_data_object_models.json
+│   ├── canon
+│   │   ├── README.md
+│   │   ├── example_sop_full.json
+│   │   ├── sop_constitution.json
+│   │   └── sop_data_object_models.json
+│   └── origin_reference_docs
+│       ├── AGENTS.md
+│       ├── AI_AUTHORITY.md
+│       └── README.md
+├── db
+│   ├── migrations
+│   │   └── 001_init_dm_schema.sql
+│   └── queries
+│       └── sop_docs__list.sql
+├── docs
+│   ├── architecture
+│   │   └── INDEX.md
+│   ├── ARCHITECTURE_OVERVIEW.md
+│   ├── CHANGELOG.md
+│   ├── DATA_MODEL_REFERENCE.md
+│   ├── GOVERNANCE_MODEL.md
+│   ├── IMPLEMENTATION_GUIDE.md
+│   ├── README.md
+│   └── SYSTEM_SCOPE.md
+├── scripts
+│   ├── check
+│   ├── generate_repo_context.mjs
+│   └── seed_example_sop.mjs
+├── dm_repo_context.json
+├── dmtree
+└── repo_tree.txt
+
+18 directories, 52 files
