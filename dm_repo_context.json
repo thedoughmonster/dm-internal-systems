@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-17T17:52:05.003Z",
+  "generated_at_utc": "2026-01-18T11:59:09.497Z",
   "repo": {
     "owner": "thedoughmonster",
     "name": "dm-internal-systems",
@@ -9,17 +9,31 @@
   },
   "self": {
     "path": "dm_repo_context.json",
-    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/dm_repo_context.json",
+    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/dm_repo_context.json",
     "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
   },
   "head": {
-    "sha": "7bb388aa450233f6be5dfce2a13e9c11c8eb0773",
-    "message": "chore: scaffold nextjs app at apps/web",
+    "sha": "09d317e4c49fa07c6beff5ca254f913c8cabecb6",
+    "message": "Create README.md",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-17T17:51:56Z"
+    "timestamp_utc": "2026-01-18T06:59:01-05:00"
   },
   "commits": [
+    {
+      "sha": "09d317e4c49fa07c6beff5ca254f913c8cabecb6",
+      "timestamp_utc": "2026-01-18T06:59:01-05:00",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "Create README.md"
+    },
+    {
+      "sha": "572eea78a3dea47114ca7233fc8e44eb4f485c68",
+      "timestamp_utc": "2026-01-17T17:52:05Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "7bb388aa450233f6be5dfce2a13e9c11c8eb0773",
       "timestamp_utc": "2026-01-17T17:51:56Z",
@@ -75,245 +89,39 @@
       "author_name": "dm-bot",
       "author_email": "dm-bot@users.noreply.github.com",
       "message": "chore(repo): update dm_repo_context.json"
-    },
-    {
-      "sha": "6debb2e39346345c9daf088f51b9b64e41056403",
-      "timestamp_utc": "2026-01-17T12:13:45-05:00",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "Update default app_path in workflow configuration"
-    },
-    {
-      "sha": "bf31e7ce7bf3659908c21b1eab139cd09b259e25",
-      "timestamp_utc": "2026-01-17T17:10:21Z",
-      "author_name": "dm-bot",
-      "author_email": "dm-bot@users.noreply.github.com",
-      "message": "chore(repo): update dm_repo_context.json"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "c82d1a1d670b1e8f29eeea5c09ef3455db6559d2",
-    "range_head_sha": "7bb388aa450233f6be5dfce2a13e9c11c8eb0773",
+    "range_base_sha": "7bb388aa450233f6be5dfce2a13e9c11c8eb0773",
+    "range_head_sha": "09d317e4c49fa07c6beff5ca254f913c8cabecb6",
     "all": [
       {
-        "path": "apps/web/.gitignore",
+        "path": "archive/origin_reference_docs/README.md",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/.gitignore",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/.gitignore"
-      },
-      {
-        "path": "apps/web/README.md",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/README.md",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/README.md"
-      },
-      {
-        "path": "apps/web/app/favicon.ico",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/favicon.ico",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/favicon.ico"
-      },
-      {
-        "path": "apps/web/app/globals.css",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/globals.css",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/globals.css"
-      },
-      {
-        "path": "apps/web/app/layout.tsx",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/layout.tsx",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/layout.tsx"
-      },
-      {
-        "path": "apps/web/app/page.module.css",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.module.css",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.module.css"
-      },
-      {
-        "path": "apps/web/app/page.tsx",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.tsx",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.tsx"
-      },
-      {
-        "path": "apps/web/eslint.config.mjs",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/eslint.config.mjs",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/eslint.config.mjs"
-      },
-      {
-        "path": "apps/web/next.config.ts",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/next.config.ts",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/next.config.ts"
-      },
-      {
-        "path": "apps/web/package-lock.json",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package-lock.json",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package-lock.json"
-      },
-      {
-        "path": "apps/web/package.json",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package.json",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package.json"
-      },
-      {
-        "path": "apps/web/public/file.svg",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/file.svg",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/file.svg"
-      },
-      {
-        "path": "apps/web/public/globe.svg",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/globe.svg",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/globe.svg"
-      },
-      {
-        "path": "apps/web/public/next.svg",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/next.svg",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/next.svg"
-      },
-      {
-        "path": "apps/web/public/vercel.svg",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/vercel.svg",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/vercel.svg"
-      },
-      {
-        "path": "apps/web/public/window.svg",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/window.svg",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/window.svg"
-      },
-      {
-        "path": "apps/web/tsconfig.json",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/tsconfig.json",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/tsconfig.json"
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/archive/origin_reference_docs/README.md",
+        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/archive/origin_reference_docs/README.md"
       },
       {
         "path": "dm_repo_context.json",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/dm_repo_context.json",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/dm_repo_context.json",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
       }
     ],
     "by_top_dir": {
-      "apps": [
+      "archive": [
         {
-          "path": "apps/web/.gitignore",
+          "path": "archive/origin_reference_docs/README.md",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/.gitignore",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/.gitignore"
-        },
-        {
-          "path": "apps/web/README.md",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/README.md",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/README.md"
-        },
-        {
-          "path": "apps/web/app/favicon.ico",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/favicon.ico",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/favicon.ico"
-        },
-        {
-          "path": "apps/web/app/globals.css",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/globals.css",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/globals.css"
-        },
-        {
-          "path": "apps/web/app/layout.tsx",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/layout.tsx",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/layout.tsx"
-        },
-        {
-          "path": "apps/web/app/page.module.css",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.module.css",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.module.css"
-        },
-        {
-          "path": "apps/web/app/page.tsx",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.tsx",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.tsx"
-        },
-        {
-          "path": "apps/web/eslint.config.mjs",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/eslint.config.mjs",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/eslint.config.mjs"
-        },
-        {
-          "path": "apps/web/next.config.ts",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/next.config.ts",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/next.config.ts"
-        },
-        {
-          "path": "apps/web/package-lock.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package-lock.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package-lock.json"
-        },
-        {
-          "path": "apps/web/package.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package.json"
-        },
-        {
-          "path": "apps/web/public/file.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/file.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/file.svg"
-        },
-        {
-          "path": "apps/web/public/globe.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/globe.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/globe.svg"
-        },
-        {
-          "path": "apps/web/public/next.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/next.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/next.svg"
-        },
-        {
-          "path": "apps/web/public/vercel.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/vercel.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/vercel.svg"
-        },
-        {
-          "path": "apps/web/public/window.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/window.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/window.svg"
-        },
-        {
-          "path": "apps/web/tsconfig.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/tsconfig.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/tsconfig.json"
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/archive/origin_reference_docs/README.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/archive/origin_reference_docs/README.md"
         }
       ],
       "(root)": [
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ]
@@ -325,111 +133,15 @@
       "github": [],
       "other": [
         {
-          "path": "apps/web/.gitignore",
+          "path": "archive/origin_reference_docs/README.md",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/.gitignore",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/.gitignore"
-        },
-        {
-          "path": "apps/web/README.md",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/README.md",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/README.md"
-        },
-        {
-          "path": "apps/web/app/favicon.ico",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/favicon.ico",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/favicon.ico"
-        },
-        {
-          "path": "apps/web/app/globals.css",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/globals.css",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/globals.css"
-        },
-        {
-          "path": "apps/web/app/layout.tsx",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/layout.tsx",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/layout.tsx"
-        },
-        {
-          "path": "apps/web/app/page.module.css",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.module.css",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.module.css"
-        },
-        {
-          "path": "apps/web/app/page.tsx",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/app/page.tsx",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/app/page.tsx"
-        },
-        {
-          "path": "apps/web/eslint.config.mjs",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/eslint.config.mjs",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/eslint.config.mjs"
-        },
-        {
-          "path": "apps/web/next.config.ts",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/next.config.ts",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/next.config.ts"
-        },
-        {
-          "path": "apps/web/package-lock.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package-lock.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package-lock.json"
-        },
-        {
-          "path": "apps/web/package.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/package.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/package.json"
-        },
-        {
-          "path": "apps/web/public/file.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/file.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/file.svg"
-        },
-        {
-          "path": "apps/web/public/globe.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/globe.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/globe.svg"
-        },
-        {
-          "path": "apps/web/public/next.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/next.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/next.svg"
-        },
-        {
-          "path": "apps/web/public/vercel.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/vercel.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/vercel.svg"
-        },
-        {
-          "path": "apps/web/public/window.svg",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/public/window.svg",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/public/window.svg"
-        },
-        {
-          "path": "apps/web/tsconfig.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/apps/web/tsconfig.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/apps/web/tsconfig.json"
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/archive/origin_reference_docs/README.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/archive/origin_reference_docs/README.md"
         },
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ]
@@ -687,6 +399,20 @@
       "action": "MODIFIED",
       "path": "dm_repo_context.json",
       "from_path": null
+    },
+    {
+      "commit_sha": "09d317e4c49fa07c6beff5ca254f913c8cabecb6",
+      "timestamp_utc": "2026-01-18T06:59:01-05:00",
+      "action": "ADDED",
+      "path": "archive/origin_reference_docs/README.md",
+      "from_path": null
+    },
+    {
+      "commit_sha": "09d317e4c49fa07c6beff5ca254f913c8cabecb6",
+      "timestamp_utc": "2026-01-18T06:59:01-05:00",
+      "action": "MODIFIED",
+      "path": "dm_repo_context.json",
+      "from_path": null
     }
   ],
   "directories": [
@@ -696,10 +422,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "canon/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/canon/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/canon/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/canon/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/canon/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/"
     },
     {
@@ -708,10 +434,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "db/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/db/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/db/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/db/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/db/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/"
     },
     {
@@ -720,10 +446,10 @@
       "authoritative": false,
       "agents_md": {
         "path": "scripts/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/scripts/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/scripts/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/scripts/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/scripts/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/"
     },
     {
@@ -732,10 +458,10 @@
       "authoritative": false,
       "agents_md": {
         "path": ".github/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/.github/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/.github/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/7bb388aa450233f6be5dfce2a13e9c11c8eb0773/.github/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/09d317e4c49fa07c6beff5ca254f913c8cabecb6/.github/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/"
     }
   ],
