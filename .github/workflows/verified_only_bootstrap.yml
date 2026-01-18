@@ -4,9 +4,18 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - AGENTS.md
+      - docs/verified_behaviors.md
+      - scripts/verified_only_bootstrap.sh
+      - .github/workflows/verified_only_bootstrap.yml
 
 permissions:
   contents: write
+
+concurrency:
+  group: verified-only-bootstrap-main
+  cancel-in-progress: true
 
 jobs:
   bootstrap:
@@ -22,10 +31,13 @@ jobs:
       - name: Commit changes if needed
         run: |
           set -euo pipefail
-          if git diff --quiet; then
-            echo "No changes detected."
+
+          # Only consider drift in the verified-only files.
+          if git diff --quiet -- AGENTS.md docs/verified_behaviors.md; then
+            echo "No verified-only drift detected."
             exit 0
           fi
+
           git config user.name "dm-verified-only-bot"
           git config user.email "dm-verified-only-bot@users.noreply.github.com"
           git add AGENTS.md docs/verified_behaviors.md
