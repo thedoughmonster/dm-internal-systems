@@ -1,0 +1,33 @@
+name: Verified-Only Bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure verified-only docs
+        run: scripts/verified_only_bootstrap.sh
+
+      - name: Commit changes if needed
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes detected."
+            exit 0
+          fi
+          git config user.name "dm-verified-only-bot"
+          git config user.email "dm-verified-only-bot@users.noreply.github.com"
+          git add AGENTS.md docs/verified_behaviors.md
+          git commit -m "chore: enforce verified-only operating model"
+          git push
