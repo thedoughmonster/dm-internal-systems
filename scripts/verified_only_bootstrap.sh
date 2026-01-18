@@ -67,3 +67,8 @@ EOT
 fi
 
 echo "Verified-only docs ensured."
+
+if [ -x scripts/dm_updates_apply.sh ]; then
+  echo "Applying updates inbox."
+  scripts/dm_updates_apply.sh
+fi
