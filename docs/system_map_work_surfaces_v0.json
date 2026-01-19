@@ -1,5 +1,0 @@
-{
-  "deprecated": true,
-  "moved_to": "docs/dm_actor_model_v1.json",
-  "notes": "Use dm_actor_model_v1.json as canonical."
-}
