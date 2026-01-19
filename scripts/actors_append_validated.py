@@ -150,11 +150,11 @@ def main() -> int:
         return 1
 
     actors_doc = load_actors_doc(args.actors_doc)
-    actor_id = actor.get("id")
+    actor_name = actor.get("name")
     for existing in actors_doc["actors"]:
-        if isinstance(existing, dict) and existing.get("id") == actor_id:
-            print("E_ACTOR_ID_DUPLICATE")
-            print(f"id: {actor_id}")
+        if isinstance(existing, dict) and existing.get("name") == actor_name:
+            print("E_ACTOR_NAME_DUPLICATE")
+            print(f"name: {actor_name}")
             return 1
 
     if args.validate_only:
@@ -165,7 +165,7 @@ def main() -> int:
         json.dump(actors_doc, handle, indent=2)
         handle.write("\n")
 
-    print(f"APPENDED_OK id={actor_id}")
+    print(f"APPENDED_OK name={actor_name}")
     return 0
 
 
