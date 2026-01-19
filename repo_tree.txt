@@ -4,7 +4,8 @@
 │       ├── db_migrate.yml
 │       ├── db_query.yml
 │       ├── repo_context.yml
-│       └── scaffold_nextjs_fixed.yml
+│       ├── scaffold_nextjs_fixed.yml
+│       └── verified_only_bootstrap.yml
 ├── apps
 │   └── web
 │       ├── app
@@ -19,7 +20,6 @@
 │       │   ├── next.svg
 │       │   ├── vercel.svg
 │       │   └── window.svg
-│       ├── scripts
 │       ├── .gitignore
 │       ├── README.md
 │       ├── eslint.config.mjs
@@ -60,13 +60,40 @@
 │   ├── GOVERNANCE_MODEL.md
 │   ├── IMPLEMENTATION_GUIDE.md
 │   ├── README.md
-│   └── SYSTEM_SCOPE.md
+│   ├── SYSTEM_SCOPE.md
+│   └── verified_behaviors.md
 ├── scripts
 │   ├── check
+│   ├── dm_updates_apply.sh
 │   ├── generate_repo_context.mjs
-│   └── seed_example_sop.mjs
+│   ├── make_update_zip.sh
+│   ├── seed_example_sop.mjs
+│   └── verified_only_bootstrap.sh
+├── supabase
+│   ├── .temp
+│   │   ├── cli-latest
+│   │   ├── gotrue-version
+│   │   ├── pooler-url
+│   │   ├── postgres-version
+│   │   ├── project-ref
+│   │   ├── rest-version
+│   │   ├── storage-migration
+│   │   └── storage-version
+│   ├── migrations
+│   │   ├── 20260118172412_remote_schema.sql
+│   │   └── 20260118173000_init_dm_schema.sql
+│   ├── .gitignore
+│   └── config.toml
+├── updates
+│   ├── applied
+│   │   └── .gitkeep
+│   ├── inbox
+│   │   ├── .gitkeep
+│   │   └── update_system_map_work_surfaces_v0.zip
+│   └── README.md
+├── AGENTS.md
 ├── dm_repo_context.json
 ├── dmtree
 └── repo_tree.txt
 
-18 directories, 52 files
+23 directories, 74 files
