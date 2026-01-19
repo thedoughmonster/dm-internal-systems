@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at_utc": "2026-01-19T11:15:09.199Z",
+  "generated_at_utc": "2026-01-19T11:16:19.508Z",
   "repo": {
     "owner": "thedoughmonster",
     "name": "dm-internal-systems",
@@ -9,17 +9,31 @@
   },
   "self": {
     "path": "dm_repo_context.json",
-    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/dm_repo_context.json",
+    "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/dm_repo_context.json",
     "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
   },
   "head": {
-    "sha": "bd5d7771738fb702066877a4e5e2ab2447d2915f",
-    "message": "Rename system_map_work_surfaces_v0.md to SYSTEM_MAP_WORK_SURFACES_v0.md",
+    "sha": "200f8ab534f2662158504ccc40c3781ab9bc053b",
+    "message": "file move",
     "author_name": "thedoughmonster",
     "author_email": "thedoughmonster@gmail.com",
-    "timestamp_utc": "2026-01-19T06:15:01-05:00"
+    "timestamp_utc": "2026-01-19T11:15:58Z"
   },
   "commits": [
+    {
+      "sha": "200f8ab534f2662158504ccc40c3781ab9bc053b",
+      "timestamp_utc": "2026-01-19T11:15:58Z",
+      "author_name": "thedoughmonster",
+      "author_email": "thedoughmonster@gmail.com",
+      "message": "file move"
+    },
+    {
+      "sha": "1ed35d226e867e3d5d47497d805da37e5c8684c5",
+      "timestamp_utc": "2026-01-19T11:15:09Z",
+      "author_name": "dm-bot",
+      "author_email": "dm-bot@users.noreply.github.com",
+      "message": "chore(repo): update dm_repo_context.json"
+    },
     {
       "sha": "bd5d7771738fb702066877a4e5e2ab2447d2915f",
       "timestamp_utc": "2026-01-19T06:15:01-05:00",
@@ -75,49 +89,23 @@
       "author_name": "thedoughmonster",
       "author_email": "thedoughmonster@gmail.com",
       "message": "update inbox addition"
-    },
-    {
-      "sha": "e6ad6a6dafb6e321f01a026310cb55dae880759d",
-      "timestamp_utc": "2026-01-18T19:48:34Z",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "docs: formalize Codex change execution model"
-    },
-    {
-      "sha": "c3dae791980a725e612951827b6dc92dc1be2851",
-      "timestamp_utc": "2026-01-18T19:40:59Z",
-      "author_name": "thedoughmonster",
-      "author_email": "thedoughmonster@gmail.com",
-      "message": "chore(bootstrap): add updates inbox system"
     }
   ],
   "changed_paths": {
-    "range_base_sha": "b332b9d9375941f0d96a6bd89135e8c130da19e3",
-    "range_head_sha": "bd5d7771738fb702066877a4e5e2ab2447d2915f",
+    "range_base_sha": "bd5d7771738fb702066877a4e5e2ab2447d2915f",
+    "range_head_sha": "200f8ab534f2662158504ccc40c3781ab9bc053b",
     "all": [
       {
         "path": "dm_repo_context.json",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/dm_repo_context.json",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/dm_repo_context.json",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
       },
       {
-        "path": "docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
+        "path": "docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
         "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md"
-      },
-      {
-        "path": "updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json"
-      },
-      {
-        "path": "updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-        "area": "other",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip"
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
+        "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/SYSTEM_MAP_WORK_SURFACES_v0.md"
       }
     ],
     "by_top_dir": {
@@ -125,30 +113,16 @@
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         }
       ],
       "docs": [
         {
-          "path": "docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
+          "path": "docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md"
-        }
-      ],
-      "updates": [
-        {
-          "path": "updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json"
-        },
-        {
-          "path": "updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip"
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/SYSTEM_MAP_WORK_SURFACES_v0.md"
         }
       ]
     },
@@ -161,26 +135,14 @@
         {
           "path": "dm_repo_context.json",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/dm_repo_context.json",
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/dm_repo_context.json",
           "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/dm_repo_context.json"
         },
         {
-          "path": "docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
+          "path": "docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
           "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md"
-        },
-        {
-          "path": "updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/applied/20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json"
-        },
-        {
-          "path": "updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-          "area": "other",
-          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
-          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip"
+          "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
+          "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/docs/SYSTEM_MAP_WORK_SURFACES_v0.md"
         }
       ]
     }
@@ -899,6 +861,20 @@
       "action": "DELETED",
       "path": "updates/inbox/update_system_map_work_surfaces_v0_with_doc.zip",
       "from_path": null
+    },
+    {
+      "commit_sha": "200f8ab534f2662158504ccc40c3781ab9bc053b",
+      "timestamp_utc": "2026-01-19T11:15:58Z",
+      "action": "MODIFIED",
+      "path": "dm_repo_context.json",
+      "from_path": null
+    },
+    {
+      "commit_sha": "200f8ab534f2662158504ccc40c3781ab9bc053b",
+      "timestamp_utc": "2026-01-19T11:15:58Z",
+      "action": "RENAMED",
+      "path": "docs/SYSTEM_MAP_WORK_SURFACES_v0.md",
+      "from_path": "docs/architecture/SYSTEM_MAP_WORK_SURFACES_v0.md"
     }
   ],
   "directories": [
@@ -908,10 +884,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "canon/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/canon/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/canon/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/canon/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/canon/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/canon/"
     },
     {
@@ -920,10 +896,10 @@
       "authoritative": true,
       "agents_md": {
         "path": "db/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/db/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/db/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/db/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/db/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/db/"
     },
     {
@@ -932,10 +908,10 @@
       "authoritative": false,
       "agents_md": {
         "path": "scripts/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/scripts/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/scripts/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/scripts/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/scripts/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/scripts/"
     },
     {
@@ -944,10 +920,10 @@
       "authoritative": false,
       "agents_md": {
         "path": ".github/AGENTS.md",
-        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/.github/AGENTS.md",
+        "raw_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/.github/AGENTS.md",
         "raw_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/AGENTS.md"
       },
-      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/bd5d7771738fb702066877a4e5e2ab2447d2915f/.github/",
+      "raw_base_url_pinned": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/200f8ab534f2662158504ccc40c3781ab9bc053b/.github/",
       "raw_base_url_latest": "https://raw.githubusercontent.com/thedoughmonster/dm-internal-systems/refs/heads/main/.github/"
     }
   ],
