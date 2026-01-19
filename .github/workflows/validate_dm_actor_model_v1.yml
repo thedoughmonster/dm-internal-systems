@@ -1,0 +1,18 @@
+name: Validate DM Actor Model v1
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+      - name: Install dependencies
+        run: pip install jsonschema
+      - name: Validate schema
+        run: python scripts/validate_dm_actor_model_v1.py
