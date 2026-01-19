@@ -20,7 +20,7 @@ def format_path(error_path):
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    data_path = root / "docs" / "system_map_work_surfaces_v0.json"
+    data_path = root / "docs" / "dm_actor_model_v1.json"
     schema_path = root / "docs" / "dm_actor_model_v1.schema.json"
 
     try:
@@ -32,8 +32,6 @@ def main():
     if not isinstance(data, dict) or "doc" not in data or not isinstance(data["doc"], dict):
         print("Invalid data format: missing doc object")
         return 1
-
-    data["doc"]["id"] = "dm_actor_model_v1"
 
     try:
         schema = json.loads(schema_path.read_text())
