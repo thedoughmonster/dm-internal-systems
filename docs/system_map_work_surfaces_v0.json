@@ -1,0 +1,190 @@
+{
+  "doc": {
+    "id": "system_map_work_surfaces_v0",
+    "status": "draft",
+    "scope": "high_level",
+    "enums": {
+      "actor_types": {
+        "values": [
+          "feed",
+          "surface",
+          "renderer",
+          "automation",
+          "external_system",
+          "artifact_source"
+        ],
+        "semantics": {
+          "feed": "Primarily emits data or events into the system.",
+          "surface": "Human-facing interaction point for expressing intent or input.",
+          "renderer": "Displays or presents truth without originating or mutating it.",
+          "automation": "Executes logic or processes based on system state or triggers.",
+          "external_system": "Another system of record or operational system outside this architecture.",
+          "artifact_source": "Produces or stores unstructured artifacts used as evidence or reference."
+        }
+      },
+      "trust_level": {
+        "values": [
+          "machine_enforced",
+          "schema_validated",
+          "unstructured_artifact"
+        ],
+        "semantics": {
+          "machine_enforced": "Input is produced automatically or via tightly controlled APIs. Structure and meaning are guaranteed.",
+          "schema_validated": "Input is provided by humans or tools but must conform to a strict schema or validation rules before being accepted as truth.",
+          "unstructured_artifact": "Input is a human-produced artifact stored as reference or evidence. Structure is not interpreted or enforced."
+        }
+      },
+      "signal_role": {
+        "values": [
+          "transmitter",
+          "receiver",
+          "transceiver"
+        ],
+        "semantics": {
+          "transmitter": "This actor sends data or events toward the source of truth but does not consume database state.",
+          "receiver": "This actor consumes data or state from the source of truth but does not emit changes back.",
+          "transceiver": "This actor both sends data to and receives data from the source of truth."
+        }
+      },
+      "data_behavior": {
+        "values": [
+          "generate",
+          "transform",
+          "render",
+          "store",
+          "alert"
+        ],
+        "semantics": {
+          "generate": "Produces new structured data or events that become candidates for truth.",
+          "transform": "Converts data from one form to another (e.g., parse, normalize, enrich) before it becomes or updates truth.",
+          "render": "Presents truth for humans or downstream systems without changing it (e.g., dashboards, reports, viewers).",
+          "store": "Holds artifacts or blobs as-is for reference (e.g., invoices, designs) without interpreting structure.",
+          "alert": "Emits notifications or signals to humans or machines (e.g., messages, emails, webhooks) in response to state changes or conditions."
+        }
+      },
+      "write_authority": {
+        "values": [
+          "none",
+          "propose_only",
+          "staging_only",
+          "promote_to_truth",
+          "direct_to_truth"
+        ],
+        "semantics": {
+          "none": "Actor does not write to the system of record.",
+          "propose_only": "Actor can submit candidate changes, but cannot commit changes to truth.",
+          "staging_only": "Actor can write only to staging areas that are not treated as truth.",
+          "promote_to_truth": "Actor can promote vetted staged data into truth through a controlled path.",
+          "direct_to_truth": "Actor can write directly into truth tables or canonical records. Use sparingly."
+        }
+      },
+      "input_control": {
+        "values": [
+          "owned_mutable",
+          "external_immutable"
+        ],
+        "semantics": {
+          "owned_mutable": "The system owns the input shape and can change or enforce it at the source (e.g., your own forms, your own services).",
+          "external_immutable": "The system does not own the input shape and cannot change it at the source (e.g., vendor exports, third party APIs, emailed files)."
+        }
+      },
+      "ingestion_middleman_types": {
+        "values": [
+          "none",
+          "parser",
+          "normalizer",
+          "enricher",
+          "validator",
+          "router",
+          "staging_table",
+          "review_gate",
+          "rpc_gate",
+          "batch_job"
+        ],
+        "semantics": {
+          "none": "No ingestion middleman step is needed.",
+          "parser": "Converts raw external input into structured fields (e.g., CSV to rows, text to fields).",
+          "normalizer": "Standardizes formats, naming, and units prior to acceptance.",
+          "enricher": "Adds derived fields or joins external references prior to acceptance.",
+          "validator": "Applies schema and business-rule checks to accept or reject ingested data.",
+          "router": "Routes ingested data to the correct target or pipeline based on content.",
+          "staging_table": "Writes to a non-truth holding area before promotion.",
+          "review_gate": "Requires review before promotion to truth.",
+          "rpc_gate": "Forces writes through a constrained function interface.",
+          "batch_job": "Aggregates or processes ingested inputs on a schedule prior to promotion."
+        }
+      }
+    },
+    "rules": [
+      "Ingestion middlemen exist to deal with external_immutable inputs. They describe the adaptation and gating steps needed to safely ingest data the system does not control at the source.",
+      "If input_control is owned_mutable, ingestion_middlemen should usually be [\"none\"]. If you include other steps, treat them as internal pipeline steps, not external ingestion compensation.",
+      "write_authority expresses how close an actor can get to truth. ingestion_middlemen expresses how external_immutable inputs are adapted and gated before truth."
+    ],
+    "schemas": {
+      "actor": {
+        "description": "Reference definition for actor objects. This is a schema, not an instance.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable identifier for the actor"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum_ref": "actor_types"
+            },
+            "description": "One or more high-level classifications for this actor"
+          },
+          "trust_level": {
+            "type": "string",
+            "enum_ref": "trust_level",
+            "description": "Degree of structural trust the system can assume for data coming from this actor"
+          },
+          "signal_role": {
+            "type": "string",
+            "enum_ref": "signal_role",
+            "description": "Directional signal relationship between this actor and the source of truth"
+          },
+          "data_behavior": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum_ref": "data_behavior"
+            },
+            "description": "One or more ways this actor handles data relative to the system"
+          },
+          "write_authority": {
+            "type": "string",
+            "enum_ref": "write_authority",
+            "description": "What authority this actor has to change truth, versus only propose or stage changes"
+          },
+          "input_control": {
+            "type": "string",
+            "enum_ref": "input_control",
+            "description": "Whether the system owns and can change the input shape at the source, or must ingest an external shape it cannot mutate"
+          },
+          "ingestion_middlemen": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum_ref": "ingestion_middleman_types"
+            },
+            "description": "Ingestion adaptation and gating steps used when input_control is external_immutable"
+          }
+        },
+        "required": [
+          "name",
+          "types",
+          "trust_level",
+          "signal_role",
+          "data_behavior",
+          "write_authority",
+          "input_control",
+          "ingestion_middlemen"
+        ]
+      }
+    },
+    "flows": []
+  }
+}
