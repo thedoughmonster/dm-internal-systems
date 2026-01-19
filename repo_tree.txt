@@ -5,6 +5,8 @@
 │       ├── db_query.yml
 │       ├── repo_context.yml
 │       ├── scaffold_nextjs_fixed.yml
+│       ├── validate_dm_actor_model_v1.yml
+│       ├── validate_dm_actors_v1.yml
 │       └── verified_only_bootstrap.yml
 ├── apps
 │   └── web
@@ -57,17 +59,25 @@
 │   ├── ARCHITECTURE_OVERVIEW.md
 │   ├── CHANGELOG.md
 │   ├── DATA_MODEL_REFERENCE.md
+│   ├── DM_ACTOR_MODEL_V1.MD
 │   ├── GOVERNANCE_MODEL.md
 │   ├── IMPLEMENTATION_GUIDE.md
 │   ├── README.md
+│   ├── SYSTEM_MAP_WORK_SURFACES_v0.md
 │   ├── SYSTEM_SCOPE.md
+│   ├── dm_actor_model_v1.json
+│   ├── dm_actor_model_v1.schema.json
+│   ├── dm_actors_v1.json
+│   ├── system_map_work_surfaces_v0.json
 │   └── verified_behaviors.md
 ├── scripts
+│   ├── actors_append_validated.py
 │   ├── check
 │   ├── dm_updates_apply.sh
 │   ├── generate_repo_context.mjs
 │   ├── make_update_zip.sh
 │   ├── seed_example_sop.mjs
+│   ├── validate_dm_actor_model_v1.py
 │   └── verified_only_bootstrap.sh
 ├── supabase
 │   ├── .temp
@@ -86,14 +96,15 @@
 │   └── config.toml
 ├── updates
 │   ├── applied
-│   │   └── .gitkeep
-│   ├── inbox
 │   │   ├── .gitkeep
-│   │   └── update_system_map_work_surfaces_v0.zip
+│   │   ├── 20260119T104745Z_update_system_map_work_surfaces_v0.zip.json
+│   │   └── 20260119T110733Z_update_system_map_work_surfaces_v0_with_doc.zip.json
+│   ├── inbox
+│   │   └── .gitkeep
 │   └── README.md
 ├── AGENTS.md
 ├── dm_repo_context.json
-├── dmtree
+├── dmtree.sh
 └── repo_tree.txt
 
-23 directories, 74 files
+23 directories, 85 files
