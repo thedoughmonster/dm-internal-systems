@@ -150,9 +150,9 @@ def main() -> int:
         return 1
 
     actors_doc = load_actors_doc(args.actors_doc)
-    actor_id = actor.get("name")
+    actor_id = actor.get("id")
     for existing in actors_doc["actors"]:
-        if isinstance(existing, dict) and existing.get("name") == actor_id:
+        if isinstance(existing, dict) and existing.get("id") == actor_id:
             print("E_ACTOR_ID_DUPLICATE")
             print(f"id: {actor_id}")
             return 1
