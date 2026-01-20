@@ -102,6 +102,29 @@
     "conflict_resolution": "json_wins"
   },
 
+  "path_governance": {
+    "docs_root_reserved": true,
+    "docs_root_allowed_files": [
+      "document_lifecycle_v1.json",
+      "DOCUMENT_LIFECYCLE_V1.MD"
+    ],
+    "lifecycle_governed_root_globs": [
+      "docs/canon/**"
+    ],
+    "lifecycle_exempt_root_globs": [
+      "docs/lifecycle_exempt/**"
+    ],
+    "notes": "Lifecycle enforcement applies only under governed roots and never under lifecycle_exempt roots."
+  },
+
+  "lifecycle_exempt_policy": {
+    "definition": "Lifecycle exempt artifacts are intake or helper artifacts, never authoritative documents.",
+    "pairing_rules_apply": false,
+    "lifecycle_states_apply": false,
+    "may_be_human_edited": true,
+    "agent_access": "forbidden"
+  },
+
   "noncompliance_policy": {
     "on_violation": [
       "stop_execution",

@@ -119,6 +119,18 @@ Humans do not edit truth.
 
 ---
 
+## Path Governance
+
+The docs top level is reserved for lifecycle authority documents only.
+
+Lifecycle governed documents live under docs/canon/.
+
+Lifecycle exempt artifacts live under docs/lifecycle_exempt/.
+
+Lifecycle rules do not apply under docs/lifecycle_exempt/.
+
+---
+
 ## Enforcement
 
 If any tool, agent, or human action violates this lifecycle:

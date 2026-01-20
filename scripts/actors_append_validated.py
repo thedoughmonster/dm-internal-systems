@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import sys
+import tempfile
 from typing import Any, Dict, List, Tuple
 
 
@@ -46,6 +48,29 @@ def derive_schema(model_doc: Dict[str, Any]) -> Tuple[List[str], List[str], Dict
             array_enums[field] = list(enums[enum_ref]["values"])
 
     return required, allowed, scalar_enums, array_enums
+
+
+def normalize_actor_input(raw: Any) -> Tuple[List[Tuple[str, Any]], List[Dict[str, str]]]:
+    if isinstance(raw, dict) and "actors" in raw:
+        actors = raw.get("actors")
+        if not isinstance(actors, list):
+            return [], [{"path": "$.actors", "message": "actors must be an array"}]
+        return [(f"$.actors[{idx}]", actor) for idx, actor in enumerate(actors)], []
+
+    if isinstance(raw, list):
+        return [(f"$[{idx}]", actor) for idx, actor in enumerate(raw)], []
+
+    return [("$", raw)], []
+
+
+def prefix_issue_path(path: str, prefix: str) -> str:
+    if prefix == "$":
+        return path
+    if path == "$":
+        return prefix
+    if path.startswith("$"):
+        return prefix + path[1:]
+    return prefix + path
 
 
 def validate_actor(
@@ -104,19 +129,28 @@ def load_actors_doc(path: str) -> Dict[str, Any]:
     return data
 
 
+def write_atomic_json(path: str, payload: Dict[str, Any]) -> None:
+    directory = os.path.dirname(path)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=directory, delete=False) as handle:
+        temp_path = handle.name
+        json.dump(payload, handle, indent=2, sort_keys=True, ensure_ascii=False)
+        handle.write("\n")
+    os.replace(temp_path, path)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Append a validated actor to dm_actors_v1.json")
     parser.add_argument("--actor-json", dest="actor_json", default=None, help="Path to actor JSON")
     parser.add_argument(
         "--actors-doc",
         dest="actors_doc",
-        default="docs/dm_actors_v1.json",
+        default="docs/canon/actors/dm_actors_v1.json",
         help="Path to actors doc",
     )
     parser.add_argument(
         "--model-doc",
         dest="model_doc",
-        default="docs/dm_actor_model_v1.json",
+        default="docs/canon/actors/dm_actor_model_v1.json",
         help="Path to actor model doc",
     )
     parser.add_argument("--validate-only", dest="validate_only", action="store_true")
@@ -138,9 +172,36 @@ def main() -> int:
             print(f"message: {issue['message']}")
         return 1
 
+    normalized, normalize_issues = normalize_actor_input(actor)
+    if normalize_issues:
+        print("E_ACTOR_SCHEMA_VALIDATION")
+        for issue in normalize_issues:
+            print(f"path: {issue['path']}")
+            print(f"message: {issue['message']}")
+        return 1
+
+    if len(normalized) == 0:
+        print("NO_ACTORS_TO_APPEND no actors to append")
+        return 0
+
     model_doc = load_json(args.model_doc)
     required, allowed, scalar_enums, array_enums = derive_schema(model_doc)
-    issues = validate_actor(actor, required, allowed, scalar_enums, array_enums)
+
+    issues: List[Dict[str, str]] = []
+    actor_entries: List[Dict[str, Any]] = []
+    for prefix, candidate in normalized:
+        entry_issues = validate_actor(candidate, required, allowed, scalar_enums, array_enums)
+        for issue in entry_issues:
+            issues.append(
+                {
+                    "path": prefix_issue_path(issue["path"], prefix),
+                    "message": issue["message"],
+                }
+            )
+        if isinstance(candidate, dict):
+            actor_entries.append(candidate)
+        else:
+            actor_entries.append(candidate)
 
     if issues:
         print("E_ACTOR_SCHEMA_VALIDATION")
@@ -150,22 +211,40 @@ def main() -> int:
         return 1
 
     actors_doc = load_actors_doc(args.actors_doc)
-    actor_name = actor.get("name")
-    for existing in actors_doc["actors"]:
-        if isinstance(existing, dict) and existing.get("name") == actor_name:
+    existing_names = {
+        existing.get("name")
+        for existing in actors_doc["actors"]
+        if isinstance(existing, dict) and "name" in existing
+    }
+    batch_names = set()
+    for entry in actor_entries:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        if name is None:
+            continue
+        if name in batch_names:
             print("E_ACTOR_NAME_DUPLICATE")
-            print(f"name: {actor_name}")
+            print(f"name: {name}")
             return 1
+        if name in existing_names:
+            print("E_ACTOR_NAME_DUPLICATE")
+            print(f"name: {name}")
+            return 1
+        batch_names.add(name)
 
     if args.validate_only:
         return 0
 
-    actors_doc["actors"].append(actor)
-    with open(args.actors_doc, "w", encoding="utf-8") as handle:
-        json.dump(actors_doc, handle, indent=2)
-        handle.write("\n")
+    actors_doc["actors"].extend(actor_entries)
+    write_atomic_json(args.actors_doc, actors_doc)
 
-    print(f"APPENDED_OK name={actor_name}")
+    if len(actor_entries) == 1:
+        actor_name = actor_entries[0].get("name") if isinstance(actor_entries[0], dict) else None
+        print(f"APPENDED_OK name={actor_name}")
+        return 0
+
+    print(f"APPENDED_OK count={len(actor_entries)}")
     return 0
 
 
