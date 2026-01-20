@@ -12,14 +12,14 @@ This directory contains lifecycle-governed canonical actor artifacts.
 ## Production and updates
 Canonical files are not edited directly in canonical states.
 Updates flow from lifecycle_exempt intake through approved scripts.
-The intake example is docs/lifecycle_exempt/inbox_actors/dm_actors_v1.src.json.
+The intake example is updates/actors_inbox/dm_actors_v1.src.json.
 
 ## Consumers
 CI workflows validate changes.
 Agents may read canonical docs, but should not read lifecycle_exempt intake artifacts.
 
 ## Actor append workflow
-The intake payload lives at docs/lifecycle_exempt/inbox_actors/dm_actors_v1.src.json.
+The intake payload lives at updates/actors_inbox/dm_actors_v1.src.json.
 The payload shape is { "actors": [ ... ] }.
 Validation runs through scripts/actors_append_validated.py.
 The canonical target is docs/canon/actors/dm_actors_v1.json.

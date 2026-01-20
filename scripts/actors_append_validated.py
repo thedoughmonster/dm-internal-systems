@@ -155,7 +155,7 @@ def main() -> int:
     )
     parser.add_argument("--validate-only", dest="validate_only", action="store_true")
     args = parser.parse_args()
-    intake_path = "docs/lifecycle_exempt/inbox_actors/dm_actors_v1.src.json"
+    intake_path = "updates/actors_inbox/dm_actors_v1.src.json"
 
     has_input, actor, input_issues = read_actor_input(args.actor_json)
     if not has_input:
@@ -239,7 +239,7 @@ def main() -> int:
 
     actors_doc["actors"].extend(actor_entries)
     write_atomic_json(args.actors_doc, actors_doc)
-    if args.actor_json == intake_path:
+    if args.actor_json is not None and args.actor_json == intake_path:
         try:
             write_atomic_json(intake_path, {"actors": []})
         except Exception as exc:
