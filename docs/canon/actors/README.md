@@ -18,6 +18,15 @@ The intake example is docs/lifecycle_exempt/inbox_actors/dm_actors_v1.src.json.
 CI workflows validate changes.
 Agents may read canonical docs, but should not read lifecycle_exempt intake artifacts.
 
+## Actor append workflow
+The intake payload lives at docs/lifecycle_exempt/inbox_actors/dm_actors_v1.src.json.
+The payload shape is { "actors": [ ... ] }.
+Validation runs through scripts/actors_append_validated.py.
+The canonical target is docs/canon/actors/dm_actors_v1.json.
+Duplicate prevention is name based and append only.
+Validate-only mode performs validation without writes, and CI uses validate-only.
+A successful append clears the intake payload to prevent replays.
+
 ## Authority reminder
 docs/document_lifecycle_v1.json is the source of truth.
 This README exists to help humans understand the layout.
