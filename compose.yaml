@@ -1,0 +1,27 @@
+services:
+  root-scripts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    tty: true
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    working_dir: /apps/web
+    volumes:
+      - ./apps/web:/apps/web
+      - web_node_modules:/apps/web/node_modules
+    environment:
+      - NODE_ENV=development
+    command: sh -lc "npm ci && npm run dev"
+
+
+volumes:
+  web_node_modules:

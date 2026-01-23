@@ -1,0 +1,155 @@
+time="2026-01-21T07:03:29-05:00" level=warning msg="C:\\Users\\16077\\dm-internal-systems\\compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image dm-internal-systems-web Building 
+ Image dm-internal-systems-root-scripts Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.05kB done
+#1 DONE 0.0s
+
+#2 [web internal] load build definition from Dockerfile
+#2 transferring dockerfile: 654B done
+#2 DONE 0.0s
+
+#3 [root-scripts internal] load build definition from Dockerfile
+#3 transferring dockerfile: 428B done
+#3 DONE 0.0s
+
+#4 [root-scripts internal] load metadata for docker.io/library/python:3.11-slim
+#4 ...
+
+#5 [web] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#5 DONE 0.4s
+
+#4 [root-scripts internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 0.3s
+
+#6 [root-scripts internal] load .dockerignore
+#6 transferring context: 1.15kB done
+#6 DONE 0.0s
+
+#7 [root-scripts internal] load build context
+#7 DONE 0.0s
+
+#8 [web] docker-image://docker.io/docker/dockerfile:1@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6
+#8 resolve docker.io/docker/dockerfile:1@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6 0.1s done
+#8 CACHED
+
+#9 [root-scripts 1/4] FROM docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2
+#9 resolve docker.io/library/python:3.11-slim@sha256:5be45dbade29bebd6886af6b438fd7e0b4eb7b611f39ba62b430263f82de36d2 0.1s done
+#9 DONE 0.1s
+
+#7 [root-scripts internal] load build context
+#7 ...
+
+#10 [web internal] load metadata for docker.io/library/node:22.13.1-slim
+#10 DONE 0.3s
+
+#11 [web internal] load .dockerignore
+#11 transferring context: 2B done
+#11 DONE 0.0s
+
+#7 [root-scripts internal] load build context
+#7 transferring context: 1.93MB 0.9s done
+#7 DONE 1.9s
+
+#12 [root-scripts 2/4] WORKDIR /app
+#12 CACHED
+
+#13 [web internal] load build context
+#13 ...
+
+#14 [web stage-0 1/6] FROM docker.io/library/node:22.13.1-slim@sha256:83fdfa2a4de32d7f8d79829ea259bd6a4821f8b2d123204ac467fbe3966450fc
+#14 resolve docker.io/library/node:22.13.1-slim@sha256:83fdfa2a4de32d7f8d79829ea259bd6a4821f8b2d123204ac467fbe3966450fc 0.0s done
+#14 DONE 0.1s
+
+#13 [web internal] load build context
+#13 transferring context: 1.73MB 0.8s done
+#13 DONE 0.8s
+
+#15 [web stage-0 2/6] WORKDIR /apps/web
+#15 CACHED
+
+#16 [web stage-0 3/6] RUN apt-get update  && apt-get install -y --no-install-recommends     ca-certificates     git  && rm -rf /var/lib/apt/lists/*
+#16 CACHED
+
+#17 [web stage-0 4/6] COPY package.json package-lock.json ./
+#17 CACHED
+
+#18 [web stage-0 5/6] RUN --mount=type=cache,target=/root/.npm     npm ci
+#18 CACHED
+
+#19 [web stage-0 6/6] COPY . .
+#19 ...
+
+#20 [root-scripts 3/4] COPY . .
+#20 DONE 5.7s
+
+#19 [web stage-0 6/6] COPY . .
+#19 DONE 4.9s
+
+#21 [web] exporting to image
+#21 exporting layers
+#21 ...
+
+#22 [root-scripts 4/4] RUN apt-get update && apt-get install -y bash && rm -rf /var/lib/apt/lists/*
+#22 0.831 Hit:1 http://deb.debian.org/debian trixie InRelease
+#22 0.863 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#22 0.927 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#22 0.987 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9670 kB]
+#22 2.527 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+#22 2.592 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [96.3 kB]
+#22 3.187 Fetched 9863 kB in 3s (3841 kB/s)
+#22 3.187 Reading package lists...
+#22 3.730 Reading package lists...
+#22 4.247 Building dependency tree...
+#22 4.367 Reading state information...
+#22 4.531 bash is already the newest version (5.2.37-2+b7).
+#22 4.531 bash set to manually installed.
+#22 4.531 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+#22 DONE 4.6s
+
+#23 [root-scripts] exporting to image
+#23 ...
+
+#21 [web] exporting to image
+#21 exporting layers 12.1s done
+#21 exporting manifest sha256:5c3f72b6ea12c502cc1d050ace9b978d6c8e1fcc679e3be685323924fbbb6b5e 0.0s done
+#21 exporting config sha256:50b8d28d5fe6271bff5ad539c32b87c6234581d0e2e44f820f741e53a0fd1f54 0.0s done
+#21 exporting attestation manifest sha256:bad80def078d17da99eae47da31f1641b6d4cb7c8a6eb8f66c048cea87c76d74 0.1s done
+#21 exporting manifest list sha256:ca51f1de05aaac2b52db0589e5a3366ff8450ae278e28b18dae036b26c7306a8
+#21 exporting manifest list sha256:ca51f1de05aaac2b52db0589e5a3366ff8450ae278e28b18dae036b26c7306a8 0.0s done
+#21 naming to docker.io/library/dm-internal-systems-web:latest done
+#21 unpacking to docker.io/library/dm-internal-systems-web:latest
+#21 unpacking to docker.io/library/dm-internal-systems-web:latest 4.4s done
+#21 DONE 16.8s
+
+#23 [root-scripts] exporting to image
+#23 exporting layers 12.2s done
+#23 exporting manifest sha256:293f3427dd5eed73adfb208b884c7c1f3aa4b6d3361a0d5a90cb73b54845f652 0.0s done
+#23 exporting config sha256:c217acb31b54c1d2ecd4ea28497ccdf63ca790f85a53376c309e07eaf2f8309a 0.0s done
+#23 exporting attestation manifest sha256:4b316235b9c09892e3abae3c8d28e5976f103961c60a2c401da2feb331bbef11
+#23 exporting attestation manifest sha256:4b316235b9c09892e3abae3c8d28e5976f103961c60a2c401da2feb331bbef11 0.1s done
+#23 exporting manifest list sha256:fa7ac0ae1191be3fb5c45a828e72967c08a446648645c264e91f5efecc8ac0f0 0.0s done
+#23 naming to docker.io/library/dm-internal-systems-root-scripts:latest
+#23 ...
+
+#24 [web] resolving provenance for metadata file
+#24 DONE 0.0s
+
+#23 [root-scripts] exporting to image
+#23 naming to docker.io/library/dm-internal-systems-root-scripts:latest done
+#23 unpacking to docker.io/library/dm-internal-systems-root-scripts:latest
+#23 unpacking to docker.io/library/dm-internal-systems-root-scripts:latest 4.0s done
+#23 DONE 16.5s
+
+#25 [root-scripts] resolving provenance for metadata file
+#25 DONE 0.0s
+ Image dm-internal-systems-root-scripts Built 
+ Image dm-internal-systems-web Built 
+ Container dm-internal-systems-root-scripts-1 Recreate 
+ Container dm-internal-systems-web-1 Recreate 
+ Container dm-internal-systems-root-scripts-1 Recreated 
+ Container dm-internal-systems-web-1 Recreated 
+ Container dm-internal-systems-web-1 Starting 
+ Container dm-internal-systems-root-scripts-1 Starting 
+ Container dm-internal-systems-root-scripts-1 Started 
+ Container dm-internal-systems-web-1 Started 

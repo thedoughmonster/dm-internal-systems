@@ -1,0 +1,94 @@
+# Version control
+.git/
+.gitignore
+.svn/
+.hg/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Go
+/vendor/
+*.test
+.go-cache/
+
+# Java
+# (No Java detected, but included for completeness)
+target/
+*.class
+.gradle/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build outputs
+/dist/
+/build/
+/out/
+
+# Test files and debug
+/test/
+/tests/
+debug/
+*.log
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Project-specific patterns
+# Documentation
+/docs/
+*.md
+*.MD
+README*
+
+# Docker files
+Dockerfile*
+docker-compose*
+
+# Temporary files
+/tmp/
+/temp/
+*.tmp
+
+# Local development
+.local/
+local/
+
+# Miscellaneous
+# Ignore package-lock.json in root, but not in apps/web (service containerized)
+!/apps/web/package-lock.json
+
+# Ignore .gitkeep files
+*.gitkeep
+
+# Ignore shell script outputs (if any)
+*.sh~
+
+# Ignore SQL files outside migrations (if not needed)
+*.sql
+!/db/migrations/*.sql
+!/supabase/migrations/*.sql
+
+# Ignore JSON files in updates/applied (if not needed)
+updates/applied/*.json
+
+# End of .dockerignore
