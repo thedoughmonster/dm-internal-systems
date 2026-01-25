@@ -1,0 +1,16 @@
+{
+  "package_id": "sop_step_0_stack_and_conventions_v1",
+  "version": "v1",
+  "ops": [
+    {
+      "op": "copy",
+      "src": "payload/docs/sop/draft/sop_step_0_stack_and_conventions_v1.json",
+      "dest": "docs/sop/draft/sop_step_0_stack_and_conventions_v1.json"
+    },
+    {
+      "op": "copy",
+      "src": "payload/docs/sop/draft/SOP_STEP_0_STACK_AND_CONVENTIONS_V1.MD",
+      "dest": "docs/sop/draft/SOP_STEP_0_STACK_AND_CONVENTIONS_V1.MD"
+    }
+  ]
+}

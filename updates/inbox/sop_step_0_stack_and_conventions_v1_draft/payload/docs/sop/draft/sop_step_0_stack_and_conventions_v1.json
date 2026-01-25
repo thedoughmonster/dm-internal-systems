@@ -1,0 +1,52 @@
+{
+  "id": "SOP-STEP-0",
+  "version": "v1",
+  "title": "SOP Step 0 Stack and Conventions",
+  "scope": "sop_authoring_runtime",
+  "role": "decision_record",
+  "lifecycle_state": "draft",
+  "decisions": {
+    "runtime": {
+      "ui": "Next.js App Router",
+      "language": "TypeScript",
+      "location": "apps/web"
+    },
+    "authoring_constraints": {
+      "no_unconstrained_rich_text": true,
+      "schema_driven": true,
+      "primitive_only_structure": true
+    },
+    "validation_layers": {
+      "form_state": "react-hook-form",
+      "ui_validation": "zod",
+      "canonical_schema": "json-schema-draft-2020-12",
+      "invariant_validation": "python"
+    }
+  },
+  "identifiers": {
+    "sop_id_format": "SOP-0001",
+    "version_id_format": "v1",
+    "step_uid_format": "STEP-<ulid>",
+    "data_id_format": "DATA-<ulid>"
+  },
+  "conventions": {
+    "canonical_data_type": "data_table",
+    "legacy_invalid": [
+      "table"
+    ],
+    "toc_is_source_of_truth": true
+  },
+  "normalization_rules": [
+    "normalize legacy aliases to canonical enums",
+    "preserve step_uid across rename and reorder",
+    "materialize bound lists on export",
+    "renumber steps sequentially based on toc order",
+    "enforce reference integrity",
+    "remove ui_only_fields",
+    "export deterministic key ordering"
+  ],
+  "notes": [
+    "Draft placement is intentional. Inbox apply forbids writing into canonical/locked/deprecated paths.",
+    "Promote via an approved script or workflow when ready: draft -> validated -> canonical."
+  ]
+}
