@@ -1,0 +1,8 @@
+CURBSIDE CANDIDATE REPORT
+=========================
+
+restaurantGuid: 7b84bb81-3660-4215-a571-39cbad9611d2
+platformHostUsed: None
+
+If platformHostUsed is blank, check snapshots_yesterday/http_errors.log
+

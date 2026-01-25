@@ -1,0 +1,86 @@
+DM Internal Systems Repo Context Report
+
+Scope of this report
+- Sources read: README.md, README_structure.txt, CODEBASE_SUMMARY.MD, docs/DOCUMENT_LIFECYCLE_V1.MD, docs/document_lifecycle_v1.json, docs/canon/actors/README.md, docs/canon/actors/dm_actor_model_v1.json, docs/canon/actors/dm_actors_v1.json, updates/README.md, updates/applied/VERIFIED_BEHAVIORS.MD, scripts/updates_apply.py, scripts/validate_docs_lifecycle_v1.py, scripts/validate_dm_actor_model_v1.py, scripts/actors_append_validated.py, scripts/dm_updates_apply.sh, scripts/generate_repo_context.mjs, scripts/seed_example_sop.mjs, scripts/toast_api/README.md, db/migrations/001_init_dm_schema.sql, db/queries/sop_docs__list.sql, supabase/config.toml, supabase/functions/ENV_KEYS.txt, supabase/functions/toast_checkin/index.ts, supabase/functions/toast_checkin/enrichment.ts, supabase/functions/toast_checkin/slack.ts, supabase/functions/toast_webhook_capture/index.ts, supabase/functions/webhook-test/index.ts, apps/web/README.md, apps/web/package.json, apps/web/app/page.tsx, apps/web/app/curbside/page.tsx, apps/web/app/curbside/CheckinClient.tsx.
+- Not executed: no tests or scripts were run. This report is based on static file review only.
+
+Repo purpose and operating model
+- The repository enforces a verified only workflow for canonical documents.
+- docs/DOCUMENT_LIFECYCLE_V1.MD and docs/document_lifecycle_v1.json define lifecycle states, path governance, and enforcement rules.
+- Canonical documents are paired JSON and Markdown, with strict filename casing rules and state based folder placement.
+
+Top level layout
+- apps/web: Next.js app scaffold with a curbside check in page.
+- db: SQL migrations and queries for a dm schema.
+- docs: lifecycle authority documents and canonical actor docs.
+- scripts: update application, validation, repo context, and Toast tooling.
+- supabase: local Supabase config, edge functions, and migrations.
+- updates: inbox for update zips and applied logs.
+
+Document lifecycle and governance
+- Lifecycle states are draft, validated, canonical, locked, and deprecated.
+- Canonical documents live under docs/canon and are paired JSON and MD in the same directory.
+- docs/lifecycle_exempt is explicitly outside lifecycle enforcement.
+- scripts/validate_docs_lifecycle_v1.py validates path structure, state folder usage, filename casing, and JSON MD pairing.
+
+Canonical actors model
+- docs/canon/actors/dm_actor_model_v1.json defines actor enums and schema for actor entries.
+- docs/canon/actors/dm_actors_v1.json lists actor instances such as Slack, Toast POS, QuickBooks, and others.
+- scripts/actors_append_validated.py validates candidate actors against the model and appends into the canonical list, with duplicate name checks.
+- updates/actors_inbox/dm_actors_v1.src.json is referenced as an intake location in docs/canon/actors/README.md and in scripts/actors_append_validated.py.
+
+Updates and verified behavior logging
+- updates/README.md describes dropping zip files into updates/inbox for processing.
+- scripts/updates_apply.py applies update zips with a copy only op model, validates destinations, runs lifecycle validation, and writes applied logs in updates/applied.
+- scripts/dm_updates_apply.sh is a separate update runner with a richer manifest format including copy_files, write_file, append_verified_behavior, and run.
+- updates/applied/VERIFIED_BEHAVIORS.MD is a log template for verified behaviors.
+
+Database layer
+- db/migrations/001_init_dm_schema.sql only creates the dm schema.
+- db/queries/sop_docs__list.sql selects sop docs from dm.sop_docs.
+- scripts/seed_example_sop.mjs writes to dm.sop_docs and dm.sop_doc_versions using SUPABASE_DB_URL and expects a canon/example_sop_full.json file at repo root, which is not listed in README_structure.txt.
+
+Supabase configuration and functions
+- supabase/config.toml configures local Supabase ports and services.
+- supabase/functions/ENV_KEYS.txt lists environment keys like SUPABASE_ANON_KEY and Toast API credentials.
+- supabase/functions/toast_checkin is an edge function that serves a curbside check in page, accepts POST check in events, and posts to Slack if SLACK_WEBHOOK_URL is set.
+- supabase/functions/toast_webhook_capture fetches order details from Toast on webhook receipt and supports a debug mode gated by DEBUG_KEY.
+- supabase/functions/webhook-test echoes inbound request data.
+
+Curbside check in and CORS context
+- apps/web/app/curbside/CheckinClient.tsx posts to NEXT_PUBLIC_TOAST_CHECKIN_POST_URL from the browser.
+- supabase/functions/toast_checkin/index.ts does not set Access-Control-Allow-Origin or other CORS headers on responses.
+- The toast_checkin handler does not implement an OPTIONS preflight response.
+- As written, browser requests from a different origin will be blocked by standard CORS rules unless the function is served from the same origin as the web page or is fronted by a proxy that adds CORS headers.
+
+Toast tooling in scripts
+- scripts/toast_api provides local Python utilities to probe Toast connectivity and pull curbside snapshots.
+- scripts/toast_api/README.md documents required environment variables and a quick start for the probe and snapshot tools.
+
+Web app
+- apps/web is a Next.js 16.1.3 app with React 19.2.3.
+- apps/web/app/page.tsx is the default starter page.
+- apps/web/app/curbside/page.tsx provides a curbside check in page with SEO metadata.
+- apps/web/app/curbside/CheckinClient.tsx posts check in events to NEXT_PUBLIC_TOAST_CHECKIN_POST_URL.
+- README.md at repo root describes Docker based build and run for the Next.js app.
+
+Automation and repo context
+- scripts/generate_repo_context.mjs generates dm_repo_context.json with commit and diff metadata. It uses git commands to compute changed files and breadcrumbs.
+- CODEBASE_SUMMARY.MD includes a high level summary and a list of GitHub workflows, but those workflow files were not opened in this review.
+
+HPW lifecycle operations
+- No references to HPW or hpw were found in a repo search for those strings. No HPW lifecycle operations are visible in the files read.
+
+Processes that appear incomplete or need finishing
+- scripts/validate_dm_actor_model_v1.py reads docs/dm_actor_model_v1.json and docs/dm_actor_model_v1.schema.json, while the canonical actor model files are under docs/canon/actors.
+- scripts/validate_docs_lifecycle_v1.py expects docs/<group>/<state>/... structure for lifecycle governed files, while canonical docs are under docs/canon/actors without state folders.
+- scripts/seed_example_sop.mjs expects canon/example_sop_full.json at repo root, but no canon directory appears in README_structure.txt.
+- Two update application paths exist, scripts/updates_apply.py and scripts/dm_updates_apply.sh, with different manifest formats and behaviors. The primary path is not clear in the files read.
+- updates/applied/VERIFIED_BEHAVIORS.MD has only a template entry and no recorded behaviors.
+
+Suggested starting points for architectural requests
+- Lifecycle rules: docs/document_lifecycle_v1.json and docs/DOCUMENT_LIFECYCLE_V1.MD.
+- Canonical actor model: docs/canon/actors/dm_actor_model_v1.json and docs/canon/actors/DM_ACTOR_MODEL_V1.MD.
+- Update mechanism: scripts/updates_apply.py and updates/README.md.
+- Supabase functions: supabase/functions/toast_checkin and supabase/functions/toast_webhook_capture.
+- Web app: apps/web/app/curbside/page.tsx and apps/web/app/curbside/CheckinClient.tsx.

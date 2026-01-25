@@ -4,8 +4,21 @@ import { ArrivalEvent } from "./types.ts";
 import { getOrderEnrichment } from "./enrichment.ts";
 import { sendSlackCheckin } from "./slack.ts";
 
+const corsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+  "access-control-allow-headers": "content-type",
+};
+
 serve(async (req) => {
   const url = new URL(req.url);
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
 
   // --------------------------------------------------
   // Serve CSS
@@ -15,6 +28,7 @@ serve(async (req) => {
     return new Response(css, {
       status: 200,
       headers: {
+        ...corsHeaders,
         "content-type": "text/css; charset=utf-8",
       },
     });
@@ -31,6 +45,7 @@ serve(async (req) => {
     return new Response(htmlPage(url.searchParams), {
       status: 200,
       headers: {
+        ...corsHeaders,
         "content-type": "text/html; charset=utf-8",
       },
     });
@@ -42,7 +57,10 @@ serve(async (req) => {
   if (req.method === "POST") {
     const checkinToken = url.searchParams.get("checkin");
     if (!checkinToken) {
-      return new Response("Missing checkin token", { status: 400 });
+      return new Response("Missing checkin token", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     let body: any = {};
@@ -73,10 +91,14 @@ serve(async (req) => {
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: {
+        ...corsHeaders,
         "content-type": "application/json",
       },
     });
   }
 
-  return new Response("Method not allowed", { status: 405 });
+  return new Response("Method not allowed", {
+    status: 405,
+    headers: corsHeaders,
+  });
 });

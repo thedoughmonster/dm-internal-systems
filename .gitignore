@@ -1,1 +1,18 @@
-TOAST_API_dm_internal_systems.json
+# Global Dependencies 
+node_modules/
+
+# App-specific dependencies (use double asterisk for deep matching)
+**/node_modules/
+
+# Build and Output Artifacts (usually ephemeral)
+dist/
+build/
+out/
+.next/
+**/build/
+**/dist/
+**/.next/
+
+# Environment files
+.env
+.env.local
