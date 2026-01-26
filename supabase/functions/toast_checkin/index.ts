@@ -92,7 +92,7 @@ serve(async (req) => {
       },
     };
 
-    console.log("[Info] arrival event", event);
+    console.info(event);
 
     const enrichment = getOrderEnrichment(checkinToken);
     console.log("[Info] arrival enrichment", enrichment ?? "none");
