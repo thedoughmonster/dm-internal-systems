@@ -10,3 +10,6 @@ create table if not exists public.curbside_checkins (
   db_error text null,
   created_at timestamptz not null default now()
 );
+
+create unique index if not exists curbside_checkins_toast_order_guid_uidx
+  on public.curbside_checkins (toast_order_guid);

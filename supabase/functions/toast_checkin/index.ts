@@ -1,10 +1,13 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { htmlPage } from "./html.ts";
 import { ArrivalEvent } from "./types.ts";
 import { sendSlackCheckin } from "./slack.ts";
 
-const allowedOrigins = new Set(["http://localhost:3000"]);
+const allowedOrigins = new Set([
+  "http://localhost:3000",
+  "https://doh.monster",
+  "https://www.doh.monster",
+]);
 
 function env(name: string): string {
   const v = Deno.env.get(name);
@@ -31,37 +34,6 @@ serve(async (req) => {
     return new Response("ok", {
       status: 200,
       headers: corsHeaders,
-    });
-  }
-
-  // --------------------------------------------------
-  // Serve CSS
-  // --------------------------------------------------
-  if (req.method === "GET" && url.pathname.endsWith("/styles.css")) {
-    const css = await Deno.readTextFile("./styles.css");
-    return new Response(css, {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "content-type": "text/css; charset=utf-8",
-      },
-    });
-  }
-
-  // --------------------------------------------------
-  // Serve HTML
-  // --------------------------------------------------
-  if (
-    req.method === "GET" &&
-    (url.pathname.endsWith("/toast_checkin") ||
-      url.pathname.endsWith("/toast_checkin/"))
-  ) {
-    return new Response(htmlPage(url.searchParams), {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "content-type": "text/html; charset=utf-8",
-      },
     });
   }
 
@@ -101,6 +73,45 @@ serve(async (req) => {
     console.info(event);
 
     const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
+    const { error: checkinInsertError } = await supabase.from("curbside_checkins").insert({
+      toast_order_guid: checkinToken,
+      ip:
+        req.headers.get("cf-connecting-ip") ??
+        req.headers.get("x-forwarded-for") ??
+        null,
+      user_agent: body?.userAgent ?? req.headers.get("user-agent") ?? null,
+      occurred_at: new Date(event.occurredAt).toISOString(),
+    });
+
+    const isDuplicate =
+      checkinInsertError && (checkinInsertError as { code?: string }).code === "23505";
+
+    if (isDuplicate) {
+      return new Response(JSON.stringify({ ok: true, status: "already_checked_in", first: false }), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "content-type": "application/json",
+        },
+      });
+    }
+
+    if (checkinInsertError) {
+      console.log("curbside_checkins insert failed", {
+        checkinToken,
+        error: checkinInsertError.message,
+      });
+      return new Response(JSON.stringify({ ok: false, error: "checkin_insert_failed" }), {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          "content-type": "application/json",
+        },
+      });
+    }
+
+    console.log("curbside_checkins insert ok", { checkinToken });
+
     const { data: curbsideRow, error: dbError } = await supabase
       .from("curbside_orders")
       .select("toast_order_guid, toast_restaurant_guid, order_payload, first_seen_at, updated_at")
@@ -110,27 +121,6 @@ serve(async (req) => {
     const orderFound = !!curbsideRow && !dbError;
     const orderPayload = orderFound ? curbsideRow!.order_payload : null;
 
-    const { error: checkinInsertError } = await supabase.from("curbside_checkins").insert({
-      toast_order_guid: checkinToken,
-      order_found: orderFound,
-      ip:
-        req.headers.get("cf-connecting-ip") ??
-        req.headers.get("x-forwarded-for") ??
-        null,
-      user_agent: body?.userAgent ?? req.headers.get("user-agent") ?? null,
-      db_error: dbError?.message ?? null,
-      occurred_at: new Date(event.occurredAt).toISOString(),
-    });
-
-    if (checkinInsertError) {
-      console.log("curbside_checkins insert failed", {
-        checkinToken,
-        error: checkinInsertError.message,
-      });
-    } else {
-      console.log("curbside_checkins insert ok", { checkinToken });
-    }
-
     await sendSlackCheckin({
       event,
       checkinToken,
@@ -139,7 +129,7 @@ serve(async (req) => {
       dbErrorMessage: dbError?.message ?? null,
     });
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, status: "checked_in", first: true }), {
       status: 200,
       headers: {
         ...corsHeaders,
