@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 type ToastWebhook = {
   timestamp?: string;
@@ -218,6 +219,26 @@ serve(async (req) => {
     }
 
     const fullOrder = await toastGetOrder(orderGuid, restaurantGuid);
+
+    const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
+    const { error: upsertError } = await supabase.from("curbside_orders").upsert(
+      {
+        toast_order_guid: orderGuid,
+        toast_restaurant_guid: restaurantGuid ?? null,
+        order_payload: fullOrder,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "toast_order_guid" },
+    );
+
+    if (upsertError) {
+      console.log("curbside_orders upsert failed", {
+        orderGuid,
+        error: upsertError.message,
+      });
+    } else {
+      console.log("curbside_orders upsert ok", { orderGuid });
+    }
 
     console.log("FULL ORDER CURBSIDE PROJECTION");
     console.log(JSON.stringify(curbsideProjection(fullOrder), null, 2));
