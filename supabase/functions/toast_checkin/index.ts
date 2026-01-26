@@ -4,18 +4,26 @@ import { ArrivalEvent } from "./types.ts";
 import { getOrderEnrichment } from "./enrichment.ts";
 import { sendSlackCheckin } from "./slack.ts";
 
-const corsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET,POST,OPTIONS",
-  "access-control-allow-headers": "content-type",
+const allowedOrigins = new Set(["http://localhost:3000"]);
+
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("origin") ?? "";
+  return {
+    "access-control-allow-origin": allowedOrigins.has(origin) ? origin : "null",
+    "access-control-allow-methods": "GET,POST,OPTIONS",
+    "access-control-allow-headers":
+      "authorization, x-client-info, apikey, content-type",
+    vary: "Origin",
+  };
 };
 
 serve(async (req) => {
   const url = new URL(req.url);
+  const corsHeaders = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
+    return new Response("ok", {
+      status: 200,
       headers: corsHeaders,
     });
   }
@@ -59,7 +67,10 @@ serve(async (req) => {
     if (!checkinToken) {
       return new Response("Missing checkin token", {
         status: 400,
-        headers: corsHeaders,
+        headers: {
+          ...corsHeaders,
+          "content-type": "text/plain; charset=utf-8",
+        },
       });
     }
 
@@ -99,6 +110,9 @@ serve(async (req) => {
 
   return new Response("Method not allowed", {
     status: 405,
-    headers: corsHeaders,
+    headers: {
+      ...corsHeaders,
+      "content-type": "text/plain; charset=utf-8",
+    },
   });
 });
