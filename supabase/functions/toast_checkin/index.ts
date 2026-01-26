@@ -110,6 +110,27 @@ serve(async (req) => {
     const orderFound = !!curbsideRow && !dbError;
     const orderPayload = orderFound ? curbsideRow!.order_payload : null;
 
+    const { error: checkinInsertError } = await supabase.from("curbside_checkins").insert({
+      toast_order_guid: checkinToken,
+      order_found: orderFound,
+      ip:
+        req.headers.get("cf-connecting-ip") ??
+        req.headers.get("x-forwarded-for") ??
+        null,
+      user_agent: body?.userAgent ?? req.headers.get("user-agent") ?? null,
+      db_error: dbError?.message ?? null,
+      occurred_at: new Date(event.occurredAt).toISOString(),
+    });
+
+    if (checkinInsertError) {
+      console.log("curbside_checkins insert failed", {
+        checkinToken,
+        error: checkinInsertError.message,
+      });
+    } else {
+      console.log("curbside_checkins insert ok", { checkinToken });
+    }
+
     await sendSlackCheckin({
       event,
       checkinToken,
