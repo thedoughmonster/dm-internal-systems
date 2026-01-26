@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { htmlPage } from "./html.ts";
 import { ArrivalEvent } from "./types.ts";
-import { getOrderEnrichment } from "./enrichment.ts";
 import { sendSlackCheckin } from "./slack.ts";
 
 const allowedOrigins = new Set(["http://localhost:3000"]);
+
+function env(name: string): string {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
 const getCorsHeaders = (req: Request) => {
   const origin = req.headers.get("origin") ?? "";
@@ -94,10 +100,23 @@ serve(async (req) => {
 
     console.info(event);
 
-    const enrichment = getOrderEnrichment(checkinToken);
-    console.log("[Info] arrival enrichment", enrichment ?? "none");
+    const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
+    const { data: curbsideRow, error: dbError } = await supabase
+      .from("curbside_orders")
+      .select("toast_order_guid, toast_restaurant_guid, order_payload, first_seen_at, updated_at")
+      .eq("toast_order_guid", checkinToken)
+      .maybeSingle();
 
-    await sendSlackCheckin(event, enrichment);
+    const orderFound = !!curbsideRow && !dbError;
+    const orderPayload = orderFound ? curbsideRow!.order_payload : null;
+
+    await sendSlackCheckin({
+      event,
+      checkinToken,
+      orderFound,
+      orderPayload,
+      dbErrorMessage: dbError?.message ?? null,
+    });
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
