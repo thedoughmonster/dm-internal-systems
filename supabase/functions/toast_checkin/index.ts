@@ -17,11 +17,11 @@ function env(name: string): string {
 
 const getCorsHeaders = (req: Request) => {
   const origin = req.headers.get("origin") ?? "";
+  const isAllowed = allowedOrigins.has(origin);
   return {
-    "access-control-allow-origin": allowedOrigins.has(origin) ? origin : "null",
-    "access-control-allow-methods": "GET,POST,OPTIONS",
-    "access-control-allow-headers":
-      "authorization, x-client-info, apikey, content-type",
+    ...(isAllowed ? { "access-control-allow-origin": origin } : {}),
+    "access-control-allow-methods": "POST,OPTIONS",
+    "access-control-allow-headers": "content-type, authorization, apikey, x-client-info",
     vary: "Origin",
   };
 };
@@ -101,13 +101,19 @@ serve(async (req) => {
         checkinToken,
         error: checkinInsertError.message,
       });
-      return new Response(JSON.stringify({ ok: false, error: "checkin_insert_failed" }), {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          "content-type": "application/json",
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "checkin_insert_failed",
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "content-type": "application/json",
+          },
         },
-      });
+      );
     }
 
     console.log("curbside_checkins insert ok", { checkinToken });

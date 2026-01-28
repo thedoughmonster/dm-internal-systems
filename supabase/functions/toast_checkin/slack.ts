@@ -13,36 +13,65 @@ export async function sendSlackCheckin(args: {
     return;
   }
 
-  const { event, checkinToken, orderFound, orderPayload, dbErrorMessage } = args;
+  const { event, checkinToken, orderFound, orderPayload } = args;
   const time = new Date(event.occurredAt).toLocaleTimeString();
 
-  let text = "";
+  const lines: string[] = ["🚗 Curbside arrival", ""];
+
+  const orderNumber =
+    orderPayload?.displayNumber ??
+    orderPayload?.orderNumber ??
+    orderPayload?.guid ??
+    checkinToken;
+
   if (!orderFound) {
-    text = `Curbside arrived but order not found in DB\nCheckin: ${checkinToken}`;
-    if (dbErrorMessage) text += `\nDB error: ${dbErrorMessage}`;
+    lines.push(`🧾 Order #${checkinToken}`);
+    lines.push("Order not found in DB");
   } else {
-    const orderNumber =
-      orderPayload?.displayNumber ??
-      orderPayload?.orderNumber ??
-      orderPayload?.guid ??
-      checkinToken;
+    if (orderNumber) {
+      lines.push(`🧾 Order #${orderNumber}`);
+    }
+
     const check0 = orderPayload?.checks?.[0];
-    const customerFromTab = check0?.tabName;
+    const customerFromTab = check0?.tabName ?? "";
     const customerFirst = check0?.customer?.firstName ?? "";
     const customerLast = check0?.customer?.lastName ?? "";
     const customerName =
-      customerFromTab || `${customerFirst} ${customerLast}`.trim() || "Unknown customer";
-    const vehicleColor = orderPayload?.curbsidePickupInfo?.transportColor ?? "";
-    const vehicleDesc = orderPayload?.curbsidePickupInfo?.transportDescription ?? "";
-    const vehicle = `${vehicleColor} ${vehicleDesc}`.trim() || "Vehicle unknown";
-    const promisedOrEstimated =
-      orderPayload?.promisedDate ?? orderPayload?.estimatedFulfillmentDate ?? null;
-    const selectionsCount = orderPayload?.checks?.[0]?.selections?.length ?? 0;
+      customerFromTab || `${customerFirst} ${customerLast}`.trim();
 
-    text = `Curbside arrival\nOrder #${orderNumber}\nCustomer: ${customerName}\nVehicle: ${vehicle}\nArrived ${time}`;
-    if (promisedOrEstimated) text += `\nTime: ${promisedOrEstimated}`;
-    if (selectionsCount) text += `\nItems: ${selectionsCount}`;
+    if (customerName) {
+      lines.push(`👤 ${customerName}`);
+    }
+
+    const vehicleColor =
+      orderPayload?.curbsidePickupInfo?.transportColor ?? "";
+    const vehicleDesc =
+      orderPayload?.curbsidePickupInfo?.transportDescription ?? "";
+    const vehicle = `${vehicleColor} ${vehicleDesc}`.trim();
+
+    if (vehicle) {
+      lines.push(`🚙 ${vehicle}`);
+    }
+
+    const footerLines: string[] = [];
+
+    if (time) {
+      footerLines.push(`⌚ Arrived ${time}`);
+    }
+
+    const selectionsCount =
+      orderPayload?.checks?.[0]?.selections?.length ?? 0;
+
+    if (Number.isInteger(selectionsCount) && selectionsCount > 0) {
+      footerLines.push(`🍩 Items: ${selectionsCount}`);
+    }
+
+    if (footerLines.length > 0) {
+      lines.push("", ...footerLines);
+    }
   }
+
+  const text = lines.join("\n");
 
   const resp = await fetch(webhook, {
     method: "POST",
