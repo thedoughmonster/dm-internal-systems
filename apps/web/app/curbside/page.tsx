@@ -54,7 +54,7 @@ export default function CurbsidePage() {
         <div className={styles.card}>
           <h1 className={styles.title}>Curbside Check-In</h1>
           <p className={styles.text}>
-            Tap when you arrive and we'll bring your order right out.
+            Tap when you arrive and we&apos;ll bring your order right out.
           </p>
           <CheckinClient />
         </div>

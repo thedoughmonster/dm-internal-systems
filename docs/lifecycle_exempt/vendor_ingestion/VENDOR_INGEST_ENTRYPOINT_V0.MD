@@ -37,3 +37,20 @@ If any provided expected value does not match the proposed match, the request is
 
 ## Audit note
 Audit entries are returned in the response only in v0. No database writes occur for audit.
+
+## Post-v0 follow-ups
+
+### Invoice ingest write summary semantics
+
+The invoice ingestion handlers currently return `linesInserted` as the number of invoice lines processed during ingest, not the number of net new rows created.
+
+This behavior is idempotent at the database level, but the response field name is ambiguous and can be misinterpreted during verification or UI integration.
+
+TODO (post-v0):
+- Clarify write summary semantics by splitting into explicit fields such as:
+  - `lines_seen`
+  - `lines_new`
+  - `lines_existing`
+- Or alternatively, return a deterministic post-write count of invoice lines for the affected `vendor_invoice_id`.
+
+This is a reporting clarity issue only and does not affect correctness or idempotency.
