@@ -8,7 +8,7 @@
 
 - `apps/web/components/ui/*`
   - shadcn primitives only
-  - no DM domain logic
+  - no app specific logic
   - no imports from `apps/web/app/*`
 
 - `apps/web/components/ui/dm/*`
@@ -22,12 +22,18 @@
   - composites are allowed to call feature APIs and coordinate state
   - composites directories are only ever siblings of the file that uses them
   - do not create `components/` folders as siblings to pages
+  - do not promote a composite unless it can be named generically and reused
 
 ## Page structure rule
 
 - `page.tsx` should be minimal.
 - Prefer rendering a single composite component, for example:
   - `return <VendorIngestFlow />;`
+
+## UI primitive usage rule
+
+- Forms must use components from `apps/web/components/ui/*` for inputs, selects, textareas, and buttons.
+- Do not use plain HTML `input`, `select`, `textarea`, or `button` elements.
 
 ## UI behavior rules
 

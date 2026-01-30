@@ -46,6 +46,12 @@ function TopNav() {
             Sessions
           </Link>
           <Link
+            href="/vendors/ingest/sessions?intent=pack"
+            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
+          >
+            Pack verification
+          </Link>
+          <Link
             href="/curbside"
             className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
           >

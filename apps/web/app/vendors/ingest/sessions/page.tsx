@@ -38,9 +38,14 @@ async function fetchSessions(
   return (await response.json()) as SessionRow[];
 }
 
-export default async function VendorsIngestSessionsPage() {
+export default async function VendorsIngestSessionsPage({
+  searchParams,
+}: {
+  searchParams?: { intent?: string };
+}) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const showPackIntent = searchParams?.intent === "pack";
 
   if (!supabaseUrl || !supabaseAnonKey) {
     const missing = [
@@ -84,6 +89,9 @@ export default async function VendorsIngestSessionsPage() {
                 <th className="px-3 py-2">Vendor Key</th>
                 <th className="px-3 py-2">Document Type</th>
                 <th className="px-3 py-2">Format Version</th>
+                {showPackIntent ? (
+                  <th className="px-3 py-2">Pack Verification</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -108,6 +116,16 @@ export default async function VendorsIngestSessionsPage() {
                   <td className="px-3 py-2">
                     {session.proposed?.formatVersion ?? "n/a"}
                   </td>
+                  {showPackIntent ? (
+                    <td className="px-3 py-2">
+                      <Link
+                        className="inline-flex rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+                        href={`/vendor-ingest/session/${session.id}/pack-verification`}
+                      >
+                        Pack verification
+                      </Link>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
