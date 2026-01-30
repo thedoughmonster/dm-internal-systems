@@ -1,5 +1,14 @@
 ## Running the Project with Docker
 
+## Changelog
+- All changes require a changelog entry in the appropriate changelog directory.
+- Root changes use `changelog/` and web changes use `apps/web/changelog/`.
+
+## Docs policy
+- `docs/canon` is directly editable and represents the current narrative documentation.
+- `docs/lifecycle_exempt` is deprecated and kept only for historical context unless explicitly reactivated.
+- The only hard requirement for docs changes is a changelog entry.
+
 This project provides a Docker-based setup for the Next.js web application located in `./apps/web`.
 
 ### Requirements

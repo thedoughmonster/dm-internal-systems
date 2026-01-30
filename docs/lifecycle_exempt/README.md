@@ -1,3 +1,7 @@
+# Deprecated
+lifecycle_exempt is no longer an active governance workflow.
+`docs/canon` can be edited directly and a changelog entry is mandatory for docs changes.
+
 # lifecycle_exempt intake
 
 ## Purpose

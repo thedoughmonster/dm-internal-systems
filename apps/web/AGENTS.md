@@ -4,6 +4,15 @@
 
 # Agents rules for UI work
 
+## Docs guidance
+- Documentation governance and policy live at repo root.
+
+## Changelog requirement
+- Every agent session that modifies any file under `apps/web` must add exactly one new entry under `apps/web/changelog/`.
+- Filename convention: `apps/web/changelog/YYYYMMDDThhmmssZ_session_summary.md`.
+- Required fields: Date (UTC) and scope, summary of intent, files created or modified by this run, decisions made, validation performed, notes on constraints respected.
+- Changelog entries are required even for documentation only changes.
+
 ## Component placement paradigm
 
 - `apps/web/components/ui/*`

@@ -34,6 +34,12 @@ It does not belong here.
 - No em dashes in generated writing.
 - No claims of capability unless verified in this repo.
 
+## Changelog requirement
+- Every agent session that modifies any repo root file or any file outside `apps/web` must add exactly one new entry under `changelog/`.
+- Filename convention: `changelog/YYYYMMDDThhmmssZ_session_summary.md`.
+- Required fields: Date (UTC) and scope, summary of intent, files created or modified by this run, decisions made, validation performed, notes on constraints respected.
+- Changelog entries are required even for documentation only changes.
+
 ## SECRET HANDLING AND REDACTION (MANDATORY)
 - Never print, paste, or echo secret values into chat output.
 - When displaying file contents, diffs, logs, command output, or diagnostics that may contain secrets, redact those values.

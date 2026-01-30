@@ -252,7 +252,7 @@ export default function UiKitPage() {
               <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
                 <div className="text-xs text-muted-foreground">Inline code</div>
                 <code className="mt-1 block text-sm">
-                  const mode = "SNIFF_ONLY"; const confidence = "high";
+                  const mode = &quot;SNIFF_ONLY&quot;; const confidence = &quot;high&quot;;
                 </code>
               </div>
 

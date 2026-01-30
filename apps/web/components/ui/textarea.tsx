@@ -297,13 +297,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         style={
           {
-            ["--dm-crt-glow-base" as any]: cssOpacity(glowBase),
-            ["--dm-crt-glow-focus" as any]: cssOpacity(glowFocus),
-
-            ["--dm-crt-base" as any]: cssOpacity(oBase),
-            ["--dm-crt-low" as any]: cssOpacity(oLow),
-            ["--dm-crt-mid" as any]: cssOpacity(oMid),
-            ["--dm-crt-high" as any]: cssOpacity(oHigh),
+            "--dm-crt-glow-base": cssOpacity(glowBase),
+            "--dm-crt-glow-focus": cssOpacity(glowFocus),
+            "--dm-crt-base": cssOpacity(oBase),
+            "--dm-crt-low": cssOpacity(oLow),
+            "--dm-crt-mid": cssOpacity(oMid),
+            "--dm-crt-high": cssOpacity(oHigh),
           } as React.CSSProperties
         }
       >
