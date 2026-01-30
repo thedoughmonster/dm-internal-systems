@@ -1,17 +1,17 @@
-type SessionRecord = {
+export type SessionRecord = {
   id: string;
   created_at: string;
   vendor_id: string;
   handler_id: string;
   filename: string | null;
-  proposed: object;
-  confirm_meta: object;
-  write_summary: object;
-  audit: object;
+  proposed: Record<string, unknown> | null;
+  confirm_meta: Record<string, unknown> | null;
+  write_summary: Record<string, unknown> | null;
+  audit: Record<string, unknown> | null;
   vendor_invoice_id: string | null;
 };
 
-function renderJson(value: object) {
+function renderJson(value: Record<string, unknown> | null) {
   return JSON.stringify(value, null, 2);
 }
 
