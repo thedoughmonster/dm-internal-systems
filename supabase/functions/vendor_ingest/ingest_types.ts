@@ -53,4 +53,5 @@ export type IngestConfirmSuccessResponse = {
   proposed: ProposedMatch;
   writeResult: object;
   audit: object;
+  sessionId: string;
 };

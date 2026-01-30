@@ -3,6 +3,7 @@ import { runIdentification } from "./identify.ts";
 import { dispatchToHandler } from "./dispatch.ts";
 import { readCsvAndMeta } from "./request_parsing.ts";
 import { buildAuditEvent } from "./audit.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import {
   IngestConfirmBlockedResponse,
   IngestConfirmSuccessResponse,
@@ -261,6 +262,7 @@ serve(async (req) => {
       proposed,
       writeResult: { dryRun: true, writesSkipped: true },
       audit,
+      sessionId: "dry-run",
     };
     return jsonResponse(body, 200, corsHeaders);
   }
@@ -268,6 +270,15 @@ serve(async (req) => {
   try {
     const supabaseUrl = env("SUPABASE_URL");
     const serviceRoleKey = env("SUPABASE_SERVICE_ROLE_KEY");
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: vendor, error: vendorError } = await supabase
+      .from("vendors")
+      .select("id")
+      .eq("vendor_key", proposed.vendorKey)
+      .maybeSingle();
+    if (vendorError || !vendor?.id) {
+      throw new Error(`Vendor not found for vendorKey: ${proposed.vendorKey}`);
+    }
     const handlerResult = await dispatchToHandler(proposed.id, {
       supabaseUrl,
       serviceRoleKey,
@@ -279,12 +290,40 @@ serve(async (req) => {
       handlerId: proposed.id,
       writeSummary: handlerResult.summary,
     });
+    const confirmMeta = {
+      expectedId,
+      expectedVendorKey,
+      expectedDocumentType,
+      expectedFormatVersion,
+      dryRun,
+    };
+    const invoiceId =
+      (handlerResult as { summary?: { invoiceId?: string | null } }).summary?.invoiceId ??
+      null;
+    const { data: session, error: sessionError } = await supabase
+      .from("vendor_ingest_sessions")
+      .insert({
+        vendor_id: vendor.id,
+        handler_id: proposed.id,
+        filename,
+        proposed,
+        confirm_meta: confirmMeta,
+        write_summary: handlerResult.summary,
+        audit,
+        vendor_invoice_id: invoiceId,
+      })
+      .select("id")
+      .single();
+    if (sessionError || !session?.id) {
+      throw new Error("Failed to persist vendor ingest session");
+    }
     const body: IngestConfirmSuccessResponse = {
       ok: true,
       mode: "CONFIRM",
       proposed,
       writeResult: handlerResult,
       audit,
+      sessionId: session.id,
     };
     return jsonResponse(body, 200, corsHeaders);
   } catch (error) {

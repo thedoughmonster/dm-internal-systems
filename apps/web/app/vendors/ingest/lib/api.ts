@@ -44,7 +44,12 @@ async function postIngest<TResponse>(body: Record<string, unknown>) {
   });
 
   if (!response.ok) {
-    throw new Error(`vendor_ingest failed with ${response.status}`);
+    const errorText = await response.text();
+    const trimmed =
+      errorText.length > 2000 ? `${errorText.slice(0, 2000)}...` : errorText;
+    throw new Error(
+      `vendor_ingest failed with ${response.status}: ${trimmed}`,
+    );
   }
 
   return (await response.json()) as TResponse;
