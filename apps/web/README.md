@@ -34,3 +34,38 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## TODO: Global internal activity loader
+
+### Goal
+Provide a single, consistent “system busy” indicator across all internal tools, without replacing per action button loaders.
+
+### Intended behavior
+- Action buttons (Analyze, Confirm, Save) switch to inline loaders when clicked.
+- A single global “hacker / system activity” loader appears during background work.
+- No page blocking.
+- No modal.
+- No duplicate spinners competing for attention.
+
+### Proposed scope
+- Internal tools layout only.
+- Not applied to public or customer facing pages.
+
+### Proposed design (not implemented)
+- InternalActivityProvider (React context)
+- API shape:
+  - `beginActivity(label)`
+  - `endActivity(token)`
+- Loader visible when active count > 0
+- Vendor ingest sniff and confirm both register activity
+
+### Explicitly deferred
+- Provider implementation
+- Layout wiring
+- Picker callbacks
+- Loader placement and animation tuning
+
+### Reason for deferral
+- UI contract and page compliance come first
+- Avoid premature cross page coupling
+- Revisit once two or more internal pages need shared activity signaling

@@ -28,4 +28,3 @@ EXPOSE 3000
 
 # Development runtime
 ENV NODE_ENV=development
-CMD ["npm", "run", "dev"]

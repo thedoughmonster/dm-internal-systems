@@ -1,0 +1,20 @@
+  Handoff summary for dm-internal-systems                                                                                                                                                         
+                                                                                                                                                                                                  
+  Status                                                                                                                                                                                          
+  - Edge Function expects JSON with csv and optional filename, plus confirm boolean. It ignores mode and file_base64.                                                                             
+  - Browser payload still sends mode, file_base64, file_name, file_size_bytes, content_type, last_modified_iso.                                                                                   
+  - Types and API already aligned to Edge contract in:                                                                                                                                            
+    apps/web/app/vendors/ingest/lib/types.ts                                                                                                                                                      
+    apps/web/app/vendors/ingest/lib/api.ts                                                                                                                                                        
+                                                                                                                                                                                                  
+  Next change                                                                                                                                                                                     
+  - Update apps/web/app/vendors/ingest/components/FilePicker.tsx to send:                                                                                                                         
+    { csv: picked.content, filename: picked.filename }                                                                                                                                            
+    and remove mode and file_base64 usage.                                                                                                                                                        
+
+  Validate after change                                                                                                                                                                           
+  - npm run typecheck in apps/web                                                                                                                                                                 
+  - npm run lint in apps/web    
+
+  Token usage: total=157,064 input=130,857 (+ 2,769,536 cached) output=26,207 (reasoning 8,448)
+To continue this session, run codex resume 019c05c9-d3a6-7eb2-ab43-5cbf7d65814a

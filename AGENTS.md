@@ -33,3 +33,12 @@ It does not belong here.
 ## Constraints
 - No em dashes in generated writing.
 - No claims of capability unless verified in this repo.
+
+## SECRET HANDLING AND REDACTION (MANDATORY)
+- Never print, paste, or echo secret values into chat output.
+- When displaying file contents, diffs, logs, command output, or diagnostics that may contain secrets, redact those values.
+- Redaction format must replace values with "[REDACTED]".
+- If partial display is explicitly required, show only the first 3 and last 2 characters with "..." in between.
+- Treat as secrets by default anything matching patterns like key, token, secret, password, auth, bearer, service_role, api, or long random strings.
+- If unsure whether a value is secret, redact it.
+- Commands that would echo secrets such as env dumps, .env files, or curl with Authorization headers must not be run unless explicitly requested, and even then must redact.
