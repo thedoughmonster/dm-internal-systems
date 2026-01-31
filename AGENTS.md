@@ -48,7 +48,7 @@ It does not belong here.
 - Every Codex session adds a new session entry file under `apps/web/changelog/` if the work touches apps/web scope files.
 - Update the relevant `MASTER_CHANGELOG.MD` if present, otherwise note that the master changelog is optional until created.
 - Each session entry includes: summary, files touched, decisions, risks and followups, commands run, verification.
-- Updates inbox workflow assets live under `workflows/updates-inbox/`.
+- Updates inbox workflow assets live under `ops_tooling/workflows/updates-inbox/`.
 
 ## Doc lifecycle status
 - Lifecycle docs are no longer gating operational changes.

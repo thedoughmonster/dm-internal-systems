@@ -22,7 +22,7 @@ Optional env vars for your broader system (not used by these scripts today):
 - DEBUG_KEY
 
 Legacy fallback (still supported):
-- scripts/toast_api/TOAST_API_HEADERS.json with keys:
+- ops_tooling/scripts/toast_api/TOAST_API_HEADERS.json with keys:
   {
     "userAccessType": "TOAST_MACHINE_CLIENT",
     "clientId": "...",

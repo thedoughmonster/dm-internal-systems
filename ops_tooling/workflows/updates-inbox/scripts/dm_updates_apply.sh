@@ -12,8 +12,8 @@ if [ "$repo_root" = "/" ]; then
   exit 1
 fi
 
-inbox_dir="${repo_root}/workflows/updates-inbox/inbox"
-applied_dir="${repo_root}/workflows/updates-inbox/applied"
+inbox_dir="${repo_root}/ops_tooling/workflows/updates-inbox/inbox"
+applied_dir="${repo_root}/ops_tooling/workflows/updates-inbox/applied"
 
 fail() {
   echo "ERROR: $*" >&2

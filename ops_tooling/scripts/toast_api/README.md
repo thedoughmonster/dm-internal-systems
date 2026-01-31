@@ -9,7 +9,7 @@ Preferred: environment variables (optionally loaded from repo root .env.local)
 - TOAST_RESTAURANT_GUID
 - TOAST_BASE_URL (default: https://ws-api.toasttab.com)
 
-Legacy fallback: scripts/toast_api/TOAST_API_HEADERS.json (do not commit)
+Legacy fallback: ops_tooling/scripts/toast_api/TOAST_API_HEADERS.json (do not commit)
 {
   "userAccessType": "TOAST_MACHINE_CLIENT",
   "clientId": "...",
@@ -27,10 +27,10 @@ Quick start:
    TOAST_BASE_URL=https://ws-api.toasttab.com
 
 2) Probe connectivity:
-   python scripts/toast_api/toast_host_probe.py
+   python ops_tooling/scripts/toast_api/toast_host_probe.py
 
 3) Pull snapshots for yesterday:
-   python scripts/toast_api/toast_find_curbside_yesterday.py
+   python ops_tooling/scripts/toast_api/toast_find_curbside_yesterday.py
 
 4) Inspect shape of one snapshot:
-   python scripts/toast_api/toast_order_shape.py scripts/toast_api/snapshots_yesterday/<GUID>.json > scripts/toast_api/snapshots_yesterday/order_shape.txt
+   python ops_tooling/scripts/toast_api/toast_order_shape.py ops_tooling/scripts/toast_api/snapshots_yesterday/<GUID>.json > ops_tooling/scripts/toast_api/snapshots_yesterday/order_shape.txt

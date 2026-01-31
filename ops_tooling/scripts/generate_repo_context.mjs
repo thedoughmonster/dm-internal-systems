@@ -1,4 +1,4 @@
-// scripts/generate_repo_context.mjs
+// ops_tooling/scripts/generate_repo_context.mjs
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 
@@ -20,9 +20,9 @@ function splitLines(s) {
 }
 
 function classifyArea(path) {
-  if (path.startsWith("db/")) return "db";
+  if (path.startsWith("ops_tooling/db/")) return "db";
   if (path.startsWith("canon/")) return "canon";
-  if (path.startsWith("scripts/")) return "scripts";
+  if (path.startsWith("ops_tooling/scripts/")) return "scripts";
   if (path.startsWith(".github/")) return "github";
   return "other";
 }

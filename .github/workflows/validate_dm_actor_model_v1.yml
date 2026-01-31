@@ -15,4 +15,4 @@ jobs:
       - name: Install dependencies
         run: pip install jsonschema
       - name: Validate schema
-        run: python scripts/validate_dm_actor_model_v1.py
+        run: python ops_tooling/scripts/validate_dm_actor_model_v1.py

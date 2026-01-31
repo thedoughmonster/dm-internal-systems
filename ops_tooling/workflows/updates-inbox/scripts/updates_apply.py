@@ -171,12 +171,12 @@ def _apply_zip(zip_path: Path) -> bool:
 def main() -> int:
     inbox = _repo_root() / "workflows" / "updates-inbox" / "inbox"
     if not inbox.exists():
-        print("No packages in workflows/updates-inbox/inbox")
+        print("No packages in ops_tooling/workflows/updates-inbox/inbox")
         return 0
 
     zips = sorted(inbox.glob("*.zip"))
     if not zips:
-        print("No packages in workflows/updates-inbox/inbox")
+        print("No packages in ops_tooling/workflows/updates-inbox/inbox")
         return 0
 
     for zip_path in zips:

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       query_file:
-        description: "SQL file name under db/queries (example: my_query.sql)"
+        description: "SQL file name under ops_tooling/db/queries (example: my_query.sql)"
         required: true
         type: string
 
@@ -39,14 +39,14 @@ jobs:
             exit 1
           fi
 
-          test -f "db/queries/$QF"
+          test -f "ops_tooling/db/queries/$QF"
 
           mkdir -p out
           TS=$(date -u +"%Y%m%dT%H%M%SZ")
           OUT="out/${TS}__${QF%.sql}.csv"
 
           psql -v ON_ERROR_STOP=1 \
-            -f "db/queries/$QF" \
+            -f "ops_tooling/db/queries/$QF" \
             --csv > "$OUT"
 
           echo "Wrote $OUT"

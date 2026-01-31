@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -ne 2 ]; then
-  echo "Usage: workflows/updates-inbox/scripts/make_update_zip.sh <zip_name> <manifest_path>" >&2
+  echo "Usage: ops_tooling/workflows/updates-inbox/scripts/make_update_zip.sh <zip_name> <manifest_path>" >&2
   exit 1
 fi
 
@@ -25,7 +25,7 @@ if [ "$repo_root" = "/" ]; then
   exit 1
 fi
 
-inbox_dir="workflows/updates-inbox/inbox"
+inbox_dir="ops_tooling/workflows/updates-inbox/inbox"
 mkdir -p "$repo_root/$inbox_dir"
 
 temp_dir="$(mktemp -d)"

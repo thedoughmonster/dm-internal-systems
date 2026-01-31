@@ -155,7 +155,7 @@ def main() -> int:
     )
     parser.add_argument("--validate-only", dest="validate_only", action="store_true")
     args = parser.parse_args()
-    intake_path = "updates/actors_inbox/dm_actors_v1.src.json"
+    intake_path = "ops_tooling/updates/actors_inbox/dm_actors_v1.src.json"
 
     has_input, actor, input_issues = read_actor_input(args.actor_json)
     if not has_input:

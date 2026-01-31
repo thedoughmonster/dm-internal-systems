@@ -1,5 +1,7 @@
 # Repo Reorganization Proposal
 
+Note: Stage 1 completed on 2026-01-31. Root-level db, fixtures, scripts, updates, and workflows now live under ops_tooling/ for operational use. The remaining plan below captures the original proposal for future stages.
+
 ## Current state summary
 - Workflows are spread across top level folders by file type such as docs, scripts, updates, db, and supabase.
 - CI workflows live in .github/workflows while their scripts and inputs live elsewhere.

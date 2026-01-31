@@ -18,31 +18,31 @@
 ## 3) Directory map
 - `.github/`: GitHub Actions workflows for database operations, repo context, validation, and update application.
 - `apps/`: Next.js web app scaffolding in `apps/web` with App Router and default styles.
-- `db/`: SQL migrations and query files for the `dm` schema and SOP document tables.
+- `ops_tooling/db/`: SQL migrations and query files for the `dm` schema and SOP document tables.
 - `docs/`: Document lifecycle authority files plus lifecycle governed and exempt document roots.
-- `scripts/`: Helper scripts for validation and repo context generation.
+- `ops_tooling/scripts/`: Helper scripts for validation and repo context generation.
 - `supabase/`: Local Supabase configuration and SQL migrations for remote schema sync.
-- `updates/`: Actor intake payloads for validation.
-- `workflows/updates-inbox/`: Inbox, applied logs, scripts, and docs for update package processing.
+- `ops_tooling/updates/`: Actor intake payloads for validation.
+- `ops_tooling/workflows/updates-inbox/`: Inbox, applied logs, scripts, and docs for update package processing.
 
 ## 4) How the system runs
 - Web app development uses `npm run dev` in `apps/web` with `next dev`.
 - Database migrations are applied via GitHub Actions workflows using `psql` against Supabase.
-- Update packages are applied by `workflows/updates-inbox/scripts/updates_apply.py` or `workflows/updates-inbox/scripts/dm_updates_apply.sh` using `workflows/updates-inbox/inbox` zip files.
-- Actor intake validation and append runs via `scripts/actors_append_validated.py`.
-- Repo context updates use `scripts/generate_repo_context.mjs` in CI.
-- Example SOP seeding uses `scripts/seed_example_sop.mjs` with `SUPABASE_DB_URL`.
+- Update packages are applied by `ops_tooling/workflows/updates-inbox/scripts/updates_apply.py` or `ops_tooling/workflows/updates-inbox/scripts/dm_updates_apply.sh` using `ops_tooling/workflows/updates-inbox/inbox` zip files.
+- Actor intake validation and append runs via `ops_tooling/scripts/actors_append_validated.py`.
+- Repo context updates use `ops_tooling/scripts/generate_repo_context.mjs` in CI.
+- Example SOP seeding uses `ops_tooling/scripts/seed_example_sop.mjs` with `SUPABASE_DB_URL`.
 
 ## 5) CI and automation
 ### `.github/workflows/db_migrate.yml`
 - Triggers: `workflow_dispatch`.
-- Behavior: connects to Supabase via `psql`, ensures `dm.migration_ledger`, applies `db/migrations/*.sql`, and enforces checksum immutability.
+- Behavior: connects to Supabase via `psql`, ensures `dm.migration_ledger`, applies `ops_tooling/db/migrations/*.sql`, and enforces checksum immutability.
 - Inputs, outputs, artifacts: outputs a CSV report under `out/` and uploads as `migration-report`.
 - Secrets: `SUPABASE_DB_PASSWORD`.
 
 ### `.github/workflows/db_query.yml`
 - Triggers: `workflow_dispatch` with `query_file` input.
-- Behavior: runs a SQL file from `db/queries` and writes CSV output.
+- Behavior: runs a SQL file from `ops_tooling/db/queries` and writes CSV output.
 - Inputs, outputs, artifacts: output CSV in `out/` uploaded as `query-results`.
 - Secrets: `SUPABASE_DB_PASSWORD`.
 
@@ -59,8 +59,8 @@
 - Secrets: none listed.
 
 ### `.github/workflows/updates_apply.yml`
-- Triggers: push of `workflows/updates-inbox/inbox/*.zip` and `workflow_dispatch`.
-- Behavior: applies updates via `workflows/updates-inbox/scripts/updates_apply.py`, validates doc lifecycle, regenerates repo context, commits changes.
+- Triggers: push of `ops_tooling/workflows/updates-inbox/inbox/*.zip` and `workflow_dispatch`.
+- Behavior: applies updates via `ops_tooling/workflows/updates-inbox/scripts/updates_apply.py`, validates doc lifecycle, regenerates repo context, commits changes.
 - Inputs, outputs, artifacts: no artifacts; commits to repo.
 - Secrets: none listed.
 
@@ -81,8 +81,8 @@
 - Canonical actor model and instances live under `docs/canon/actors/` with JSON and MD pairs.
 - Actor schema enumerations and required fields are defined in `docs/canon/actors/dm_actor_model_v1.json`.
 - Actor instances are listed in `docs/canon/actors/dm_actors_v1.json` and are append only via script validation.
-- Lifecycle exempt guidance is in `docs/lifecycle_exempt/README.md` and update inbox payloads live in `workflows/updates-inbox/inbox`.
-- Update packages apply into `docs/` via `workflows/updates-inbox/scripts/updates_apply.py` with path and lifecycle validation.
+- Lifecycle exempt guidance is in `docs/lifecycle_exempt/README.md` and update inbox payloads live in `ops_tooling/workflows/updates-inbox/inbox`.
+- Update packages apply into `docs/` via `ops_tooling/workflows/updates-inbox/scripts/updates_apply.py` with path and lifecycle validation.
 
 ## 7) Integrations
 - Supabase Postgres database with migrations and workflow driven execution.
@@ -90,13 +90,13 @@
 - Vercel is referenced in the Next.js starter app and README.
 
 ## 8) Risks and unknowns
-- unknown: `scripts/validate_docs_lifecycle_v1.py` expects `docs/<group>/<state>/` layout, while canonical docs live in `docs/canon/actors/`.
-- unknown: `scripts/validate_dm_actor_model_v1.py` targets `docs/dm_actor_model_v1.json`, but canonical actor model is in `docs/canon/actors/`.
+- unknown: `ops_tooling/scripts/validate_docs_lifecycle_v1.py` expects `docs/<group>/<state>/` layout, while canonical docs live in `docs/canon/actors/`.
+- unknown: `ops_tooling/scripts/validate_dm_actor_model_v1.py` targets `docs/dm_actor_model_v1.json`, but canonical actor model is in `docs/canon/actors/`.
 - unknown: No server runtime beyond the Next.js starter app is visible, so system execution surfaces might be incomplete.
 - unknown: No RLS policies or Supabase edge functions are present in this repo.
-- unknown: The update package schema for `workflows/updates-inbox/scripts/dm_updates_apply.sh` differs from `workflows/updates-inbox/scripts/updates_apply.py` and the intended primary path is unclear.
-- unknown: The canonical SOP JSON source referenced by `scripts/seed_example_sop.mjs` uses `canon/example_sop_full.json`, which is not present.
-- unknown: Database migration strategy uses both `db/migrations` and `supabase/migrations`, and the intended authoritative set is unclear.
+- unknown: The update package schema for `ops_tooling/workflows/updates-inbox/scripts/dm_updates_apply.sh` differs from `ops_tooling/workflows/updates-inbox/scripts/updates_apply.py` and the intended primary path is unclear.
+- unknown: The canonical SOP JSON source referenced by `ops_tooling/scripts/seed_example_sop.mjs` uses `canon/example_sop_full.json`, which is not present.
+- unknown: Database migration strategy uses both `ops_tooling/db/migrations` and `supabase/migrations`, and the intended authoritative set is unclear.
 - unknown: Deployment target for `apps/web` is not specified beyond the scaffold and Vercel references.
 - unknown: The status field in `docs/canon/actors/dm_actor_model_v1.json` is `draft` while stored under a canonical directory.
 - unknown: Any API or data access layer between the web app and Supabase is not visible.
@@ -112,22 +112,22 @@
 - `docs/canon/actors/dm_actor_model_v1.schema.json`
 - `docs/canon/actors/dm_actors_v1.json`
 - `docs/lifecycle_exempt/README.md`
-- `db/migrations/001_init_dm_schema.sql`
-- `db/queries/sop_docs__list.sql`
+- `ops_tooling/db/migrations/001_init_dm_schema.sql`
+- `ops_tooling/db/queries/sop_docs__list.sql`
 - `supabase/config.toml`
 - `supabase/migrations/20260118172412_remote_schema.sql`
 - `supabase/migrations/20260118173000_init_dm_schema.sql`
-- `workflows/updates-inbox/scripts/updates_apply.py`
-- `workflows/updates-inbox/scripts/dm_updates_apply.sh`
-- `scripts/actors_append_validated.py`
-- `scripts/validate_docs_lifecycle_v1.py`
-- `scripts/validate_dm_actor_model_v1.py`
-- `scripts/generate_repo_context.mjs`
+- `ops_tooling/workflows/updates-inbox/scripts/updates_apply.py`
+- `ops_tooling/workflows/updates-inbox/scripts/dm_updates_apply.sh`
+- `ops_tooling/scripts/actors_append_validated.py`
+- `ops_tooling/scripts/validate_docs_lifecycle_v1.py`
+- `ops_tooling/scripts/validate_dm_actor_model_v1.py`
+- `ops_tooling/scripts/generate_repo_context.mjs`
 - `apps/web/package.json`
 - `apps/web/next.config.ts`
 - `apps/web/app/layout.tsx`
 - `apps/web/app/page.tsx`
-- `workflows/updates-inbox/docs/README.md`
+- `ops_tooling/workflows/updates-inbox/docs/README.md`
 - `.github/workflows/updates_apply.yml`
 - `.github/workflows/db_migrate.yml`
 - `.github/workflows/validate_dm_actors_v1.yml`

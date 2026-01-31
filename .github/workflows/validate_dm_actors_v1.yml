@@ -3,11 +3,11 @@ name: Validate DM actors v1
 on:
   pull_request:
     paths:
-      - updates/actors_inbox/dm_actors_v1.src.json
+      - ops_tooling/updates/actors_inbox/dm_actors_v1.src.json
       - docs/canon/actors/dm_actors_v1.json
       - docs/canon/actors/dm_actor_model_v1.json
       - docs/canon/actors/dm_actor_model_v1.schema.json
-      - scripts/actors_append_validated.py
+      - ops_tooling/scripts/actors_append_validated.py
   workflow_dispatch:
 
 jobs:
@@ -23,4 +23,4 @@ jobs:
       - name: Install jsonschema
         run: pip install jsonschema
       - name: Validate actor append
-        run: python scripts/actors_append_validated.py --actor-json updates/actors_inbox/dm_actors_v1.src.json --actors-doc docs/canon/actors/dm_actors_v1.json --model-doc docs/canon/actors/dm_actor_model_v1.json --validate-only
+        run: python ops_tooling/scripts/actors_append_validated.py --actor-json ops_tooling/updates/actors_inbox/dm_actors_v1.src.json --actors-doc docs/canon/actors/dm_actors_v1.json --model-doc docs/canon/actors/dm_actor_model_v1.json --validate-only

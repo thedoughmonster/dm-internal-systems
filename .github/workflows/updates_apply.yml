@@ -3,7 +3,7 @@ name: Apply Updates Inbox
 on:
   push:
     paths:
-      - "workflows/updates-inbox/inbox/*.zip"
+      - "ops_tooling/workflows/updates-inbox/inbox/*.zip"
   workflow_dispatch: {}
 
 permissions:
@@ -24,13 +24,13 @@ jobs:
           python-version: "3.11"
 
       - name: Apply updates
-        run: python workflows/updates-inbox/scripts/updates_apply.py
+        run: python ops_tooling/workflows/updates-inbox/scripts/updates_apply.py
         env:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Validate docs lifecycle
-        run: python scripts/validate_docs_lifecycle_v1.py
+        run: python ops_tooling/scripts/validate_docs_lifecycle_v1.py
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,12 +39,12 @@ jobs:
 
       - name: Regenerate repo context
         run: |
-          if [ ! -f scripts/generate_repo_context.mjs ]; then
+          if [ ! -f ops_tooling/scripts/generate_repo_context.mjs ]; then
             echo "=== ATTENTION - INSTRUCTION DEVIATION REQUIRED ==="
-            echo "scripts/generate_repo_context.mjs is missing and updates_apply workflow will fail without it."
+            echo "ops_tooling/scripts/generate_repo_context.mjs is missing and updates_apply workflow will fail without it."
             exit 1
           fi
-          node scripts/generate_repo_context.mjs
+          node ops_tooling/scripts/generate_repo_context.mjs
 
       - name: Commit and push
         run: |
