@@ -41,11 +41,14 @@ async function fetchSessions(
 export default async function VendorsIngestSessionsPage({
   searchParams,
 }: {
-  searchParams?: { intent?: string };
+  searchParams?: Promise<{ intent?: string }>;
 }) {
+  const sp = searchParams ? await searchParams : undefined;
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const showPackIntent = searchParams?.intent === "pack";
+  const showPackIntent = sp?.intent === "pack";
+
 
   if (!supabaseUrl || !supabaseAnonKey) {
     const missing = [

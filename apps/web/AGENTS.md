@@ -52,3 +52,7 @@
   - Analyze JSON
   - Confirm JSON
   - Audit JSON (if applicable)
+
+## Style guides and constraints
+- read the `ui_style_contract.json` and `ui_style_contract.md` adhere to principles therein
+- 
