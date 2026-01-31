@@ -40,6 +40,16 @@ It does not belong here.
 - Required fields: Date (UTC) and scope, summary of intent, files created or modified by this run, decisions made, validation performed, notes on constraints respected.
 - Changelog entries are required even for documentation only changes.
 
+## Documentation and changelog requirements
+- Every Codex session adds a new session entry file under `changelog/` if the work touches root scope files.
+- Every Codex session adds a new session entry file under `apps/web/changelog/` if the work touches apps/web scope files.
+- Update the relevant `MASTER_CHANGELOG.MD` if present, otherwise note that the master changelog is optional until created.
+- Each session entry includes: summary, files touched, decisions, risks and followups, commands run, verification.
+
+## Doc lifecycle status
+- Lifecycle docs are no longer gating operational changes.
+- Lifecycle docs can be updated opportunistically, but changes must always be recorded in changelog entries.
+
 ## SECRET HANDLING AND REDACTION (MANDATORY)
 - Never print, paste, or echo secret values into chat output.
 - When displaying file contents, diffs, logs, command output, or diagnostics that may contain secrets, redact those values.

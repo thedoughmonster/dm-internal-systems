@@ -1,5 +1,19 @@
 ## Running the Project with Docker
 
+## Documentation authority
+- Changelogs are the required record for all work sessions.
+- Canonical docs describe stable structures and may lag operational reality.
+- Lifecycle and lifecycle_exempt docs are reference and intake guidance, not workflow gates.
+- Migrations and updates directories remain authoritative for DB and update history.
+- Changelog entries belong in `changelog/` for root scope work and `apps/web/changelog/` for apps/web scope work.
+- Every Codex run must add a changelog entry.
+
+Start here:
+- AGENTS.md
+- CODEBASE_SUMMARY.MD
+- docs/DOCUMENTATION_AUDIT.md
+- changelog/ and apps/web/changelog/
+
 ## Changelog
 - All changes require a changelog entry in the appropriate changelog directory.
 - Root changes use `changelog/` and web changes use `apps/web/changelog/`.
