@@ -16,6 +16,14 @@ FORBIDDEN_FILES = {
     "docs/document_lifecycle_v1.json",
     "docs/DOCUMENT_LIFECYCLE_V1.MD",
 }
+SCRIPT_PATH = Path(__file__).resolve()
+
+
+def _repo_root() -> Path:
+    for parent in SCRIPT_PATH.parents:
+        if (parent / "AGENTS.md").is_file() or (parent / ".git").exists():
+            return parent
+    return SCRIPT_PATH.parents[0]
 
 
 def _utc_timestamp() -> str:
@@ -27,7 +35,7 @@ def _utc_iso() -> str:
 
 
 def _write_log(zip_name, status, manifest_sha, files_written, notes):
-    applied_dir = Path("updates") / "applied"
+    applied_dir = _repo_root() / "workflows" / "updates-inbox" / "applied"
     applied_dir.mkdir(parents=True, exist_ok=True)
     log_name = f"{_utc_timestamp()}_{Path(zip_name).stem}.json"
     log_path = applied_dir / log_name
@@ -76,7 +84,8 @@ def _validate_src(src: str) -> PurePosixPath:
 
 
 def _run_validator() -> int:
-    result = subprocess.run([sys.executable, "scripts/validate_docs_lifecycle_v1.py"])
+    validator = _repo_root() / "scripts" / "validate_docs_lifecycle_v1.py"
+    result = subprocess.run([sys.executable, str(validator)])
     return result.returncode
 
 
@@ -133,7 +142,7 @@ def _apply_zip(zip_path: Path) -> bool:
                 ):
                     raise ValueError(f"Source file escapes payload/: {src}")
 
-                dest_path = Path(*PurePosixPath(dest_posix).parts)
+                dest_path = _repo_root() / PurePosixPath(dest_posix)
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(src_path, dest_path)
                 files_written.append(dest_posix)
@@ -148,7 +157,7 @@ def _apply_zip(zip_path: Path) -> bool:
                 )
                 return False
 
-        applied_zips = Path("updates") / "applied" / "zips"
+        applied_zips = _repo_root() / "workflows" / "updates-inbox" / "applied" / "zips"
         applied_zips.mkdir(parents=True, exist_ok=True)
         os.replace(zip_path, applied_zips / zip_name)
         _write_log(zip_name, "applied", manifest_sha, files_written, "")
@@ -160,14 +169,14 @@ def _apply_zip(zip_path: Path) -> bool:
 
 
 def main() -> int:
-    inbox = Path("updates") / "inbox"
+    inbox = _repo_root() / "workflows" / "updates-inbox" / "inbox"
     if not inbox.exists():
-        print("No packages in updates/inbox")
+        print("No packages in workflows/updates-inbox/inbox")
         return 0
 
     zips = sorted(inbox.glob("*.zip"))
     if not zips:
-        print("No packages in updates/inbox")
+        print("No packages in workflows/updates-inbox/inbox")
         return 0
 
     for zip_path in zips:

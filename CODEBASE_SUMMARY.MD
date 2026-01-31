@@ -20,14 +20,15 @@
 - `apps/`: Next.js web app scaffolding in `apps/web` with App Router and default styles.
 - `db/`: SQL migrations and query files for the `dm` schema and SOP document tables.
 - `docs/`: Document lifecycle authority files plus lifecycle governed and exempt document roots.
-- `scripts/`: Helper scripts for validation, update application, and repo context generation.
+- `scripts/`: Helper scripts for validation and repo context generation.
 - `supabase/`: Local Supabase configuration and SQL migrations for remote schema sync.
-- `updates/`: Inbox and applied logs for update package processing.
+- `updates/`: Actor intake payloads for validation.
+- `workflows/updates-inbox/`: Inbox, applied logs, scripts, and docs for update package processing.
 
 ## 4) How the system runs
 - Web app development uses `npm run dev` in `apps/web` with `next dev`.
 - Database migrations are applied via GitHub Actions workflows using `psql` against Supabase.
-- Update packages are applied by `scripts/updates_apply.py` or `scripts/dm_updates_apply.sh` using `updates/inbox` zip files.
+- Update packages are applied by `workflows/updates-inbox/scripts/updates_apply.py` or `workflows/updates-inbox/scripts/dm_updates_apply.sh` using `workflows/updates-inbox/inbox` zip files.
 - Actor intake validation and append runs via `scripts/actors_append_validated.py`.
 - Repo context updates use `scripts/generate_repo_context.mjs` in CI.
 - Example SOP seeding uses `scripts/seed_example_sop.mjs` with `SUPABASE_DB_URL`.
@@ -58,8 +59,8 @@
 - Secrets: none listed.
 
 ### `.github/workflows/updates_apply.yml`
-- Triggers: push of `updates/inbox/*.zip` and `workflow_dispatch`.
-- Behavior: applies updates via `scripts/updates_apply.py`, validates doc lifecycle, regenerates repo context, commits changes.
+- Triggers: push of `workflows/updates-inbox/inbox/*.zip` and `workflow_dispatch`.
+- Behavior: applies updates via `workflows/updates-inbox/scripts/updates_apply.py`, validates doc lifecycle, regenerates repo context, commits changes.
 - Inputs, outputs, artifacts: no artifacts; commits to repo.
 - Secrets: none listed.
 
@@ -80,8 +81,8 @@
 - Canonical actor model and instances live under `docs/canon/actors/` with JSON and MD pairs.
 - Actor schema enumerations and required fields are defined in `docs/canon/actors/dm_actor_model_v1.json`.
 - Actor instances are listed in `docs/canon/actors/dm_actors_v1.json` and are append only via script validation.
-- Lifecycle exempt guidance is in `docs/lifecycle_exempt/README.md` and update inbox payloads live in `updates/`.
-- Update packages apply into `docs/` via `scripts/updates_apply.py` with path and lifecycle validation.
+- Lifecycle exempt guidance is in `docs/lifecycle_exempt/README.md` and update inbox payloads live in `workflows/updates-inbox/inbox`.
+- Update packages apply into `docs/` via `workflows/updates-inbox/scripts/updates_apply.py` with path and lifecycle validation.
 
 ## 7) Integrations
 - Supabase Postgres database with migrations and workflow driven execution.
@@ -93,7 +94,7 @@
 - unknown: `scripts/validate_dm_actor_model_v1.py` targets `docs/dm_actor_model_v1.json`, but canonical actor model is in `docs/canon/actors/`.
 - unknown: No server runtime beyond the Next.js starter app is visible, so system execution surfaces might be incomplete.
 - unknown: No RLS policies or Supabase edge functions are present in this repo.
-- unknown: The update package schema for `scripts/dm_updates_apply.sh` differs from `scripts/updates_apply.py` and the intended primary path is unclear.
+- unknown: The update package schema for `workflows/updates-inbox/scripts/dm_updates_apply.sh` differs from `workflows/updates-inbox/scripts/updates_apply.py` and the intended primary path is unclear.
 - unknown: The canonical SOP JSON source referenced by `scripts/seed_example_sop.mjs` uses `canon/example_sop_full.json`, which is not present.
 - unknown: Database migration strategy uses both `db/migrations` and `supabase/migrations`, and the intended authoritative set is unclear.
 - unknown: Deployment target for `apps/web` is not specified beyond the scaffold and Vercel references.
@@ -116,8 +117,8 @@
 - `supabase/config.toml`
 - `supabase/migrations/20260118172412_remote_schema.sql`
 - `supabase/migrations/20260118173000_init_dm_schema.sql`
-- `scripts/updates_apply.py`
-- `scripts/dm_updates_apply.sh`
+- `workflows/updates-inbox/scripts/updates_apply.py`
+- `workflows/updates-inbox/scripts/dm_updates_apply.sh`
 - `scripts/actors_append_validated.py`
 - `scripts/validate_docs_lifecycle_v1.py`
 - `scripts/validate_dm_actor_model_v1.py`
@@ -126,7 +127,7 @@
 - `apps/web/next.config.ts`
 - `apps/web/app/layout.tsx`
 - `apps/web/app/page.tsx`
-- `updates/README.md`
+- `workflows/updates-inbox/docs/README.md`
 - `.github/workflows/updates_apply.yml`
 - `.github/workflows/db_migrate.yml`
 - `.github/workflows/validate_dm_actors_v1.yml`

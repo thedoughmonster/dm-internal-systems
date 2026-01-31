@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -ne 2 ]; then
-  echo "Usage: scripts/make_update_zip.sh <zip_name> <manifest_path>" >&2
+  echo "Usage: workflows/updates-inbox/scripts/make_update_zip.sh <zip_name> <manifest_path>" >&2
   exit 1
 fi
 
@@ -14,8 +14,18 @@ if [ ! -f "$manifest_path" ]; then
   exit 1
 fi
 
-repo_root="$(pwd)"
-inbox_dir="updates/inbox"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$script_dir"
+while [ "$repo_root" != "/" ] && [ ! -f "$repo_root/AGENTS.md" ] && [ ! -d "$repo_root/.git" ]; do
+  repo_root="$(dirname "$repo_root")"
+done
+
+if [ "$repo_root" = "/" ]; then
+  echo "ERROR: repo root not found" >&2
+  exit 1
+fi
+
+inbox_dir="workflows/updates-inbox/inbox"
 mkdir -p "$repo_root/$inbox_dir"
 
 temp_dir="$(mktemp -d)"

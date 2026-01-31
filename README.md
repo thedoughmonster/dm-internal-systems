@@ -4,7 +4,7 @@
 - Changelogs are the required record for all work sessions.
 - Canonical docs describe stable structures and may lag operational reality.
 - Lifecycle and lifecycle_exempt docs are reference and intake guidance, not workflow gates.
-- Migrations and updates directories remain authoritative for DB and update history.
+- Migrations and workflows/updates-inbox remain authoritative for DB and update history.
 - Changelog entries belong in `changelog/` for root scope work and `apps/web/changelog/` for apps/web scope work.
 - Every Codex run must add a changelog entry.
 

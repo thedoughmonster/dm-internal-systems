@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-inbox_dir="updates/inbox"
-applied_dir="updates/applied"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$script_dir"
+while [ "$repo_root" != "/" ] && [ ! -f "$repo_root/AGENTS.md" ] && [ ! -d "$repo_root/.git" ]; do
+  repo_root="$(dirname "$repo_root")"
+done
+
+if [ "$repo_root" = "/" ]; then
+  echo "ERROR: repo root not found" >&2
+  exit 1
+fi
+
+inbox_dir="${repo_root}/workflows/updates-inbox/inbox"
+applied_dir="${repo_root}/workflows/updates-inbox/applied"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -87,7 +98,7 @@ append_verified_behavior() {
   local verification_json="$4"
   local notes_json="$5"
 
-  if [ ! -f docs/verified_behaviors.md ]; then
+  if [ ! -f "${repo_root}/docs/verified_behaviors.md" ]; then
     fail "docs/verified_behaviors.md not found for append_verified_behavior"
   fi
 
@@ -153,14 +164,14 @@ ${notes_block}"
         inserted = 1
       }
     }
-  ' docs/verified_behaviors.md > "$tmp_file"
+  ' "${repo_root}/docs/verified_behaviors.md" > "$tmp_file"
 
   if ! grep -q "^## Verified Behavior" "$tmp_file"; then
     rm -f "$tmp_file"
     fail "Failed to append verified behavior entry"
   fi
 
-  mv "$tmp_file" docs/verified_behaviors.md
+  mv "$tmp_file" "${repo_root}/docs/verified_behaviors.md"
 }
 
 apply_run_command() {
