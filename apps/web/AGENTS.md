@@ -4,6 +4,9 @@
 
 # Agents rules for UI work
 
+## Repo reference
+See `REPO_LINK.md` for the canonical repository URL and access guidance.
+
 ## Docs guidance
 - Documentation governance and policy live at repo root.
 

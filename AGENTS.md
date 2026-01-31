@@ -1,5 +1,8 @@
 # DM Internal Systems – Agent Charter (Verified-Only)
 
+## Repo reference
+See `REPO_LINK.md` for the canonical repository URL and access guidance.
+
 ## Purpose
 This repository is worked on using a verified-only operating model.
 We prioritize real progress over speculative architecture.
