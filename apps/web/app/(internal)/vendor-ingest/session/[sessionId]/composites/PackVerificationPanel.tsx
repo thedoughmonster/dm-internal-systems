@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PackApplyForm from "./PackApplyForm";
 import PackParseForm from "./PackParseForm";
 
@@ -118,14 +120,12 @@ export default async function PackVerificationPanel({
       !anonKey ? "NEXT_PUBLIC_SUPABASE_ANON_KEY" : null,
     ].filter(Boolean);
     return (
-      <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Pack verification
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Missing env var: {missing.join(", ")}
-        </p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pack verification</CardTitle>
+          <CardDescription>Missing env var: {missing.join(", ")}</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -139,25 +139,25 @@ export default async function PackVerificationPanel({
 
   if (!session) {
     return (
-      <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Pack verification
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">Session not found.</p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pack verification</CardTitle>
+          <CardDescription>Session not found.</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
   if (!session.vendor_invoice_id) {
     return (
-      <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Pack verification
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          No invoice attached to this ingest session.
-        </p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pack verification</CardTitle>
+          <CardDescription>
+            No invoice attached to this ingest session.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -198,14 +198,14 @@ export default async function PackVerificationPanel({
 
   if (groups.size === 0) {
     return (
-      <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Pack verification
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          No invoice lines with pack strings were found for this session.
-        </p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pack verification</CardTitle>
+          <CardDescription>
+            No invoice lines with pack strings were found for this session.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -226,10 +226,35 @@ export default async function PackVerificationPanel({
   }, {});
 
   return (
-    <section className="mt-8 space-y-6">
-      <h2 className="text-lg font-semibold text-slate-900">
-        Pack verification
-      </h2>
+    <div className="space-y-5">
+      <Card>
+        <CardHeader>
+          <CardTitle>Session summary</CardTitle>
+          <CardDescription>
+            Pack strings grouped from invoice lines for verification.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">Session</Badge>
+            <span className="font-mono text-xs text-foreground/90">{session.id}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">Vendor</Badge>
+            <span className="font-mono text-xs text-foreground/90">{session.vendor_id}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">Invoice</Badge>
+            <span className="font-mono text-xs text-foreground/90">
+              {session.vendor_invoice_id ?? "n/a"}
+            </span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Normalized pack strings: {groups.size}
+          </div>
+        </CardContent>
+      </Card>
+
       {Array.from(groups.values()).map((group) => {
         const parse = parseMap[group.normalized];
         const catalogOptions = buildCatalogOptions(group.lines);
@@ -240,23 +265,25 @@ export default async function PackVerificationPanel({
         };
 
         return (
-          <div
-            key={group.normalized}
-            className="rounded-lg border border-slate-200 bg-white p-5"
-          >
-            <div className="flex flex-col gap-2">
-              <div className="text-sm text-slate-600">Normalized</div>
-              <div className="text-sm font-semibold text-slate-900">
-                {group.normalized}
+          <Card key={group.normalized} className="border-border/60 bg-card/40">
+            <CardHeader className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant="outline">Normalized</Badge>
+                <span className="font-mono text-xs text-foreground/90">
+                  {group.normalized}
+                </span>
               </div>
-              <div className="text-xs text-slate-500">
+              <CardDescription className="text-xs text-muted-foreground">
                 Raw samples: {group.rawSamples.join(" | ")}
+              </CardDescription>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant="outline">Lines</Badge>
+                <span className="font-mono text-xs text-foreground/90">
+                  {group.lines.length}
+                </span>
               </div>
-              <div className="text-xs text-slate-500">
-                Lines: {group.lines.length}
-              </div>
-            </div>
-            <div className="mt-4">
+            </CardHeader>
+            <CardContent>
               {parse ? (
                 <PackApplyForm
                   vendorId={session.vendor_id}
@@ -274,10 +301,10 @@ export default async function PackVerificationPanel({
                   evidence={evidence}
                 />
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         );
       })}
-    </section>
+    </div>
   );
 }

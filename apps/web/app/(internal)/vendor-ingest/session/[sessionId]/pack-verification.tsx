@@ -1,13 +1,9 @@
-import PackVerificationPanel from "./composites/PackVerificationPanel";
+import PackVerificationView from "./composites/PackVerificationView";
 
 type PageProps = {
   params: { sessionId: string };
 };
 
 export default function PackVerificationPage({ params }: PageProps) {
-  return (
-    <div className="p-6">
-      <PackVerificationPanel sessionId={params.sessionId} />
-    </div>
-  );
+  return <PackVerificationView sessionId={params.sessionId} />;
 }

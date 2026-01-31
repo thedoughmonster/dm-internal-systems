@@ -104,21 +104,21 @@ export default function PackParseForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor={rawId} className="text-xs text-slate-500">
+        <Label htmlFor={rawId} className="text-xs text-muted-foreground">
           Raw pack string
         </Label>
         <Input id={rawId} value={packStringRaw} readOnly />
       </div>
       <div>
-        <Label htmlFor={normalizedId} className="text-xs text-slate-500">
+        <Label htmlFor={normalizedId} className="text-xs text-muted-foreground">
           Normalized pack string
         </Label>
         <Input id={normalizedId} value={packStringNormalized} readOnly />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-1">
-          <Label htmlFor={qtyId} className="text-xs text-slate-500">
-          Pack quantity
+          <Label htmlFor={qtyId} className="text-xs text-muted-foreground">
+            Pack quantity
           </Label>
           <Input
             id={qtyId}
@@ -130,8 +130,8 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={qtyUomId} className="text-xs text-slate-500">
-          Pack UOM
+          <Label htmlFor={qtyUomId} className="text-xs text-muted-foreground">
+            Pack UOM
           </Label>
           <Input
             id={qtyUomId}
@@ -141,8 +141,8 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={sizeId} className="text-xs text-slate-500">
-          Pack size
+          <Label htmlFor={sizeId} className="text-xs text-muted-foreground">
+            Pack size
           </Label>
           <Input
             id={sizeId}
@@ -154,8 +154,8 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={sizeUomId} className="text-xs text-slate-500">
-          Pack size UOM
+          <Label htmlFor={sizeUomId} className="text-xs text-muted-foreground">
+            Pack size UOM
           </Label>
           <Input
             id={sizeUomId}
@@ -166,7 +166,7 @@ export default function PackParseForm({
         </div>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={verifiedById} className="text-xs text-slate-500">
+        <Label htmlFor={verifiedById} className="text-xs text-muted-foreground">
           Verified by
         </Label>
         <Input
@@ -176,7 +176,7 @@ export default function PackParseForm({
         />
       </div>
       <div className="space-y-1">
-        <Label htmlFor={notesId} className="text-xs text-slate-500">
+        <Label htmlFor={notesId} className="text-xs text-muted-foreground">
           Notes
         </Label>
         <Textarea
@@ -191,11 +191,12 @@ export default function PackParseForm({
         <Button
           type="submit"
           disabled={busy}
+          className="min-w-[140px]"
         >
           {busy ? "Saving" : "Save parse"}
         </Button>
-        {status ? <span className="text-sm text-emerald-600">{status}</span> : null}
-        {error ? <span className="text-sm text-rose-600">{error}</span> : null}
+        {status ? <span className="text-sm text-emerald-400">{status}</span> : null}
+        {error ? <span className="text-sm text-destructive">{error}</span> : null}
       </div>
     </form>
   );

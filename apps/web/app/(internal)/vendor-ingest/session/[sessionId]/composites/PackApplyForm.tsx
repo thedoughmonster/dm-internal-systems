@@ -130,20 +130,20 @@ export default function PackApplyForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-2 text-sm text-slate-700">
+      <div className="grid gap-2 text-sm">
         <div>
-          <span className="text-xs text-slate-500">Normalized</span>
-          <div className="font-semibold text-slate-900">{packStringNormalized}</div>
+          <span className="text-xs text-muted-foreground">Normalized</span>
+          <div className="font-mono text-xs text-foreground/90">{packStringNormalized}</div>
         </div>
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-muted-foreground">
           Raw sample: {packStringRaw}
         </div>
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-muted-foreground">
           Parsed: {parse.pack_qty} {parse.pack_uom} | {parse.pack_size} {parse.pack_size_uom}
         </div>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={catalogId} className="text-xs text-slate-500">
+        <Label htmlFor={catalogId} className="text-xs text-muted-foreground">
           Catalog item
         </Label>
         <Select
@@ -176,7 +176,7 @@ export default function PackApplyForm({
         </Select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={applyModeId} className="text-xs text-slate-500">
+        <Label htmlFor={applyModeId} className="text-xs text-muted-foreground">
           Apply mode
         </Label>
         <Select
@@ -195,7 +195,7 @@ export default function PackApplyForm({
         </Select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={notesId} className="text-xs text-slate-500">
+        <Label htmlFor={notesId} className="text-xs text-muted-foreground">
           Notes
         </Label>
         <Textarea
@@ -210,11 +210,12 @@ export default function PackApplyForm({
         <Button
           type="submit"
           disabled={busy || !hasCatalogOptions}
+          className="min-w-[160px]"
         >
           {busy ? "Applying" : "Apply to catalog"}
         </Button>
-        {status ? <span className="text-sm text-emerald-600">{status}</span> : null}
-        {error ? <span className="text-sm text-rose-600">{error}</span> : null}
+        {status ? <span className="text-sm text-emerald-400">{status}</span> : null}
+        {error ? <span className="text-sm text-destructive">{error}</span> : null}
       </div>
     </form>
   );
