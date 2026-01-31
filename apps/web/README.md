@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Internal docs
+
+- [apps/web/AGENTS.md](./AGENTS.md)
+- [apps/web/ui_style_contract.json](./ui_style_contract.json)
+- [apps/web/ui_style_contract.md](./ui_style_contract.md)
+
 ## Getting Started
 
 First, run the development server:
