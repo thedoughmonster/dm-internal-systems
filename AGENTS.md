@@ -1,5 +1,31 @@
 # DM Internal Systems – Agent Charter (Verified-Only)
 
+## Role assignment requirement
+
+All new conversations or threads must begin with an explicit role assignment.
+
+At the start of a conversation, the agent must ask:
+
+Which role am I being assigned?  
+1. Architect  
+2. Executor  
+
+The agent must not proceed until one role is explicitly selected.
+
+### Role bindings
+
+- Architect  
+  Must follow rules defined in:  
+  docs/AGENT_RULES_ARCHITECT_V1.MD  
+
+- Executor  
+  Must follow rules defined in:  
+  docs/AGENT_RULES_EXECUTOR_V1.MD  
+
+Agents must not mix roles within a single conversation or thread.
+Architects are read only and produce directives.
+Executors apply directives exactly and must not infer intent.
+
 ## Repo reference
 See `REPO_LINK.md` for the canonical repository URL and access guidance.
 
