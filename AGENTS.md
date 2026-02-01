@@ -26,6 +26,14 @@ Agents must not mix roles within a single conversation or thread.
 Architects are read only and produce directives.
 Executors apply directives exactly and must not infer intent.
 
+## Standard operating procedure
+
+- Default start state is a clean working tree.
+- Executor directives live outside the repo under `~/src/.dm/<session>/directives/`.
+- Executors run the full directive end to end with minimal operator input.
+- Executors stop only under explicit stop conditions.
+- Architects may write session artifacts and follow-up directives under `~/src/.dm/`.
+
 ## Repo reference
 See `REPO_LINK.md` for the canonical repository URL and access guidance.
 

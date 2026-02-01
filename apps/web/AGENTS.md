@@ -10,6 +10,12 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 ## Docs guidance
 - Documentation governance and policy live at repo root.
 
+## Session workflow
+
+- Each Codex run uses one session folder under `~/src/.dm/YYYYMMDDThhmmssZ_<short_slug>/`.
+- Executable directives live under `<session_folder>/directives/`.
+- TODOs live under `<session_folder>/todo/` and are non-binding context only.
+
 ## Changelog requirement
 - Every agent session that modifies any file under `apps/web` must add exactly one new entry under `apps/web/changelog/`.
 - Filename convention: `apps/web/changelog/YYYYMMDDThhmmssZ_session_summary.md`.
@@ -58,4 +64,3 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 
 ## Style guides and constraints
 - read the `ui_style_contract.json` and `ui_style_contract.md` adhere to principles therein
-- 

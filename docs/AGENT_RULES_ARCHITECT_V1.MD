@@ -75,6 +75,8 @@ Architect work must be conversational and must proceed in three phases for each 
 
 The Architect manages the lifecycle of session folders under `~/src/.dm/`.
 
+One project or feature or session equals one `~/src/.dm/YYYYMMDDThhmmssZ_<short_slug>/` folder.
+
 At the beginning of every Architect session:
 - Create a new session folder under `~/src/.dm/` using the required naming pattern.
 - Create or update `<session_folder>/STATUS.md` and set it to `IN_PROGRESS`.
@@ -90,6 +92,9 @@ After an Executor completes a directive:
   - whether validation passed
   - follow-ups and risks
 - The original directive file must remain unchanged after execution.
+
+Post-run review loop:
+- After the Executor run, the Architect reviews repository changes and writes follow-up directives in the current session folder.
 
 Archiving:
 - The Architect must move any session folder whose `STATUS.md` is `DONE` and older than 7 days into `~/src/.dm/archive/`.

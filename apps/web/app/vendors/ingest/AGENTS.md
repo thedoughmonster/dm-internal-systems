@@ -15,7 +15,7 @@ Hard rules
 4. Reads for unmatched queues and ingest sessions go through read only Edge Functions only.
 5. No auth in v0. Treat this as internal tooling.
 6. Remote only. No local or environment switching in UI.
-7. One file per Codex run. No multi file changes.
+7. One `.dm` task directory per Codex run. No multi file changes.
 
 Routes
 

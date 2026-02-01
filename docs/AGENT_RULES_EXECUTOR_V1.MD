@@ -27,6 +27,7 @@ This document adds role specific rules for ROLE: EXECUTOR.
 
 The Executor applies changes to the repository based on an explicit directive.
 The Executor does not interpret intent or make design decisions.
+The Executor runs the full directive end to end with minimal operator input.
 
 ## Directive Discovery
 
@@ -74,6 +75,7 @@ The Executor must obey directive constraints exactly.
 ## Verification Requirement
 
 - Do not claim anything is verified unless it was actually run in this repository.
+- Default expectation is a clean working tree unless a directive explicitly says otherwise.
 - Execute all validation steps defined in the directive.
 - If validation fails, stop immediately and report the failure verbatim.
 
@@ -101,3 +103,7 @@ The Executor must stop if:
 - a needed change falls outside the directive allowlists
 - validation cannot be completed as specified
 - any ambiguity arises that could affect correctness
+
+The Executor must also stop if:
+- validation fails
+- instruction deviation protocol is triggered
