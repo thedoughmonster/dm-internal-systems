@@ -30,6 +30,17 @@ This document adds role specific rules for ROLE: ARCHITECT.
 - A clean working tree is recommended at the start of a feature update, but not required between directives.
 - Directives must not instruct the Executor to run commands that print secrets.
 
+## Data access rule
+
+- All UI reads and writes must go through Edge Functions.
+- Do not call Supabase REST endpoints directly from UI code.
+- Phase in this rule where required, but treat new work as Edge Function only.
+
+## Migration naming rules
+
+- Migration filenames must use UTC timestamps in the format `YYYYMMDDhhmmss_description.sql`.
+- Do not include `T` or `Z` in migration filenames.
+
 ## QOL exception: agent guidance edits
 
 Agent guidance files may be updated without adding repository changelog entries.

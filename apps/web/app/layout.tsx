@@ -1,6 +1,7 @@
 // apps/web/app/layout.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Settings } from "lucide-react";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Share_Tech_Mono } from "next/font/google";
@@ -44,6 +45,13 @@ function TopNav() {
               {item.title}
             </Link>
           ))}
+          <Link
+            href="/settings"
+            className="rounded-md p-2 text-foreground/80 hover:bg-accent hover:text-accent-foreground"
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Link>
         </nav>
       </div>
     </header>

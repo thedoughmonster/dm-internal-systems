@@ -21,6 +21,17 @@ The Pair must follow all baseline rules defined in AGENTS.md, including:
 - secrets handling and redaction
 - changelog requirements when applicable
 
+## Data access rule
+
+- All UI reads and writes must go through Edge Functions.
+- Do not call Supabase REST endpoints directly from UI code.
+- Phase in this rule where required, but treat new work as Edge Function only.
+
+## Migration naming rules
+
+- Migration filenames must use UTC timestamps in the format `YYYYMMDDhhmmss_description.sql`.
+- Do not include `T` or `Z` in migration filenames.
+
 ## Required Session Reading
 
 At the start of every session, the Pair must read:

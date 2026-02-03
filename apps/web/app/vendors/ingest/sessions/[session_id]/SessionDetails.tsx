@@ -96,20 +96,20 @@ export default function SessionDetails({
       <section className="space-y-4">
         <Accordion type="single" collapsible variant="sidebar" defaultValue="pack-sizes">
           <AccordionItem value="pack-sizes">
-            <AccordionTrigger>Pack sizes</AccordionTrigger>
+            <AccordionTrigger>Pack sizes at ingest time</AccordionTrigger>
             <AccordionContent>
               <Card className="border-border/70 bg-card/60">
                 <CardHeader>
-                  <CardTitle className="text-sm font-medium">Pack sizes</CardTitle>
+                  <CardTitle className="text-sm font-medium">Pack sizes at ingest time</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm text-muted-foreground">
-                  <p>Review only. Use pack mapping to update interpretations.</p>
+                  <p>Snapshot captured at ingest time. Use pack mapping to update interpretations.</p>
                   <details className="rounded-md border border-border/60 bg-background/40 p-3">
                     <summary className="cursor-pointer text-sm font-semibold text-foreground">
                       {packIntent?.applicable
                         ? packIntent.unmappedPackGroupCount > 0
-                          ? `Unmapped pack sizes (${packIntent.unmappedPackGroupCount} groups)`
-                          : "Pack sizes (no unmapped groups)"
+                          ? `Unmapped at ingest time (${packIntent.unmappedPackGroupCount} groups)`
+                          : "Pack sizes at ingest time (no unmapped groups)"
                         : "Pack sizes not available"}
                     </summary>
                     <div className="mt-3 space-y-3 text-sm text-muted-foreground">
@@ -167,7 +167,9 @@ export default function SessionDetails({
                             </Table>
                           </div>
                         ) : (
-                          <div className="text-xs text-muted-foreground">No unmapped pack sizes found.</div>
+                          <div className="text-xs text-muted-foreground">
+                            No unmapped pack sizes at ingest time.
+                          </div>
                         )
                       ) : (
                         <div className="text-xs text-muted-foreground">

@@ -24,6 +24,32 @@ The agent must not proceed until one role is explicitly selected.
 - Do not place type definitions inside registry files.
 - Define types in a dedicated types file and import them.
 
+## Data access rule
+
+- All UI reads and writes must go through Edge Functions.
+- Do not call Supabase REST endpoints directly from UI code.
+- Phase in this rule where required, but treat new work as Edge Function only.
+
+## Command allowlist rule
+
+- Executor is always allowed to run `npx supabase` commands when needed for the task.
+- Executor is always allowed to run non destructive git commands for status, diffing, branching, and cleanup.
+- When explicitly instructed by the operator, the Executor is always allowed to run standard git versioning commands such as `git add`, `git commit`, `git push`, and `git pull`.
+- Destructive git commands must include a large warning and require explicit operator approval before execution.
+
+## Executor override and troubleshooting rule
+
+- The operator may explicitly override rules during execution. Overrides must be written by the operator in the chat.
+- The Executor may troubleshoot errors and apply fixes within the directive scope without a separate directive.
+- If the Executor believes a troubleshooting fix might be out of scope, it must emit the instruction deviation alert and request authorization before proceeding.
+- These exceptions do not remove the requirement to follow an explicit directive for primary work.
+
+## Validation remediation rule
+
+- Executors must fix any lint or typecheck errors that arise during their session before closing it.
+- Validation failures are considered part of the current session unless proven to be from unrelated work.
+- Executors may extend fixes beyond the original change set to resolve validation errors, but must use the deviation alert when unsure about scope.
+
 ### Role bindings
 
 - Architect  

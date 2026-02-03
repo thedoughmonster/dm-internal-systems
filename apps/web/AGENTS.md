@@ -69,6 +69,20 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
   - Confirm JSON
   - Audit JSON (if applicable)
 
+## Data access and analytics rules
+
+- All UI reads and writes must go through Edge Functions.
+- Do not call Supabase REST endpoints directly from UI code.
+- SQL functions used by Edge Functions must be read only and compute results from existing tables.
+- Do not persist derived analytics data in new tables unless explicitly approved.
+- Do not introduce UI controls for environment switching or authentication in v0.
+- Keep derived analytics vendor scoped until a shared ingredient mapping is available.
+
+## Migration naming rules
+
+- Migration filenames must use UTC timestamps in the format `YYYYMMDDhhmmss_description.sql`.
+- Do not include `T` or `Z` in migration filenames.
+
 ## Style guides and constraints
 - read the `ui_style_contract.json` and `ui_style_contract.md` adhere to principles therein
 

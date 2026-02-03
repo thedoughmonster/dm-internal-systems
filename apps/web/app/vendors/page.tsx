@@ -5,6 +5,28 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { SessionRow } from "@/app/vendors/ingest/sessions/composites/VendorIngestSessionsView"
+import {
+  DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT,
+  getPriceChangeThresholdPercent,
+} from "@/app/settings/lib/api"
+import { buildApiUrl } from "@/lib/api-url"
+import { getServerBaseUrl } from "@/lib/server-base-url"
+
+type SessionRowWithVendor = SessionRow & {
+  vendor_id?: string | null
+}
+
+type PriceChangeRow = {
+  vendor_catalog_item_id: string
+  vendor_sku: string | null
+  description: string | null
+  latest_invoice_date: string
+  latest_price_cents: number
+  previous_invoice_date: string
+  previous_price_cents: number
+  delta_cents: number
+  delta_percent: number
+}
 
 function requiredEnv(name: string) {
   const value = process.env[name]
@@ -17,9 +39,9 @@ function requiredEnv(name: string) {
 async function fetchSessions(
   supabaseUrl: string,
   supabaseAnonKey: string
-): Promise<SessionRow[]> {
+): Promise<SessionRowWithVendor[]> {
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/vendor_ingest_sessions` +
-    "?select=id,created_at,handler_id,filename,proposed,vendor_invoice_id" +
+    "?select=id,created_at,handler_id,filename,proposed,vendor_invoice_id,vendor_id" +
     "&order=created_at.desc&limit=50"
   const response = await fetch(endpoint, {
     headers: {
@@ -34,7 +56,35 @@ async function fetchSessions(
     throw new Error(`Failed to load sessions with ${response.status}: ${text}`)
   }
 
-  return (await response.json()) as SessionRow[]
+  return (await response.json()) as SessionRowWithVendor[]
+}
+
+async function fetchPriceChanges({
+  vendorId,
+  days,
+  minPercentChange,
+  baseUrl,
+}: {
+  vendorId: string
+  days: number
+  minPercentChange: number
+  baseUrl?: string | null
+}): Promise<PriceChangeRow[]> {
+  const query = new URLSearchParams({
+    vendorId,
+    days: days.toString(),
+    minPercentChange: minPercentChange.toString(),
+  })
+  const response = await fetch(buildApiUrl(`/api/price-changes?${query.toString()}`, baseUrl ?? undefined), {
+    cache: "no-store",
+  })
+
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`Failed to load price changes with ${response.status}: ${text}`)
+  }
+
+  return (await response.json()) as PriceChangeRow[]
 }
 
 async function fetchPackQueueCount(
@@ -101,11 +151,47 @@ function buildRecentActivity(sessions: SessionRow[]) {
   })
 }
 
+function pickDefaultVendorId(sessions: SessionRowWithVendor[]) {
+  return sessions.find((session) => session.vendor_id)?.vendor_id ?? null
+}
+
+function formatCurrency(cents: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(cents / 100)
+}
+
+function formatSignedCurrency(cents: number) {
+  const sign = cents > 0 ? "+" : ""
+  return `${sign}${formatCurrency(cents)}`
+}
+
+function formatSignedPercent(value: number) {
+  const sign = value > 0 ? "+" : ""
+  return `${sign}${(value * 100).toFixed(1)}%`
+}
+
+function formatPriceChangeLabel(change: PriceChangeRow) {
+  const labelParts = [change.vendor_sku, change.description].filter(
+    (part) => typeof part === "string" && part.trim().length > 0
+  ) as string[]
+  return labelParts.length > 0
+    ? labelParts.join(" | ")
+    : change.vendor_catalog_item_id
+}
+
 export default async function VendorsPage() {
-  let sessions: SessionRow[] = []
+  const baseUrl = await getServerBaseUrl()
+  let sessions: SessionRowWithVendor[] = []
   let sessionsError: string | null = null
   let queueCount: number | null = null
   let queueError: string | null = null
+  let priceChanges: PriceChangeRow[] = []
+  let priceChangesError: string | null = null
+  let defaultVendorId: string | null = null
+  let thresholdPercent = DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT
 
   try {
     const supabaseUrl = requiredEnv("NEXT_PUBLIC_SUPABASE_URL")
@@ -114,6 +200,14 @@ export default async function VendorsPage() {
   } catch (error) {
     sessionsError =
       error instanceof Error ? error.message : "Unable to load sessions"
+  }
+
+  defaultVendorId = pickDefaultVendorId(sessions)
+
+  try {
+    thresholdPercent = await getPriceChangeThresholdPercent(baseUrl)
+  } catch {
+    thresholdPercent = DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT
   }
 
   try {
@@ -130,19 +224,37 @@ export default async function VendorsPage() {
       error instanceof Error ? error.message : "Unable to load pack queue"
   }
 
+  try {
+    if (!defaultVendorId) {
+      throw new Error("No vendor sessions available yet")
+    }
+    priceChanges = await fetchPriceChanges({
+      vendorId: defaultVendorId,
+      days: 28,
+      minPercentChange: thresholdPercent / 100,
+      baseUrl,
+    })
+  } catch (error) {
+    priceChangesError =
+      error instanceof Error ? error.message : "Unable to load price changes"
+  }
+
   const topVendors = buildTopVendors(sessions)
   const recentActivity = buildRecentActivity(sessions)
   const queueValue = queueCount ?? 0
+  const priceChangeCount = priceChanges.length
+  const priceChangeValue = priceChangesError ? "—" : `${priceChangeCount}`
+  const priceChangeItems = priceChanges.slice(0, 3).map((change) => {
+    const label = formatPriceChangeLabel(change)
+    const percent = formatSignedPercent(change.delta_percent)
+    const delta = formatSignedCurrency(change.delta_cents)
+    return `${label}: ${percent} (${delta})`
+  })
+  const priceChangesHref = defaultVendorId
+    ? `/vendors/ingest/price-changes?vendor=${defaultVendorId}&days=28`
+    : "/vendors/ingest/price-changes?days=28"
 
   const metrics = [
-    {
-      title: "Unmatched items",
-      value: queueCount === null ? "—" : `${queueValue}`,
-      detail:
-        queueError ??
-        "Unmapped pack strings awaiting review",
-      href: "/vendors/ingest/pack-mapping",
-    },
     {
       title: "Ingest sessions",
       value: `${sessions.length}`,
@@ -152,14 +264,14 @@ export default async function VendorsPage() {
     {
       title: "Pack mapping queue",
       value: queueCount === null ? "—" : `${queueValue}`,
-      detail: queueError ?? "Global queue",
+      detail: queueError ?? "Unmapped pack strings awaiting review",
       href: "/vendors/ingest/pack-mapping",
     },
     {
       title: "Price changes",
-      value: "—",
-      detail: "No data source wired yet",
-      href: "/vendors/ingest",
+      value: priceChangeValue,
+      detail: priceChangesError ?? "Changed items in last 28 days",
+      href: priceChangesHref,
     },
   ]
 
@@ -174,9 +286,12 @@ export default async function VendorsPage() {
     },
     {
       title: "Price change alerts",
-      items: [
-        "No data source wired yet",
-      ],
+      items:
+        priceChangesError
+          ? [priceChangesError]
+          : priceChangeItems.length > 0
+            ? priceChangeItems
+            : ["No price changes in last 28 days"],
     },
   ]
 
