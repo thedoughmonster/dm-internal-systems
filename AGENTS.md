@@ -20,11 +20,6 @@ After role selection and required reading, list available directive sessions und
 - The agent must read the required file at session start.
 - The agent must not proceed with any request until the required reading has been completed.
 
-## Type Definition Rule
-
-- Do not place type definitions inside registry files.
-- Define types in a dedicated types file and import them.
-
 ## Data access rule
 
 - All UI reads and writes must go through Edge Functions.
@@ -65,6 +60,10 @@ After role selection and required reading, list available directive sessions und
 - Pair  
   Must follow rules defined in:  
   docs/AGENT_RULES_PAIR_V1.MD  
+
+- Web UI work  
+  Must follow rules defined in:  
+  docs/AGENT_RULES_WEB_UI_V1.MD
 
 Agents must not mix roles within a single conversation or thread.
 Architects are read only and produce directives.

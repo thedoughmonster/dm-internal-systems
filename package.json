@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@openai/codex": "^0.89.0",
+    "eslint-plugin-import": "^2.32.0",
     "supabase": "^2.74.5"
   }
 }

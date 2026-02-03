@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
@@ -794,3 +794,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+

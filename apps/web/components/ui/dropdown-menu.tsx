@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
@@ -7,12 +7,9 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const DropdownMenu = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof DropdownMenuPrimitive.Root>>) => (
-  <DropdownMenuPrimitive.Root {...props} />
-)
+const DropdownMenu = (
+  props: RequireId<React.ComponentProps<typeof DropdownMenuPrimitive.Root>>
+) => <DropdownMenuPrimitive.Root {...props} />
 
 const DropdownMenuTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
@@ -39,12 +36,9 @@ const DropdownMenuPortal = ({
 )
 DropdownMenuPortal.displayName = DropdownMenuPrimitive.Portal.displayName
 
-const DropdownMenuSub = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof DropdownMenuPrimitive.Sub>>) => (
-  <DropdownMenuPrimitive.Sub {...props} />
-)
+const DropdownMenuSub = (
+  props: RequireId<React.ComponentProps<typeof DropdownMenuPrimitive.Sub>>
+) => <DropdownMenuPrimitive.Sub {...props} />
 
 const DropdownMenuRadioGroup = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioGroup>,

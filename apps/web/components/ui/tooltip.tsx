@@ -1,24 +1,18 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-const TooltipProvider = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof TooltipPrimitive.Provider>>) => (
-  <TooltipPrimitive.Provider {...props} />
-)
+const TooltipProvider = (
+  props: RequireId<React.ComponentProps<typeof TooltipPrimitive.Provider>>
+) => <TooltipPrimitive.Provider {...props} />
 
-const Tooltip = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof TooltipPrimitive.Root>>) => (
-  <TooltipPrimitive.Root {...props} />
-)
+const Tooltip = (
+  props: RequireId<React.ComponentProps<typeof TooltipPrimitive.Root>>
+) => <TooltipPrimitive.Root {...props} />
 
 const TooltipTrigger = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Trigger>,

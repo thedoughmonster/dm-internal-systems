@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
@@ -7,17 +7,15 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function MenubarMenu({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof MenubarPrimitive.Menu>>) {
+function MenubarMenu(
+  props: RequireId<React.ComponentProps<typeof MenubarPrimitive.Menu>>
+) {
   return <MenubarPrimitive.Menu {...props} />
 }
 
-function MenubarGroup({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof MenubarPrimitive.Group>>) {
+function MenubarGroup(
+  props: RequireId<React.ComponentProps<typeof MenubarPrimitive.Group>>
+) {
   return <MenubarPrimitive.Group {...props} />
 }
 
@@ -33,17 +31,15 @@ function MenubarPortal({
   )
 }
 
-function MenubarRadioGroup({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof MenubarPrimitive.RadioGroup>>) {
+function MenubarRadioGroup(
+  props: RequireId<React.ComponentProps<typeof MenubarPrimitive.RadioGroup>>
+) {
   return <MenubarPrimitive.RadioGroup {...props} />
 }
 
-function MenubarSub({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof MenubarPrimitive.Sub>>) {
+function MenubarSub(
+  props: RequireId<React.ComponentProps<typeof MenubarPrimitive.Sub>>
+) {
   return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
 }
 

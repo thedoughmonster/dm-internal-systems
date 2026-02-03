@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
@@ -8,12 +8,9 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Sheet = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof SheetPrimitive.Root>>) => (
-  <SheetPrimitive.Root {...props} />
-)
+const Sheet = (
+  props: RequireId<React.ComponentProps<typeof SheetPrimitive.Root>>
+) => <SheetPrimitive.Root {...props} />
 
 const SheetTrigger = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Trigger>,

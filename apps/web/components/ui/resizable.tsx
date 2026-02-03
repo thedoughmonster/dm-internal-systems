@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import { GripVertical } from "lucide-react"
@@ -20,10 +20,9 @@ const ResizablePanelGroup = ({
   />
 )
 
-const ResizablePanel = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof Panel>>) => <Panel {...props} />
+const ResizablePanel = (
+  props: RequireId<React.ComponentProps<typeof Panel>>
+) => <Panel {...props} />
 
 const ResizableHandle = ({
   withHandle,

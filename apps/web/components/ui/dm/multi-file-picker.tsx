@@ -1,5 +1,5 @@
-import type { ComponentIdProps } from "@/lib/types/component-id"
 "use client";
+import type { ComponentIdProps } from "@/lib/types/component-id"
 
 import * as React from "react";
 import { FileText, Upload, X } from "lucide-react";
@@ -235,3 +235,4 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
     </div>
   );
 }
+

@@ -3,7 +3,7 @@ import path from "node:path"
 import crypto from "node:crypto"
 import YAML from "yaml"
 
-import type { DirectiveFile, DirectiveMeta } from "@/types/directives/task"
+import type { DirectiveFile, DirectiveMeta } from "@/lib/types/directives/task"
 
 const APP_ROOT = process.cwd()
 const DIRECTIVES_ROOT = APP_ROOT.endsWith(path.join("apps", "web"))

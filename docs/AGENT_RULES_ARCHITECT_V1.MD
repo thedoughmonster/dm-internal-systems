@@ -127,6 +127,26 @@ After an Executor completes a task:
 Post-run review loop:
 - After the Executor run, the Architect reviews repository changes and writes follow-up tasks in the current session folder if needed.
 
+## Initialization protocol
+
+1. Confirm role assignment and required reading are complete.
+2. List available directive sessions under `apps/web/.local/directives/`, excluding archived sessions.
+3. When listing sessions, include `meta.status` and `meta.session_priority` from the session README.
+4. Ask the operator which session to run before drafting or updating tasks.
+
+## Directive priority conventions
+
+- Session README `meta.session_priority` should be one of: `urgent`, `high`, `medium`, `low`.
+- Task file `meta.priority` should be one of: `urgent`, `high`, `medium`, `low`.
+- Task file `meta.status` should be one of: `todo`, `in_progress`, `blocked`, `done`, `archived`.
+
+## Streamlining conventions
+
+- Session README should include a one line `meta.summary` that is meaningful when listed.
+- Session README may include `meta.focus: true` to signal the current priority session.
+- Task filenames should use `TASK_<area>-<intent>.md` for fast selection.
+- Task files should use a standard block order: Objective, Constraints, Allowed files, Steps, Validation, Expected output, Stop conditions.
+
 ## Directive location
 
 The Architect has permission to write under `apps/web/.local/directives/`.
@@ -167,18 +187,18 @@ The Architect is responsible for keeping `apps/web/.local/directives/` organized
   Allowed file types and locations
   - .md files anywhere in the repo
   - .yml and .yaml files anywhere in the repo
-  - .d.ts files only under apps/web/types/
+  - .d.ts files only under apps/web/lib/types/
   - .cont.json files only under apps/web/contracts/
   - .json files that are library or framework configuration, regardless of location
 
   Naming conventions
-  - .d.ts files must live under apps/web/types/<feature>/<component>.d.ts or apps/web/types/<feature>/page.d.ts
+  - .d.ts files must live under apps/web/lib/types/<feature>/<component>.d.ts or apps/web/lib/types/<feature>/page.d.ts
   - .cont.json files must live under apps/web/contracts/<feature>/<component>.cont.json or apps/web/contracts/
   <feature>/page.cont.json
 
   Constraints
   - This exception does not allow edits to product code or config outside the file types and locations above.
-  - All shared types must be defined in a .d.ts file under apps/web/types/.
+  - All shared types must be defined in a .d.ts file under apps/web/lib/types/.
 
 ## Forbidden Actions
 

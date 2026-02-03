@@ -1,17 +1,14 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
-const Popover = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof PopoverPrimitive.Root>>) => (
-  <PopoverPrimitive.Root {...props} />
-)
+const Popover = (
+  props: RequireId<React.ComponentProps<typeof PopoverPrimitive.Root>>
+) => <PopoverPrimitive.Root {...props} />
 
 const PopoverTrigger = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Trigger>,

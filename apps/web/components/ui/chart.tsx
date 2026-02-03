@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
@@ -105,12 +105,9 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof RechartsPrimitive.Tooltip>>) => (
-  <RechartsPrimitive.Tooltip {...props} />
-)
+const ChartTooltip = (
+  props: RequireId<React.ComponentProps<typeof RechartsPrimitive.Tooltip>>
+) => <RechartsPrimitive.Tooltip {...props} />
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
@@ -272,14 +269,11 @@ const ChartTooltipContent = React.forwardRef<
 )
 ChartTooltipContent.displayName = "ChartTooltip"
 
-const ChartLegend = ({
-  id: _id,
-  ...props
-}: RequireId<
-  React.ComponentPropsWithoutRef<typeof RechartsPrimitive.Legend>
->) => (
-  <RechartsPrimitive.Legend {...props} />
-)
+const ChartLegend = (
+  props: RequireId<
+    React.ComponentPropsWithoutRef<typeof RechartsPrimitive.Legend>
+  >
+) => <RechartsPrimitive.Legend {...props} />
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,

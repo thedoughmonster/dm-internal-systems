@@ -1,6 +1,6 @@
+"use client";
 import type { RequireId } from "@/lib/types/component-id"
 // apps/web/components/ui/textarea.tsx
-"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -493,3 +493,4 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 Textarea.displayName = "Textarea";
 
 export { Textarea };
+

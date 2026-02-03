@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
@@ -7,12 +7,9 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Select = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof SelectPrimitive.Root>>) => (
-  <SelectPrimitive.Root {...props} />
-)
+const Select = (
+  props: RequireId<React.ComponentProps<typeof SelectPrimitive.Root>>
+) => <SelectPrimitive.Root {...props} />
 
 const SelectGroup = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Group>,

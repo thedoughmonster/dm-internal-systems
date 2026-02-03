@@ -1,6 +1,6 @@
+"use client";
 import type { ComponentIdProps } from "@/lib/types/component-id"
 /* apps/web/components/ui/dm/file-picker.tsx */
-"use client";
 
 import * as React from "react";
 import { FileText, Upload, X } from "lucide-react";
@@ -213,3 +213,4 @@ export function DmFilePicker(props: DmFilePickerProps) {
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
@@ -164,3 +164,4 @@ export {
   CommandShortcut,
   CommandSeparator,
 }
+

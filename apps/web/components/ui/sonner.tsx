@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import {
   CircleCheck,
@@ -13,7 +13,7 @@ import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = RequireId<React.ComponentProps<typeof Sonner>>
 
-const Toaster = ({ id: _id, ...props }: ToasterProps) => {
+const Toaster = (props: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
   return (

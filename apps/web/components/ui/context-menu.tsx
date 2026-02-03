@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
@@ -7,12 +7,9 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const ContextMenu = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Root>>) => (
-  <ContextMenuPrimitive.Root {...props} />
-)
+const ContextMenu = (
+  props: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Root>>
+) => <ContextMenuPrimitive.Root {...props} />
 
 const ContextMenuTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Trigger>,
@@ -39,12 +36,9 @@ const ContextMenuPortal = ({
 )
 ContextMenuPortal.displayName = ContextMenuPrimitive.Portal.displayName
 
-const ContextMenuSub = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Sub>>) => (
-  <ContextMenuPrimitive.Sub {...props} />
-)
+const ContextMenuSub = (
+  props: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Sub>>
+) => <ContextMenuPrimitive.Sub {...props} />
 
 const ContextMenuRadioGroup = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.RadioGroup>,

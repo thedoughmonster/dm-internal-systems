@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -265,3 +265,4 @@ export {
   FieldContent,
   FieldTitle,
 }
+

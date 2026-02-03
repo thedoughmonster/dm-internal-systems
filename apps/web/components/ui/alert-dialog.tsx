@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
@@ -7,12 +7,9 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-const AlertDialog = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof AlertDialogPrimitive.Root>>) => (
-  <AlertDialogPrimitive.Root {...props} />
-)
+const AlertDialog = (
+  props: RequireId<React.ComponentProps<typeof AlertDialogPrimitive.Root>>
+) => <AlertDialogPrimitive.Root {...props} />
 
 const AlertDialogTrigger = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Trigger>,

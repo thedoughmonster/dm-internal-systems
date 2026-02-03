@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
@@ -7,12 +7,9 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof DialogPrimitive.Root>>) => (
-  <DialogPrimitive.Root {...props} />
-)
+const Dialog = (
+  props: RequireId<React.ComponentProps<typeof DialogPrimitive.Root>>
+) => <DialogPrimitive.Root {...props} />
 
 const DialogTrigger = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Trigger>,

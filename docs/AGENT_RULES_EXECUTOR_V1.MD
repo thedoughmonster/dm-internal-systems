@@ -117,6 +117,27 @@ After executing a directive, the Executor must:
 - Provide the raw outcomes needed for the Architect to write `<session_folder>/directives/RESULTS.md`.
 
 The Executor must not edit the directive file after execution.
+
+## Initialization protocol
+
+1. Confirm role assignment and required reading are complete.
+2. If the operator provides a task path, verify it exists and proceed.
+3. If no task path is provided, list available directive sessions under `apps/web/.local/directives/`, excluding archived sessions.
+4. When listing sessions, include `meta.status` and `meta.session_priority` from the session README.
+5. Ask the operator to select a specific session and task file path before proceeding.
+
+## Directive priority conventions
+
+- Session README `meta.session_priority` should be one of: `urgent`, `high`, `medium`, `low`.
+- Task file `meta.priority` should be one of: `urgent`, `high`, `medium`, `low`.
+- Task file `meta.status` should be one of: `todo`, `in_progress`, `blocked`, `done`, `archived`.
+
+## Streamlining conventions
+
+- Session README should include a one line `meta.summary` that is meaningful when listed.
+- Session README may include `meta.focus: true` to signal the current priority session.
+- Task filenames should use `TASK_<area>-<intent>.md` for fast selection.
+- Task files should use a standard block order: Objective, Constraints, Allowed files, Steps, Validation, Expected output, Stop conditions.
   
 ## Directive Compliance
 

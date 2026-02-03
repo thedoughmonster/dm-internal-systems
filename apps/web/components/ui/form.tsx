@@ -1,5 +1,5 @@
-import type { RequireId } from "@/lib/types/component-id"
 "use client"
+import type { RequireId } from "@/lib/types/component-id"
 
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
@@ -16,10 +16,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-const Form = ({
-  id: _id,
-  ...props
-}: RequireId<React.ComponentProps<typeof FormProvider>>) => (
+const Form = (props: RequireId<React.ComponentProps<typeof FormProvider>>) => (
   <FormProvider {...props} />
 )
 
@@ -35,10 +32,9 @@ const FormFieldContext = React.createContext<FormFieldContextValue | null>(null)
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->({
-  id: _id,
-  ...props
-}: RequireId<ControllerProps<TFieldValues, TName>>) => {
+>(
+  props: RequireId<ControllerProps<TFieldValues, TName>>
+) => {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -117,8 +113,9 @@ FormLabel.displayName = "FormLabel"
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   RequireId<React.ComponentPropsWithoutRef<typeof Slot>>
->(({ id: _id, ...props }, ref) => {
+>(({ id, ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  void id
 
   return (
     <Slot
@@ -139,8 +136,9 @@ FormControl.displayName = "FormControl"
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   RequireId<React.HTMLAttributes<HTMLParagraphElement>>
->(({ id: _id, className, ...props }, ref) => {
+>(({ id, className, ...props }, ref) => {
   const { formDescriptionId } = useFormField()
+  void id
 
   return (
     <p
@@ -156,8 +154,9 @@ FormDescription.displayName = "FormDescription"
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   RequireId<React.HTMLAttributes<HTMLParagraphElement>>
->(({ id: _id, className, children, ...props }, ref) => {
+>(({ id, className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
+  void id
   const body = error ? String(error?.message ?? "") : children
 
   if (!body) {
