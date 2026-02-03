@@ -1,7 +1,7 @@
 // apps/web/app/layout.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Code, Settings } from "lucide-react";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Share_Tech_Mono } from "next/font/google";
@@ -36,7 +36,7 @@ function TopNav() {
         </div>
 
         <nav className="flex items-center gap-1">
-          {topNavItems.map((item) => (
+          {topNavItems.filter((item) => item.id !== "directives").map((item) => (
             <Link
               key={item.id}
               href={item.href}
@@ -51,6 +51,13 @@ function TopNav() {
             aria-label="Settings"
           >
             <Settings className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/directives"
+            className="rounded-md p-2 text-foreground/80 hover:bg-accent hover:text-accent-foreground"
+            aria-label="Directives"
+          >
+            <Code className="h-4 w-4" />
           </Link>
         </nav>
       </div>

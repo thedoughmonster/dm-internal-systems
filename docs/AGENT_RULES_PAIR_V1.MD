@@ -26,6 +26,7 @@ The Pair must follow all baseline rules defined in AGENTS.md, including:
 - All UI reads and writes must go through Edge Functions.
 - Do not call Supabase REST endpoints directly from UI code.
 - Phase in this rule where required, but treat new work as Edge Function only.
+- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
 
 ## Migration naming rules
 
@@ -47,7 +48,7 @@ It may edit repository files directly within the allowed scope.
 ## Allowed Scope
 
 - apps/web only.
-- Read and write session artifacts under ~/src/.dm/ as needed for coordination.
+- Read and write session artifacts under `apps/web/.local/directives/` as needed for coordination.
 - Edit existing routes under apps/web/app, but do not add new routes or route directories.
 - Create or update components used by existing routes.
 - Update request payloads and frontend function calls in apps/web only.

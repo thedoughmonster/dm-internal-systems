@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -6,23 +7,61 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const ContextMenu = ContextMenuPrimitive.Root
+const ContextMenu = ({
+  id: _id,
+  ...props
+}: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Root>>) => (
+  <ContextMenuPrimitive.Root {...props} />
+)
 
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger
+const ContextMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Trigger>,
+  RequireId<React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Trigger>>
+>((props, ref) => <ContextMenuPrimitive.Trigger ref={ref} {...props} />)
+ContextMenuTrigger.displayName = ContextMenuPrimitive.Trigger.displayName
 
-const ContextMenuGroup = ContextMenuPrimitive.Group
+const ContextMenuGroup = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Group>,
+  RequireId<React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Group>>
+>((props, ref) => <ContextMenuPrimitive.Group ref={ref} {...props} />)
+ContextMenuGroup.displayName = ContextMenuPrimitive.Group.displayName
 
-const ContextMenuPortal = ContextMenuPrimitive.Portal
+const ContextMenuPortal = ({
+  id,
+  children,
+  ...props
+}: RequireId<
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Portal>
+>) => (
+  <ContextMenuPrimitive.Portal {...props}>
+    <div id={id}>{children}</div>
+  </ContextMenuPrimitive.Portal>
+)
+ContextMenuPortal.displayName = ContextMenuPrimitive.Portal.displayName
 
-const ContextMenuSub = ContextMenuPrimitive.Sub
+const ContextMenuSub = ({
+  id: _id,
+  ...props
+}: RequireId<React.ComponentProps<typeof ContextMenuPrimitive.Sub>>) => (
+  <ContextMenuPrimitive.Sub {...props} />
+)
 
-const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
+const ContextMenuRadioGroup = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.RadioGroup>,
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioGroup>
+  >
+>((props, ref) => <ContextMenuPrimitive.RadioGroup ref={ref} {...props} />)
+ContextMenuRadioGroup.displayName =
+  ContextMenuPrimitive.RadioGroup.displayName
 
 const ContextMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
-    inset?: boolean
-  }
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
+      inset?: boolean
+    }
+  >
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
     ref={ref}
@@ -41,7 +80,7 @@ ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
 
 const ContextMenuSubContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
+  RequireId<React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>>
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.SubContent
     ref={ref}
@@ -56,26 +95,29 @@ ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
 
 const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <ContextMenuPrimitive.Portal>
+  RequireId<React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>>
+>(({ id, className, ...props }, ref) => (
+  <ContextMenuPortal id={`${id}-portal`}>
     <ContextMenuPrimitive.Content
       ref={ref}
       className={cn(
         "z-50 max-h-[--radix-context-menu-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-context-menu-content-transform-origin]",
         className
       )}
+      id={id}
       {...props}
     />
-  </ContextMenuPrimitive.Portal>
+  </ContextMenuPortal>
 ))
 ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
 
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
-    inset?: boolean
-  }
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
+      inset?: boolean
+    }
+  >
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
     ref={ref}
@@ -91,7 +133,9 @@ ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName
 
 const ContextMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.CheckboxItem>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.CheckboxItem>
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.CheckboxItem>
+  >
 >(({ className, children, checked, ...props }, ref) => (
   <ContextMenuPrimitive.CheckboxItem
     ref={ref}
@@ -115,7 +159,9 @@ ContextMenuCheckboxItem.displayName =
 
 const ContextMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.RadioItem>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioItem>
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioItem>
+  >
 >(({ className, children, ...props }, ref) => (
   <ContextMenuPrimitive.RadioItem
     ref={ref}
@@ -137,9 +183,11 @@ ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName
 
 const ContextMenuLabel = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
-    inset?: boolean
-  }
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
+      inset?: boolean
+    }
+  >
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Label
     ref={ref}
@@ -155,7 +203,9 @@ ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName
 
 const ContextMenuSeparator = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Separator>
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Separator>
+  >
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.Separator
     ref={ref}
@@ -168,7 +218,7 @@ ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName
 const ContextMenuShortcut = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+}: RequireId<React.HTMLAttributes<HTMLSpanElement>>) => {
   return (
     <span
       className={cn(

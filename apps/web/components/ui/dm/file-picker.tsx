@@ -1,3 +1,4 @@
+import type { ComponentIdProps } from "@/lib/types/component-id"
 /* apps/web/components/ui/dm/file-picker.tsx */
 "use client";
 
@@ -19,7 +20,7 @@ export interface DmPickedFileText {
   text: string;
 }
 
-export interface DmFilePickerProps {
+export interface DmFilePickerProps extends ComponentIdProps {
   accept?: string;
   disabled?: boolean;
   maxSizeBytes?: number;
@@ -48,6 +49,7 @@ function formatBytes(bytes: number): string {
 
 export function DmFilePicker(props: DmFilePickerProps) {
   const {
+    id,
     accept = ".csv,text/csv",
     disabled = false,
     maxSizeBytes,
@@ -135,7 +137,7 @@ export function DmFilePicker(props: DmFilePickerProps) {
   );
 
   return (
-    <div className={cn("grid gap-3", className)}>
+    <div id={id} className={cn("grid gap-3", className)}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="text-sm font-medium">{label}</div>
@@ -144,6 +146,7 @@ export function DmFilePicker(props: DmFilePickerProps) {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
+            id={`${id}-pick`}
             type="button"
             variant="secondary"
             size="sm"
@@ -160,6 +163,7 @@ export function DmFilePicker(props: DmFilePickerProps) {
           </Button>
 
           <Button
+            id={`${id}-clear`}
             type="button"
             variant="outline"
             size="sm"
@@ -174,6 +178,7 @@ export function DmFilePicker(props: DmFilePickerProps) {
       </div>
 
       <input
+        id={`${id}-input`}
         ref={inputRef}
         type="file"
         accept={accept}
@@ -185,12 +190,16 @@ export function DmFilePicker(props: DmFilePickerProps) {
       {meta ? (
         <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="gap-2">
+            <Badge id={`${id}-meta-name`} variant="outline" className="gap-2">
               <FileText className="h-3.5 w-3.5" />
               {meta.filename}
             </Badge>
-            <Badge variant="outline">{formatBytes(meta.sizeBytes)}</Badge>
-            <Badge variant="outline">{meta.contentType || "unknown"}</Badge>
+            <Badge id={`${id}-meta-size`} variant="outline">
+              {formatBytes(meta.sizeBytes)}
+            </Badge>
+            <Badge id={`${id}-meta-type`} variant="outline">
+              {meta.contentType || "unknown"}
+            </Badge>
           </div>
         </div>
       ) : null}

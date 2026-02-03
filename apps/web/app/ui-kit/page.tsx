@@ -164,6 +164,7 @@ function KeyValue({
 /* --------------------------------------------------------- */
 
 export default function UiKitPage() {
+  const pageId = "ui-kit";
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("dm-internal-systems");
   const [email, setEmail] = React.useState("ops@dough.monster");
@@ -195,7 +196,7 @@ export default function UiKitPage() {
   }, [loading]);
 
   return (
-    <TooltipProvider>
+    <TooltipProvider id={`${pageId}-tooltip-provider`}>
       <main className="mx-auto w-full max-w-6xl p-6">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
@@ -210,6 +211,7 @@ export default function UiKitPage() {
             <Pill>Scope: internal tools</Pill>
 
             <Button
+              id={`${pageId}-toggle-loading`}
               variant="secondary"
               className="gap-2"
               onClick={() => setLoading((v) => !v)}
@@ -219,6 +221,7 @@ export default function UiKitPage() {
             </Button>
 
             <Button
+              id={`${pageId}-toast`}
               variant="outline"
               className="gap-2"
               onClick={() => {
@@ -236,7 +239,11 @@ export default function UiKitPage() {
           <Section
             title="Typography and tokens"
             description="Headings, body, muted, code, badges, separators."
-            right={<Badge variant="outline">baseline</Badge>}
+            right={
+              <Badge id={`${pageId}-section-typography-badge`} variant="outline">
+                baseline
+              </Badge>
+            }
           >
             <div className="space-y-4">
               <div className="space-y-1">
@@ -257,13 +264,19 @@ export default function UiKitPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Badge>default</Badge>
-                <Badge variant="secondary">secondary</Badge>
-                <Badge variant="outline">outline</Badge>
-                <Badge variant="destructive">destructive</Badge>
+                <Badge id={`${pageId}-badge-default`}>default</Badge>
+                <Badge id={`${pageId}-badge-secondary`} variant="secondary">
+                  secondary
+                </Badge>
+                <Badge id={`${pageId}-badge-outline`} variant="outline">
+                  outline
+                </Badge>
+                <Badge id={`${pageId}-badge-destructive`} variant="destructive">
+                  destructive
+                </Badge>
               </div>
 
-              <Separator />
+              <Separator id={`${pageId}-separator-typography`} />
 
               <div className="grid gap-1">
                 <KeyValue k="status" v="PROPOSED_MATCH" tone="ok" />
@@ -276,41 +289,72 @@ export default function UiKitPage() {
           <Section
             title="Buttons, overlays, menus"
             description="Buttons, dropdown, tooltip, popover, dialog, focus rings."
-            right={<Badge variant="outline">interactions</Badge>}
+            right={
+              <Badge id={`${pageId}-section-interactions-badge`} variant="outline">
+                interactions
+              </Badge>
+            }
           >
             <div className="flex flex-wrap items-center gap-2">
-              <Button>Primary</Button>
-              <Button variant="secondary">Secondary</Button>
-              <Button variant="outline">Outline</Button>
-              <Button variant="destructive">Destructive</Button>
-              <Button variant="ghost">Ghost</Button>
+              <Button id={`${pageId}-button-primary`}>Primary</Button>
+              <Button id={`${pageId}-button-secondary`} variant="secondary">
+                Secondary
+              </Button>
+              <Button id={`${pageId}-button-outline`} variant="outline">
+                Outline
+              </Button>
+              <Button id={`${pageId}-button-destructive`} variant="destructive">
+                Destructive
+              </Button>
+              <Button id={`${pageId}-button-ghost`} variant="ghost">
+                Ghost
+              </Button>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline">Tooltip</Button>
+              <Tooltip id={`${pageId}-tooltip-example`}>
+                <TooltipTrigger id={`${pageId}-tooltip-example-trigger`} asChild>
+                  <Button id={`${pageId}-button-tooltip`} variant="outline">
+                    Tooltip
+                  </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent id={`${pageId}-tooltip-example-content`}>
                   <p>Tooltips should feel crisp, not heavy.</p>
                 </TooltipContent>
               </Tooltip>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+              <Popover id={`${pageId}-popover-example`}>
+                <PopoverTrigger id={`${pageId}-popover-example-trigger`} asChild>
+                  <Button
+                    id={`${pageId}-button-popover`}
+                    variant="outline"
+                    className="gap-2"
+                  >
                     Popover <ChevronDown className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="w-[320px]">
+                <PopoverContent
+                  id={`${pageId}-popover-example-content`}
+                  align="start"
+                  className="w-[320px]"
+                >
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Quick actions</div>
                     <div className="text-sm text-muted-foreground">
                       Overlay surfaces must match the terminal theme.
                     </div>
                     <div className="flex gap-2 pt-2">
-                      <Button size="sm" className="gap-2">
+                      <Button
+                        id={`${pageId}-button-popover-confirm`}
+                        size="sm"
+                        className="gap-2"
+                      >
                         <Check className="h-4 w-4" /> Confirm
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-2">
+                      <Button
+                        id={`${pageId}-button-popover-cancel`}
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                      >
                         <X className="h-4 w-4" /> Cancel
                       </Button>
                     </div>
@@ -318,38 +362,55 @@ export default function UiKitPage() {
                 </PopoverContent>
               </Popover>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+              <DropdownMenu id={`${pageId}-dropdown-example`}>
+                <DropdownMenuTrigger id={`${pageId}-dropdown-example-trigger`} asChild>
+                  <Button
+                    id={`${pageId}-button-dropdown`}
+                    variant="outline"
+                    className="gap-2"
+                  >
                     Dropdown <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Inspect session</DropdownMenuItem>
-                  <DropdownMenuItem>Re-run analyze</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-300">Delete draft</DropdownMenuItem>
+                <DropdownMenuContent id={`${pageId}-dropdown-example-content`} align="start">
+                  <DropdownMenuLabel id={`${pageId}-dropdown-example-label`}>
+                    Actions
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator id={`${pageId}-dropdown-example-separator`} />
+                  <DropdownMenuItem id={`${pageId}-dropdown-example-item-inspect`}>
+                    Inspect session
+                  </DropdownMenuItem>
+                  <DropdownMenuItem id={`${pageId}-dropdown-example-item-rerun`}>
+                    Re-run analyze
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    id={`${pageId}-dropdown-example-item-delete`}
+                    className="text-red-300"
+                  >
+                    Delete draft
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline">Open dialog</Button>
+              <Dialog id={`${pageId}-dialog-example`}>
+                <DialogTrigger id={`${pageId}-dialog-example-trigger`} asChild>
+                  <Button id={`${pageId}-button-dialog-open`} variant="outline">
+                    Open dialog
+                  </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[560px]">
-                  <DialogHeader>
-                    <DialogTitle>Dialog title</DialogTitle>
-                    <DialogDescription>
+                <DialogContent id={`${pageId}-dialog-example-content`} className="sm:max-w-[560px]">
+                  <DialogHeader id={`${pageId}-dialog-example-header`}>
+                    <DialogTitle id={`${pageId}-dialog-example-title`}>Dialog title</DialogTitle>
+                    <DialogDescription id={`${pageId}-dialog-example-description`}>
                       Testing modal surfaces, blur, borders, and focus states.
                     </DialogDescription>
                   </DialogHeader>
 
                   <div className="space-y-3 text-sm">
-                    <Alert>
+                    <Alert id={`${pageId}-dialog-example-alert`}>
                       <Terminal className="h-4 w-4" />
-                      <AlertTitle>Heads up</AlertTitle>
-                      <AlertDescription>
+                      <AlertTitle id={`${pageId}-dialog-example-alert-title`}>Heads up</AlertTitle>
+                      <AlertDescription id={`${pageId}-dialog-example-alert-description`}>
                         Confirm step writes to Supabase and creates an ingest session.
                       </AlertDescription>
                     </Alert>
@@ -366,9 +427,11 @@ export default function UiKitPage() {
                     </div>
                   </div>
 
-                  <DialogFooter>
-                    <Button variant="outline">Cancel</Button>
-                    <Button className="gap-2">
+                  <DialogFooter id={`${pageId}-dialog-example-footer`}>
+                    <Button id={`${pageId}-dialog-example-cancel`} variant="outline">
+                      Cancel
+                    </Button>
+                    <Button id={`${pageId}-dialog-example-confirm`} className="gap-2">
                       <Check className="h-4 w-4" /> Confirm
                     </Button>
                   </DialogFooter>
@@ -380,11 +443,17 @@ export default function UiKitPage() {
           <Section
             title="Forms and inputs"
             description="Input, textarea, select, switch, checkbox, slider, disabled states."
-            right={<Badge variant="outline">forms</Badge>}
+            right={
+              <Badge id={`${pageId}-section-forms-badge`} variant="outline">
+                forms
+              </Badge>
+            }
           >
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Project</Label>
+                <Label id={`${pageId}-label-project`} htmlFor="name">
+                  Project
+                </Label>
                 <Input
                   id="name"
                   value={text}
@@ -394,7 +463,9 @@ export default function UiKitPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label id={`${pageId}-label-email`} htmlFor="email">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   value={email}
@@ -404,7 +475,9 @@ export default function UiKitPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label id={`${pageId}-label-notes`} htmlFor="notes">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
                   value={notes}
@@ -413,35 +486,54 @@ export default function UiKitPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Vendor</Label>
-                <Select defaultValue="sysco">
-                  <SelectTrigger className="w-[240px]">
-                    <SelectValue placeholder="Select vendor" />
+                <Label id={`${pageId}-label-vendor`}>Vendor</Label>
+                <Select id={`${pageId}-select-vendor`} defaultValue="sysco">
+                  <SelectTrigger id={`${pageId}-select-vendor-trigger`} className="w-[240px]">
+                    <SelectValue id={`${pageId}-select-vendor-value`} placeholder="Select vendor" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sysco">Sysco</SelectItem>
-                    <SelectItem value="webstaurant">Webstaurant</SelectItem>
-                    <SelectItem value="amazon">Amazon</SelectItem>
+                  <SelectContent id={`${pageId}-select-vendor-content`}>
+                    <SelectItem id={`${pageId}-select-vendor-item-sysco`} value="sysco">
+                      Sysco
+                    </SelectItem>
+                    <SelectItem id={`${pageId}-select-vendor-item-webstaurant`} value="webstaurant">
+                      Webstaurant
+                    </SelectItem>
+                    <SelectItem id={`${pageId}-select-vendor-item-amazon`} value="amazon">
+                      Amazon
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-3">
-                  <Switch checked={enabled} onCheckedChange={setEnabled} />
+                  <Switch
+                    id={`${pageId}-switch-enabled`}
+                    checked={enabled}
+                    onCheckedChange={setEnabled}
+                  />
                   <span className="text-sm">Enabled</span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Checkbox checked={checked} onCheckedChange={(v) => setChecked(Boolean(v))} />
+                  <Checkbox
+                    id={`${pageId}-checkbox-example`}
+                    checked={checked}
+                    onCheckedChange={(v) => setChecked(Boolean(v))}
+                  />
                   <span className="text-sm">Checkbox</span>
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <Label>Match threshold</Label>
+                <Label id={`${pageId}-label-threshold`}>Match threshold</Label>
                 <div className="flex items-center gap-4">
-                  <Slider value={slider} onValueChange={setSlider} className="max-w-[320px]" />
+                  <Slider
+                    id={`${pageId}-slider-threshold`}
+                    value={slider}
+                    onValueChange={setSlider}
+                    className="max-w-[320px]"
+                  />
                   <span className="w-12 text-right font-mono text-xs text-muted-foreground">
                     {slider[0]}
                   </span>
@@ -449,14 +541,14 @@ export default function UiKitPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button className="gap-2">
+                <Button id={`${pageId}-button-save`} className="gap-2">
                   <Check className="h-4 w-4" /> Save
                 </Button>
-                <Button variant="secondary" className="gap-2">
+                <Button id={`${pageId}-button-queue`} variant="secondary" className="gap-2">
                   <Loader2 className={cn("h-4 w-4", loading ? "animate-spin" : "")} />
                   Queue
                 </Button>
-                <Button variant="outline" disabled>
+                <Button id={`${pageId}-button-disabled`} variant="outline" disabled>
                   Disabled
                 </Button>
               </div>
@@ -466,7 +558,11 @@ export default function UiKitPage() {
           <Section
             title="States, alerts, progress, skeleton"
             description="Loading, success, warning, error, progress, skeletons."
-            right={<Badge variant="outline">states</Badge>}
+            right={
+              <Badge id={`${pageId}-section-states-badge`} variant="outline">
+                states
+              </Badge>
+            }
           >
             <div className="space-y-4">
               <div className="grid gap-2">
@@ -474,9 +570,10 @@ export default function UiKitPage() {
                   <div className="text-sm text-muted-foreground">Ingest progress</div>
                   <div className="font-mono text-xs text-muted-foreground">{progress}%</div>
                 </div>
-                <Progress value={progress} />
+                <Progress id={`${pageId}-progress`} value={progress} />
                 <div className="flex gap-2">
                   <Button
+                    id={`${pageId}-progress-run`}
                     size="sm"
                     onClick={() => setLoading(true)}
                     disabled={loading}
@@ -485,31 +582,42 @@ export default function UiKitPage() {
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                     Run
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => setProgress(32)}>
+                  <Button
+                    id={`${pageId}-progress-reset`}
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setProgress(32)}
+                  >
                     Reset
                   </Button>
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <Alert>
+                <Alert id={`${pageId}-alert-ok`}>
                   <Check className="h-4 w-4" />
-                  <AlertTitle>OK</AlertTitle>
-                  <AlertDescription>Detected sysco_invoice_v1 with high confidence.</AlertDescription>
+                  <AlertTitle id={`${pageId}-alert-ok-title`}>OK</AlertTitle>
+                  <AlertDescription id={`${pageId}-alert-ok-description`}>
+                    Detected sysco_invoice_v1 with high confidence.
+                  </AlertDescription>
                 </Alert>
 
-                <Alert className="border-amber-500/40 bg-amber-500/10">
+                <Alert id={`${pageId}-alert-warning`} className="border-amber-500/40 bg-amber-500/10">
                   <Zap className="h-4 w-4" />
-                  <AlertTitle className="text-amber-100">Warning</AlertTitle>
-                  <AlertDescription className="text-amber-100/80">
+                  <AlertTitle id={`${pageId}-alert-warning-title`} className="text-amber-100">
+                    Warning
+                  </AlertTitle>
+                  <AlertDescription id={`${pageId}-alert-warning-description`} className="text-amber-100/80">
                     Some lines were skipped due to malformed fields.
                   </AlertDescription>
                 </Alert>
 
-                <Alert className="border-red-500/40 bg-red-500/10">
+                <Alert id={`${pageId}-alert-error`} className="border-red-500/40 bg-red-500/10">
                   <X className="h-4 w-4" />
-                  <AlertTitle className="text-red-100">Error</AlertTitle>
-                  <AlertDescription className="text-red-100/80">
+                  <AlertTitle id={`${pageId}-alert-error-title`} className="text-red-100">
+                    Error
+                  </AlertTitle>
+                  <AlertDescription id={`${pageId}-alert-error-description`} className="text-red-100/80">
                     Could not parse CSV. Missing header record.
                   </AlertDescription>
                 </Alert>
@@ -518,9 +626,9 @@ export default function UiKitPage() {
               <div className="grid gap-2">
                 <div className="text-sm text-muted-foreground">Skeleton</div>
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-24 w-full" />
+                  <Skeleton id={`${pageId}-skeleton-line-1`} className="h-4 w-2/3" />
+                  <Skeleton id={`${pageId}-skeleton-line-2`} className="h-4 w-1/2" />
+                  <Skeleton id={`${pageId}-skeleton-block`} className="h-24 w-full" />
                 </div>
               </div>
             </div>
@@ -529,70 +637,94 @@ export default function UiKitPage() {
           <Section
             title="Tabs, accordion, table"
             description="Navigation density and data readability."
-            right={<Badge variant="outline">data</Badge>}
+            right={
+              <Badge id={`${pageId}-section-data-badge`} variant="outline">
+                data
+              </Badge>
+            }
           >
             <div className="space-y-4">
-              <Tabs value={tab} onValueChange={setTab}>
-                <TabsList>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="details">Details</TabsTrigger>
+              <Tabs id={`${pageId}-tabs`} value={tab} onValueChange={setTab}>
+                <TabsList id={`${pageId}-tabs-list`}>
+                  <TabsTrigger id={`${pageId}-tabs-trigger-overview`} value="overview">
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger id={`${pageId}-tabs-trigger-details`} value="details">
+                    Details
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="mt-3 space-y-3">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Ingest summary</CardTitle>
-                      <CardDescription>
+                <TabsContent id={`${pageId}-tabs-content-overview`} value="overview" className="mt-3 space-y-3">
+                  <Card id={`${pageId}-summary-card`}>
+                    <CardHeader id={`${pageId}-summary-card-header`}>
+                      <CardTitle id={`${pageId}-summary-card-title`} className="text-base">
+                        Ingest summary
+                      </CardTitle>
+                      <CardDescription id={`${pageId}-summary-card-description`}>
                         Small cards must still feel like a terminal panel.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="grid gap-2">
+                    <CardContent id={`${pageId}-summary-card-content`} className="grid gap-2">
                       <KeyValue k="mode" v="SNIFF_ONLY" tone="info" />
                       <KeyValue k="results" v="2 identifiers" tone="ok" />
                       <KeyValue k="session" v="draft" tone="warn" />
                     </CardContent>
                   </Card>
 
-                  <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                      <AccordionTrigger>What is confirm?</AccordionTrigger>
-                      <AccordionContent className="text-sm text-muted-foreground">
+                  <Accordion id={`${pageId}-accordion`} type="single" collapsible>
+                    <AccordionItem id={`${pageId}-accordion-item-1`} value="item-1">
+                      <AccordionTrigger id={`${pageId}-accordion-trigger-1`}>
+                        What is confirm?
+                      </AccordionTrigger>
+                      <AccordionContent id={`${pageId}-accordion-content-1`} className="text-sm text-muted-foreground">
                         Confirm locks the expectedId and writes a session. Sniff-only is read-only.
                       </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-2">
-                      <AccordionTrigger>Where do unmatched SKUs go?</AccordionTrigger>
-                      <AccordionContent className="text-sm text-muted-foreground">
+                    <AccordionItem id={`${pageId}-accordion-item-2`} value="item-2">
+                      <AccordionTrigger id={`${pageId}-accordion-trigger-2`}>
+                        Where do unmatched SKUs go?
+                      </AccordionTrigger>
+                      <AccordionContent id={`${pageId}-accordion-content-2`} className="text-sm text-muted-foreground">
                         Into the unmatched queue for manual review, then mapped to catalog items.
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
                 </TabsContent>
 
-                <TabsContent value="details" className="mt-3 space-y-3">
+                <TabsContent id={`${pageId}-tabs-content-details`} value="details" className="mt-3 space-y-3">
                   <div className="overflow-hidden rounded-2xl border border-border/60">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead>SKU</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead className="text-right">Case $</TableHead>
-                          <TableHead className="text-right">Each $</TableHead>
-                          <TableHead>Status</TableHead>
+                    <Table id={`${pageId}-table`}>
+                      <TableHeader id={`${pageId}-table-header`}>
+                        <TableRow id={`${pageId}-table-header-row`} className="bg-muted/30">
+                          <TableHead id={`${pageId}-table-head-sku`}>SKU</TableHead>
+                          <TableHead id={`${pageId}-table-head-description`}>Description</TableHead>
+                          <TableHead id={`${pageId}-table-head-case`} className="text-right">Case $</TableHead>
+                          <TableHead id={`${pageId}-table-head-each`} className="text-right">Each $</TableHead>
+                          <TableHead id={`${pageId}-table-head-status`}>Status</TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody className="bg-background/20">
+                      <TableBody id={`${pageId}-table-body`} className="bg-background/20">
                         {[
                           { sku: "12345", desc: "Flour, high gluten", case: "34.90", each: "1.74", status: "Matched" },
                           { sku: "77881", desc: "Butter, unsalted", case: "92.10", each: "4.61", status: "Needs review" },
                           { sku: "99001", desc: "Yeast, instant", case: "18.50", each: "0.93", status: "Unmatched" },
                         ].map((r) => (
-                          <TableRow key={r.sku} className="border-t border-border/40">
-                            <TableCell className="font-mono text-xs">{r.sku}</TableCell>
-                            <TableCell>{r.desc}</TableCell>
-                            <TableCell className="text-right tabular-nums">{r.case}</TableCell>
-                            <TableCell className="text-right tabular-nums">{r.each}</TableCell>
-                            <TableCell>
+                          <TableRow
+                            id={`${pageId}-table-row-${r.sku}`}
+                            key={r.sku}
+                            className="border-t border-border/40"
+                          >
+                            <TableCell id={`${pageId}-table-cell-${r.sku}-sku`} className="font-mono text-xs">
+                              {r.sku}
+                            </TableCell>
+                            <TableCell id={`${pageId}-table-cell-${r.sku}-desc`}>{r.desc}</TableCell>
+                            <TableCell id={`${pageId}-table-cell-${r.sku}-case`} className="text-right tabular-nums">
+                              {r.case}
+                            </TableCell>
+                            <TableCell id={`${pageId}-table-cell-${r.sku}-each`} className="text-right tabular-nums">
+                              {r.each}
+                            </TableCell>
+                            <TableCell id={`${pageId}-table-cell-${r.sku}-status`}>
                               <span
                                 className={cn(
                                   "inline-flex rounded-full border px-2 py-0.5 text-xs",
@@ -612,6 +744,7 @@ export default function UiKitPage() {
 
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
+                      id={`${pageId}-button-run-action`}
                       disabled={loading}
                       onClick={async () => {
                         setLoading(true);
@@ -628,9 +761,12 @@ export default function UiKitPage() {
                       )}
                     </Button>
 
-                    <Button variant="secondary">Secondary action</Button>
+                    <Button id={`${pageId}-button-secondary-action`} variant="secondary">
+                      Secondary action
+                    </Button>
 
                     <Button
+                      id={`${pageId}-button-copy-id`}
                       variant="outline"
                       className="gap-2"
                       onClick={async () => {
@@ -653,7 +789,11 @@ export default function UiKitPage() {
           <Section
             title="Terminal widgets"
             description="Panels, cursor, log feel, density."
-            right={<Badge variant="outline">fun</Badge>}
+            right={
+              <Badge id={`${pageId}-section-fun-badge`} variant="outline">
+                fun
+              </Badge>
+            }
           >
             <div className="grid gap-3">
               <TerminalPanel
@@ -677,7 +817,7 @@ export default function UiKitPage() {
                   "[warn] awaiting confirm step",
                 ]}
               />
-<Loader label="hacker loader" />
+              <Loader id={`${pageId}-loader`} label="hacker loader" />
             </div>
           </Section>
         </div>

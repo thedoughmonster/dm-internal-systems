@@ -67,6 +67,7 @@ export default function GlobalSidebarShell({
   children,
   toggleable = true,
 }: GlobalSidebarShellProps) {
+  const shellId = "global-sidebar";
   const pathname = usePathname()
   const [slot, setSlot] = React.useState<GlobalSidebarSlotValue>({})
   const activeTopNav = React.useMemo(() => {
@@ -83,7 +84,7 @@ export default function GlobalSidebarShell({
       <slot.header />
     ) : (
       <div className="flex h-12 items-center gap-2 border-b border-border/60 px-4">
-        <SidebarTrigger />
+        <SidebarTrigger id={`${shellId}-trigger`} />
         <div className="text-sm font-medium">
           {activeTopNav?.title ?? "Sidebar"}
         </div>
@@ -101,6 +102,7 @@ export default function GlobalSidebarShell({
     activeTopNav?.sidebarSections && activeTopNav.sidebarSections.length > 0 ? (
       <div className="dm-machine-mono text-xs leading-tight">
         <Accordion
+          id={`${shellId}-accordion`}
           type="single"
           collapsible
           variant="sidebar"
@@ -109,13 +111,32 @@ export default function GlobalSidebarShell({
           className="px-2"
         >
           {activeTopNav.sidebarSections.map((section) => (
-            <AccordionItem key={section.id} value={section.id}>
-              <AccordionTrigger>{section.title}</AccordionTrigger>
-              <AccordionContent>
-                <SidebarMenu className="pb-2">
+            <AccordionItem
+              id={`${shellId}-section-${section.id}-item`}
+              key={section.id}
+              value={section.id}
+            >
+              <AccordionTrigger id={`${shellId}-section-${section.id}-trigger`}>
+                {section.title}
+              </AccordionTrigger>
+              <AccordionContent id={`${shellId}-section-${section.id}-content`}>
+                <SidebarMenu
+                  id={`${shellId}-section-${section.id}-menu`}
+                  className="pb-2"
+                >
                   {section.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
+                    <SidebarMenuItem
+                      id={`${shellId}-section-${section.id}-menu-item-${item.href.replace(
+                        /[^a-z0-9]+/gi,
+                        "-",
+                      )}`}
+                      key={item.href}
+                    >
                       <SidebarMenuButton
+                        id={`${shellId}-section-${section.id}-menu-button-${item.href.replace(
+                          /[^a-z0-9]+/gi,
+                          "-",
+                        )}`}
                         asChild
                         size="sm"
                         isActive={
@@ -138,18 +159,22 @@ export default function GlobalSidebarShell({
 
   return (
     <GlobalSidebarContext.Provider value={{ slot, setSlot }}>
-      <SidebarProvider className="min-h-[calc(100svh-3.5rem)]">
+      <SidebarProvider
+        id={`${shellId}-provider`}
+        className="min-h-[calc(100svh-3.5rem)]"
+      >
         <Sidebar
+          id={`${shellId}-sidebar`}
           className="top-14 h-[calc(100svh-3.5rem)]"
           collapsible={toggleable ? "offcanvas" : "none"}
           variant="inset"
         >
-          <SidebarContent>
+          <SidebarContent id={`${shellId}-content`}>
             {slot.content ? <slot.content /> : defaultSidebarContent}
           </SidebarContent>
-          <SidebarRail />
+          <SidebarRail id={`${shellId}-rail`} />
         </Sidebar>
-        <SidebarInset>
+        <SidebarInset id={`${shellId}-inset`}>
           {headerNode}
           <div className="flex min-h-0 flex-1 flex-col">{children}</div>
         </SidebarInset>

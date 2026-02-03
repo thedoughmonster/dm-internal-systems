@@ -12,6 +12,7 @@ Which role am I being assigned?
 3. Pair  
 
 The agent must not proceed until one role is explicitly selected.
+After role selection and required reading, list available directive sessions under `apps/web/.local/directives/` and exclude archived sessions by default.
 
 ## Required Reading
 
@@ -29,6 +30,7 @@ The agent must not proceed until one role is explicitly selected.
 - All UI reads and writes must go through Edge Functions.
 - Do not call Supabase REST endpoints directly from UI code.
 - Phase in this rule where required, but treat new work as Edge Function only.
+- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
 
 ## Command allowlist rule
 
@@ -75,10 +77,19 @@ Executors apply directives exactly and must not infer intent.
 - Feature updates that require multiple steps must use a feature branch.
 - Operator prefers no commits until the end of a feature update.
 - Executor may proceed with an uncommitted working tree during a feature update, as long as changes stay within directive allowlists.
-- Executor directives live outside the repo under `~/src/.dm/<session>/directives/`.
+- Directive tasks live under `apps/web/.local/directives/<guid>/`.
+- Each directive session folder contains a parent `README.md` and task files named `TASK_<slug>.md`.
 - Executors run the full directive end to end with minimal operator input.
 - Executors stop only under explicit stop conditions.
-- Architects may write session artifacts and follow-up directives under `~/src/.dm/`.
+- Architects may write directive artifacts under `apps/web/.local/directives/`.
+
+## Directive storage model
+
+- `apps/web/.local/directives/` is local only and git ignored.
+- Each session folder is a GUID.
+- `README.md` in the session folder is the parent intake file.
+- Each task is a file named `TASK_<slug>.md` in the session folder.
+- All directive files use YAML front matter with a `meta` block and a short summary field.
 
 ## Repo reference
 See `REPO_LINK.md` for the canonical repository URL and access guidance.
@@ -156,4 +167,4 @@ This exception is strictly limited to these files:
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
 - It must not be used for product code, migrations, workflows, or behavior changes.
-- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+- Every use of this exception must be recorded in the current session `README.md` under a Notes section with date and a short summary of what changed.

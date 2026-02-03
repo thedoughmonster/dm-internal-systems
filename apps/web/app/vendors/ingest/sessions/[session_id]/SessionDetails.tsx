@@ -42,6 +42,7 @@ export default function SessionDetails({
 }: {
   session: SessionRecord;
 }) {
+  const detailId = `session-details-${session.id}`.replace(/[^a-z0-9]+/gi, "-")
   const packIntent = getPackIntent(session.write_summary);
   const packGroups = packIntent?.unmappedPackGroups ?? [];
 
@@ -55,18 +56,20 @@ export default function SessionDetails({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline">Session {session.id}</Badge>
+          <Badge id={`${detailId}-badge-session`} variant="outline">
+            Session {session.id}
+          </Badge>
         </div>
       </header>
 
       <section className="grid gap-4">
-        <Card className="border-border/70 bg-card/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card id={`${detailId}-summary-card`} className="border-border/70 bg-card/60">
+          <CardHeader id={`${detailId}-summary-header`} className="pb-3">
+            <CardTitle id={`${detailId}-summary-title`} className="text-sm font-medium text-muted-foreground">
               Session details
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2 text-sm">
+          <CardContent id={`${detailId}-summary-content`} className="grid gap-2 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">Created</span>
               <span className="font-mono text-xs text-foreground/90">{session.created_at}</span>
@@ -91,18 +94,28 @@ export default function SessionDetails({
         </Card>
       </section>
 
-      <Separator />
+      <Separator id={`${detailId}-separator`} />
 
       <section className="space-y-4">
-        <Accordion type="single" collapsible variant="sidebar" defaultValue="pack-sizes">
-          <AccordionItem value="pack-sizes">
-            <AccordionTrigger>Pack sizes at ingest time</AccordionTrigger>
-            <AccordionContent>
-              <Card className="border-border/70 bg-card/60">
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Pack sizes at ingest time</CardTitle>
+        <Accordion
+          id={`${detailId}-accordion`}
+          type="single"
+          collapsible
+          variant="sidebar"
+          defaultValue="pack-sizes"
+        >
+          <AccordionItem id={`${detailId}-accordion-pack-sizes`} value="pack-sizes">
+            <AccordionTrigger id={`${detailId}-accordion-pack-sizes-trigger`}>
+              Pack sizes at ingest time
+            </AccordionTrigger>
+            <AccordionContent id={`${detailId}-accordion-pack-sizes-content`}>
+              <Card id={`${detailId}-pack-sizes-card`} className="border-border/70 bg-card/60">
+                <CardHeader id={`${detailId}-pack-sizes-header`}>
+                  <CardTitle id={`${detailId}-pack-sizes-title`} className="text-sm font-medium">
+                    Pack sizes at ingest time
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <CardContent id={`${detailId}-pack-sizes-content`} className="space-y-3 text-sm text-muted-foreground">
                   <p>Snapshot captured at ingest time. Use pack mapping to update interpretations.</p>
                   <details className="rounded-md border border-border/60 bg-background/40 p-3">
                     <summary className="cursor-pointer text-sm font-semibold text-foreground">
@@ -116,23 +129,49 @@ export default function SessionDetails({
                       {packIntent?.applicable ? (
                         packGroups.length > 0 ? (
                           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/40">
-                            <Table>
-                              <TableHeader className="text-xs uppercase tracking-wide text-muted-foreground">
-                                <TableRow className="border-border/40">
-                                  <TableHead className="p-3">Pack string</TableHead>
-                                  <TableHead className="p-3">Lines</TableHead>
-                                  <TableHead className="p-3">Samples</TableHead>
-                                  <TableHead className="p-3">Sample line</TableHead>
+                            <Table id={`${detailId}-pack-sizes-table`}>
+                              <TableHeader
+                                id={`${detailId}-pack-sizes-table-header`}
+                                className="text-xs uppercase tracking-wide text-muted-foreground"
+                              >
+                                <TableRow id={`${detailId}-pack-sizes-table-header-row`} className="border-border/40">
+                                  <TableHead id={`${detailId}-pack-sizes-head-pack`} className="p-3">
+                                    Pack string
+                                  </TableHead>
+                                  <TableHead id={`${detailId}-pack-sizes-head-lines`} className="p-3">
+                                    Lines
+                                  </TableHead>
+                                  <TableHead id={`${detailId}-pack-sizes-head-samples`} className="p-3">
+                                    Samples
+                                  </TableHead>
+                                  <TableHead id={`${detailId}-pack-sizes-head-sample-line`} className="p-3">
+                                    Sample line
+                                  </TableHead>
                                 </TableRow>
                               </TableHeader>
-                              <TableBody>
+                              <TableBody id={`${detailId}-pack-sizes-table-body`}>
                                 {packGroups.map((group) => (
-                                  <TableRow key={group.packStringNormalized} className="border-border/40">
-                                    <TableCell className="p-3 text-xs font-mono">
+                                  <TableRow
+                                    id={`${detailId}-pack-sizes-row-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}`}
+                                    key={group.packStringNormalized}
+                                    className="border-border/40"
+                                  >
+                                    <TableCell
+                                      id={`${detailId}-pack-sizes-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-pack`}
+                                      className="p-3 text-xs font-mono"
+                                    >
                                       {group.packStringNormalized}
                                     </TableCell>
-                                    <TableCell className="p-3 text-xs">{group.lineCount}</TableCell>
-                                    <TableCell className="p-3 text-xs">
+                                    <TableCell
+                                      id={`${detailId}-pack-sizes-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-lines`}
+                                      className="p-3 text-xs"
+                                    >
+                                      {group.lineCount}
+                                    </TableCell>
+                                    <TableCell
+                                      id={`${detailId}-pack-sizes-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-samples`}
+                                      className="p-3 text-xs"
+                                    >
                                       {group.rawSamples.length > 0 ? (
                                         <div className="grid gap-1">
                                           {group.rawSamples.map((sample) => (
@@ -145,7 +184,10 @@ export default function SessionDetails({
                                         <span className="text-muted-foreground">n/a</span>
                                       )}
                                     </TableCell>
-                                    <TableCell className="p-3 text-xs">
+                                    <TableCell
+                                      id={`${detailId}-pack-sizes-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-sample-line`}
+                                      className="p-3 text-xs"
+                                    >
                                       {group.sampleLine.vendorSku || group.sampleLine.description ? (
                                         <div className="grid gap-1">
                                           {group.sampleLine.vendorSku ? (
@@ -176,7 +218,7 @@ export default function SessionDetails({
                           Pack sizes not available for this session.
                         </div>
                       )}
-                      <Button variant="secondary" size="sm" asChild>
+                      <Button id={`${detailId}-pack-mapping-link`} variant="secondary" size="sm" asChild>
                         <Link href="/vendors/ingest/pack-mapping">Open pack mapping</Link>
                       </Button>
                     </div>
@@ -191,14 +233,18 @@ export default function SessionDetails({
             { key: "write-summary", title: "Write Summary", value: session.write_summary },
             { key: "audit", title: "Audit", value: session.audit },
           ].map((block) => (
-            <AccordionItem key={block.key} value={block.key}>
-              <AccordionTrigger>{block.title}</AccordionTrigger>
-              <AccordionContent>
-                <Card className="border-border/70 bg-card/60">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium">{block.title}</CardTitle>
+            <AccordionItem id={`${detailId}-accordion-${block.key}`} key={block.key} value={block.key}>
+              <AccordionTrigger id={`${detailId}-accordion-${block.key}-trigger`}>
+                {block.title}
+              </AccordionTrigger>
+              <AccordionContent id={`${detailId}-accordion-${block.key}-content`}>
+                <Card id={`${detailId}-card-${block.key}`} className="border-border/70 bg-card/60">
+                  <CardHeader id={`${detailId}-card-${block.key}-header`} className="pb-3">
+                    <CardTitle id={`${detailId}-card-${block.key}-title`} className="text-sm font-medium">
+                      {block.title}
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
+                  <CardContent id={`${detailId}-card-${block.key}-content`} className="space-y-3 text-sm text-muted-foreground">
                     <details className="rounded-md border border-border/60 bg-background/40 p-3">
                       <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         Raw JSON

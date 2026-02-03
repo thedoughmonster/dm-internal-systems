@@ -121,6 +121,14 @@ export default function PackMappingRowForm({
   onFlagNotSupported,
   onSaved,
 }: PackMappingRowFormProps) {
+  const formId = React.useMemo(
+    () =>
+      `pack-mapping-row-${row.vendor_id}-${row.pack_string_raw}`.replace(
+        /[^a-z0-9]+/gi,
+        "-",
+      ),
+    [row.pack_string_raw, row.vendor_id],
+  );
   const [packQty, setPackQty] = React.useState("");
   const [packSize, setPackSize] = React.useState("");
   const [packSizeUom, setPackSizeUom] = React.useState("");
@@ -273,6 +281,7 @@ export default function PackMappingRowForm({
     <div className="grid gap-2">
       <div className="grid gap-2 md:grid-cols-4">
         <Input
+          id={`${formId}-qty`}
           className="min-w-[9rem]"
           placeholder="Pack qty"
           value={packQty}
@@ -280,6 +289,7 @@ export default function PackMappingRowForm({
           disabled={status === "saving"}
         />
         <Input
+          id={`${formId}-size`}
           className="min-w-[9rem]"
           placeholder="Pack size"
           value={packSize}
@@ -287,6 +297,7 @@ export default function PackMappingRowForm({
           disabled={status === "saving"}
         />
         <Select
+          id={`${formId}-unit-category`}
           value={unitCategory}
           onValueChange={(value) => {
             const nextCategory = value as UnitCategoryKey;
@@ -297,18 +308,19 @@ export default function PackMappingRowForm({
           }}
           disabled={status === "saving"}
         >
-          <SelectTrigger className="min-w-[9rem]">
-            <SelectValue placeholder="Unit type" />
+          <SelectTrigger id={`${formId}-unit-category-trigger`} className="min-w-[9rem]">
+            <SelectValue id={`${formId}-unit-category-value`} placeholder="Unit type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent id={`${formId}-unit-category-content`}>
             {Object.entries(UNIT_CATEGORIES).map(([key, category]) => (
-              <SelectItem key={key} value={key}>
+              <SelectItem id={`${formId}-unit-category-${key}`} key={key} value={key}>
                 {category.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select
+          id={`${formId}-unit`}
           value={unitValue}
           onValueChange={(value) => {
             if (value === "other") {
@@ -323,22 +335,29 @@ export default function PackMappingRowForm({
           }}
           disabled={status === "saving"}
         >
-          <SelectTrigger className="min-w-[9rem]">
-            <SelectValue placeholder="Unit" />
+          <SelectTrigger id={`${formId}-unit-trigger`} className="min-w-[9rem]">
+            <SelectValue id={`${formId}-unit-value`} placeholder="Unit" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent id={`${formId}-unit-content`}>
             {unitOptions.map((unit) => (
-              <SelectItem key={unit.value} value={unit.value}>
+              <SelectItem
+                id={`${formId}-unit-${unit.value}`}
+                key={unit.value}
+                value={unit.value}
+              >
                 {unit.label}
               </SelectItem>
             ))}
-            <SelectItem value="other">Other</SelectItem>
+            <SelectItem id={`${formId}-unit-other`} value="other">
+              Other
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {showOtherUnit ? (
         <Input
+          id={`${formId}-unit-custom`}
           className="min-w-[9rem]"
           placeholder="Custom unit"
           value={packSizeUom}
@@ -348,10 +367,16 @@ export default function PackMappingRowForm({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" onClick={handleSubmit} disabled={status === "saving"}>
+        <Button
+          id={`${formId}-save`}
+          size="sm"
+          onClick={handleSubmit}
+          disabled={status === "saving"}
+        >
           {status === "saving" ? "Saving..." : "Save mapping"}
         </Button>
         <Button
+          id={`${formId}-flag`}
           size="sm"
           variant="secondary"
           onClick={handleFlagUnsupported}
@@ -367,9 +392,13 @@ export default function PackMappingRowForm({
       </div>
 
       {status === "error" && errorMessage ? (
-        <Alert className="border-red-500/40 bg-red-500/10">
-          <AlertTitle className="text-red-100">Mapping error</AlertTitle>
-          <AlertDescription className="text-red-100/80">{errorMessage}</AlertDescription>
+        <Alert id={`${formId}-error`} className="border-red-500/40 bg-red-500/10">
+          <AlertTitle id={`${formId}-error-title`} className="text-red-100">
+            Mapping error
+          </AlertTitle>
+          <AlertDescription id={`${formId}-error-description`} className="text-red-100/80">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       ) : null}
     </div>

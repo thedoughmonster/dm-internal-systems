@@ -104,20 +104,32 @@ export default function PackParseForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor={rawId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${rawId}-label`}
+          htmlFor={rawId}
+          className="text-xs text-muted-foreground"
+        >
           Raw pack string
         </Label>
         <Input id={rawId} value={packStringRaw} readOnly />
       </div>
       <div>
-        <Label htmlFor={normalizedId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${normalizedId}-label`}
+          htmlFor={normalizedId}
+          className="text-xs text-muted-foreground"
+        >
           Normalized pack string
         </Label>
         <Input id={normalizedId} value={packStringNormalized} readOnly />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-1">
-          <Label htmlFor={qtyId} className="text-xs text-muted-foreground">
+          <Label
+            id={`${qtyId}-label`}
+            htmlFor={qtyId}
+            className="text-xs text-muted-foreground"
+          >
             Pack quantity
           </Label>
           <Input
@@ -130,7 +142,11 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={qtyUomId} className="text-xs text-muted-foreground">
+          <Label
+            id={`${qtyUomId}-label`}
+            htmlFor={qtyUomId}
+            className="text-xs text-muted-foreground"
+          >
             Pack UOM
           </Label>
           <Input
@@ -141,7 +157,11 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={sizeId} className="text-xs text-muted-foreground">
+          <Label
+            id={`${sizeId}-label`}
+            htmlFor={sizeId}
+            className="text-xs text-muted-foreground"
+          >
             Pack size
           </Label>
           <Input
@@ -154,7 +174,11 @@ export default function PackParseForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor={sizeUomId} className="text-xs text-muted-foreground">
+          <Label
+            id={`${sizeUomId}-label`}
+            htmlFor={sizeUomId}
+            className="text-xs text-muted-foreground"
+          >
             Pack size UOM
           </Label>
           <Input
@@ -166,7 +190,11 @@ export default function PackParseForm({
         </div>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={verifiedById} className="text-xs text-muted-foreground">
+        <Label
+          id={`${verifiedById}-label`}
+          htmlFor={verifiedById}
+          className="text-xs text-muted-foreground"
+        >
           Verified by
         </Label>
         <Input
@@ -176,7 +204,11 @@ export default function PackParseForm({
         />
       </div>
       <div className="space-y-1">
-        <Label htmlFor={notesId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${notesId}-label`}
+          htmlFor={notesId}
+          className="text-xs text-muted-foreground"
+        >
           Notes
         </Label>
         <Textarea
@@ -189,6 +221,7 @@ export default function PackParseForm({
       </div>
       <div className="flex items-center gap-3">
         <Button
+          id={`${notesId}-submit`}
           type="submit"
           disabled={busy}
           className="min-w-[140px]"

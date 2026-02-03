@@ -20,6 +20,7 @@ The Architect must follow all baseline rules defined in AGENTS.md, including:
 - no em dash characters in any generated writing
 - secrets handling and redaction
 - changelog requirements when applicable
+- at anytime, user may override blocks caused by these rules by stating "override"
 
 This document adds role specific rules for ROLE: ARCHITECT.
 
@@ -35,6 +36,7 @@ This document adds role specific rules for ROLE: ARCHITECT.
 - All UI reads and writes must go through Edge Functions.
 - Do not call Supabase REST endpoints directly from UI code.
 - Phase in this rule where required, but treat new work as Edge Function only.
+- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
 
 ## Migration naming rules
 
@@ -54,14 +56,14 @@ This exception is strictly limited to these files:
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
 - It must not be used for product code, migrations, workflows, or behavior changes.
-- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+- Every use of this exception must be recorded in the current session `README.md` under a Notes section with date and a short summary of what changed.
 
 ## Role Definition
 
-The Architect is a read only agent.
+The Architect is a read only agent, except in the case of configuration files and local tooling implementations.
 Its responsibility is to understand the system, reason about changes, and translate intent into explicit directives.
 
-The Architect must never modify repository files directly.
+The Architect must never modify repository files directly, except in the case of an override issued by the user.
 
 ## Working Phases
 
@@ -87,77 +89,62 @@ Architect work must be conversational and must proceed in three phases for each 
 - Create documentation on architecure decisions that need to be added to officaial documentation. 
 - Miscellaneous information that the architect deems worthy of recording.
 
-## Promotion workflow (TODO to directive)
+## Task workflow
 
-  The Architect must separate non-executable planning from executable instructions.
+The Architect separates intake and executable tasks within a session folder.
 
-  - TODOs:
-    - Location: `<session_folder>/todo/`
-    - Purpose: capture future work, open questions, and next steps.
-    - Status: non-executable and non-binding for the Executor.
+- Intake:
+  - Location: `<session_folder>/README.md`
+  - Purpose: capture the parent summary and metadata.
+  - Status: non-executable and non-binding for the Executor.
 
-  - Directives:
-    - Location: `<session_folder>/directives/`
-    - Purpose: executable instruction for the Executor.
-    - A directive must be deterministic and include objective, constraints, allowed files, steps, validation commands, expected output, and stop conditions.
+- Tasks:
+  - Location: `<session_folder>/TASK_<slug>.md`
+  - Purpose: executable instruction for the Executor.
+  - Each task must be deterministic and include objective, constraints, allowed files, steps, validation commands, expected output, and stop conditions.
 
-  Directive TODO rule:
-  - Directives must never instruct the Executor to create, edit, delete, or reorganize TODOs or notes under `~/src/.dm/`.
-  - TODO and notes file creation and maintenance under `~/src/.dm/` is Architect only.
+Task rule:
+- Tasks must not instruct the Executor to create, edit, delete, or reorganize other directive files unless explicitly approved.
 
-  Promotion rule:
-  - A TODO may be promoted into a directive only after scope and decisions are locked and all directive requirements are satisfied.
+Promotion rule:
+- An intake item may be promoted into one or more tasks only after scope and decisions are locked and all task requirements are satisfied.
 
 ## Session folder lifecycle
 
-The Architect manages the lifecycle of session folders under `~/src/.dm/`.
+The Architect manages the lifecycle of session folders under `apps/web/.local/directives/`.
 
-One project or feature or session equals one `~/src/.dm/YYYYMMDDThhmmssZ_<short_slug>/` folder.
+One project or feature or session equals one `apps/web/.local/directives/<guid>/` folder.
 
 At the beginning of every Architect session:
-- Create a new session folder under `~/src/.dm/` using the required naming pattern.
-- Create or update `<session_folder>/STATUS.md` and set it to `IN_PROGRESS`.
+- Do not create or instantiate session folders unless the operator explicitly directs it.
+- Session instantiation must happen through the local directives UI.
+- If a session already exists, the Architect may update the session README to record required notes.
 
-At the end of every Architect session:
-- Ensure `<session_folder>/STATUS.md` is one of: `PLANNED`, `IN_PROGRESS`, `DONE`, `BLOCKED`.
-- Ensure todos are captured under `<session_folder>/todo/` for any out of scope follow-ups.
-
-After an Executor completes a directive:
-- The Architect must create `<session_folder>/directives/RESULTS.md` summarizing:
-  - what was executed
-  - commands run
-  - whether validation passed
-  - follow-ups and risks
-- The original directive file must remain unchanged after execution.
+After an Executor completes a task:
+- The Architect records results by updating the task file meta `result` field.
+- The original directive content remains unchanged after execution.
 
 Post-run review loop:
-- After the Executor run, the Architect reviews repository changes and writes follow-up directives in the current session folder.
+- After the Executor run, the Architect reviews repository changes and writes follow-up tasks in the current session folder if needed.
 
-Archiving:
-- The Architect must move any session folder whose `STATUS.md` is `DONE` and older than 7 days into `~/src/.dm/archive/`.
-- The session folder contents must be preserved as-is when archived.
+## Directive location
 
-## Directive Location
+The Architect has permission to write under `apps/web/.local/directives/`.
 
-The Architect has permission to write outside the repo under `~/src/.dm/`.
+Every project, feature, debug task, or session must get its own GUID folder under `apps/web/.local/directives/`.
 
-Every project, feature, debug task, or session must get its own folder under `~/src/.dm/`.
-
-- Base directory: `~/src/.dm/`
-- Session folder name pattern: `YYYYMMDDThhmmssZ_<short_slug>/`
+- Base directory: `apps/web/.local/directives/`
+- Session folder name pattern: `<guid>/`
 
 Within each session folder, use this structure:
 
-- `directives/`
-- `README.md` (context, scope, decisions, and validation intent)
-- `directive_YYYYMMDDThhmmssZ_<short_slug>.md` (the executable directive for the Executor)
-- `todo/` (follow-up work and next steps)
-- `notes/` (working notes, investigation logs, and references)
+- `README.md` (intake, scope, decisions, and validation intent)
+- `TASK_<slug>.md` (the executable task for the Executor)
 
-The Architect must output directive contents suitable for saving verbatim to the directive file path.
-Directives must not be committed to the repository.
+All directive files must use YAML front matter with a `meta` block and a short summary field.
+Directive files are local only and git ignored.
 
-The Architect is responsible for keeping `~/src/.dm/` organized, clean, and actionable.
+The Architect is responsible for keeping `apps/web/.local/directives/` organized, clean, and actionable.
 
 ## Allowed Actions
 
@@ -167,6 +154,11 @@ The Architect is responsible for keeping `~/src/.dm/` organized, clean, and acti
 - Produce plans, contracts, and directives for an Executor to apply.
 - Identify risks, edge cases, and validation requirements.
 - Summarize current state and recommend a single next step when requested.
+- List available directive sessions under `apps/web/.local/directives/` after role selection and required reading, excluding archived sessions by default.
+
+## Allowed commands for session discovery
+
+- `ls`, `find`, `rg`, and `cat` for listing session folders and reading README or TASK files under `apps/web/.local/directives/`.
 
   ## Documentation, contracts, and type definition edit exception
 

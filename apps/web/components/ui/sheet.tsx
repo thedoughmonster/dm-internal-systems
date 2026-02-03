@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -7,17 +8,39 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Sheet = SheetPrimitive.Root
+const Sheet = ({
+  id: _id,
+  ...props
+}: RequireId<React.ComponentProps<typeof SheetPrimitive.Root>>) => (
+  <SheetPrimitive.Root {...props} />
+)
 
-const SheetTrigger = SheetPrimitive.Trigger
+const SheetTrigger = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Trigger>,
+  RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Trigger>>
+>((props, ref) => <SheetPrimitive.Trigger ref={ref} {...props} />)
+SheetTrigger.displayName = SheetPrimitive.Trigger.displayName
 
-const SheetClose = SheetPrimitive.Close
+const SheetClose = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Close>,
+  RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Close>>
+>((props, ref) => <SheetPrimitive.Close ref={ref} {...props} />)
+SheetClose.displayName = SheetPrimitive.Close.displayName
 
-const SheetPortal = SheetPrimitive.Portal
+const SheetPortal = ({
+  id,
+  children,
+  ...props
+}: RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Portal>>) => (
+  <SheetPrimitive.Portal {...props}>
+    <div id={id}>{children}</div>
+  </SheetPrimitive.Portal>
+)
+SheetPortal.displayName = SheetPrimitive.Portal.displayName
 
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
+  RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
@@ -49,19 +72,21 @@ const sheetVariants = cva(
   }
 )
 
-interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+type SheetContentProps = RequireId<
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
+    VariantProps<typeof sheetVariants>
+>
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
+>(({ id, side = "right", className, children, ...props }, ref) => (
+  <SheetPortal id={`${id}-portal`}>
+    <SheetOverlay id={`${id}-overlay`} />
     <SheetPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
+      id={id}
       {...props}
     >
       {children}
@@ -77,7 +102,7 @@ SheetContent.displayName = SheetPrimitive.Content.displayName
 const SheetHeader = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: RequireId<React.HTMLAttributes<HTMLDivElement>>) => (
   <div
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
@@ -91,7 +116,7 @@ SheetHeader.displayName = "SheetHeader"
 const SheetFooter = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: RequireId<React.HTMLAttributes<HTMLDivElement>>) => (
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
@@ -104,7 +129,7 @@ SheetFooter.displayName = "SheetFooter"
 
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
+  RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
@@ -116,7 +141,7 @@ SheetTitle.displayName = SheetPrimitive.Title.displayName
 
 const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
+  RequireId<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}

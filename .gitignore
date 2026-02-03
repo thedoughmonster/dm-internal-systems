@@ -16,3 +16,6 @@ out/
 # Environment files
 .env
 .env.local
+
+# Local only directives data
+apps/web/.local/

@@ -12,9 +12,10 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 
 ## Session workflow
 
-- Each Codex run uses one session folder under `~/src/.dm/YYYYMMDDThhmmssZ_<short_slug>/`.
-- Executable directives live under `<session_folder>/directives/`.
-- TODOs live under `<session_folder>/todo/` and are non-binding context only.
+- Directive tasks live under `apps/web/.local/directives/<guid>/`.
+- Each session folder contains a parent `README.md` and task files named `TASK_<slug>.md`.
+- All directive files use YAML front matter with a `meta` block and a short summary field.
+- After role selection and required reading, list available directive sessions under `apps/web/.local/directives/` and exclude archived sessions by default.
 
 ## Commit policy
 
@@ -77,6 +78,7 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 - Do not persist derived analytics data in new tables unless explicitly approved.
 - Do not introduce UI controls for environment switching or authentication in v0.
 - Keep derived analytics vendor scoped until a shared ingredient mapping is available.
+- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
 
 ## Migration naming rules
 
@@ -99,4 +101,4 @@ This exception is strictly limited to these files:
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
 - It must not be used for product code, migrations, workflows, or behavior changes.
-- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+- Every use of this exception must be recorded in the current session `README.md` under a Notes section with date and a short summary of what changed.

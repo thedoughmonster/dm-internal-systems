@@ -111,6 +111,7 @@ async function fetchJson<T>(url: string, anonKey: string): Promise<T> {
 export default async function PackVerificationPanel({
   sessionId,
 }: PackVerificationPanelProps) {
+  const panelId = `pack-verification-${sessionId}`;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -120,10 +121,14 @@ export default async function PackVerificationPanel({
       !anonKey ? "NEXT_PUBLIC_SUPABASE_ANON_KEY" : null,
     ].filter(Boolean);
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pack verification</CardTitle>
-          <CardDescription>Missing env var: {missing.join(", ")}</CardDescription>
+      <Card id={`${panelId}-missing-env`}>
+        <CardHeader id={`${panelId}-missing-env-header`}>
+          <CardTitle id={`${panelId}-missing-env-title`}>
+            Pack verification
+          </CardTitle>
+          <CardDescription id={`${panelId}-missing-env-description`}>
+            Missing env var: {missing.join(", ")}
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -139,10 +144,14 @@ export default async function PackVerificationPanel({
 
   if (!session) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pack verification</CardTitle>
-          <CardDescription>Session not found.</CardDescription>
+      <Card id={`${panelId}-missing-session`}>
+        <CardHeader id={`${panelId}-missing-session-header`}>
+          <CardTitle id={`${panelId}-missing-session-title`}>
+            Pack verification
+          </CardTitle>
+          <CardDescription id={`${panelId}-missing-session-description`}>
+            Session not found.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -150,10 +159,12 @@ export default async function PackVerificationPanel({
 
   if (!session.vendor_invoice_id) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pack verification</CardTitle>
-          <CardDescription>
+      <Card id={`${panelId}-missing-invoice`}>
+        <CardHeader id={`${panelId}-missing-invoice-header`}>
+          <CardTitle id={`${panelId}-missing-invoice-title`}>
+            Pack verification
+          </CardTitle>
+          <CardDescription id={`${panelId}-missing-invoice-description`}>
             No invoice attached to this ingest session.
           </CardDescription>
         </CardHeader>
@@ -198,10 +209,12 @@ export default async function PackVerificationPanel({
 
   if (groups.size === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pack verification</CardTitle>
-          <CardDescription>
+      <Card id={`${panelId}-empty-lines`}>
+        <CardHeader id={`${panelId}-empty-lines-header`}>
+          <CardTitle id={`${panelId}-empty-lines-title`}>
+            Pack verification
+          </CardTitle>
+          <CardDescription id={`${panelId}-empty-lines-description`}>
             No invoice lines with pack strings were found for this session.
           </CardDescription>
         </CardHeader>
@@ -227,24 +240,33 @@ export default async function PackVerificationPanel({
 
   return (
     <div className="space-y-5">
-      <Card>
-        <CardHeader>
-          <CardTitle>Session summary</CardTitle>
-          <CardDescription>
+      <Card id={`${panelId}-summary-card`}>
+        <CardHeader id={`${panelId}-summary-header`}>
+          <CardTitle id={`${panelId}-summary-title`}>Session summary</CardTitle>
+          <CardDescription id={`${panelId}-summary-description`}>
             Pack strings grouped from invoice lines for verification.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 text-sm">
+        <CardContent
+          id={`${panelId}-summary-content`}
+          className="grid gap-3 text-sm"
+        >
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Session</Badge>
+            <Badge id={`${panelId}-summary-session-badge`} variant="outline">
+              Session
+            </Badge>
             <span className="font-mono text-xs text-foreground/90">{session.id}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Vendor</Badge>
+            <Badge id={`${panelId}-summary-vendor-badge`} variant="outline">
+              Vendor
+            </Badge>
             <span className="font-mono text-xs text-foreground/90">{session.vendor_id}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Invoice</Badge>
+            <Badge id={`${panelId}-summary-invoice-badge`} variant="outline">
+              Invoice
+            </Badge>
             <span className="font-mono text-xs text-foreground/90">
               {session.vendor_invoice_id ?? "n/a"}
             </span>
@@ -256,6 +278,10 @@ export default async function PackVerificationPanel({
       </Card>
 
       {Array.from(groups.values()).map((group) => {
+        const groupKey = group.normalized
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-");
+        const groupId = `${panelId}-group-${groupKey}`;
         const parse = parseMap[group.normalized];
         const catalogOptions = buildCatalogOptions(group.lines);
         const evidence = {
@@ -265,25 +291,36 @@ export default async function PackVerificationPanel({
         };
 
         return (
-          <Card key={group.normalized} className="border-border/60 bg-card/40">
-            <CardHeader className="space-y-2">
+          <Card
+            id={`${groupId}-card`}
+            key={group.normalized}
+            className="border-border/60 bg-card/40"
+          >
+            <CardHeader id={`${groupId}-header`} className="space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline">Normalized</Badge>
+                <Badge id={`${groupId}-normalized-badge`} variant="outline">
+                  Normalized
+                </Badge>
                 <span className="font-mono text-xs text-foreground/90">
                   {group.normalized}
                 </span>
               </div>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription
+                id={`${groupId}-raw-samples`}
+                className="text-xs text-muted-foreground"
+              >
                 Raw samples: {group.rawSamples.join(" | ")}
               </CardDescription>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline">Lines</Badge>
+                <Badge id={`${groupId}-lines-badge`} variant="outline">
+                  Lines
+                </Badge>
                 <span className="font-mono text-xs text-foreground/90">
                   {group.lines.length}
                 </span>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent id={`${groupId}-content`}>
               {parse ? (
                 <PackApplyForm
                   vendorId={session.vendor_id}

@@ -23,6 +23,7 @@ export const topNavItems: TopNavItem[] = [
           { title: "Dashboard", href: "/vendors" },
           { title: "Vendor ingest", href: "/vendors/ingest" },
           { title: "Sessions", href: "/vendors/ingest/sessions" },
+          { title: "Price changes", href: "/vendors/ingest/price-changes" },
           { title: "Pack mapping", href: "/vendors/ingest/pack-mapping" },
         ],
       },
@@ -40,5 +41,10 @@ export const topNavItems: TopNavItem[] = [
       },
       ...uiKitSidebarSections,
     ],
+  },
+  {
+    id: "directives",
+    title: "Directives",
+    href: "/directives",
   },
 ]

@@ -8,7 +8,7 @@ import type { SessionRow } from "@/app/vendors/ingest/sessions/composites/Vendor
 import {
   DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT,
   getPriceChangeThresholdPercent,
-} from "@/app/settings/lib/api"
+} from "@/lib/app-settings"
 import { buildApiUrl } from "@/lib/api-url"
 import { getServerBaseUrl } from "@/lib/server-base-url"
 
@@ -305,8 +305,10 @@ export default async function VendorsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">Dashboard</Badge>
-          <Button asChild variant="secondary">
+          <Badge id="vendors-dashboard-badge" variant="outline">
+            Dashboard
+          </Badge>
+          <Button id="vendors-dashboard-open-ingest" asChild variant="secondary">
             <Link href="/vendors/ingest">Open ingest</Link>
           </Button>
         </div>
@@ -314,16 +316,34 @@ export default async function VendorsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric) => (
-          <Card key={metric.title} className="border-border/70 bg-card/60">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card
+            id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}`}
+            key={metric.title}
+            className="border-border/70 bg-card/60"
+          >
+            <CardHeader
+              id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-header`}
+              className="pb-3"
+            >
+              <CardTitle
+                id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-title`}
+                className="text-sm font-medium text-muted-foreground"
+              >
                 {metric.title}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent
+              id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-content`}
+              className="space-y-2"
+            >
               <div className="text-2xl font-semibold">{metric.value}</div>
               <p className="text-xs text-muted-foreground">{metric.detail}</p>
-              <Button asChild size="sm" variant="outline">
+              <Button
+                id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-review`}
+                asChild
+                size="sm"
+                variant="outline"
+              >
                 <Link href={metric.href}>Review</Link>
               </Button>
             </CardContent>
@@ -331,17 +351,34 @@ export default async function VendorsPage() {
         ))}
       </div>
 
-      <Separator />
+      <Separator id="vendors-dashboard-separator" />
 
       <div className="grid gap-4 lg:grid-cols-3">
         {lists.map((list) => (
-          <Card key={list.title} className="border-border/70 bg-card/60">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">{list.title}</CardTitle>
+          <Card
+            id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}`}
+            key={list.title}
+            className="border-border/70 bg-card/60"
+          >
+            <CardHeader
+              id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-header`}
+            >
+              <CardTitle
+                id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-title`}
+                className="text-sm font-medium"
+              >
+                {list.title}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <CardContent
+              id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-content`}
+              className="space-y-2 text-sm text-muted-foreground"
+            >
               {list.items.map((item) => (
-                <div key={item} className="flex items-center gap-2">
+                <div
+                  key={item}
+                  className="flex items-center gap-2"
+                >
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                   <span>{item}</span>
                 </div>
@@ -351,11 +388,13 @@ export default async function VendorsPage() {
         ))}
       </div>
 
-      <Card className="border-border/70 bg-card/60">
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Error rate</CardTitle>
+      <Card id="vendors-dashboard-error-card" className="border-border/70 bg-card/60">
+        <CardHeader id="vendors-dashboard-error-header">
+          <CardTitle id="vendors-dashboard-error-title" className="text-sm font-medium">
+            Error rate
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
+        <CardContent id="vendors-dashboard-error-content" className="space-y-2 text-sm text-muted-foreground">
           <p>7 day error rate: 3.4 percent (placeholder).</p>
           <p>Most impacted vendors: Redwood Imports, Copperline Dairy.</p>
         </CardContent>

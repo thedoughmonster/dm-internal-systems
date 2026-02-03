@@ -1,13 +1,15 @@
+import type { RequireId } from "@/lib/types/component-id"
 // apps/web/components/ui/input.tsx
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
+export type InputProps = RequireId<React.InputHTMLAttributes<HTMLInputElement>>
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ id, className, type, ...props }, ref) => {
     return (
       <div
+        id={id}
         className={cn(
           "group relative rounded-md border border-input",
           "bg-black",

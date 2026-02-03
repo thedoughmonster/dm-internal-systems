@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import {
   DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT,
   savePriceChangeThresholdPercent,
-} from "../lib/api"
+} from "@/lib/app-settings"
 
 type SettingsViewProps = {
   initialThresholdPercent: number
@@ -66,28 +66,40 @@ export default function SettingsView({
       </header>
 
       {loadError ? (
-        <Card className="border-border/70 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Unable to load settings</CardTitle>
-            <CardDescription>Defaults will be used until the issue is resolved.</CardDescription>
+        <Card id="settings-view-load-error" className="border-border/70 bg-card/60">
+          <CardHeader id="settings-view-load-error-header">
+            <CardTitle id="settings-view-load-error-title" className="text-sm font-medium">
+              Unable to load settings
+            </CardTitle>
+            <CardDescription id="settings-view-load-error-description">
+              Defaults will be used until the issue is resolved.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent id="settings-view-load-error-content">
             <p className="text-sm text-destructive break-words">{loadError}</p>
           </CardContent>
         </Card>
       ) : null}
 
-      <Card className="border-border/70 bg-card/60">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-sm font-medium">Vendors</CardTitle>
-          <CardDescription>Settings that apply to vendor dashboards.</CardDescription>
-          <Separator />
+      <Card id="settings-view-vendors-card" className="border-border/70 bg-card/60">
+        <CardHeader id="settings-view-vendors-header" className="space-y-2">
+          <CardTitle id="settings-view-vendors-title" className="text-sm font-medium">
+            Vendors
+          </CardTitle>
+          <CardDescription id="settings-view-vendors-description">
+            Settings that apply to vendor dashboards.
+          </CardDescription>
+          <Separator id="settings-view-vendors-separator" />
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent id="settings-view-vendors-content" className="space-y-4">
           <div className="grid gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Label htmlFor="price-change-threshold">Price change % threshold</Label>
-              <Badge variant="outline">Default {DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT}%</Badge>
+              <Label id="price-change-threshold-label" htmlFor="price-change-threshold">
+                Price change % threshold
+              </Label>
+              <Badge id="price-change-threshold-badge" variant="outline">
+                Default {DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT}%
+              </Badge>
             </div>
             <Input
               id="price-change-threshold"
@@ -104,7 +116,12 @@ export default function SettingsView({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" onClick={handleSave} disabled={isSaving}>
+            <Button
+              id="price-change-threshold-save"
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
               {isSaving ? "Saving" : "Save"}
             </Button>
             {successMessage ? (

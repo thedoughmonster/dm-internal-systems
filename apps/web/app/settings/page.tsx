@@ -2,7 +2,7 @@ import SettingsView from "./composites/SettingsView"
 import {
   DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT,
   getPriceChangeThresholdPercent,
-} from "./lib/api"
+} from "@/lib/app-settings"
 import { getServerBaseUrl } from "@/lib/server-base-url"
 
 export default async function SettingsPage() {

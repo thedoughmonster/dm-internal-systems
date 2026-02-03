@@ -95,6 +95,7 @@ function rowKey(row: PackMappingQueueRow) {
 }
 
 export default function PackMappingQueueClient() {
+  const pageId = "pack-mapping-queue";
   const [rows, setRows] = React.useState<PackMappingQueueRow[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -171,8 +172,15 @@ export default function PackMappingQueueClient() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">Queue {rows.length}</Badge>
-            <Button size="sm" variant="secondary" onClick={() => void loadQueue()}>
+            <Badge id={`${pageId}-badge-count`} variant="outline">
+              Queue {rows.length}
+            </Badge>
+            <Button
+              id={`${pageId}-refresh`}
+              size="sm"
+              variant="secondary"
+              onClick={() => void loadQueue()}
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
@@ -183,13 +191,15 @@ export default function PackMappingQueueClient() {
       <section className="space-y-4">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle className="text-base">Global queue</CardTitle>
+            <CardTitle id={`${pageId}-global-title`} className="text-base">
+              Global queue
+            </CardTitle>
           </div>
           <p className="text-sm text-muted-foreground">
             Ordered by invoice line frequency across vendors. Each row shows evidence and a mapping
             form.
           </p>
-          <Separator />
+          <Separator id={`${pageId}-separator`} />
         </div>
 
         {loading ? (
@@ -200,9 +210,13 @@ export default function PackMappingQueueClient() {
         ) : null}
 
         {error ? (
-          <Alert className="border-red-500/40 bg-red-500/10">
-            <AlertTitle className="text-red-100">Queue error</AlertTitle>
-            <AlertDescription className="text-red-100/80">{error}</AlertDescription>
+          <Alert id={`${pageId}-error`} className="border-red-500/40 bg-red-500/10">
+            <AlertTitle id={`${pageId}-error-title`} className="text-red-100">
+              Queue error
+            </AlertTitle>
+            <AlertDescription id={`${pageId}-error-description`} className="text-red-100/80">
+              {error}
+            </AlertDescription>
           </Alert>
         ) : null}
 
@@ -224,9 +238,10 @@ export default function PackMappingQueueClient() {
                     isClosing ? "max-h-0 opacity-0" : "max-h-[600px] opacity-100"
                   }`}
                 >
-                  <Card className="border-border/60 bg-card/60">
-                    <CardHeader className="border-b border-border/60">
+                  <Card id={`${pageId}-row-${key}`} className="border-border/60 bg-card/60">
+                    <CardHeader id={`${pageId}-row-${key}-header`} className="border-b border-border/60">
                       <CardTitleBar
+                        id={`${pageId}-row-${key}-title`}
                         title={row.description ?? "n/a"}
                         siblingTitle={row.pack_string_normalized}
                         subtitle={`${row.vendor_key} · ${row.vendor_invoice_number} · ${
@@ -236,7 +251,7 @@ export default function PackMappingQueueClient() {
                         }`}
                       />
                     </CardHeader>
-                    <CardContent className="p-4">
+                    <CardContent id={`${pageId}-row-${key}-content`} className="p-4">
                       <PackMappingRowForm
                         row={row}
                         onSave={handleSave}

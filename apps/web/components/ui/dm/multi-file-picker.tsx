@@ -1,3 +1,4 @@
+import type { ComponentIdProps } from "@/lib/types/component-id"
 "use client";
 
 import * as React from "react";
@@ -10,7 +11,7 @@ import type { DmPickedFileText } from "@/components/ui/dm/file-picker";
 
 export type DmMultiFilePickerStatus = "idle" | "reading" | "ready" | "error";
 
-export interface DmMultiFilePickerProps {
+export interface DmMultiFilePickerProps extends ComponentIdProps {
   accept?: string;
   disabled?: boolean;
   maxSizeBytes?: number;
@@ -39,6 +40,7 @@ function formatBytes(bytes: number): string {
 
 export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
   const {
+    id,
     accept = ".csv,text/csv",
     disabled = false,
     maxSizeBytes,
@@ -140,7 +142,7 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
   );
 
   return (
-    <div className={cn("grid gap-3", className)}>
+    <div id={id} className={cn("grid gap-3", className)}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="text-sm font-medium">{label}</div>
@@ -149,6 +151,7 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
+            id={`${id}-pick`}
             type="button"
             variant="secondary"
             size="sm"
@@ -165,6 +168,7 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
           </Button>
 
           <Button
+            id={`${id}-clear`}
             type="button"
             variant="outline"
             size="sm"
@@ -179,6 +183,7 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
       </div>
 
       <input
+        id={`${id}-input`}
         ref={inputRef}
         type="file"
         accept={accept}
@@ -191,17 +196,30 @@ export function DmMultiFilePicker(props: DmMultiFilePickerProps) {
       {meta.length > 0 ? (
         <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">{meta.length} files</Badge>
+            <Badge id={`${id}-meta-count`} variant="outline">
+              {meta.length} files
+            </Badge>
           </div>
           <div className="mt-2 grid gap-2 text-xs">
-            {meta.map((file) => (
-              <div key={`${file.filename}-${file.lastModifiedMs}`} className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="gap-2">
+            {meta.map((file, index) => (
+              <div
+                key={`${file.filename}-${file.lastModifiedMs}`}
+                className="flex flex-wrap gap-2"
+              >
+                <Badge
+                  id={`${id}-meta-${index}-name`}
+                  variant="outline"
+                  className="gap-2"
+                >
                   <FileText className="h-3.5 w-3.5" />
                   {file.filename}
                 </Badge>
-                <Badge variant="outline">{formatBytes(file.sizeBytes)}</Badge>
-                <Badge variant="outline">{file.contentType || "unknown"}</Badge>
+                <Badge id={`${id}-meta-${index}-size`} variant="outline">
+                  {formatBytes(file.sizeBytes)}
+                </Badge>
+                <Badge id={`${id}-meta-${index}-type`} variant="outline">
+                  {file.contentType || "unknown"}
+                </Badge>
               </div>
             ))}
           </div>

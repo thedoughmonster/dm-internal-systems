@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils"
+import type { RequireId } from "@/lib/types/component-id"
 
 function Skeleton({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: RequireId<React.HTMLAttributes<HTMLDivElement>>) {
   return (
     <div
       className={cn("animate-pulse rounded-md bg-muted", className)}

@@ -35,6 +35,7 @@ export default function VendorsIngestSessionsView({
   errorMessage,
   showPackIntent,
 }: VendorsIngestSessionsViewProps) {
+  const viewId = "vendor-ingest-sessions";
   return (
     <main className="mx-auto w-full max-w-6xl p-6">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -45,52 +46,83 @@ export default function VendorsIngestSessionsView({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline">Sessions {sessions.length}</Badge>
-          {showPackIntent ? <Badge variant="outline">Pack intent</Badge> : null}
+          <Badge id={`${viewId}-badge-count`} variant="outline">
+            Sessions {sessions.length}
+          </Badge>
+          {showPackIntent ? (
+            <Badge id={`${viewId}-badge-pack-intent`} variant="outline">
+              Pack intent
+            </Badge>
+          ) : null}
         </div>
       </div>
 
       {errorMessage ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Unable to load sessions</CardTitle>
-            <CardDescription>Check Supabase connectivity and credentials.</CardDescription>
+        <Card id={`${viewId}-error-card`}>
+          <CardHeader id={`${viewId}-error-header`}>
+            <CardTitle id={`${viewId}-error-title`}>Unable to load sessions</CardTitle>
+            <CardDescription id={`${viewId}-error-description`}>
+              Check Supabase connectivity and credentials.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent id={`${viewId}-error-content`}>
             <p className="text-sm text-destructive break-words">{errorMessage}</p>
           </CardContent>
         </Card>
       ) : sessions.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>No sessions yet</CardTitle>
-            <CardDescription>Upload an invoice to start a new ingest.</CardDescription>
+        <Card id={`${viewId}-empty-card`}>
+          <CardHeader id={`${viewId}-empty-header`}>
+            <CardTitle id={`${viewId}-empty-title`}>No sessions yet</CardTitle>
+            <CardDescription id={`${viewId}-empty-description`}>
+              Upload an invoice to start a new ingest.
+            </CardDescription>
           </CardHeader>
         </Card>
       ) : (
-        <Card className="border-border/60 bg-card/40">
-          <CardHeader>
-            <CardTitle>Session list</CardTitle>
-            <CardDescription>Open a session to review ingest details.</CardDescription>
+        <Card id={`${viewId}-list-card`} className="border-border/60 bg-card/40">
+          <CardHeader id={`${viewId}-list-header`}>
+            <CardTitle id={`${viewId}-list-title`}>Session list</CardTitle>
+            <CardDescription id={`${viewId}-list-description`}>
+              Open a session to review ingest details.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent id={`${viewId}-list-content`}>
             <div className="overflow-x-auto rounded-xl border border-border/60 bg-card/40">
-              <Table>
-                <TableHeader className="text-xs uppercase tracking-wide text-muted-foreground">
-                  <TableRow className="border-border/40">
-                    <TableHead className="p-3">Created</TableHead>
-                    <TableHead className="p-3">Handler</TableHead>
-                    <TableHead className="p-3">Filename</TableHead>
-                    <TableHead className="p-3">Vendor key</TableHead>
-                    <TableHead className="p-3">Document type</TableHead>
-                    <TableHead className="p-3">Format version</TableHead>
+              <Table id={`${viewId}-table`}>
+                <TableHeader
+                  id={`${viewId}-table-header`}
+                  className="text-xs uppercase tracking-wide text-muted-foreground"
+                >
+                  <TableRow id={`${viewId}-table-header-row`} className="border-border/40">
+                    <TableHead id={`${viewId}-table-head-created`} className="p-3">
+                      Created
+                    </TableHead>
+                    <TableHead id={`${viewId}-table-head-handler`} className="p-3">
+                      Handler
+                    </TableHead>
+                    <TableHead id={`${viewId}-table-head-filename`} className="p-3">
+                      Filename
+                    </TableHead>
+                    <TableHead id={`${viewId}-table-head-vendor-key`} className="p-3">
+                      Vendor key
+                    </TableHead>
+                    <TableHead id={`${viewId}-table-head-doc-type`} className="p-3">
+                      Document type
+                    </TableHead>
+                    <TableHead id={`${viewId}-table-head-format`} className="p-3">
+                      Format version
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody id={`${viewId}-table-body`}>
                   {sessions.map((session) => (
-                    <TableRow key={session.id} className="border-border/40">
-                      <TableCell className="p-3 text-sm">
-                        <Button variant="link" size="sm" asChild>
+                    <TableRow
+                      id={`${viewId}-table-row-${session.id}`}
+                      key={session.id}
+                      className="border-border/40"
+                    >
+                      <TableCell id={`${viewId}-table-cell-created-${session.id}`} className="p-3 text-sm">
+                        <Button id={`${viewId}-session-link-${session.id}`} variant="link" size="sm" asChild>
                           <Link href={`/vendors/ingest/sessions/${session.id}`}>
                             <span className="font-mono text-xs text-foreground/90">
                               {session.created_at}
@@ -98,29 +130,29 @@ export default function VendorsIngestSessionsView({
                           </Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="p-3 text-sm">
+                      <TableCell id={`${viewId}-table-cell-handler-${session.id}`} className="p-3 text-sm">
                         <span className="font-mono text-xs text-foreground/90">
                           {session.handler_id}
                         </span>
                       </TableCell>
-                      <TableCell className="p-3 text-sm">
+                      <TableCell id={`${viewId}-table-cell-filename-${session.id}`} className="p-3 text-sm">
                         {session.filename ? (
                           session.filename
                         ) : (
                           <span className="text-muted-foreground">n/a</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-3 text-sm">
+                      <TableCell id={`${viewId}-table-cell-vendor-key-${session.id}`} className="p-3 text-sm">
                         {session.proposed?.vendorKey ?? (
                           <span className="text-muted-foreground">n/a</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-3 text-sm">
+                      <TableCell id={`${viewId}-table-cell-doc-type-${session.id}`} className="p-3 text-sm">
                         {session.proposed?.documentType ?? (
                           <span className="text-muted-foreground">n/a</span>
                         )}
                       </TableCell>
-                      <TableCell className="p-3 text-sm">
+                      <TableCell id={`${viewId}-table-cell-format-${session.id}`} className="p-3 text-sm">
                         {session.proposed?.formatVersion ?? (
                           <span className="text-muted-foreground">n/a</span>
                         )}

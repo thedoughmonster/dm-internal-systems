@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -5,13 +6,22 @@ import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
 
 import { cn } from "@/lib/utils"
 
-const HoverCard = HoverCardPrimitive.Root
+const HoverCard = ({
+  id: _id,
+  ...props
+}: RequireId<React.ComponentProps<typeof HoverCardPrimitive.Root>>) => (
+  <HoverCardPrimitive.Root {...props} />
+)
 
-const HoverCardTrigger = HoverCardPrimitive.Trigger
+const HoverCardTrigger = React.forwardRef<
+  React.ElementRef<typeof HoverCardPrimitive.Trigger>,
+  RequireId<React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Trigger>>
+>((props, ref) => <HoverCardPrimitive.Trigger ref={ref} {...props} />)
+HoverCardTrigger.displayName = HoverCardPrimitive.Trigger.displayName
 
 const HoverCardContent = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
+  RequireId<React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>>
 >(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
   <HoverCardPrimitive.Content
     ref={ref}

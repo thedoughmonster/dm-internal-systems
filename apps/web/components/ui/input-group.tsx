@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -8,7 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+function InputGroup({
+  className,
+  ...props
+}: RequireId<React.ComponentProps<"div">>) {
   return (
     <div
       data-slot="input-group"
@@ -61,7 +65,9 @@ function InputGroupAddon({
   className,
   align = "inline-start",
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
+}: RequireId<
+  React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>
+>) {
   return (
     <div
       role="group"
@@ -103,8 +109,10 @@ function InputGroupButton({
   variant = "ghost",
   size = "xs",
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size"> &
-  VariantProps<typeof inputGroupButtonVariants>) {
+}: RequireId<
+  Omit<React.ComponentProps<typeof Button>, "size"> &
+    VariantProps<typeof inputGroupButtonVariants>
+>) {
   return (
     <Button
       type={type}
@@ -116,7 +124,10 @@ function InputGroupButton({
   )
 }
 
-function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
+function InputGroupText({
+  className,
+  ...props
+}: RequireId<React.ComponentProps<"span">>) {
   return (
     <span
       className={cn(
@@ -131,7 +142,7 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
 function InputGroupInput({
   className,
   ...props
-}: React.ComponentProps<"input">) {
+}: RequireId<React.ComponentProps<"input">>) {
   return (
     <Input
       data-slot="input-group-control"
@@ -147,7 +158,7 @@ function InputGroupInput({
 function InputGroupTextarea({
   className,
   ...props
-}: React.ComponentProps<"textarea">) {
+}: RequireId<React.ComponentProps<"textarea">>) {
   return (
     <Textarea
       data-slot="input-group-control"

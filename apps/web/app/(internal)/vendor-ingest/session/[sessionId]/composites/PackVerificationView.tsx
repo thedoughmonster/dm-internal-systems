@@ -18,8 +18,12 @@ export default function PackVerificationView({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline">Vendor ingest</Badge>
-          <Badge variant="outline">Session {sessionId.slice(0, 8)}</Badge>
+          <Badge id={`pack-verification-${sessionId}-badge-ingest`} variant="outline">
+            Vendor ingest
+          </Badge>
+          <Badge id={`pack-verification-${sessionId}-badge-session`} variant="outline">
+            Session {sessionId.slice(0, 8)}
+          </Badge>
         </div>
       </div>
 

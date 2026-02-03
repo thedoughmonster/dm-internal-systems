@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 
 function Calendar({
+  id,
   className,
   classNames,
   showOutsideDays = true,
@@ -20,13 +22,16 @@ function Calendar({
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
+}: RequireId<
+  React.ComponentProps<typeof DayPicker> & {
+    buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  }
+>) {
   const defaultClassNames = getDefaultClassNames()
 
   return (
     <DayPicker
+      id={id}
       showOutsideDays={showOutsideDays}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:2rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -155,7 +160,12 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
-        DayButton: CalendarDayButton,
+        DayButton: (dayProps) => (
+          <CalendarDayButton
+            id={`${id}-day-${dayProps.day.date.toISOString().slice(0, 10)}`}
+            {...dayProps}
+          />
+        ),
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -173,11 +183,12 @@ function Calendar({
 }
 
 function CalendarDayButton({
+  id,
   className,
   day,
   modifiers,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: RequireId<React.ComponentProps<typeof DayButton>>) {
   const defaultClassNames = getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -187,6 +198,7 @@ function CalendarDayButton({
 
   return (
     <Button
+      id={id}
       ref={ref}
       variant="ghost"
       size="icon"

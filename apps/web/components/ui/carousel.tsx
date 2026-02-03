@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import * as React from "react"
@@ -44,7 +45,7 @@ function useCarousel() {
 
 const Carousel = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & CarouselProps
+  RequireId<React.HTMLAttributes<HTMLDivElement> & CarouselProps>
 >(
   (
     {
@@ -152,12 +153,12 @@ Carousel.displayName = "Carousel"
 
 const CarouselContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  RequireId<React.HTMLAttributes<HTMLDivElement>>
+>(({ id, className, ...props }, ref) => {
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={carouselRef} className="overflow-hidden" id={id}>
       <div
         ref={ref}
         className={cn(
@@ -174,7 +175,7 @@ CarouselContent.displayName = "CarouselContent"
 
 const CarouselItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  RequireId<React.HTMLAttributes<HTMLDivElement>>
 >(({ className, ...props }, ref) => {
   const { orientation } = useCarousel()
 

@@ -32,6 +32,10 @@ These rules are strict. If any rule conflicts with a request, stop and clarify.
 - Pages should be wiring only, not heavy logic.
 - Use composites to hold route specific logic.
 
+5) Shared app APIs live in lib
+- Shared app API helpers must live under `apps/web/lib` and be imported via `@/lib/*`.
+- Route scoped `app/**/lib` modules must not be imported outside their route tree.
+
 ## Navigation rules
 
 - Only direct child routes of `apps/web/app` with a `page.tsx` are eligible for the global top navigation.

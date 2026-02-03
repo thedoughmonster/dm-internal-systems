@@ -4,6 +4,7 @@ import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { ChevronDown } from "lucide-react"
 
+import type { RequireId } from "@/lib/types/component-id"
 import { cn } from "@/lib/utils"
 
 type AccordionVariant = "default" | "sidebar"
@@ -14,9 +15,11 @@ const useAccordionVariant = () => React.useContext(AccordionVariantContext)
 
 const Accordion = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root> & {
-    variant?: AccordionVariant
-  }
+  RequireId<
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root> & {
+      variant?: AccordionVariant
+    }
+  >
 >(({ variant = "default", ...props }, ref) => (
   <AccordionVariantContext.Provider value={variant}>
     <AccordionPrimitive.Root ref={ref} {...props} />
@@ -26,7 +29,7 @@ Accordion.displayName = "Accordion"
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+  RequireId<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>>
 >(({ className, ...props }, ref) => (
   // Apply variant styles without forcing consumers to set className.
   <AccordionPrimitive.Item
@@ -43,7 +46,7 @@ AccordionItem.displayName = "AccordionItem"
 
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+  RequireId<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>>
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
@@ -65,7 +68,7 @@ AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+  RequireId<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>>
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}

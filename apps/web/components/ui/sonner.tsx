@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 "use client"
 
 import {
@@ -10,9 +11,9 @@ import {
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
 
-type ToasterProps = React.ComponentProps<typeof Sonner>
+type ToasterProps = RequireId<React.ComponentProps<typeof Sonner>>
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = ({ id: _id, ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
   return (

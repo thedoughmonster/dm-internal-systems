@@ -1,18 +1,21 @@
+import type { ComponentIdProps } from "@/lib/types/component-id"
 // apps/web/components/ui/loader.tsx
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface LoaderProps {
+export interface LoaderProps extends ComponentIdProps {
   label?: string;
   className?: string;
 }
 
 export function Loader({
+  id,
   label = "hacker loader",
   className,
 }: LoaderProps) {
   return (
     <div
+      id={id}
       className={cn(
         "rounded-2xl border border-border/60 bg-card/40 p-4 shadow-sm",
         className

@@ -49,22 +49,23 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 function ContractDialog() {
+  const dialogId = "vendor-ingest-contract";
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+    <Dialog id={`${dialogId}-dialog`}>
+      <DialogTrigger id={`${dialogId}-trigger`} asChild>
+        <Button id={`${dialogId}-button`} variant="outline" size="sm" className="gap-2">
           <FileText className="h-4 w-4" />
           View contract
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[740px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent id={`${dialogId}-content`} className="sm:max-w-[740px]">
+        <DialogHeader id={`${dialogId}-header`}>
+          <DialogTitle id={`${dialogId}-title`} className="flex items-center gap-2">
             <Terminal className="h-4 w-4" />
             vendor_ingest contract
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id={`${dialogId}-description`}>
             Analyze is read only. Confirm locks expectedId and writes an ingest session.
           </DialogDescription>
         </DialogHeader>
@@ -101,31 +102,35 @@ function ContractDialog() {
 }
 
 function JsonDialog({
+  id,
   title,
   data,
   buttonLabel,
   disabled,
 }: {
+  id: string;
   title: string;
   data: unknown;
   buttonLabel: string;
   disabled?: boolean;
 }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled}>
+    <Dialog id={`${id}-dialog`}>
+      <DialogTrigger id={`${id}-trigger`} asChild>
+        <Button id={`${id}-button`} variant="outline" size="sm" disabled={disabled}>
           {buttonLabel}
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[860px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent id={`${id}-content`} className="sm:max-w-[860px]">
+        <DialogHeader id={`${id}-header`}>
+          <DialogTitle id={`${id}-title`} className="flex items-center gap-2">
             <Terminal className="h-4 w-4" />
             {title}
           </DialogTitle>
-          <DialogDescription>Raw payload for inspection and debugging.</DialogDescription>
+          <DialogDescription id={`${id}-description`}>
+            Raw payload for inspection and debugging.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="rounded-2xl border border-border/60 bg-black/40 p-4">
@@ -138,7 +143,13 @@ function JsonDialog({
   );
 }
 
-function StatusBadge({ status }: { status: AnalyzeResponsePayload["status"] }) {
+function StatusBadge({
+  id,
+  status,
+}: {
+  id: string;
+  status: AnalyzeResponsePayload["status"];
+}) {
   const cls =
     status === "PROPOSED_MATCH"
       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
@@ -146,7 +157,11 @@ function StatusBadge({ status }: { status: AnalyzeResponsePayload["status"] }) {
         ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
         : "border-red-500/40 bg-red-500/10 text-red-200";
 
-  return <Badge className={cls}>{status}</Badge>;
+  return (
+    <Badge id={id} className={cls}>
+      {status}
+    </Badge>
+  );
 }
 
 type FileEntry = {
@@ -206,26 +221,58 @@ function buildEntryId(picked: DmPickedFileText, index: number) {
   return `${picked.filename}-${picked.lastModifiedMs}-${picked.sizeBytes}-${index}`;
 }
 
-function PackIntentTable({ packIntent }: { packIntent: PackIntent }) {
+function PackIntentTable({
+  id,
+  packIntent,
+}: {
+  id: string;
+  packIntent: PackIntent;
+}) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border/60">
-      <Table>
-        <TableHeader className="text-xs uppercase tracking-wide text-muted-foreground">
-          <TableRow className="border-border/40">
-            <TableHead className="p-3">Pack string</TableHead>
-            <TableHead className="p-3">Lines</TableHead>
-            <TableHead className="p-3">Samples</TableHead>
-            <TableHead className="p-3">Sample line</TableHead>
+      <Table id={`${id}-table`}>
+        <TableHeader
+          id={`${id}-table-header`}
+          className="text-xs uppercase tracking-wide text-muted-foreground"
+        >
+          <TableRow id={`${id}-table-header-row`} className="border-border/40">
+            <TableHead id={`${id}-table-head-pack`} className="p-3">
+              Pack string
+            </TableHead>
+            <TableHead id={`${id}-table-head-lines`} className="p-3">
+              Lines
+            </TableHead>
+            <TableHead id={`${id}-table-head-samples`} className="p-3">
+              Samples
+            </TableHead>
+            <TableHead id={`${id}-table-head-sample-line`} className="p-3">
+              Sample line
+            </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody id={`${id}-table-body`}>
           {packIntent.unmappedPackGroups.map((group) => (
-            <TableRow key={group.packStringNormalized} className="border-border/40">
-              <TableCell className="p-3 text-xs font-mono text-foreground/90">
+            <TableRow
+              id={`${id}-table-row-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}`}
+              key={group.packStringNormalized}
+              className="border-border/40"
+            >
+              <TableCell
+                id={`${id}-table-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-pack`}
+                className="p-3 text-xs font-mono text-foreground/90"
+              >
                 {group.packStringNormalized}
               </TableCell>
-              <TableCell className="p-3 text-xs">{group.lineCount}</TableCell>
-              <TableCell className="p-3 text-xs">
+              <TableCell
+                id={`${id}-table-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-lines`}
+                className="p-3 text-xs"
+              >
+                {group.lineCount}
+              </TableCell>
+              <TableCell
+                id={`${id}-table-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-samples`}
+                className="p-3 text-xs"
+              >
                 {group.rawSamples.length > 0 ? (
                   <div className="grid gap-1">
                     {group.rawSamples.map((sample) => (
@@ -238,7 +285,10 @@ function PackIntentTable({ packIntent }: { packIntent: PackIntent }) {
                   <span className="text-muted-foreground">n/a</span>
                 )}
               </TableCell>
-              <TableCell className="p-3 text-xs">
+              <TableCell
+                id={`${id}-table-cell-${group.packStringNormalized.replace(/[^a-z0-9]+/gi, "-")}-sample-line`}
+                className="p-3 text-xs"
+              >
                 {group.sampleLine.vendorSku || group.sampleLine.description ? (
                   <div className="grid gap-1">
                     {group.sampleLine.vendorSku ? (
@@ -261,6 +311,7 @@ function PackIntentTable({ packIntent }: { packIntent: PackIntent }) {
 }
 
 export function VendorIngestFlow() {
+  const flowId = "vendor-ingest-flow";
   const [entries, setEntries] = React.useState<FileEntry[]>([]);
   const [confirmAllSummary, setConfirmAllSummary] = React.useState<ConfirmAllSummary | null>(null);
   const [confirmAllLoading, setConfirmAllLoading] = React.useState(false);
@@ -430,7 +481,7 @@ export function VendorIngestFlow() {
   }, [entries, getConfirmSkipReason, runConfirmForEntry]);
 
   return (
-    <TooltipProvider>
+    <TooltipProvider id={`${flowId}-tooltip-provider`}>
       <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-10">
         <header className="space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -440,9 +491,10 @@ export function VendorIngestFlow() {
                   Vendor Ingest
                 </h1>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <Tooltip id={`${flowId}-info-tooltip`}>
+                  <TooltipTrigger id={`${flowId}-info-tooltip-trigger`} asChild>
                     <Button
+                      id={`${flowId}-info-button`}
                       type="button"
                       variant="outline"
                       size="icon"
@@ -452,7 +504,7 @@ export function VendorIngestFlow() {
                       <Info className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent id={`${flowId}-info-tooltip-content`}>
                     <p>Select files to analyze automatically, then confirm each eligible session.</p>
                   </TooltipContent>
                 </Tooltip>
@@ -467,7 +519,7 @@ export function VendorIngestFlow() {
               <ContractDialog />
               <Pill>Scope: internal tools</Pill>
               <Pill>Flow: analyze then confirm</Pill>
-              <Badge variant="outline" className="gap-2">
+              <Badge id={`${flowId}-badge-ingest`} variant="outline" className="gap-2">
                 <UploadCloud className="h-3.5 w-3.5" />
                 vendor_ingest
               </Badge>
@@ -475,17 +527,20 @@ export function VendorIngestFlow() {
           </div>
         </header>
 
-        <Card className="rounded-2xl border-border/60 bg-card/40 shadow-sm">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-base">Select CSV files</CardTitle>
-            <CardDescription>
+        <Card id={`${flowId}-select-card`} className="rounded-2xl border-border/60 bg-card/40 shadow-sm">
+          <CardHeader id={`${flowId}-select-header`} className="space-y-2">
+            <CardTitle id={`${flowId}-select-title`} className="text-base">
+              Select CSV files
+            </CardTitle>
+            <CardDescription id={`${flowId}-select-description`}>
               Choosing files triggers analyze automatically. Confirm is available only when a proposed match is returned.
             </CardDescription>
-            <Separator />
+            <Separator id={`${flowId}-select-separator`} />
           </CardHeader>
 
-          <CardContent className="space-y-5">
+          <CardContent id={`${flowId}-select-content`} className="space-y-5">
             <DmMultiFilePicker
+              id={`${flowId}-file-picker`}
               label="CSV files"
               helpText="Choose vendor CSV exports. Analyze runs automatically for each file."
               onPickText={handlePickedFiles}
@@ -503,20 +558,27 @@ export function VendorIngestFlow() {
         </Card>
 
         {hasAnalyzeOutputs ? (
-          <Card className="rounded-2xl border-border/60 bg-muted/10">
-            <CardHeader className="space-y-2">
+          <Card id={`${flowId}-results-card`} className="rounded-2xl border-border/60 bg-muted/10">
+            <CardHeader id={`${flowId}-results-header`} className="space-y-2">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <CardTitle className="text-base">Results</CardTitle>
-                  <CardDescription>
+                  <CardTitle id={`${flowId}-results-title`} className="text-base">
+                    Results
+                  </CardTitle>
+                  <CardDescription id={`${flowId}-results-description`}>
                     Review each file, inspect payloads, then confirm sessions.
                   </CardDescription>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">Files {entries.length}</Badge>
-                  <Badge variant="outline">Eligible {eligibleEntries.length}</Badge>
+                  <Badge id={`${flowId}-results-files`} variant="outline">
+                    Files {entries.length}
+                  </Badge>
+                  <Badge id={`${flowId}-results-eligible`} variant="outline">
+                    Eligible {eligibleEntries.length}
+                  </Badge>
                   <Button
+                    id={`${flowId}-confirm-all`}
                     size="sm"
                     className="gap-2"
                     onClick={() => void runConfirmAll()}
@@ -532,14 +594,16 @@ export function VendorIngestFlow() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator id={`${flowId}-results-separator`} />
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent id={`${flowId}-results-content`} className="space-y-4">
               {confirmAllSummary?.skipped.length ? (
-                <Alert className="border-amber-500/40 bg-amber-500/10">
-                  <AlertTitle className="text-amber-100">Confirm all summary</AlertTitle>
-                  <AlertDescription className="text-amber-100/80">
+                <Alert id={`${flowId}-confirm-summary`} className="border-amber-500/40 bg-amber-500/10">
+                  <AlertTitle id={`${flowId}-confirm-summary-title`} className="text-amber-100">
+                    Confirm all summary
+                  </AlertTitle>
+                  <AlertDescription id={`${flowId}-confirm-summary-description`} className="text-amber-100/80">
                     <div className="mt-2 space-y-2 text-xs">
                       {confirmAllSummary.skipped.map((item) => (
                         <div key={item.id} className="flex flex-col gap-1">
@@ -554,6 +618,7 @@ export function VendorIngestFlow() {
 
               <div className="grid gap-4">
                 {entries.map((entry) => {
+                  const entryId = `${flowId}-entry-${entry.id}`;
                   const proposed = entry.analyzeResult?.proposed ?? null;
                   const analyzeJsonAvailable = Boolean(entry.analyzeResult);
                   const confirmJsonAvailable = Boolean(entry.confirmResult);
@@ -566,12 +631,14 @@ export function VendorIngestFlow() {
                   const canConfirm = !getConfirmSkipReason(entry) && !confirmAllLoading;
 
                   return (
-                    <Card key={entry.id} className="rounded-2xl border-border/60 bg-background/5">
-                      <CardHeader className="space-y-2">
+                    <Card id={`${entryId}-card`} key={entry.id} className="rounded-2xl border-border/60 bg-background/5">
+                      <CardHeader id={`${entryId}-header`} className="space-y-2">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
-                            <CardTitle className="text-sm">{entry.picked.filename}</CardTitle>
-                            <CardDescription>
+                            <CardTitle id={`${entryId}-title`} className="text-sm">
+                              {entry.picked.filename}
+                            </CardTitle>
+                            <CardDescription id={`${entryId}-description`}>
                               {entry.picked.contentType || "text/csv"}
                             </CardDescription>
                           </div>
@@ -581,6 +648,7 @@ export function VendorIngestFlow() {
                               className={cn(!analyzeJsonAvailable ? "invisible pointer-events-none" : "")}
                             >
                               <JsonDialog
+                                id={`${entryId}-analyze-json`}
                                 title="Analyze response"
                                 data={entry.analyzeResult ?? {}}
                                 buttonLabel="Analyze JSON"
@@ -592,6 +660,7 @@ export function VendorIngestFlow() {
                               className={cn(!confirmJsonAvailable ? "invisible pointer-events-none" : "")}
                             >
                               <JsonDialog
+                                id={`${entryId}-confirm-json`}
                                 title="Confirm response"
                                 data={entry.confirmResult ?? {}}
                                 buttonLabel="Confirm JSON"
@@ -600,6 +669,7 @@ export function VendorIngestFlow() {
                             </div>
 
                             <Button
+                              id={`${entryId}-rerun-analyze`}
                               variant="secondary"
                               size="sm"
                               className="gap-2"
@@ -615,6 +685,7 @@ export function VendorIngestFlow() {
                             </Button>
 
                             <Button
+                              id={`${entryId}-confirm-session`}
                               size="sm"
                               className="gap-2"
                               onClick={() => void runConfirmForEntry(entry)}
@@ -630,10 +701,10 @@ export function VendorIngestFlow() {
                           </div>
                         </div>
 
-                        <Separator />
+                        <Separator id={`${entryId}-separator`} />
                       </CardHeader>
 
-                      <CardContent className="space-y-4">
+                      <CardContent id={`${entryId}-content`} className="space-y-4">
                         {entry.analyzeStatus === "loading" ? (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -642,10 +713,12 @@ export function VendorIngestFlow() {
                         ) : null}
 
                         {entry.analyzeError ? (
-                          <Alert className="border-red-500/40 bg-red-500/10">
+                          <Alert id={`${entryId}-analyze-error`} className="border-red-500/40 bg-red-500/10">
                             <X className="h-4 w-4" />
-                            <AlertTitle className="text-red-100">Analyze error</AlertTitle>
-                            <AlertDescription className="text-red-100/80">
+                            <AlertTitle id={`${entryId}-analyze-error-title`} className="text-red-100">
+                              Analyze error
+                            </AlertTitle>
+                            <AlertDescription id={`${entryId}-analyze-error-description`} className="text-red-100/80">
                               {entry.analyzeError}
                             </AlertDescription>
                           </Alert>
@@ -654,13 +727,20 @@ export function VendorIngestFlow() {
                         {entry.analyzeResult ? (
                           <div className="rounded-2xl border border-border/60 bg-background/10 p-4">
                             <div className="flex flex-wrap items-center gap-2">
-                              <StatusBadge status={entry.analyzeResult.status} />
-                              <Badge variant="outline">mode: {entry.analyzeResult.mode}</Badge>
-                              <Badge variant="outline">
+                              <StatusBadge
+                                id={`${entryId}-status-badge`}
+                                status={entry.analyzeResult.status}
+                              />
+                              <Badge id={`${entryId}-mode-badge`} variant="outline">
+                                mode: {entry.analyzeResult.mode}
+                              </Badge>
+                              <Badge id={`${entryId}-results-badge`} variant="outline">
                                 results: {entry.analyzeResult.results.length}
                               </Badge>
                               {proposed?.confidence ? (
-                                <Badge variant="outline">confidence: {proposed.confidence}</Badge>
+                                <Badge id={`${entryId}-confidence-badge`} variant="outline">
+                                  confidence: {proposed.confidence}
+                                </Badge>
                               ) : null}
                             </div>
 
@@ -684,23 +764,27 @@ export function VendorIngestFlow() {
                         ) : null}
 
                         {entry.confirmError ? (
-                          <Alert className="border-red-500/40 bg-red-500/10">
+                          <Alert id={`${entryId}-confirm-error`} className="border-red-500/40 bg-red-500/10">
                             <X className="h-4 w-4" />
-                            <AlertTitle className="text-red-100">Confirm error</AlertTitle>
-                            <AlertDescription className="text-red-100/80">
+                            <AlertTitle id={`${entryId}-confirm-error-title`} className="text-red-100">
+                              Confirm error
+                            </AlertTitle>
+                            <AlertDescription id={`${entryId}-confirm-error-description`} className="text-red-100/80">
                               {entry.confirmError}
                             </AlertDescription>
                           </Alert>
                         ) : null}
 
                         {confirmResult ? (
-                          <Alert className="border-emerald-500/40 bg-emerald-500/10">
+                          <Alert id={`${entryId}-confirm-success`} className="border-emerald-500/40 bg-emerald-500/10">
                             <Check className="h-4 w-4" />
-                            <AlertTitle className="text-emerald-100">Confirm success</AlertTitle>
-                            <AlertDescription className="text-emerald-100/80">
+                            <AlertTitle id={`${entryId}-confirm-success-title`} className="text-emerald-100">
+                              Confirm success
+                            </AlertTitle>
+                            <AlertDescription id={`${entryId}-confirm-success-description`} className="text-emerald-100/80">
                               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                                 <span>Session:</span>
-                                <Button variant="link" size="sm" asChild>
+                                <Button id={`${entryId}-session-link`} variant="link" size="sm" asChild>
                                   <Link
                                     href={`/vendors/ingest/sessions/${confirmResult.sessionId}`}
                                     target="_blank"
@@ -719,22 +803,22 @@ export function VendorIngestFlow() {
                         {confirmResult ? (
                           packIntent?.applicable ? (
                             packIntent.unmappedPackGroupCount > 0 ? (
-                              <Alert className="border-amber-500/40 bg-amber-500/10">
-                                <AlertTitle className="text-amber-100">
+                              <Alert id={`${entryId}-pack-intent-unmapped`} className="border-amber-500/40 bg-amber-500/10">
+                                <AlertTitle id={`${entryId}-pack-intent-unmapped-title`} className="text-amber-100">
                                   Unmapped pack sizes
                                 </AlertTitle>
-                                <AlertDescription className="text-amber-100/80">
+                                <AlertDescription id={`${entryId}-pack-intent-unmapped-description`} className="text-amber-100/80">
                                   <details className="mt-2 rounded-lg border border-border/60 bg-background/10 p-3">
                                     <summary className="cursor-pointer text-sm font-medium text-amber-50">
                                       {packIntent.unmappedPackGroupCount} groups,{" "}
                                       {packIntent.unmappedPackLineCount} lines
                                     </summary>
                                     <div className="mt-3 space-y-3">
-                                      <PackIntentTable packIntent={packIntent} />
+                                      <PackIntentTable id={`${entryId}-pack-intent-table`} packIntent={packIntent} />
                                     </div>
                                   </details>
                                   <div className="mt-3">
-                                    <Button variant="secondary" size="sm" asChild>
+                                    <Button id={`${entryId}-pack-intent-open`} variant="secondary" size="sm" asChild>
                                       <Link href="/vendors/ingest/pack-mapping">
                                         Open pack mapping
                                       </Link>
@@ -743,12 +827,14 @@ export function VendorIngestFlow() {
                                 </AlertDescription>
                               </Alert>
                             ) : (
-                              <Alert className="border-amber-500/40 bg-amber-500/10">
-                                <AlertTitle className="text-amber-100">Pack sizes</AlertTitle>
-                                <AlertDescription className="text-amber-100/80">
+                              <Alert id={`${entryId}-pack-intent-none`} className="border-amber-500/40 bg-amber-500/10">
+                                <AlertTitle id={`${entryId}-pack-intent-none-title`} className="text-amber-100">
+                                  Pack sizes
+                                </AlertTitle>
+                                <AlertDescription id={`${entryId}-pack-intent-none-description`} className="text-amber-100/80">
                                   No unmapped pack sizes found.
                                   <div className="mt-3">
-                                    <Button variant="secondary" size="sm" asChild>
+                                    <Button id={`${entryId}-pack-intent-none-open`} variant="secondary" size="sm" asChild>
                                       <Link href="/vendors/ingest/pack-mapping">
                                         Open pack mapping
                                       </Link>
@@ -758,12 +844,14 @@ export function VendorIngestFlow() {
                               </Alert>
                             )
                           ) : (
-                            <Alert className="border-amber-500/40 bg-amber-500/10">
-                              <AlertTitle className="text-amber-100">Pack sizes</AlertTitle>
-                              <AlertDescription className="text-amber-100/80">
+                            <Alert id={`${entryId}-pack-intent-missing`} className="border-amber-500/40 bg-amber-500/10">
+                              <AlertTitle id={`${entryId}-pack-intent-missing-title`} className="text-amber-100">
+                                Pack sizes
+                              </AlertTitle>
+                              <AlertDescription id={`${entryId}-pack-intent-missing-description`} className="text-amber-100/80">
                                 Pack sizes not available for this session.
                                 <div className="mt-3">
-                                  <Button variant="secondary" size="sm" asChild>
+                                  <Button id={`${entryId}-pack-intent-missing-open`} variant="secondary" size="sm" asChild>
                                     <Link href="/vendors/ingest/pack-mapping">
                                       Open pack mapping
                                     </Link>

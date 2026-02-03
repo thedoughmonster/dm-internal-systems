@@ -143,16 +143,22 @@ export default function PackApplyForm({
         </div>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={catalogId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${catalogId}-label`}
+          htmlFor={catalogId}
+          className="text-xs text-muted-foreground"
+        >
           Catalog item
         </Label>
         <Select
+          id={`${catalogId}-select`}
           value={catalogItemId}
           onValueChange={setCatalogItemId}
           disabled={!hasCatalogOptions}
         >
           <SelectTrigger id={catalogId}>
             <SelectValue
+              id={`${catalogId}-value`}
               placeholder={
                 hasCatalogOptions
                   ? "Select a catalog item"
@@ -160,15 +166,19 @@ export default function PackApplyForm({
               }
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent id={`${catalogId}-content`}>
             {hasCatalogOptions ? (
               catalogOptions.map((option) => (
-                <SelectItem key={option.id} value={option.id}>
+                <SelectItem
+                  id={`${catalogId}-item-${option.id}`}
+                  key={option.id}
+                  value={option.id}
+                >
                   {option.label}
                 </SelectItem>
               ))
             ) : (
-              <SelectItem value="none" disabled>
+              <SelectItem id={`${catalogId}-item-none`} value="none" disabled>
                 No catalog items available
               </SelectItem>
             )}
@@ -176,26 +186,42 @@ export default function PackApplyForm({
         </Select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={applyModeId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${applyModeId}-label`}
+          htmlFor={applyModeId}
+          className="text-xs text-muted-foreground"
+        >
           Apply mode
         </Label>
         <Select
+          id={`${applyModeId}-select`}
           value={applyMode}
           onValueChange={(value: "REPLACE_ALWAYS" | "ONLY_IF_NULL") =>
             setApplyMode(value)
           }
         >
           <SelectTrigger id={applyModeId}>
-            <SelectValue />
+            <SelectValue id={`${applyModeId}-value`} />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ONLY_IF_NULL">Only if null</SelectItem>
-            <SelectItem value="REPLACE_ALWAYS">Replace always</SelectItem>
+          <SelectContent id={`${applyModeId}-content`}>
+            <SelectItem id={`${applyModeId}-item-null`} value="ONLY_IF_NULL">
+              Only if null
+            </SelectItem>
+            <SelectItem
+              id={`${applyModeId}-item-replace`}
+              value="REPLACE_ALWAYS"
+            >
+              Replace always
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor={notesId} className="text-xs text-muted-foreground">
+        <Label
+          id={`${notesId}-label`}
+          htmlFor={notesId}
+          className="text-xs text-muted-foreground"
+        >
           Notes
         </Label>
         <Textarea
@@ -208,6 +234,7 @@ export default function PackApplyForm({
       </div>
       <div className="flex items-center gap-3">
         <Button
+          id={`${notesId}-submit`}
           type="submit"
           disabled={busy || !hasCatalogOptions}
           className="min-w-[160px]"

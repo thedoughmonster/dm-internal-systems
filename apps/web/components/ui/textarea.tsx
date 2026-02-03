@@ -1,3 +1,4 @@
+import type { RequireId } from "@/lib/types/component-id"
 // apps/web/components/ui/textarea.tsx
 "use client";
 
@@ -5,7 +6,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  extends RequireId<React.TextareaHTMLAttributes<HTMLTextAreaElement>> {
   /**
    * Initial brightness strength.
    * 0 is faint, 1 is very bright.
@@ -247,6 +248,7 @@ function Knob({ label, value01, onChange }: KnobProps) {
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
+      id,
       className,
       crtBrightnessIntensity = 0.35,
       crtFlickerIntensity = 0.55,
@@ -289,6 +291,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     return (
       <div
+        id={id}
         className={cn(
           "group relative overflow-hidden rounded-md border border-input",
           "bg-black",

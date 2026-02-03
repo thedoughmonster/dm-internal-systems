@@ -15,7 +15,7 @@ import type { PriceChangeRow, PriceChangeSeries } from "../lib/types"
 import {
   DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT,
   getPriceChangeThresholdPercent,
-} from "@/app/settings/lib/api"
+} from "@/lib/app-settings"
 
 const DAY_OPTIONS = [7, 14, 28, 56, 90]
 
@@ -57,23 +57,41 @@ function buildSeriesTable(series: PriceChangeSeries, itemId: string) {
   if (points.length === 0) {
     return <div className="text-xs text-muted-foreground">No invoice history in range.</div>
   }
+  const tableId = `price-changes-series-${itemId}`.replace(/[^a-z0-9]+/gi, "-")
 
   return (
     <div className="overflow-x-auto rounded-md border border-border/60 bg-card/40">
-      <Table>
-        <TableHeader className="text-xs uppercase tracking-wide text-muted-foreground">
-          <TableRow className="border-border/40">
-            <TableHead className="p-2">Invoice date</TableHead>
-            <TableHead className="p-2 text-right">Avg price</TableHead>
+      <Table id={`${tableId}-table`}>
+        <TableHeader
+          id={`${tableId}-header`}
+          className="text-xs uppercase tracking-wide text-muted-foreground"
+        >
+          <TableRow id={`${tableId}-header-row`} className="border-border/40">
+            <TableHead id={`${tableId}-head-date`} className="p-2">
+              Invoice date
+            </TableHead>
+            <TableHead id={`${tableId}-head-price`} className="p-2 text-right">
+              Avg price
+            </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody id={`${tableId}-body`}>
           {points.map((point) => (
-            <TableRow key={point.invoiceDate} className="border-border/40">
-              <TableCell className="p-2 text-xs text-muted-foreground">
+            <TableRow
+              id={`${tableId}-row-${point.invoiceDate}`}
+              key={point.invoiceDate}
+              className="border-border/40"
+            >
+              <TableCell
+                id={`${tableId}-cell-${point.invoiceDate}-date`}
+                className="p-2 text-xs text-muted-foreground"
+              >
                 {point.invoiceDate}
               </TableCell>
-              <TableCell className="p-2 text-right text-xs font-mono">
+              <TableCell
+                id={`${tableId}-cell-${point.invoiceDate}-price`}
+                className="p-2 text-right text-xs font-mono"
+              >
                 {formatCurrency(point.averagePriceCents)}
               </TableCell>
             </TableRow>
@@ -91,6 +109,7 @@ export default async function PriceChangesView({
   searchParams?: { vendor?: string; days?: string }
   baseUrl?: string | null
 }) {
+  const viewId = "price-changes";
   const days = parseDays(searchParams?.days)
   let vendorId = searchParams?.vendor ?? null
 
@@ -153,34 +172,49 @@ export default async function PriceChangesView({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{headerDescription}</Badge>
-          <Badge variant="secondary">Window {days} days</Badge>
-          <Badge variant="outline">Min change {thresholdPercent}%</Badge>
+          <Badge id={`${viewId}-badge-vendor`} variant="outline">
+            {headerDescription}
+          </Badge>
+          <Badge id={`${viewId}-badge-window`} variant="secondary">
+            Window {days} days
+          </Badge>
+          <Badge id={`${viewId}-badge-threshold`} variant="outline">
+            Min change {thresholdPercent}%
+          </Badge>
         </div>
       </header>
 
       {thresholdError ? (
-        <Card className="border-border/70 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Threshold setting unavailable</CardTitle>
-            <CardDescription>Using the default threshold.</CardDescription>
+        <Card id={`${viewId}-threshold-card`} className="border-border/70 bg-card/60">
+          <CardHeader id={`${viewId}-threshold-header`}>
+            <CardTitle id={`${viewId}-threshold-title`} className="text-sm font-medium">
+              Threshold setting unavailable
+            </CardTitle>
+            <CardDescription id={`${viewId}-threshold-description`}>
+              Using the default threshold.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent id={`${viewId}-threshold-content`}>
             <p className="text-sm text-destructive break-words">{thresholdError}</p>
           </CardContent>
         </Card>
       ) : null}
 
-      <Card className="border-border/70 bg-card/60">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-sm font-medium">Time range</CardTitle>
-          <CardDescription>Select a window to compare invoice averages.</CardDescription>
-          <Separator />
+      <Card id={`${viewId}-range-card`} className="border-border/70 bg-card/60">
+        <CardHeader id={`${viewId}-range-header`} className="space-y-2">
+          <CardTitle id={`${viewId}-range-title`} className="text-sm font-medium">
+            Time range
+          </CardTitle>
+          <CardDescription id={`${viewId}-range-description`}>
+            Select a window to compare invoice averages.
+          </CardDescription>
+          <Separator id={`${viewId}-range-separator`} />
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
+        <CardContent id={`${viewId}-range-content`} className="flex flex-wrap gap-2">
           {DAY_OPTIONS.map((option) => (
             <Button
               key={option}
+              id={`${viewId}-range-${option}`}
               asChild
               size="sm"
               variant={option === days ? "default" : "outline"}
@@ -200,59 +234,84 @@ export default async function PriceChangesView({
       </Card>
 
       {errorMessage ? (
-        <Card className="border-border/70 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Unable to load price changes</CardTitle>
-            <CardDescription>Check Supabase connectivity and vendor data.</CardDescription>
+        <Card id={`${viewId}-error-card`} className="border-border/70 bg-card/60">
+          <CardHeader id={`${viewId}-error-header`}>
+            <CardTitle id={`${viewId}-error-title`} className="text-sm font-medium">
+              Unable to load price changes
+            </CardTitle>
+            <CardDescription id={`${viewId}-error-description`}>
+              Check Supabase connectivity and vendor data.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent id={`${viewId}-error-content`}>
             <p className="text-sm text-destructive break-words">{errorMessage}</p>
           </CardContent>
         </Card>
       ) : priceChanges.length === 0 ? (
-        <Card className="border-border/70 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">No price changes</CardTitle>
-            <CardDescription>Nothing exceeded the threshold in this window.</CardDescription>
+        <Card id={`${viewId}-empty-card`} className="border-border/70 bg-card/60">
+          <CardHeader id={`${viewId}-empty-header`}>
+            <CardTitle id={`${viewId}-empty-title`} className="text-sm font-medium">
+              No price changes
+            </CardTitle>
+            <CardDescription id={`${viewId}-empty-description`}>
+              Nothing exceeded the threshold in this window.
+            </CardDescription>
           </CardHeader>
         </Card>
       ) : (
         <>
-          <Card className="border-border/70 bg-card/60">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-sm font-medium">Changed items</CardTitle>
-              <CardDescription>
+          <Card id={`${viewId}-changes-card`} className="border-border/70 bg-card/60">
+            <CardHeader id={`${viewId}-changes-header`} className="space-y-2">
+              <CardTitle id={`${viewId}-changes-title`} className="text-sm font-medium">
+                Changed items
+              </CardTitle>
+              <CardDescription id={`${viewId}-changes-description`}>
                 {priceChanges.length} items with changes above {thresholdPercent}%.
               </CardDescription>
-              <Separator />
+              <Separator id={`${viewId}-changes-separator`} />
             </CardHeader>
-            <CardContent>
+            <CardContent id={`${viewId}-changes-content`}>
               <div className="overflow-x-auto rounded-md border border-border/60 bg-card/40">
-                <Table>
-                  <TableHeader className="text-xs uppercase tracking-wide text-muted-foreground">
-                    <TableRow className="border-border/40">
-                      <TableHead className="p-3">Item</TableHead>
-                      <TableHead className="p-3 text-right">Latest</TableHead>
-                      <TableHead className="p-3 text-right">Previous</TableHead>
-                      <TableHead className="p-3 text-right">Delta</TableHead>
+                <Table id={`${viewId}-changes-table`}>
+                  <TableHeader
+                    id={`${viewId}-changes-table-header`}
+                    className="text-xs uppercase tracking-wide text-muted-foreground"
+                  >
+                    <TableRow id={`${viewId}-changes-table-header-row`} className="border-border/40">
+                      <TableHead id={`${viewId}-changes-table-head-item`} className="p-3">
+                        Item
+                      </TableHead>
+                      <TableHead id={`${viewId}-changes-table-head-latest`} className="p-3 text-right">
+                        Latest
+                      </TableHead>
+                      <TableHead id={`${viewId}-changes-table-head-previous`} className="p-3 text-right">
+                        Previous
+                      </TableHead>
+                      <TableHead id={`${viewId}-changes-table-head-delta`} className="p-3 text-right">
+                        Delta
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody id={`${viewId}-changes-table-body`}>
                     {priceChanges.map((change) => (
-                      <TableRow key={change.vendor_catalog_item_id} className="border-border/40">
-                        <TableCell className="p-3 text-sm">
+                      <TableRow
+                        id={`${viewId}-changes-row-${change.vendor_catalog_item_id}`}
+                        key={change.vendor_catalog_item_id}
+                        className="border-border/40"
+                      >
+                        <TableCell id={`${viewId}-changes-cell-${change.vendor_catalog_item_id}-item`} className="p-3 text-sm">
                           <div className="text-foreground">{formatPriceChangeLabel(change)}</div>
                           <div className="text-xs text-muted-foreground">
                             {change.vendor_catalog_item_id}
                           </div>
                         </TableCell>
-                        <TableCell className="p-3 text-right text-sm">
+                        <TableCell id={`${viewId}-changes-cell-${change.vendor_catalog_item_id}-latest`} className="p-3 text-right text-sm">
                           {formatCurrency(change.latest_price_cents)}
                         </TableCell>
-                        <TableCell className="p-3 text-right text-sm">
+                        <TableCell id={`${viewId}-changes-cell-${change.vendor_catalog_item_id}-previous`} className="p-3 text-right text-sm">
                           {formatCurrency(change.previous_price_cents)}
                         </TableCell>
-                        <TableCell className="p-3 text-right text-sm">
+                        <TableCell id={`${viewId}-changes-cell-${change.vendor_catalog_item_id}-delta`} className="p-3 text-right text-sm">
                           {formatSignedPercent(change.delta_percent)} ({formatSignedCurrency(change.delta_cents)})
                         </TableCell>
                       </TableRow>
@@ -264,12 +323,16 @@ export default async function PriceChangesView({
           </Card>
 
           {seriesError ? (
-            <Card className="border-border/70 bg-card/60">
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Price history unavailable</CardTitle>
-                <CardDescription>Series data could not be loaded.</CardDescription>
+            <Card id={`${viewId}-series-error-card`} className="border-border/70 bg-card/60">
+              <CardHeader id={`${viewId}-series-error-header`}>
+                <CardTitle id={`${viewId}-series-error-title`} className="text-sm font-medium">
+                  Price history unavailable
+                </CardTitle>
+                <CardDescription id={`${viewId}-series-error-description`}>
+                  Series data could not be loaded.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent id={`${viewId}-series-error-content`}>
                 <p className="text-sm text-destructive break-words">{seriesError}</p>
               </CardContent>
             </Card>
@@ -278,24 +341,31 @@ export default async function PriceChangesView({
           <div className="grid gap-4">
             {priceChanges.map((change) => (
               <Card
+                id={`${viewId}-history-${change.vendor_catalog_item_id}`}
                 key={`${change.vendor_catalog_item_id}-history`}
                 className="border-border/70 bg-card/60"
               >
-                <CardHeader className="space-y-2">
-                  <CardTitle className="text-sm font-medium">
+                <CardHeader id={`${viewId}-history-${change.vendor_catalog_item_id}-header`} className="space-y-2">
+                  <CardTitle id={`${viewId}-history-${change.vendor_catalog_item_id}-title`} className="text-sm font-medium">
                     {formatPriceChangeLabel(change)}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription id={`${viewId}-history-${change.vendor_catalog_item_id}-description`}>
                     Latest {formatCurrency(change.latest_price_cents)} on {change.latest_invoice_date}. Previous {formatCurrency(
                       change.previous_price_cents
                     )} on {change.previous_invoice_date}.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent id={`${viewId}-history-${change.vendor_catalog_item_id}-content`} className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <Badge variant="outline">Delta {formatSignedPercent(change.delta_percent)}</Badge>
-                    <Badge variant="outline">{formatSignedCurrency(change.delta_cents)}</Badge>
-                    <Badge variant="secondary">{change.vendor_catalog_item_id}</Badge>
+                    <Badge id={`${viewId}-history-${change.vendor_catalog_item_id}-delta`} variant="outline">
+                      Delta {formatSignedPercent(change.delta_percent)}
+                    </Badge>
+                    <Badge id={`${viewId}-history-${change.vendor_catalog_item_id}-delta-amount`} variant="outline">
+                      {formatSignedCurrency(change.delta_cents)}
+                    </Badge>
+                    <Badge id={`${viewId}-history-${change.vendor_catalog_item_id}-catalog`} variant="secondary">
+                      {change.vendor_catalog_item_id}
+                    </Badge>
                   </div>
                   {buildSeriesTable(series, change.vendor_catalog_item_id)}
                 </CardContent>

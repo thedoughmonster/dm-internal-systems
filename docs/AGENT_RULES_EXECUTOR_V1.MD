@@ -36,6 +36,7 @@ This document adds role specific rules for ROLE: EXECUTOR.
 - All UI reads and writes must go through Edge Functions.
 - Do not call Supabase REST endpoints directly from UI code.
 - Phase in this rule where required, but treat new work as Edge Function only.
+- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
 
 ## Command allowlist rule
 
@@ -75,7 +76,7 @@ This exception is strictly limited to these files:
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
 - It must not be used for product code, migrations, workflows, or behavior changes.
-- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+- Every use of this exception must be recorded in the current session `README.md` under a Notes section with date and a short summary of what changed.
 
 ## Role Definition
 
@@ -83,34 +84,32 @@ The Executor applies changes to the repository based on an explicit directive.
 The Executor does not interpret intent or make design decisions.
 The Executor runs the full directive end to end with minimal operator input.
 
-## Directive Discovery
+## Directive discovery
 
-Executor directives are stored outside the repo under `~/src/.dm/` in a per session folder.
+Executor tasks are stored under `apps/web/.local/directives/<guid>/`.
 
-- Base directory: `~/src/.dm/`
-- Session folder name pattern: `YYYYMMDDThhmmssZ_<short_slug>/`
-- Directive folder: `<session_folder>/directives/`
-- Directive filename pattern: `directive_YYYYMMDDThhmmssZ_<short_slug>.md`
+- Base directory: `apps/web/.local/directives/`
+- Session folder name pattern: `<guid>/`
+- Task filename pattern: `TASK_<slug>.md`
 
-The Executor must be given a specific directive file path by the operator.
-The Executor must not guess which directive to use.
+The Executor must be given a specific task file path by the operator.
+The Executor must not guess which task to use.
 
 ## Non executable artifacts
 
-The Executor must not execute TODOs or notes.
+The Executor must not execute session `README.md` files.
 
-- TODOs live in `<session_folder>/todo/` and are non-binding context only.
-- Notes live in `<session_folder>/notes/` and are non-binding context only.
-- Only a directive file in `<session_folder>/directives/` is executable instruction.
+- `README.md` is intake and context only.
+- `TASK_<slug>.md` is executable instruction.
 
-If the operator provides a TODO path instead of a directive path, the Executor must stop and request a directive.
+If the operator provides a README path instead of a task path, the Executor must stop and request a task.
 
-The Executor must not create, edit, or delete any files under `~/src/.dm/` (including `<session_folder>/todo/` and `<session_folder>/notes/`).
-If a directive includes steps that attempt to create or edit TODO items, the Executor must ignore those steps, continue with the remaining steps when possible, and report that the TODO steps were ignored.
+The Executor must not create or delete directive files unless explicitly instructed.
+The Executor may update the task file meta `status` and `result` fields when executing the assigned task.
 
 ## Session folder lifecycle responsibilities
 
-The Executor does not manage `~/src/.dm/` lifecycle.
+The Executor does not manage `apps/web/.local/directives/` lifecycle.
 
 After executing a directive, the Executor must:
 - Report the directive file path executed.

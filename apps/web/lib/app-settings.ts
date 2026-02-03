@@ -1,5 +1,14 @@
-import type { AppSettingRow, PriceChangeThresholdSetting } from "./types"
 import { buildApiUrl } from "@/lib/api-url"
+
+export type AppSettingRow = {
+  key: string
+  value: Record<string, unknown>
+  updated_at: string
+}
+
+export type PriceChangeThresholdSetting = {
+  percent: number
+}
 
 export const PRICE_CHANGE_THRESHOLD_KEY = "vendors.price_change_percent_threshold"
 export const DEFAULT_PRICE_CHANGE_THRESHOLD_PERCENT = 2
@@ -20,7 +29,7 @@ export async function fetchAppSetting(
   const response = await fetch(
     buildApiUrl(`/api/app-settings?key=${encodeURIComponent(key)}`, baseUrl ?? undefined),
     {
-    cache: "no-store",
+      cache: "no-store",
     }
   )
 
