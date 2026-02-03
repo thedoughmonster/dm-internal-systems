@@ -54,4 +54,18 @@ export type IngestConfirmSuccessResponse = {
   writeResult: object;
   audit: object;
   sessionId: string;
+  packIntent: PackIntent;
+};
+
+export type PackIntent = {
+  applicable: boolean;
+  vendorInvoiceId: string | null;
+  unmappedPackLineCount: number;
+  unmappedPackGroupCount: number;
+  unmappedPackGroups: Array<{
+    packStringNormalized: string;
+    lineCount: number;
+    rawSamples: string[];
+    sampleLine: { vendorSku: string | null; description: string | null };
+  }>;
 };

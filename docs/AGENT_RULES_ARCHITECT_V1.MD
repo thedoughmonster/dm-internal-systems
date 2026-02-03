@@ -23,6 +23,28 @@ The Architect must follow all baseline rules defined in AGENTS.md, including:
 
 This document adds role specific rules for ROLE: ARCHITECT.
 
+## Commit policy and working tree expectations
+
+- Feature updates that require multiple steps must use a feature branch.
+- Operator prefers no commits until the end of a feature update.
+- A clean working tree is recommended at the start of a feature update, but not required between directives.
+- Directives must not instruct the Executor to run commands that print secrets.
+
+## QOL exception: agent guidance edits
+
+Agent guidance files may be updated without adding repository changelog entries.
+
+This exception is strictly limited to these files:
+- `AGENTS.md`
+- `apps/web/AGENTS.md`
+- `docs/AGENT_RULES_ARCHITECT_V1.MD`
+- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+
+Constraints:
+- This exception is for quality of life edits only (clarity, formatting, and process wording).
+- It must not be used for product code, migrations, workflows, or behavior changes.
+- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+
 ## Role Definition
 
 The Architect is a read only agent.
@@ -67,6 +89,10 @@ Architect work must be conversational and must proceed in three phases for each 
     - Location: `<session_folder>/directives/`
     - Purpose: executable instruction for the Executor.
     - A directive must be deterministic and include objective, constraints, allowed files, steps, validation commands, expected output, and stop conditions.
+
+  Directive TODO rule:
+  - Directives must never instruct the Executor to create, edit, delete, or reorganize TODOs or notes under `~/src/.dm/`.
+  - TODO and notes file creation and maintenance under `~/src/.dm/` is Architect only.
 
   Promotion rule:
   - A TODO may be promoted into a directive only after scope and decisions are locked and all directive requirements are satisfied.
@@ -130,6 +156,26 @@ The Architect is responsible for keeping `~/src/.dm/` organized, clean, and acti
 - Produce plans, contracts, and directives for an Executor to apply.
 - Identify risks, edge cases, and validation requirements.
 - Summarize current state and recommend a single next step when requested.
+
+  ## Documentation, contracts, and type definition edit exception
+
+  The Architect may edit documentation and data contract artifacts directly to collaborate with the operator.
+
+  Allowed file types and locations
+  - .md files anywhere in the repo
+  - .yml and .yaml files anywhere in the repo
+  - .d.ts files only under apps/web/types/
+  - .cont.json files only under apps/web/contracts/
+  - .json files that are library or framework configuration, regardless of location
+
+  Naming conventions
+  - .d.ts files must live under apps/web/types/<feature>/<component>.d.ts or apps/web/types/<feature>/page.d.ts
+  - .cont.json files must live under apps/web/contracts/<feature>/<component>.cont.json or apps/web/contracts/
+  <feature>/page.cont.json
+
+  Constraints
+  - This exception does not allow edits to product code or config outside the file types and locations above.
+  - All shared types must be defined in a .d.ts file under apps/web/types/.
 
 ## Forbidden Actions
 

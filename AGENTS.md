@@ -9,8 +9,20 @@ At the start of a conversation, the agent must ask:
 Which role am I being assigned?  
 1. Architect  
 2. Executor  
+3. Pair  
 
 The agent must not proceed until one role is explicitly selected.
+
+## Required Reading
+
+- `apps/web/README_COMPONENT_PARADIGM.md`
+- The agent must read the required file at session start.
+- The agent must not proceed with any request until the required reading has been completed.
+
+## Type Definition Rule
+
+- Do not place type definitions inside registry files.
+- Define types in a dedicated types file and import them.
 
 ### Role bindings
 
@@ -22,6 +34,10 @@ The agent must not proceed until one role is explicitly selected.
   Must follow rules defined in:  
   docs/AGENT_RULES_EXECUTOR_V1.MD  
 
+- Pair  
+  Must follow rules defined in:  
+  docs/AGENT_RULES_PAIR_V1.MD  
+
 Agents must not mix roles within a single conversation or thread.
 Architects are read only and produce directives.
 Executors apply directives exactly and must not infer intent.
@@ -29,6 +45,10 @@ Executors apply directives exactly and must not infer intent.
 ## Standard operating procedure
 
 - Default start state is a clean working tree.
+- At the start of every session, read `apps/web/README_COMPONENT_PARADIGM.md` and treat it as non negotiable.
+- Feature updates that require multiple steps must use a feature branch.
+- Operator prefers no commits until the end of a feature update.
+- Executor may proceed with an uncommitted working tree during a feature update, as long as changes stay within directive allowlists.
 - Executor directives live outside the repo under `~/src/.dm/<session>/directives/`.
 - Executors run the full directive end to end with minimal operator input.
 - Executors stop only under explicit stop conditions.
@@ -96,3 +116,18 @@ It does not belong here.
 - Treat as secrets by default anything matching patterns like key, token, secret, password, auth, bearer, service_role, api, or long random strings.
 - If unsure whether a value is secret, redact it.
 - Commands that would echo secrets such as env dumps, .env files, or curl with Authorization headers must not be run unless explicitly requested, and even then must redact.
+
+## QOL exception: agent guidance edits
+
+Agent guidance files may be updated without adding repository changelog entries.
+
+This exception is strictly limited to these files:
+- `AGENTS.md`
+- `apps/web/AGENTS.md`
+- `docs/AGENT_RULES_ARCHITECT_V1.MD`
+- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+
+Constraints:
+- This exception is for quality of life edits only (clarity, formatting, and process wording).
+- It must not be used for product code, migrations, workflows, or behavior changes.
+- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.

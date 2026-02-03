@@ -8,6 +8,7 @@ import {
   IngestConfirmBlockedResponse,
   IngestConfirmSuccessResponse,
   IngestSniffResponse,
+  PackIntent,
   ProposedMatch,
 } from "./ingest_types.ts";
 import { IdentifyResult } from "./identifier_types.ts";
@@ -30,7 +31,8 @@ const getCorsHeaders = (req: Request) => {
   return {
     ...(isAllowed ? { "access-control-allow-origin": origin } : {}),
     "access-control-allow-methods": "POST,OPTIONS",
-    "access-control-allow-headers": "content-type, authorization, apikey, x-client-info",
+    "access-control-allow-headers":
+      "content-type, authorization, apikey, x-client-info, x-internal-ui-secret",
     vary: "Origin",
   };
 };
@@ -102,6 +104,127 @@ function buildUnexpectedErrorPayload(error: unknown): object {
     };
   }
   return { message: "Unknown error" };
+}
+
+function normalizePackString(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toUpperCase();
+}
+
+function buildEmptyPackIntent(
+  applicable: boolean,
+  vendorInvoiceId: string | null,
+): PackIntent {
+  return {
+    applicable,
+    vendorInvoiceId,
+    unmappedPackLineCount: 0,
+    unmappedPackGroupCount: 0,
+    unmappedPackGroups: [],
+  };
+}
+
+async function buildPackIntent(params: {
+  supabase: ReturnType<typeof createClient>;
+  vendorId: string;
+  invoiceId: string | null;
+}): Promise<PackIntent> {
+  const { supabase, vendorId, invoiceId } = params;
+  if (!invoiceId) {
+    return buildEmptyPackIntent(false, null);
+  }
+
+  const { data: invoiceLines, error: invoiceLinesError } = await supabase
+    .from("vendor_invoice_lines")
+    .select("vendor_sku, description, raw")
+    .eq("vendor_invoice_id", invoiceId);
+  if (invoiceLinesError) {
+    throw invoiceLinesError;
+  }
+
+  const grouped = new Map<
+    string,
+    {
+      lineCount: number;
+      rawSamples: Set<string>;
+      sampleLine: { vendorSku: string | null; description: string | null };
+    }
+  >();
+
+  for (const line of invoiceLines ?? []) {
+    const raw = line?.raw as { pack_size_text?: unknown } | null;
+    const rawPack = typeof raw?.pack_size_text === "string" ? raw.pack_size_text : null;
+    if (!rawPack) continue;
+    const normalized = normalizePackString(rawPack);
+    if (!normalized) continue;
+
+    const entry =
+      grouped.get(normalized) ?? {
+        lineCount: 0,
+        rawSamples: new Set<string>(),
+        sampleLine: { vendorSku: null, description: null },
+      };
+
+    entry.lineCount += 1;
+    if (entry.rawSamples.size < 3 && !entry.rawSamples.has(rawPack)) {
+      entry.rawSamples.add(rawPack);
+    }
+    if (!entry.sampleLine.vendorSku && line?.vendor_sku) {
+      entry.sampleLine.vendorSku = line.vendor_sku;
+    }
+    if (!entry.sampleLine.description && line?.description) {
+      entry.sampleLine.description = line.description;
+    }
+
+    grouped.set(normalized, entry);
+  }
+
+  const normalizedStrings = Array.from(grouped.keys());
+  if (normalizedStrings.length === 0) {
+    return buildEmptyPackIntent(true, invoiceId);
+  }
+
+  const { data: parsedRows, error: parseError } = await supabase
+    .from("vendor_pack_string_parses")
+    .select("pack_string_normalized")
+    .eq("vendor_id", vendorId)
+    .in("pack_string_normalized", normalizedStrings);
+  if (parseError) {
+    throw parseError;
+  }
+
+  const mapped = new Set(
+    (parsedRows ?? [])
+      .map((row) => row.pack_string_normalized)
+      .filter((value): value is string => Boolean(value)),
+  );
+
+  const unmapped = normalizedStrings
+    .map((packStringNormalized) => {
+      const entry = grouped.get(packStringNormalized);
+      if (!entry) return null;
+      return {
+        packStringNormalized,
+        lineCount: entry.lineCount,
+        rawSamples: Array.from(entry.rawSamples),
+        sampleLine: entry.sampleLine,
+      };
+    })
+    .filter(
+      (entry): entry is NonNullable<typeof entry> =>
+        Boolean(entry && !mapped.has(entry.packStringNormalized)),
+    )
+    .sort((a, b) => b.lineCount - a.lineCount)
+    .slice(0, 25);
+
+  const unmappedLineCount = unmapped.reduce((sum, entry) => sum + entry.lineCount, 0);
+
+  return {
+    applicable: true,
+    vendorInvoiceId: invoiceId,
+    unmappedPackLineCount: unmappedLineCount,
+    unmappedPackGroupCount: unmapped.length,
+    unmappedPackGroups: unmapped,
+  };
 }
 
 serve(async (req) => {
@@ -256,6 +379,7 @@ serve(async (req) => {
       handlerId: proposed.id,
       writeSummary: { dryRun: true, writesSkipped: true },
     });
+    const packIntent = buildEmptyPackIntent(false, null);
     const body: IngestConfirmSuccessResponse = {
       ok: true,
       mode: "CONFIRM",
@@ -263,6 +387,7 @@ serve(async (req) => {
       writeResult: { dryRun: true, writesSkipped: true },
       audit,
       sessionId: "dry-run",
+      packIntent,
     };
     return jsonResponse(body, 200, corsHeaders);
   }
@@ -285,11 +410,6 @@ serve(async (req) => {
       csvText,
       filename,
     });
-    const audit = buildAuditEvent({
-      ...auditBase,
-      handlerId: proposed.id,
-      writeSummary: handlerResult.summary,
-    });
     const confirmMeta = {
       expectedId,
       expectedVendorKey,
@@ -300,6 +420,22 @@ serve(async (req) => {
     const invoiceId =
       (handlerResult as { summary?: { invoiceId?: string | null } }).summary?.invoiceId ??
       null;
+    const packIntent = await buildPackIntent({
+      supabase,
+      vendorId: vendor.id,
+      invoiceId,
+    });
+    const summary =
+      (handlerResult as { summary?: Record<string, unknown> | null }).summary ?? {};
+    const writeSummary = {
+      ...(typeof summary === "object" && summary ? summary : {}),
+      packIntent,
+    };
+    const audit = buildAuditEvent({
+      ...auditBase,
+      handlerId: proposed.id,
+      writeSummary,
+    });
     const { data: session, error: sessionError } = await supabase
       .from("vendor_ingest_sessions")
       .insert({
@@ -308,7 +444,7 @@ serve(async (req) => {
         filename,
         proposed,
         confirm_meta: confirmMeta,
-        write_summary: handlerResult.summary,
+        write_summary: writeSummary,
         audit,
         vendor_invoice_id: invoiceId,
       })
@@ -324,6 +460,7 @@ serve(async (req) => {
       writeResult: handlerResult,
       audit,
       sessionId: session.id,
+      packIntent,
     };
     return jsonResponse(body, 200, corsHeaders);
   } catch (error) {

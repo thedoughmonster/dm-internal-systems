@@ -2,6 +2,13 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+type CardTitleBarProps = {
+  title: React.ReactNode
+  siblingTitle?: React.ReactNode
+  subtitle?: React.ReactNode
+  className?: string
+}
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -44,6 +51,29 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = "CardTitle"
 
+const CardTitleBar = ({
+  title,
+  siblingTitle,
+  subtitle,
+  className,
+}: CardTitleBarProps) => (
+  <div className={cn("space-y-2", className)}>
+    <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="truncate text-base font-semibold leading-none tracking-tight">
+        {title}
+      </div>
+      {siblingTitle ? (
+        <div className="truncate font-mono text-xs text-muted-foreground">
+          {siblingTitle}
+        </div>
+      ) : null}
+    </div>
+    {subtitle ? (
+      <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
+    ) : null}
+  </div>
+)
+
 const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -76,4 +106,12 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardTitleBar,
+  CardDescription,
+  CardContent,
+}

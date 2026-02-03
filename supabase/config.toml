@@ -404,3 +404,8 @@ entrypoint = "./functions/toast_checkin/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/toast_checkin/*.html" ]
+
+[functions.vendor_pack_unmapped_queue_v1]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/vendor_pack_unmapped_queue_v1/index.ts"

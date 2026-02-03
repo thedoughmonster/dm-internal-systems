@@ -13,7 +13,7 @@ export default function CheckinClient() {
   const [status, setStatus] = useState<Status>("idle");
   const [requestError, setRequestError] = useState<string | null>(null);
 
-  const checkin = useMemo(() => searchParams.get("checkin") ?? "", [searchParams]);
+  const checkin = useMemo(() => searchParams?.get("checkin") ?? "", [searchParams]);
   const hasCheckin = checkin.length > 0;
   const postUrl = useMemo(() => {
     if (!POST_URL) {

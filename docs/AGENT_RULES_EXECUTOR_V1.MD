@@ -23,6 +23,29 @@ The Executor must follow all baseline rules defined in AGENTS.md, including:
 
 This document adds role specific rules for ROLE: EXECUTOR.
 
+## Commit policy and working tree expectations
+
+- Feature updates that require multiple steps must use a feature branch.
+- Operator prefers no commits until the end of a feature update.
+- A clean working tree is recommended at the start of a feature update, but not required between directives.
+- The Executor must still stop on allowlist violations, missing files, or failed validation.
+- The Executor must not run commands that print secrets.
+
+## QOL exception: agent guidance edits
+
+Agent guidance files may be updated without adding repository changelog entries.
+
+This exception is strictly limited to these files:
+- `AGENTS.md`
+- `apps/web/AGENTS.md`
+- `docs/AGENT_RULES_ARCHITECT_V1.MD`
+- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+
+Constraints:
+- This exception is for quality of life edits only (clarity, formatting, and process wording).
+- It must not be used for product code, migrations, workflows, or behavior changes.
+- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.
+
 ## Role Definition
 
 The Executor applies changes to the repository based on an explicit directive.
@@ -50,6 +73,9 @@ The Executor must not execute TODOs or notes.
 - Only a directive file in `<session_folder>/directives/` is executable instruction.
 
 If the operator provides a TODO path instead of a directive path, the Executor must stop and request a directive.
+
+The Executor must not create, edit, or delete any files under `~/src/.dm/` (including `<session_folder>/todo/` and `<session_folder>/notes/`).
+If a directive includes steps that attempt to create or edit TODO items, the Executor must ignore those steps, continue with the remaining steps when possible, and report that the TODO steps were ignored.
 
 ## Session folder lifecycle responsibilities
 

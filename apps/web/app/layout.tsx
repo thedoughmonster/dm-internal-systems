@@ -4,6 +4,8 @@ import Link from "next/link";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Share_Tech_Mono } from "next/font/google";
+import GlobalSidebarShell from "@/app/composites/global-sidebar-shell";
+import { topNavItems } from "@/lib/navigation-registry";
 
 const machineMono = Share_Tech_Mono({
   weight: "400",
@@ -33,36 +35,15 @@ function TopNav() {
         </div>
 
         <nav className="flex items-center gap-1">
-          <Link
-            href="/vendors/ingest"
-            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
-          >
-            Vendor ingest
-          </Link>
-          <Link
-            href="/vendors/ingest/sessions"
-            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
-          >
-            Sessions
-          </Link>
-          <Link
-            href="/vendors/ingest/sessions?intent=pack"
-            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
-          >
-            Pack verification
-          </Link>
-          <Link
-            href="/curbside"
-            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
-          >
-            Curbside
-          </Link>
-          <Link
-            href="/ui-kit"
-            className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
-          >
-            UI kit
-          </Link>
+          {topNavItems.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="rounded-md px-3 py-2 text-sm text-foreground/90 hover:bg-accent hover:text-accent-foreground"
+            >
+              {item.title}
+            </Link>
+          ))}
         </nav>
       </div>
     </header>
@@ -74,12 +55,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const SIDEBAR_TOGGLEABLE = true;
+
   return (
     <html lang="en" className="dark">
       <body className={machineMono.variable}>
         <div className="dm-app-bg min-h-screen">
           <TopNav />
-          {children}
+          <GlobalSidebarShell toggleable={SIDEBAR_TOGGLEABLE}>
+            {children}
+          </GlobalSidebarShell>
         </div>
         <Toaster position="bottom-right" theme="dark" richColors closeButton />
       </body>

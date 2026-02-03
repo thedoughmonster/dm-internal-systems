@@ -16,6 +16,13 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 - Executable directives live under `<session_folder>/directives/`.
 - TODOs live under `<session_folder>/todo/` and are non-binding context only.
 
+## Commit policy
+
+- Feature updates that require multiple steps must use a feature branch.
+- Operator prefers no commits until the end of a feature update.
+- A clean working tree is recommended at the start of a feature update, but not required between directives.
+- Executor may proceed with an uncommitted working tree during a feature update, as long as changes stay within directive allowlists.
+
 ## Changelog requirement
 - Every agent session that modifies any file under `apps/web` must add exactly one new entry under `apps/web/changelog/`.
 - Filename convention: `apps/web/changelog/YYYYMMDDThhmmssZ_session_summary.md`.
@@ -64,3 +71,18 @@ See `REPO_LINK.md` for the canonical repository URL and access guidance.
 
 ## Style guides and constraints
 - read the `ui_style_contract.json` and `ui_style_contract.md` adhere to principles therein
+
+## QOL exception: agent guidance edits
+
+Agent guidance files may be updated without adding repository changelog entries.
+
+This exception is strictly limited to these files:
+- `AGENTS.md`
+- `apps/web/AGENTS.md`
+- `docs/AGENT_RULES_ARCHITECT_V1.MD`
+- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+
+Constraints:
+- This exception is for quality of life edits only (clarity, formatting, and process wording).
+- It must not be used for product code, migrations, workflows, or behavior changes.
+- Every use of this exception must be recorded in the current session folder under `~/src/.dm/<session>/notes/` with date and a short summary of what changed.

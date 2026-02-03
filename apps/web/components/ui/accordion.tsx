@@ -6,15 +6,36 @@ import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Accordion = AccordionPrimitive.Root
+type AccordionVariant = "default" | "sidebar"
+
+const AccordionVariantContext = React.createContext<AccordionVariant>("default")
+
+const useAccordionVariant = () => React.useContext(AccordionVariantContext)
+
+const Accordion = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root> & {
+    variant?: AccordionVariant
+  }
+>(({ variant = "default", ...props }, ref) => (
+  <AccordionVariantContext.Provider value={variant}>
+    <AccordionPrimitive.Root ref={ref} {...props} />
+  </AccordionVariantContext.Provider>
+))
+Accordion.displayName = "Accordion"
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
+  // Apply variant styles without forcing consumers to set className.
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn(
+      "border-b",
+      useAccordionVariant() === "sidebar" && "border-border/70",
+      className
+    )}
     {...props}
   />
 ))
@@ -28,7 +49,9 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+        useAccordionVariant() === "sidebar"
+          ? "flex flex-1 items-center justify-between py-2 text-sm font-medium text-sidebar-foreground/80 transition-all hover:no-underline [&[data-state=open]>svg]:rotate-180"
+          : "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
         className
       )}
       {...props}

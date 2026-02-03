@@ -2,9 +2,11 @@
 
 ## Sniff then confirm flow
 - Send raw CSV or JSON body with `csv` to sniff format.
+- Analyze is sniff only and must not create sessions.
 - Sniff response returns a proposed match, ambiguity, or unknown format.
 - Client must send a second request with `confirm=true` to allow writes.
 - Confirm requests must pass expected identifier binding checks when provided.
+- Confirm creates an ingest session.
 
 ## Body parsing and single read rule
 - The entry point reads the request body once using `req.text()`.
@@ -27,6 +29,8 @@ If any provided expected value does not match the proposed match, the request is
 - `INCOMPATIBLE` 422: known format structure but incompatible fields. UI should alert and stop.
 - `MISMATCHED_CONFIRMATION` 409: expected binding does not match proposed. UI should not proceed.
 - `HANDLER_NOT_FOUND` 500: server misconfiguration. UI should alert and stop.
+- `STRUCTURED_TEXT_MISMATCH` 409: structured pack string did not match normalization. UI should alert and stop.
+- `NOTES_REQUIRED` 400: notes required when updating a parse. UI should prompt for notes.
 
 ## Adding new identifiers and handlers
 1. Add a new identifier function in `supabase/functions/vendor_ingest/identifier_functions`.
@@ -37,6 +41,17 @@ If any provided expected value does not match the proposed match, the request is
 
 ## Audit note
 Audit entries are returned in the response only in v0. No database writes occur for audit.
+
+## Confirm success fields
+
+- `sessionId` string
+- `packIntent` object
+
+## Pack intent semantics
+
+- Computed from invoice lines `raw.pack_size_text`.
+- Normalized by trimming ends, collapsing internal whitespace, and uppercasing.
+- Unmapped groups are capped at 25.
 
 ## Post-v0 follow-ups
 

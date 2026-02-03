@@ -1,9 +1,9 @@
-import PackVerificationView from "./composites/PackVerificationView";
+import { redirect } from "next/navigation";
 
 type PageProps = {
   params: { sessionId: string };
 };
 
 export default function PackVerificationPage({ params }: PageProps) {
-  return <PackVerificationView sessionId={params.sessionId} />;
+  redirect(`/vendors/ingest/sessions/${params.sessionId}`);
 }

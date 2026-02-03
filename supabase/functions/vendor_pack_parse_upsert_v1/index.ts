@@ -4,13 +4,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 type PackParseUpsertRequest = {
   vendorId: string;
   packStringRaw: string;
-  packStringStructured: string;
   packQty: number;
-  packUom: string;
   packSize: number;
   packSizeUom: string;
-  verifiedBy?: string | null;
-  notes?: string | null;
   evidence?: Record<string, unknown> | null;
 };
 
@@ -143,77 +139,16 @@ serve(async (req) => {
   try {
     const vendorId = requireString(payload.vendorId, "vendor_id");
     const packStringRaw = requireString(payload.packStringRaw, "pack_string_raw");
-    const packStringStructured = requireString(
-      payload.packStringStructured,
-      "pack_string_structured",
-    );
     const packQty = requireNumber(payload.packQty, "pack_qty");
-    const packUom = requireString(payload.packUom, "pack_uom");
     const packSize = requireNumber(payload.packSize, "pack_size");
     const packSizeUom = requireString(payload.packSizeUom, "pack_size_uom");
 
     const normalized = normalizePackString(packStringRaw);
-    if (packStringStructured !== normalized) {
-      return jsonResponse(
-        {
-          ok: false,
-          error: {
-            code: "STRUCTURED_TEXT_MISMATCH",
-            message: "Structured text must equal normalized pack string",
-            details: { normalized },
-          },
-        },
-        409,
-        corsHeaders,
-      );
-    }
 
     const supabase = createClient(
       env("SUPABASE_URL"),
       env("SUPABASE_SERVICE_ROLE_KEY"),
     );
-
-    const { data: existing, error: existingError } = await supabase
-      .from("vendor_pack_string_parses")
-      .select("id")
-      .eq("vendor_id", vendorId)
-      .eq("pack_string_normalized", normalized)
-      .maybeSingle();
-
-    if (existingError) {
-      return jsonResponse(
-        {
-          ok: false,
-          error: {
-            code: "LOOKUP_FAILED",
-            message: "Failed to check existing parse",
-            details: { reason: existingError.message },
-          },
-        },
-        500,
-        corsHeaders,
-      );
-    }
-
-    const notes = payload.notes?.trim() ?? "";
-    if (existing && !notes) {
-      return jsonResponse(
-        {
-          ok: false,
-          error: {
-            code: "NOTES_REQUIRED",
-            message: "Notes are required when updating a parse",
-          },
-        },
-        400,
-        corsHeaders,
-      );
-    }
-
-    const evidencePayload = {
-      ...(payload.evidence ?? {}),
-      ...(notes ? { notes } : {}),
-    };
 
     const { data, error } = await supabase
       .from("vendor_pack_string_parses")
@@ -223,12 +158,12 @@ serve(async (req) => {
           pack_string_raw: packStringRaw,
           pack_string_normalized: normalized,
           pack_qty: packQty,
-          pack_uom: packUom,
+          pack_uom: "PACK",
           pack_size: packSize,
           pack_size_uom: packSizeUom,
           verified_at: new Date().toISOString(),
-          verified_by: payload.verifiedBy ?? null,
-          evidence: evidencePayload,
+          verified_by: null,
+          evidence: payload.evidence ?? null,
         },
         { onConflict: "vendor_id,pack_string_normalized" },
       )

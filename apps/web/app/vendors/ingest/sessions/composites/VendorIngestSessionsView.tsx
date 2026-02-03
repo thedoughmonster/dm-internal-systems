@@ -84,9 +84,6 @@ export default function VendorsIngestSessionsView({
                     <TableHead className="p-3">Vendor key</TableHead>
                     <TableHead className="p-3">Document type</TableHead>
                     <TableHead className="p-3">Format version</TableHead>
-                    {showPackIntent ? (
-                      <TableHead className="p-3">Pack verification</TableHead>
-                    ) : null}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -128,17 +125,6 @@ export default function VendorsIngestSessionsView({
                           <span className="text-muted-foreground">n/a</span>
                         )}
                       </TableCell>
-                      {showPackIntent ? (
-                        <TableCell className="p-3 text-sm">
-                          <Button variant="secondary" size="sm" asChild>
-                            <Link
-                              href={`/vendor-ingest/session/${session.id}/pack-verification`}
-                            >
-                              Pack verification
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      ) : null}
                     </TableRow>
                   ))}
                 </TableBody>

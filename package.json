@@ -1,5 +1,6 @@
 {
   "devDependencies": {
-    "@openai/codex": "^0.89.0"
+    "@openai/codex": "^0.89.0",
+    "supabase": "^2.74.5"
   }
 }
