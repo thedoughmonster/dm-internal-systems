@@ -6,7 +6,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardTitleBar } from "@/components/ui/card";
+import { Card, CardContent, CardTitle, CardTitleBar } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 import PackMappingRowForm, {
@@ -238,8 +238,21 @@ export default function PackMappingQueueClient() {
                     isClosing ? "max-h-0 opacity-0" : "max-h-[600px] opacity-100"
                   }`}
                 >
-                  <Card id={`${pageId}-row-${key}`} className="border-border/60 bg-card/60">
-                    <CardHeader id={`${pageId}-row-${key}-header`} className="border-b border-border/60">
+                  <Card
+                    id={`${pageId}-row-${key}`}
+                    className="border-border/60 bg-card/60"
+                    headerTitle={row.description ?? "n/a"}
+                    headerBadges={[
+                      <Badge
+                        key={`${pageId}-row-${key}-normalized`}
+                        id={`${pageId}-row-${key}-normalized`}
+                        variant="outline"
+                      >
+                        {row.pack_string_normalized}
+                      </Badge>,
+                    ]}
+                  >
+                    <CardContent id={`${pageId}-row-${key}-content`} className="space-y-4 p-4">
                       <CardTitleBar
                         id={`${pageId}-row-${key}-title`}
                         title={row.description ?? "n/a"}
@@ -250,8 +263,6 @@ export default function PackMappingQueueClient() {
                           row.pack_string_raw
                         }`}
                       />
-                    </CardHeader>
-                    <CardContent id={`${pageId}-row-${key}-content`} className="p-4">
                       <PackMappingRowForm
                         row={row}
                         onSave={handleSave}

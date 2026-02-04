@@ -1,11 +1,9 @@
-<!-- path: docs/AGENT_RULES_ARCHITECT_V1.MD -->
+<!-- path: docs/AGENT_RULES_ARCHITECT.MD -->
 
 # AGENT RULES ARCHITECT V1
 
-VERSION: v1.1  
 STATUS: ACTIVE  
 SCOPE: Architect role behavior for dm-internal-systems  
-LAST_UPDATED: 2026-01-31  
 OWNER: Human Operator  
 
 ## Purpose
@@ -27,6 +25,7 @@ This document adds role specific rules for ROLE: ARCHITECT.
 ## Commit policy and working tree expectations
 
 - Feature updates that require multiple steps must use a feature branch.
+- The Architect must create and close the feature branch and record the branch name in the session README meta.
 - Operator prefers no commits until the end of a feature update.
 - A clean working tree is recommended at the start of a feature update, but not required between directives.
 - Directives must not instruct the Executor to run commands that print secrets.
@@ -50,8 +49,8 @@ Agent guidance files may be updated without adding repository changelog entries.
 This exception is strictly limited to these files:
 - `AGENTS.md`
 - `apps/web/AGENTS.md`
-- `docs/AGENT_RULES_ARCHITECT_V1.MD`
-- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+- `docs/AGENT_RULES_ARCHITECT.MD`
+- `docs/AGENT_RULES_EXECUTOR.MD`
 
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
@@ -64,6 +63,7 @@ The Architect is a read only agent, except in the case of configuration files an
 Its responsibility is to understand the system, reason about changes, and translate intent into explicit directives.
 
 The Architect must never modify repository files directly, except in the case of an override issued by the user.
+The Architect is the only role that may change session metadata, except for allowed Executor `meta.result` updates.
 
 ## Working Phases
 
@@ -105,6 +105,11 @@ The Architect separates intake and executable tasks within a session folder.
 
 Task rule:
 - Tasks must not instruct the Executor to create, edit, delete, or reorganize other directive files unless explicitly approved.
+- Task files must include `meta.title`.
+- Before updating YAML front matter, run a YAML validator to confirm the front matter is valid.
+- Before finishing a task, run a validation pass on the full `.md` file to ensure required sections are present and ordered.
+  - Preferred YAML validation: `python3` with PyYAML if available. If PyYAML is missing, use `node` with an existing YAML parser dependency. If neither is available, stop and request guidance.
+  - Preferred markdown validation: a small local script to confirm required section headers and order.
 
 Promotion rule:
 - An intake item may be promoted into one or more tasks only after scope and decisions are locked and all task requirements are satisfied.
@@ -127,18 +132,57 @@ After an Executor completes a task:
 Post-run review loop:
 - After the Executor run, the Architect reviews repository changes and writes follow-up tasks in the current session folder if needed.
 
+Trash task cleanup:
+- Remove UI generated placeholder task files under `apps/web/.local/directives/` that only contain boilerplate such as "Provide the executor directive here."
+- Do not remove tasks that contain real directives or have been executed.
+- When the operator requests directive session or task cleanup without scope, treat it as all sessions by default, including archived sessions.
+- Remove README placeholder Todo sections that only say to describe the directive scope.
+- Update the session README `meta.updated` timestamp after cleanup changes.
+
+Handoff metadata normalization:
+- When converting user generated session files into active directives, update metadata in the session README and all existing task files.
+- Ensure status, priority, session_priority, bucket, and updated timestamps are set for the current handoff.
+
+Auto run handling:
+- If any session READMEs are marked `meta.auto_run: true`, handle them immediately at startup by applying the startup actions list below.
+
+Startup actions:
+1. Read required files and confirm role assignment.
+2. List available directive sessions under `apps/web/.local/directives/`, excluding archived sessions, using human readable meta fields in a numbered list. The list must be numbered, and any numeric reply after a numbered list is treated as selecting or referencing that item.
+3. If any session READMEs have `meta.auto_run: true`, set their status to `open`, normalize metadata in the session README and all task files, and remove UI generated placeholder tasks.
+4. If multiple auto run sessions exist, pick the one with the highest priority. If priority is tied, pick the session with the earliest created timestamp.
+5. Set the chosen session status to `in_progress` and surface a short summary of what changed before proceeding.
+6. If any session has `meta.session_priority: ultra`, stop and hand off to the Executor. Do not proceed with other work.
+6. Rewrite the session summary in your own words and ask the operator to confirm it is accurate before drafting tasks.
+7. Verify the session README has `meta.title` and `meta.summary`. Stop and ask if missing.
+8. Validate that all task files include Objective, Constraints, Allowed files, Steps, Validation, Expected output, and Stop conditions. If missing, fix them at creation time.
+9. Set and normalize `effort` to `small`, `medium`, or `large` once scope is understood, and always before drafting tasks. Update it if scope changes.
+10. Flag tasks with empty Allowed files or missing Validation as blocked until clarified.
+11. Check for conflicts between session priority and task priorities, and surface them.
+
+Metadata normalization defaults:
+- Auto generate for session README: status, bucket, updated, effort.
+- Auto generate for task files: status, priority, session_priority, bucket, updated, tags, effort, depends_on, blocked_by, related, summary.
+- Preserve created values when present and non empty.
+- Keep auto_run values as is.
+- If priority or session_priority is missing, set it to `low`.
+- Effort must be one of: `small`, `medium`, `large`.
+
 ## Initialization protocol
 
 1. Confirm role assignment and required reading are complete.
 2. List available directive sessions under `apps/web/.local/directives/`, excluding archived sessions.
-3. When listing sessions, include `meta.status` and `meta.session_priority` from the session README.
-4. Ask the operator which session to run before drafting or updating tasks.
+3. When listing sessions, include `meta.title`, `meta.status`, and `meta.session_priority` from the session README.
+4. Do not list or reference sessions by folder name alone.
+5. If a session README is missing, unreadable, or lacks `meta.title`, stop and ask the operator how to proceed.
+6. Ask the operator which session to run before drafting or updating tasks.
 
 ## Directive priority conventions
 
 - Session README `meta.session_priority` should be one of: `urgent`, `high`, `medium`, `low`.
 - Task file `meta.priority` should be one of: `urgent`, `high`, `medium`, `low`.
 - Task file `meta.status` should be one of: `todo`, `in_progress`, `blocked`, `done`, `archived`.
+- `ultra` is reserved for Auditor only.
 
 ## Streamlining conventions
 

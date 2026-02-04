@@ -39,6 +39,10 @@
     --neon-green: 140 85% 55%;
     --neon-cyan: 190 90% 55%;
     --neon-magenta: 290 92% 62%;
+
+    --title-font-family: var(--font-tektur);
+    --title-font-weight: 500;
+    --title-letter-spacing: 0.02em;
   }
 
   .dark {
@@ -90,6 +94,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--title-font-family), ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: var(--title-font-weight, 600);
+    letter-spacing: var(--title-letter-spacing, 0.02em) !important;
+  }
+
   ::selection {
     background: hsl(var(--neon-green) / 0.25);
     color: hsl(var(--foreground));
@@ -128,6 +144,13 @@
     font-family: var(--font-machine-mono), ui-monospace, SFMono-Regular, Menlo,
       Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     letter-spacing: 0.04em;
+  }
+
+  .dm-title {
+    font-family: var(--title-font-family), ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: var(--title-font-weight, 600);
+    letter-spacing: var(--title-letter-spacing, 0.02em) !important;
   }
 
   /* App background: gradient + grid for whole pages */
@@ -202,6 +225,70 @@
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dm-markdown h1,
+  .dm-markdown h2,
+  .dm-markdown h3 {
+    margin-top: 1.2rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dm-markdown h1::after,
+  .dm-markdown h2::after,
+  .dm-markdown h3::after {
+    content: "";
+    display: block;
+    margin-top: 0.4rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  .dm-markdown ul,
+  .dm-markdown ol {
+    padding-left: 1.5rem;
+    margin: 0.4rem 0;
+  }
+
+  .dm-markdown ul {
+    list-style: disc;
+  }
+
+  .dm-markdown ol {
+    list-style: decimal;
+  }
+
+  .dm-markdown li {
+    margin: 0.2rem 0;
+  }
+
+  .dm-markdown pre {
+    overflow-x: auto;
+    border-radius: 0.6rem;
+    border: 1px solid hsl(var(--border) / 0.7);
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    background: hsl(var(--background) / 0.65);
+    color: hsl(0 0% 100%);
+    box-shadow: inset 0 0 0.6rem hsl(var(--border) / 0.35);
+  }
+
+  .dm-markdown code {
+    font-family: "Courier New", Courier, ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", monospace;
+    color: hsl(0 0% 100%);
+  }
+
+  .dm-markdown :not(pre) > code {
+    background: hsl(var(--muted));
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .dm-markdown blockquote {
+    border-left: 2px solid hsl(var(--border) / 0.7);
+    padding-left: 0.75rem;
     color: hsl(var(--muted-foreground));
   }
 }

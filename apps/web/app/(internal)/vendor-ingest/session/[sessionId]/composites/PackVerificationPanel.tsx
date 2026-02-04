@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import PackApplyForm from "./PackApplyForm";
 import PackParseForm from "./PackParseForm";
 
@@ -121,15 +121,15 @@ export default async function PackVerificationPanel({
       !anonKey ? "NEXT_PUBLIC_SUPABASE_ANON_KEY" : null,
     ].filter(Boolean);
     return (
-      <Card id={`${panelId}-missing-env`}>
-        <CardHeader id={`${panelId}-missing-env-header`}>
-          <CardTitle id={`${panelId}-missing-env-title`}>
-            Pack verification
-          </CardTitle>
-          <CardDescription id={`${panelId}-missing-env-description`}>
+      <Card
+        id={`${panelId}-missing-env`}
+        headerTitle="Pack verification"
+      >
+        <CardContent id={`${panelId}-missing-env-content`}>
+          <p className="text-sm text-muted-foreground">
             Missing env var: {missing.join(", ")}
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -144,30 +144,28 @@ export default async function PackVerificationPanel({
 
   if (!session) {
     return (
-      <Card id={`${panelId}-missing-session`}>
-        <CardHeader id={`${panelId}-missing-session-header`}>
-          <CardTitle id={`${panelId}-missing-session-title`}>
-            Pack verification
-          </CardTitle>
-          <CardDescription id={`${panelId}-missing-session-description`}>
-            Session not found.
-          </CardDescription>
-        </CardHeader>
+      <Card
+        id={`${panelId}-missing-session`}
+        headerTitle="Pack verification"
+      >
+        <CardContent id={`${panelId}-missing-session-content`}>
+          <p className="text-sm text-muted-foreground">Session not found.</p>
+        </CardContent>
       </Card>
     );
   }
 
   if (!session.vendor_invoice_id) {
     return (
-      <Card id={`${panelId}-missing-invoice`}>
-        <CardHeader id={`${panelId}-missing-invoice-header`}>
-          <CardTitle id={`${panelId}-missing-invoice-title`}>
-            Pack verification
-          </CardTitle>
-          <CardDescription id={`${panelId}-missing-invoice-description`}>
+      <Card
+        id={`${panelId}-missing-invoice`}
+        headerTitle="Pack verification"
+      >
+        <CardContent id={`${panelId}-missing-invoice-content`}>
+          <p className="text-sm text-muted-foreground">
             No invoice attached to this ingest session.
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -209,15 +207,15 @@ export default async function PackVerificationPanel({
 
   if (groups.size === 0) {
     return (
-      <Card id={`${panelId}-empty-lines`}>
-        <CardHeader id={`${panelId}-empty-lines-header`}>
-          <CardTitle id={`${panelId}-empty-lines-title`}>
-            Pack verification
-          </CardTitle>
-          <CardDescription id={`${panelId}-empty-lines-description`}>
+      <Card
+        id={`${panelId}-empty-lines`}
+        headerTitle="Pack verification"
+      >
+        <CardContent id={`${panelId}-empty-lines-content`}>
+          <p className="text-sm text-muted-foreground">
             No invoice lines with pack strings were found for this session.
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -240,17 +238,17 @@ export default async function PackVerificationPanel({
 
   return (
     <div className="space-y-5">
-      <Card id={`${panelId}-summary-card`}>
-        <CardHeader id={`${panelId}-summary-header`}>
-          <CardTitle id={`${panelId}-summary-title`}>Session summary</CardTitle>
-          <CardDescription id={`${panelId}-summary-description`}>
-            Pack strings grouped from invoice lines for verification.
-          </CardDescription>
-        </CardHeader>
+      <Card
+        id={`${panelId}-summary-card`}
+        headerTitle="Session summary"
+      >
         <CardContent
           id={`${panelId}-summary-content`}
           className="grid gap-3 text-sm"
         >
+          <p className="text-xs text-muted-foreground">
+            Pack strings grouped from invoice lines for verification.
+          </p>
           <div className="flex flex-wrap items-center gap-2">
             <Badge id={`${panelId}-summary-session-badge`} variant="outline">
               Session
@@ -295,32 +293,24 @@ export default async function PackVerificationPanel({
             id={`${groupId}-card`}
             key={group.normalized}
             className="border-border/60 bg-card/40"
+            headerTitle={group.normalized}
+            headerBadges={[
+              <Badge
+                key={`${groupId}-lines-badge`}
+                id={`${groupId}-lines-badge`}
+                variant="outline"
+              >
+                Lines {group.lines.length}
+              </Badge>,
+            ]}
           >
-            <CardHeader id={`${groupId}-header`} className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge id={`${groupId}-normalized-badge`} variant="outline">
-                  Normalized
-                </Badge>
-                <span className="font-mono text-xs text-foreground/90">
-                  {group.normalized}
-                </span>
-              </div>
-              <CardDescription
+            <CardContent id={`${groupId}-content`}>
+              <p
                 id={`${groupId}-raw-samples`}
                 className="text-xs text-muted-foreground"
               >
                 Raw samples: {group.rawSamples.join(" | ")}
-              </CardDescription>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge id={`${groupId}-lines-badge`} variant="outline">
-                  Lines
-                </Badge>
-                <span className="font-mono text-xs text-foreground/90">
-                  {group.lines.length}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent id={`${groupId}-content`}>
+              </p>
               {parse ? (
                 <PackApplyForm
                   vendorId={session.vendor_id}

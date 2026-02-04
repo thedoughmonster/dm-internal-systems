@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
@@ -185,32 +185,28 @@ export default async function PriceChangesView({
       </header>
 
       {thresholdError ? (
-        <Card id={`${viewId}-threshold-card`} className="border-border/70 bg-card/60">
-          <CardHeader id={`${viewId}-threshold-header`}>
-            <CardTitle id={`${viewId}-threshold-title`} className="text-sm font-medium">
-              Threshold setting unavailable
-            </CardTitle>
-            <CardDescription id={`${viewId}-threshold-description`}>
-              Using the default threshold.
-            </CardDescription>
-          </CardHeader>
+        <Card
+          id={`${viewId}-threshold-card`}
+          className="border-border/70 bg-card/60"
+          headerTitle="Threshold setting unavailable"
+        >
           <CardContent id={`${viewId}-threshold-content`}>
+            <p className="text-sm text-muted-foreground">Using the default threshold.</p>
             <p className="text-sm text-destructive break-words">{thresholdError}</p>
           </CardContent>
         </Card>
       ) : null}
 
-      <Card id={`${viewId}-range-card`} className="border-border/70 bg-card/60">
-        <CardHeader id={`${viewId}-range-header`} className="space-y-2">
-          <CardTitle id={`${viewId}-range-title`} className="text-sm font-medium">
-            Time range
-          </CardTitle>
-          <CardDescription id={`${viewId}-range-description`}>
-            Select a window to compare invoice averages.
-          </CardDescription>
-          <Separator id={`${viewId}-range-separator`} />
-        </CardHeader>
+      <Card
+        id={`${viewId}-range-card`}
+        className="border-border/70 bg-card/60"
+        headerTitle="Time range"
+      >
         <CardContent id={`${viewId}-range-content`} className="flex flex-wrap gap-2">
+          <p className="text-sm text-muted-foreground">
+            Select a window to compare invoice averages.
+          </p>
+          <Separator id={`${viewId}-range-separator`} />
           {DAY_OPTIONS.map((option) => (
             <Button
               key={option}
@@ -234,43 +230,42 @@ export default async function PriceChangesView({
       </Card>
 
       {errorMessage ? (
-        <Card id={`${viewId}-error-card`} className="border-border/70 bg-card/60">
-          <CardHeader id={`${viewId}-error-header`}>
-            <CardTitle id={`${viewId}-error-title`} className="text-sm font-medium">
-              Unable to load price changes
-            </CardTitle>
-            <CardDescription id={`${viewId}-error-description`}>
-              Check Supabase connectivity and vendor data.
-            </CardDescription>
-          </CardHeader>
+        <Card
+          id={`${viewId}-error-card`}
+          className="border-border/70 bg-card/60"
+          headerTitle="Unable to load price changes"
+        >
           <CardContent id={`${viewId}-error-content`}>
+            <p className="text-sm text-muted-foreground">
+              Check Supabase connectivity and vendor data.
+            </p>
             <p className="text-sm text-destructive break-words">{errorMessage}</p>
           </CardContent>
         </Card>
       ) : priceChanges.length === 0 ? (
-        <Card id={`${viewId}-empty-card`} className="border-border/70 bg-card/60">
-          <CardHeader id={`${viewId}-empty-header`}>
-            <CardTitle id={`${viewId}-empty-title`} className="text-sm font-medium">
-              No price changes
-            </CardTitle>
-            <CardDescription id={`${viewId}-empty-description`}>
+        <Card
+          id={`${viewId}-empty-card`}
+          className="border-border/70 bg-card/60"
+          headerTitle="No price changes"
+        >
+          <CardContent id={`${viewId}-empty-content`}>
+            <p className="text-sm text-muted-foreground">
               Nothing exceeded the threshold in this window.
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </CardContent>
         </Card>
       ) : (
         <>
-          <Card id={`${viewId}-changes-card`} className="border-border/70 bg-card/60">
-            <CardHeader id={`${viewId}-changes-header`} className="space-y-2">
-              <CardTitle id={`${viewId}-changes-title`} className="text-sm font-medium">
-                Changed items
-              </CardTitle>
-              <CardDescription id={`${viewId}-changes-description`}>
-                {priceChanges.length} items with changes above {thresholdPercent}%.
-              </CardDescription>
-              <Separator id={`${viewId}-changes-separator`} />
-            </CardHeader>
+          <Card
+            id={`${viewId}-changes-card`}
+            className="border-border/70 bg-card/60"
+            headerTitle="Changed items"
+          >
             <CardContent id={`${viewId}-changes-content`}>
+              <p className="text-sm text-muted-foreground">
+                {priceChanges.length} items with changes above {thresholdPercent}%.
+              </p>
+              <Separator id={`${viewId}-changes-separator`} />
               <div className="overflow-x-auto rounded-md border border-border/60 bg-card/40">
                 <Table id={`${viewId}-changes-table`}>
                   <TableHeader
@@ -323,16 +318,15 @@ export default async function PriceChangesView({
           </Card>
 
           {seriesError ? (
-            <Card id={`${viewId}-series-error-card`} className="border-border/70 bg-card/60">
-              <CardHeader id={`${viewId}-series-error-header`}>
-                <CardTitle id={`${viewId}-series-error-title`} className="text-sm font-medium">
-                  Price history unavailable
-                </CardTitle>
-                <CardDescription id={`${viewId}-series-error-description`}>
-                  Series data could not be loaded.
-                </CardDescription>
-              </CardHeader>
+            <Card
+              id={`${viewId}-series-error-card`}
+              className="border-border/70 bg-card/60"
+              headerTitle="Price history unavailable"
+            >
               <CardContent id={`${viewId}-series-error-content`}>
+                <p className="text-sm text-muted-foreground">
+                  Series data could not be loaded.
+                </p>
                 <p className="text-sm text-destructive break-words">{seriesError}</p>
               </CardContent>
             </Card>
@@ -344,18 +338,14 @@ export default async function PriceChangesView({
                 id={`${viewId}-history-${change.vendor_catalog_item_id}`}
                 key={`${change.vendor_catalog_item_id}-history`}
                 className="border-border/70 bg-card/60"
+                headerTitle={formatPriceChangeLabel(change)}
               >
-                <CardHeader id={`${viewId}-history-${change.vendor_catalog_item_id}-header`} className="space-y-2">
-                  <CardTitle id={`${viewId}-history-${change.vendor_catalog_item_id}-title`} className="text-sm font-medium">
-                    {formatPriceChangeLabel(change)}
-                  </CardTitle>
-                  <CardDescription id={`${viewId}-history-${change.vendor_catalog_item_id}-description`}>
+                <CardContent id={`${viewId}-history-${change.vendor_catalog_item_id}-content`} className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
                     Latest {formatCurrency(change.latest_price_cents)} on {change.latest_invoice_date}. Previous {formatCurrency(
                       change.previous_price_cents
                     )} on {change.previous_invoice_date}.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent id={`${viewId}-history-${change.vendor_catalog_item_id}-content`} className="space-y-3">
+                  </p>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Badge id={`${viewId}-history-${change.vendor_catalog_item_id}-delta`} variant="outline">
                       Delta {formatSignedPercent(change.delta_percent)}

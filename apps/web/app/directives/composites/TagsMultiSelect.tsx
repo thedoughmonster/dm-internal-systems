@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export type TagOption = {
@@ -35,12 +34,13 @@ export default function TagsMultiSelect({
   return (
     <div className="space-y-2">
       {selected.map((value) => (
-        <Input
+        <input
           id={`${id}-value-${value}`}
           key={value}
           type="hidden"
           name={name}
           value={value}
+          hidden
         />
       ))}
       <div className="flex flex-wrap gap-3">

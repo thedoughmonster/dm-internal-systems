@@ -3,7 +3,11 @@ import path from "node:path"
 import crypto from "node:crypto"
 import YAML from "yaml"
 
-import type { DirectiveFile, DirectiveMeta } from "@/lib/types/directives/task"
+import type {
+  DirectiveFile,
+  DirectiveMeta,
+  DirectivePriority,
+} from "@/lib/types/directives/task"
 
 const APP_ROOT = process.cwd()
 const DIRECTIVES_ROOT = APP_ROOT.endsWith(path.join("apps", "web"))
@@ -126,9 +130,80 @@ export async function listDirectiveFiles(): Promise<DirectiveFile[]> {
   return results
 }
 
+export async function listSessionFiles(sessionId: string): Promise<DirectiveFile[]> {
+  await ensureRoot()
+  const sessionPath = path.join(DIRECTIVES_ROOT, sessionId)
+  const stat = await fs.stat(sessionPath)
+  if (!stat.isDirectory()) {
+    throw new Error("Session not found.")
+  }
+
+  const files = await fs.readdir(sessionPath)
+  const results: DirectiveFile[] = []
+
+  for (const filename of files) {
+    if (!filename.endsWith(".md")) {
+      continue
+    }
+
+    const filePath = path.join(sessionPath, filename)
+    const content = await fs.readFile(filePath, "utf-8")
+    const parsed = parseFrontMatter(content)
+    results.push({
+      sessionId,
+      filename,
+      kind: getKindFromFilename(filename),
+      meta: parsed.meta,
+      body: parsed.body,
+    })
+  }
+
+  return results
+}
+
+export async function listSessionFileContents(sessionId: string): Promise<
+  Array<DirectiveFile & { content: string }>
+> {
+  await ensureRoot()
+  const sessionPath = path.join(DIRECTIVES_ROOT, sessionId)
+  const stat = await fs.stat(sessionPath)
+  if (!stat.isDirectory()) {
+    throw new Error("Session not found.")
+  }
+
+  const files = await fs.readdir(sessionPath)
+  const results: Array<DirectiveFile & { content: string }> = []
+
+  for (const filename of files) {
+    if (!filename.endsWith(".md")) {
+      continue
+    }
+
+    const filePath = path.join(sessionPath, filename)
+    const content = await fs.readFile(filePath, "utf-8")
+    const parsed = parseFrontMatter(content)
+    results.push({
+      sessionId,
+      filename,
+      kind: getKindFromFilename(filename),
+      meta: parsed.meta,
+      body: parsed.body,
+      content,
+    })
+  }
+
+  return results
+}
+
 export async function createTodoSession(input: {
   title: string
   summary: string
+  tags: string[]
+  sessionPriority?: DirectivePriority
+  autoRun?: boolean
+  dependsOn?: string[]
+  blockedBy?: string[]
+  related?: string[]
 }) {
   await ensureRoot()
   const now = new Date().toISOString()
@@ -142,10 +217,15 @@ export async function createTodoSession(input: {
     directive: directiveId,
     status: "todo",
     bucket: "todo",
-    session_priority: "medium",
+    session_priority: input.sessionPriority ?? DEFAULT_META.session_priority,
+    auto_run: input.autoRun ?? DEFAULT_META.auto_run,
     created: now,
     updated: now,
     summary: input.summary,
+    tags: input.tags,
+    depends_on: input.dependsOn ?? DEFAULT_META.depends_on,
+    blocked_by: input.blockedBy ?? DEFAULT_META.blocked_by,
+    related: input.related ?? DEFAULT_META.related,
   }
 
   const sessionPath = path.join(DIRECTIVES_ROOT, sessionId)
@@ -156,6 +236,41 @@ export async function createTodoSession(input: {
   await writeAtomic(path.join(sessionPath, "README.md"), content)
 
   return { sessionId, directiveId }
+}
+
+export async function updateTodoSession(input: {
+  sessionId: string
+  filename: string
+  title: string
+  summary: string
+  tags: string[]
+  sessionPriority?: DirectivePriority
+  autoRun?: boolean
+  dependsOn?: string[]
+  blockedBy?: string[]
+  related?: string[]
+}) {
+  await ensureRoot()
+  const sessionPath = path.join(DIRECTIVES_ROOT, input.sessionId)
+  const filePath = path.join(sessionPath, input.filename)
+  const content = await fs.readFile(filePath, "utf-8")
+  const parsed = parseFrontMatter(content)
+
+  const updatedMeta: DirectiveMeta = {
+    ...parsed.meta,
+    title: input.title,
+    summary: input.summary,
+    tags: input.tags,
+    session_priority: input.sessionPriority ?? parsed.meta.session_priority,
+    auto_run: input.autoRun ?? parsed.meta.auto_run,
+    depends_on: input.dependsOn ?? parsed.meta.depends_on,
+    blocked_by: input.blockedBy ?? parsed.meta.blocked_by,
+    related: input.related ?? parsed.meta.related,
+    updated: new Date().toISOString(),
+  }
+
+  const updatedContent = serializeFrontMatter(updatedMeta, parsed.body)
+  await writeAtomic(filePath, updatedContent)
 }
 
 export async function createTask(input: {

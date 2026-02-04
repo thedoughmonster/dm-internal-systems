@@ -33,7 +33,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -655,16 +655,14 @@ export default function UiKitPage() {
                 </TabsList>
 
                 <TabsContent id={`${pageId}-tabs-content-overview`} value="overview" className="mt-3 space-y-3">
-                  <Card id={`${pageId}-summary-card`}>
-                    <CardHeader id={`${pageId}-summary-card-header`}>
-                      <CardTitle id={`${pageId}-summary-card-title`} className="text-base">
-                        Ingest summary
-                      </CardTitle>
-                      <CardDescription id={`${pageId}-summary-card-description`}>
-                        Small cards must still feel like a terminal panel.
-                      </CardDescription>
-                    </CardHeader>
+                  <Card
+                    id={`${pageId}-summary-card`}
+                    headerTitle="Ingest summary"
+                  >
                     <CardContent id={`${pageId}-summary-card-content`} className="grid gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        Small cards must still feel like a terminal panel.
+                      </p>
                       <KeyValue k="mode" v="SNIFF_ONLY" tone="info" />
                       <KeyValue k="results" v="2 identifiers" tone="ok" />
                       <KeyValue k="session" v="draft" tone="warn" />

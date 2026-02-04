@@ -12,7 +12,7 @@ import type { DmPickedFileText } from "@/components/ui/dm/file-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
@@ -527,18 +527,17 @@ export function VendorIngestFlow() {
           </div>
         </header>
 
-        <Card id={`${flowId}-select-card`} className="rounded-2xl border-border/60 bg-card/40 shadow-sm">
-          <CardHeader id={`${flowId}-select-header`} className="space-y-2">
-            <CardTitle id={`${flowId}-select-title`} className="text-base">
-              Select CSV files
-            </CardTitle>
-            <CardDescription id={`${flowId}-select-description`}>
-              Choosing files triggers analyze automatically. Confirm is available only when a proposed match is returned.
-            </CardDescription>
-            <Separator id={`${flowId}-select-separator`} />
-          </CardHeader>
+        <Card
+          id={`${flowId}-select-card`}
+          className="rounded-2xl border-border/60 bg-card/40 shadow-sm"
+          headerTitle="Select CSV files"
+        >
 
           <CardContent id={`${flowId}-select-content`} className="space-y-5">
+            <p className="text-sm text-muted-foreground">
+              Choosing files triggers analyze automatically. Confirm is available only when a proposed match is returned.
+            </p>
+            <Separator id={`${flowId}-select-separator`} />
             <DmMultiFilePicker
               id={`${flowId}-file-picker`}
               label="CSV files"
@@ -558,46 +557,41 @@ export function VendorIngestFlow() {
         </Card>
 
         {hasAnalyzeOutputs ? (
-          <Card id={`${flowId}-results-card`} className="rounded-2xl border-border/60 bg-muted/10">
-            <CardHeader id={`${flowId}-results-header`} className="space-y-2">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <CardTitle id={`${flowId}-results-title`} className="text-base">
-                    Results
-                  </CardTitle>
-                  <CardDescription id={`${flowId}-results-description`}>
-                    Review each file, inspect payloads, then confirm sessions.
-                  </CardDescription>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge id={`${flowId}-results-files`} variant="outline">
-                    Files {entries.length}
-                  </Badge>
-                  <Badge id={`${flowId}-results-eligible`} variant="outline">
-                    Eligible {eligibleEntries.length}
-                  </Badge>
-                  <Button
-                    id={`${flowId}-confirm-all`}
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => void runConfirmAll()}
-                    disabled={!canConfirmAll}
-                  >
-                    {confirmAllLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Check className="h-4 w-4" />
-                    )}
-                    Confirm all eligible
-                  </Button>
-                </div>
-              </div>
-
-              <Separator id={`${flowId}-results-separator`} />
-            </CardHeader>
+          <Card
+            id={`${flowId}-results-card`}
+            className="rounded-2xl border-border/60 bg-muted/10"
+            headerTitle="Results"
+            headerBadges={[
+              <Badge key={`${flowId}-results-files`} id={`${flowId}-results-files`} variant="outline">
+                Files {entries.length}
+              </Badge>,
+              <Badge key={`${flowId}-results-eligible`} id={`${flowId}-results-eligible`} variant="outline">
+                Eligible {eligibleEntries.length}
+              </Badge>,
+            ]}
+          >
 
             <CardContent id={`${flowId}-results-content`} className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">
+                  Review each file, inspect payloads, then confirm sessions.
+                </p>
+                <Button
+                  id={`${flowId}-confirm-all`}
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => void runConfirmAll()}
+                  disabled={!canConfirmAll}
+                >
+                  {confirmAllLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                  Confirm all eligible
+                </Button>
+              </div>
+              <Separator id={`${flowId}-results-separator`} />
               {confirmAllSummary?.skipped.length ? (
                 <Alert id={`${flowId}-confirm-summary`} className="border-amber-500/40 bg-amber-500/10">
                   <AlertTitle id={`${flowId}-confirm-summary-title`} className="text-amber-100">
@@ -631,80 +625,76 @@ export function VendorIngestFlow() {
                   const canConfirm = !getConfirmSkipReason(entry) && !confirmAllLoading;
 
                   return (
-                    <Card id={`${entryId}-card`} key={entry.id} className="rounded-2xl border-border/60 bg-background/5">
-                      <CardHeader id={`${entryId}-header`} className="space-y-2">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0">
-                            <CardTitle id={`${entryId}-title`} className="text-sm">
-                              {entry.picked.filename}
-                            </CardTitle>
-                            <CardDescription id={`${entryId}-description`}>
-                              {entry.picked.contentType || "text/csv"}
-                            </CardDescription>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2">
-                            <div
-                              className={cn(!analyzeJsonAvailable ? "invisible pointer-events-none" : "")}
-                            >
-                              <JsonDialog
-                                id={`${entryId}-analyze-json`}
-                                title="Analyze response"
-                                data={entry.analyzeResult ?? {}}
-                                buttonLabel="Analyze JSON"
-                                disabled={!analyzeJsonAvailable}
-                              />
-                            </div>
-
-                            <div
-                              className={cn(!confirmJsonAvailable ? "invisible pointer-events-none" : "")}
-                            >
-                              <JsonDialog
-                                id={`${entryId}-confirm-json`}
-                                title="Confirm response"
-                                data={entry.confirmResult ?? {}}
-                                buttonLabel="Confirm JSON"
-                                disabled={!confirmJsonAvailable}
-                              />
-                            </div>
-
-                            <Button
-                              id={`${entryId}-rerun-analyze`}
-                              variant="secondary"
-                              size="sm"
-                              className="gap-2"
-                              onClick={() => void runAnalyzeForEntry(entry)}
-                              disabled={!canRerunAnalyze}
-                            >
-                              {entry.analyzeStatus === "loading" ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Check className="h-4 w-4" />
-                              )}
-                              Re-run analyze
-                            </Button>
-
-                            <Button
-                              id={`${entryId}-confirm-session`}
-                              size="sm"
-                              className="gap-2"
-                              onClick={() => void runConfirmForEntry(entry)}
-                              disabled={!canConfirm}
-                            >
-                              {entry.confirmStatus === "loading" ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Check className="h-4 w-4" />
-                              )}
-                              Confirm session
-                            </Button>
-                          </div>
-                        </div>
-
-                        <Separator id={`${entryId}-separator`} />
-                      </CardHeader>
+                    <Card
+                      id={`${entryId}-card`}
+                      key={entry.id}
+                      className="rounded-2xl border-border/60 bg-background/5"
+                      headerTitle={entry.picked.filename}
+                      headerBadges={[
+                        <Badge key={`${entryId}-type-badge`} id={`${entryId}-type-badge`} variant="outline">
+                          {entry.picked.contentType || "text/csv"}
+                        </Badge>,
+                      ]}
+                    >
 
                       <CardContent id={`${entryId}-content`} className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div
+                            className={cn(!analyzeJsonAvailable ? "invisible pointer-events-none" : "")}
+                          >
+                            <JsonDialog
+                              id={`${entryId}-analyze-json`}
+                              title="Analyze response"
+                              data={entry.analyzeResult ?? {}}
+                              buttonLabel="Analyze JSON"
+                              disabled={!analyzeJsonAvailable}
+                            />
+                          </div>
+
+                          <div
+                            className={cn(!confirmJsonAvailable ? "invisible pointer-events-none" : "")}
+                          >
+                            <JsonDialog
+                              id={`${entryId}-confirm-json`}
+                              title="Confirm response"
+                              data={entry.confirmResult ?? {}}
+                              buttonLabel="Confirm JSON"
+                              disabled={!confirmJsonAvailable}
+                            />
+                          </div>
+
+                          <Button
+                            id={`${entryId}-rerun-analyze`}
+                            variant="secondary"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => void runAnalyzeForEntry(entry)}
+                            disabled={!canRerunAnalyze}
+                          >
+                            {entry.analyzeStatus === "loading" ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                            Re-run analyze
+                          </Button>
+
+                          <Button
+                            id={`${entryId}-confirm-session`}
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => void runConfirmForEntry(entry)}
+                            disabled={!canConfirm}
+                          >
+                            {entry.confirmStatus === "loading" ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                            Confirm session
+                          </Button>
+                        </div>
+                        <Separator id={`${entryId}-separator`} />
                         {entry.analyzeStatus === "loading" ? (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />

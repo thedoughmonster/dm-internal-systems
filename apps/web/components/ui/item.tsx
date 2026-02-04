@@ -135,7 +135,7 @@ function ItemTitle({
     <div
       data-slot="item-title"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm font-medium leading-snug",
+        "dm-title flex w-fit items-center gap-2 text-sm font-medium leading-snug",
         className
       )}
       {...props}

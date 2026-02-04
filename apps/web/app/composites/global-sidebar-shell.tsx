@@ -22,45 +22,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { topNavItems } from "@/lib/navigation-registry"
+import {
+  GlobalSidebarContext,
+  type GlobalSidebarSlotValue,
+} from "@/lib/global-sidebar-slot"
 
 type GlobalSidebarShellProps = {
   children: React.ReactNode
   toggleable?: boolean
-}
-
-type GlobalSidebarSlotValue = {
-  header?: React.ComponentType
-  content?: React.ComponentType
-}
-
-type GlobalSidebarContextValue = {
-  slot: GlobalSidebarSlotValue
-  setSlot: React.Dispatch<React.SetStateAction<GlobalSidebarSlotValue>>
-}
-
-const slotsEqual = (
-  a: GlobalSidebarSlotValue,
-  b: GlobalSidebarSlotValue
-) => a.header === b.header && a.content === b.content
-
-const GlobalSidebarContext = React.createContext<GlobalSidebarContextValue | null>(
-  null
-)
-
-export function GlobalSidebarSlot({ header, content }: GlobalSidebarSlotValue) {
-  const context = React.useContext(GlobalSidebarContext)
-  const setSlot = context?.setSlot
-
-  React.useEffect(() => {
-    const next = { header, content }
-    if (!setSlot) return
-    setSlot((prev) => (slotsEqual(prev, next) ? prev : next))
-    return () => {
-      setSlot((prev) => (slotsEqual(prev, next) ? {} : prev))
-    }
-  }, [setSlot, header, content])
-
-  return null
 }
 
 export default function GlobalSidebarShell({

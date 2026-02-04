@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -63,12 +63,11 @@ export default function SessionDetails({
       </header>
 
       <section className="grid gap-4">
-        <Card id={`${detailId}-summary-card`} className="border-border/70 bg-card/60">
-          <CardHeader id={`${detailId}-summary-header`} className="pb-3">
-            <CardTitle id={`${detailId}-summary-title`} className="text-sm font-medium text-muted-foreground">
-              Session details
-            </CardTitle>
-          </CardHeader>
+        <Card
+          id={`${detailId}-summary-card`}
+          className="border-border/70 bg-card/60"
+          headerTitle="Session details"
+        >
           <CardContent id={`${detailId}-summary-content`} className="grid gap-2 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">Created</span>
@@ -109,12 +108,11 @@ export default function SessionDetails({
               Pack sizes at ingest time
             </AccordionTrigger>
             <AccordionContent id={`${detailId}-accordion-pack-sizes-content`}>
-              <Card id={`${detailId}-pack-sizes-card`} className="border-border/70 bg-card/60">
-                <CardHeader id={`${detailId}-pack-sizes-header`}>
-                  <CardTitle id={`${detailId}-pack-sizes-title`} className="text-sm font-medium">
-                    Pack sizes at ingest time
-                  </CardTitle>
-                </CardHeader>
+              <Card
+                id={`${detailId}-pack-sizes-card`}
+                className="border-border/70 bg-card/60"
+                headerTitle="Pack sizes at ingest time"
+              >
                 <CardContent id={`${detailId}-pack-sizes-content`} className="space-y-3 text-sm text-muted-foreground">
                   <p>Snapshot captured at ingest time. Use pack mapping to update interpretations.</p>
                   <details className="rounded-md border border-border/60 bg-background/40 p-3">
@@ -238,12 +236,11 @@ export default function SessionDetails({
                 {block.title}
               </AccordionTrigger>
               <AccordionContent id={`${detailId}-accordion-${block.key}-content`}>
-                <Card id={`${detailId}-card-${block.key}`} className="border-border/70 bg-card/60">
-                  <CardHeader id={`${detailId}-card-${block.key}-header`} className="pb-3">
-                    <CardTitle id={`${detailId}-card-${block.key}-title`} className="text-sm font-medium">
-                      {block.title}
-                    </CardTitle>
-                  </CardHeader>
+                <Card
+                  id={`${detailId}-card-${block.key}`}
+                  className="border-border/70 bg-card/60"
+                  headerTitle={block.title}
+                >
                   <CardContent id={`${detailId}-card-${block.key}-content`} className="space-y-3 text-sm text-muted-foreground">
                     <details className="rounded-md border border-border/60 bg-background/40 p-3">
                       <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-muted-foreground">

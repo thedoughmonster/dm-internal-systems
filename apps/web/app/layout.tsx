@@ -4,14 +4,75 @@ import Link from "next/link";
 import { Code, Settings } from "lucide-react";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { Share_Tech_Mono } from "next/font/google";
+import {
+  Audiowide,
+  Chakra_Petch,
+  Michroma,
+  Orbitron,
+  Oxanium,
+  Quantico,
+  Space_Grotesk,
+  Tektur,
+  SUSE_Mono,
+  Share_Tech_Mono,
+} from "next/font/google";
 import GlobalSidebarShell from "@/app/composites/global-sidebar-shell";
 import { topNavItems } from "@/lib/navigation-registry";
 
-const machineMono = Share_Tech_Mono({
-  weight: "400",
+const machineMono = SUSE_Mono({
+  weight: ["400", "500"],
   subsets: ["latin"],
   variable: "--font-machine-mono",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
+
+const oxanium = Oxanium({
+  subsets: ["latin"],
+  variable: "--font-oxanium",
+});
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  variable: "--font-orbitron",
+});
+
+const quantico = Quantico({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-quantico",
+});
+
+const chakraPetch = Chakra_Petch({
+  weight: ["400", "600"],
+  subsets: ["latin"],
+  variable: "--font-chakra-petch",
+});
+
+const michroma = Michroma({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-michroma",
+});
+
+const audiowide = Audiowide({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-audiowide",
+});
+
+const shareTechMono = Share_Tech_Mono({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-share-tech-mono",
+});
+
+const tektur = Tektur({
+  subsets: ["latin"],
+  variable: "--font-tektur",
 });
 
 export const metadata: Metadata = {
@@ -74,7 +135,20 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="dark">
-      <body className={machineMono.variable}>
+      <body
+        className={[
+          machineMono.variable,
+          spaceGrotesk.variable,
+          oxanium.variable,
+          orbitron.variable,
+          quantico.variable,
+          chakraPetch.variable,
+          michroma.variable,
+          audiowide.variable,
+          shareTechMono.variable,
+          tektur.variable,
+        ].join(" ")}
+      >
         <div className="dm-app-bg min-h-screen">
           <TopNav />
           <GlobalSidebarShell toggleable={SIDEBAR_TOGGLEABLE}>

@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 
 export type FilterOption = {
   label: string
@@ -36,7 +35,7 @@ export default function FilterSelect({
 
   return (
     <div className="space-y-2">
-      <Input id={`${id}-value`} type="hidden" name={name} value={selected} />
+      <input id={`${id}-value`} type="hidden" name={name} value={selected} hidden />
       <Select id={`${id}-select`} value={selected} onValueChange={setSelected}>
         <SelectTrigger id={id}>
           <SelectValue id={`${id}-label`} placeholder={placeholder} />

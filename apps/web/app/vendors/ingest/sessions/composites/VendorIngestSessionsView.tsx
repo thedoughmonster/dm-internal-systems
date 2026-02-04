@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -58,35 +58,32 @@ export default function VendorsIngestSessionsView({
       </div>
 
       {errorMessage ? (
-        <Card id={`${viewId}-error-card`}>
-          <CardHeader id={`${viewId}-error-header`}>
-            <CardTitle id={`${viewId}-error-title`}>Unable to load sessions</CardTitle>
-            <CardDescription id={`${viewId}-error-description`}>
-              Check Supabase connectivity and credentials.
-            </CardDescription>
-          </CardHeader>
+        <Card id={`${viewId}-error-card`} headerTitle="Unable to load sessions">
           <CardContent id={`${viewId}-error-content`}>
+            <p className="text-sm text-muted-foreground">
+              Check Supabase connectivity and credentials.
+            </p>
             <p className="text-sm text-destructive break-words">{errorMessage}</p>
           </CardContent>
         </Card>
       ) : sessions.length === 0 ? (
-        <Card id={`${viewId}-empty-card`}>
-          <CardHeader id={`${viewId}-empty-header`}>
-            <CardTitle id={`${viewId}-empty-title`}>No sessions yet</CardTitle>
-            <CardDescription id={`${viewId}-empty-description`}>
+        <Card id={`${viewId}-empty-card`} headerTitle="No sessions yet">
+          <CardContent id={`${viewId}-empty-content`}>
+            <p className="text-sm text-muted-foreground">
               Upload an invoice to start a new ingest.
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </CardContent>
         </Card>
       ) : (
-        <Card id={`${viewId}-list-card`} className="border-border/60 bg-card/40">
-          <CardHeader id={`${viewId}-list-header`}>
-            <CardTitle id={`${viewId}-list-title`}>Session list</CardTitle>
-            <CardDescription id={`${viewId}-list-description`}>
-              Open a session to review ingest details.
-            </CardDescription>
-          </CardHeader>
+        <Card
+          id={`${viewId}-list-card`}
+          className="border-border/60 bg-card/40"
+          headerTitle="Session list"
+        >
           <CardContent id={`${viewId}-list-content`}>
+            <p className="text-sm text-muted-foreground">
+              Open a session to review ingest details.
+            </p>
             <div className="overflow-x-auto rounded-xl border border-border/60 bg-card/40">
               <Table id={`${viewId}-table`}>
                 <TableHeader

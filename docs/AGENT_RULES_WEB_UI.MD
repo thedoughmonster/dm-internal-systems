@@ -1,11 +1,9 @@
-<!-- path: docs/AGENT_RULES_WEB_UI_V1.MD -->
+<!-- path: docs/AGENT_RULES_WEB_UI.MD -->
 
 # AGENT RULES WEB UI V1
 
-VERSION: v1.0  
 STATUS: ACTIVE  
 SCOPE: Web UI work for dm-internal-systems  
-LAST_UPDATED: 2026-02-03  
 OWNER: Human Operator  
 
 ## Purpose
@@ -131,8 +129,9 @@ Lint enforces structural boundaries. See `apps/web/eslint.config.mjs` and `apps/
 
 ## UI primitive usage rule
 
-- Forms must use components from `apps/web/components/ui/*` for inputs, selects, textareas, and buttons.
-- Do not use plain HTML `input`, `select`, `textarea`, or `button` elements.
+- Raw HTML form elements are only allowed inside `apps/web/components/ui/*`.
+- Outside `apps/web/components/ui/*`, forms must use components from `apps/web/components/ui/*` for inputs, selects, textareas, and buttons.
+- Do not use plain HTML `input`, `select`, `textarea`, or `button` elements outside `apps/web/components/ui/*`.
 
 ## UI behavior rules
 

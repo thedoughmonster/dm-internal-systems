@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { SessionRow } from "@/app/vendors/ingest/sessions/composites/VendorIngestSessionsView"
 import {
@@ -320,18 +320,8 @@ export default async function VendorsPage() {
             id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}`}
             key={metric.title}
             className="border-border/70 bg-card/60"
+            headerTitle={metric.title}
           >
-            <CardHeader
-              id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-header`}
-              className="pb-3"
-            >
-              <CardTitle
-                id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-title`}
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {metric.title}
-              </CardTitle>
-            </CardHeader>
             <CardContent
               id={`vendors-dashboard-metric-${metric.title.replace(/[^a-z0-9]+/gi, "-")}-content`}
               className="space-y-2"
@@ -359,17 +349,8 @@ export default async function VendorsPage() {
             id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}`}
             key={list.title}
             className="border-border/70 bg-card/60"
+            headerTitle={list.title}
           >
-            <CardHeader
-              id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-header`}
-            >
-              <CardTitle
-                id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-title`}
-                className="text-sm font-medium"
-              >
-                {list.title}
-              </CardTitle>
-            </CardHeader>
             <CardContent
               id={`vendors-dashboard-list-${list.title.replace(/[^a-z0-9]+/gi, "-")}-content`}
               className="space-y-2 text-sm text-muted-foreground"
@@ -388,12 +369,11 @@ export default async function VendorsPage() {
         ))}
       </div>
 
-      <Card id="vendors-dashboard-error-card" className="border-border/70 bg-card/60">
-        <CardHeader id="vendors-dashboard-error-header">
-          <CardTitle id="vendors-dashboard-error-title" className="text-sm font-medium">
-            Error rate
-          </CardTitle>
-        </CardHeader>
+      <Card
+        id="vendors-dashboard-error-card"
+        className="border-border/70 bg-card/60"
+        headerTitle="Error rate"
+      >
         <CardContent id="vendors-dashboard-error-content" className="space-y-2 text-sm text-muted-foreground">
           <p>7 day error rate: 3.4 percent (placeholder).</p>
           <p>Most impacted vendors: Redwood Imports, Copperline Dairy.</p>

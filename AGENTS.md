@@ -51,19 +51,20 @@ After role selection and required reading, list available directive sessions und
 
 - Architect  
   Must follow rules defined in:  
-  docs/AGENT_RULES_ARCHITECT_V1.MD  
+  docs/AGENT_RULES_ARCHITECT.MD  
 
 - Executor  
   Must follow rules defined in:  
-  docs/AGENT_RULES_EXECUTOR_V1.MD  
+  docs/AGENT_RULES_EXECUTOR.MD  
 
 - Pair  
   Must follow rules defined in:  
-  docs/AGENT_RULES_PAIR_V1.MD  
+  docs/AGENT_RULES_PAIR.MD  
 
-- Web UI work  
+- Auditor  
   Must follow rules defined in:  
-  docs/AGENT_RULES_WEB_UI_V1.MD
+  docs/AGENT_RULES_AUDITOR.MD  
+
 
 Agents must not mix roles within a single conversation or thread.
 Architects are read only and produce directives.
@@ -160,8 +161,8 @@ Agent guidance files may be updated without adding repository changelog entries.
 This exception is strictly limited to these files:
 - `AGENTS.md`
 - `apps/web/AGENTS.md`
-- `docs/AGENT_RULES_ARCHITECT_V1.MD`
-- `docs/AGENT_RULES_EXECUTOR_V1.MD`
+ - `docs/AGENT_RULES_ARCHITECT.MD`
+ - `docs/AGENT_RULES_EXECUTOR.MD`
 
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
