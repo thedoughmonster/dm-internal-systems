@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 import {
   createTask,
@@ -82,6 +83,7 @@ export async function createTodo(formData: FormData) {
     related,
   })
   revalidatePath("/directives")
+  redirect("/directives")
 }
 
 export async function createDirectiveTask(formData: FormData) {

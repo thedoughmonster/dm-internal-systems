@@ -93,7 +93,9 @@ export default function SessionCard({
                 } as React.CSSProperties
               }
             >
-              <CardContent className="space-y-4">{children}</CardContent>
+              <CardContent id={`${id}-body`} className="space-y-4">
+                {children}
+              </CardContent>
             </div>
           </AccordionContent>
         </div>

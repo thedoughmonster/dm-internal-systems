@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import RefreshButton from "@/app/directives/composites/RefreshButton"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 type SessionMarkdownPageProps = {
   params?: Promise<{
     sessionId: string
