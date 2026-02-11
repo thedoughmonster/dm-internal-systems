@@ -21,3 +21,6 @@ out/
 
 # Local only directives data
 apps/web/.local/
+
+# Local editor settings
+.vscode/
