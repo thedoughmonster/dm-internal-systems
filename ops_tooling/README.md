@@ -45,6 +45,10 @@ Examples:
 - **Canonical business artifacts and user facing docs**
   - belongs under `docs/**` (or another clearly named docs home if you later reorganize)
 
+- **Root-level script programs**
+  - do not add active tooling under repo-root `scripts/`
+  - place scripts and validators under `ops_tooling/scripts/**`
+
 - **Untracked local machine artifacts**
   - `node_modules/`, build output, local caches, temp files
   - should not be committed
@@ -72,5 +76,5 @@ When adding a new workflow, co locate everything needed to understand and operat
 - Add a small pointer doc under `ops_tooling/workflows/<workflow_name>/docs/` that links the `.github/workflows/...` file to the workflow assets in this directory
 
 4) Update navigation docs
-- If an entry point doc like `CODEBASE_SUMMARY.MD` lists core workflows, update it to include the new workflow path
+- If an entry point doc like `docs/README.md` lists core workflows, update it to include the new workflow path
 - Add a changelog entry for the session that introduces the workflow, including files touched and the validation commands you ran

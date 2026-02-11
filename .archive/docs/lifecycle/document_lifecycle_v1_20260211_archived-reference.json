@@ -1,0 +1,143 @@
+{
+  "lifecycle_status": "archived_reference",
+  "archived_at_utc": "2026-02-11T11:31:07Z",
+  "archive_copy": ".archive/docs/lifecycle/document_lifecycle_v1_20260211.json",
+  "gating_enabled": false,
+  "active_authority": [
+    "AGENTS.md",
+    "docs/agent-rules/**"
+  ],
+  "name": "Document Lifecycle Specification",
+  "version": "v1",
+  "authority": "highest",
+  "scope": "repository-wide",
+  "description": "Defines the mandatory lifecycle, states, and enforcement rules for all canonical documents.",
+
+  "document_definition": {
+    "definition": "A document is a paired machine and human artifact intended to be authoritative.",
+    "required_artifacts": [
+      "machine_canonical_json",
+      "human_companion_md"
+    ]
+  },
+
+  "file_rules": {
+    "machine_canonical": {
+      "format": "json",
+      "filename_case": "lowercase"
+    },
+    "human_companion": {
+      "format": "md",
+      "filename_case": "uppercase"
+    },
+    "pairing_rules": {
+      "same_basename_required": true,
+      "same_directory_required": true,
+      "both_required": true
+    }
+  },
+
+  "lifecycle_states": [
+    "draft",
+    "validated",
+    "canonical",
+    "locked",
+    "deprecated"
+  ],
+
+  "state_definitions": {
+    "draft": {
+      "editable": true,
+      "schema_required": false,
+      "authoritative": false,
+      "agent_access": "forbidden"
+    },
+    "validated": {
+      "editable": false,
+      "schema_required": true,
+      "authoritative": false,
+      "agent_access": "forbidden"
+    },
+    "canonical": {
+      "editable": false,
+      "schema_required": true,
+      "authoritative": true,
+      "agent_access": "allowed"
+    },
+    "locked": {
+      "editable": false,
+      "schema_required": true,
+      "authoritative": true,
+      "agent_access": "read_only"
+    },
+    "deprecated": {
+      "editable": false,
+      "schema_required": true,
+      "authoritative": false,
+      "agent_access": "forbidden"
+    }
+  },
+
+  "allowed_transitions": [
+    { "from": "draft", "to": "validated" },
+    { "from": "validated", "to": "canonical" },
+    { "from": "canonical", "to": "locked" },
+    { "from": "canonical", "to": "deprecated" }
+  ],
+
+  "mutation_rules": {
+    "direct_editing_forbidden_states": [
+      "validated",
+      "canonical",
+      "locked",
+      "deprecated"
+    ],
+    "mutation_method": "copy_forward_versioning_only",
+    "mutation_surface": "approved_scripts_only"
+  },
+
+  "authority_by_state": {
+    "draft": "human_or_generator",
+    "validated": "validation_scripts_only",
+    "canonical": "promotion_scripts_only",
+    "locked": "none",
+    "deprecated": "archival_scripts_only"
+  },
+
+  "companion_md_rules": {
+    "role": "explanatory_only",
+    "may_define_rules": false,
+    "conflict_resolution": "json_wins"
+  },
+
+  "path_governance": {
+    "docs_root_reserved": true,
+    "docs_root_allowed_files": [
+      "document_lifecycle_v1.json",
+      "DOCUMENT_LIFECYCLE_V1.MD"
+    ],
+    "lifecycle_governed_root_globs": [
+      "docs/canon/**"
+    ],
+    "lifecycle_exempt_root_globs": [
+      "docs/lifecycle_exempt/**"
+    ],
+    "notes": "Lifecycle enforcement applies only under governed roots and never under lifecycle_exempt roots."
+  },
+
+  "lifecycle_exempt_policy": {
+    "definition": "Lifecycle exempt artifacts are intake or helper artifacts, never authoritative documents.",
+    "pairing_rules_apply": false,
+    "lifecycle_states_apply": false,
+    "may_be_human_edited": true,
+    "agent_access": "forbidden"
+  },
+
+  "noncompliance_policy": {
+    "on_violation": [
+      "stop_execution",
+      "report_violation"
+    ],
+    "best_effort_allowed": false
+  }
+}

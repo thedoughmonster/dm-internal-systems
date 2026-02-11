@@ -3,7 +3,6 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -12,10 +11,7 @@ from zipfile import ZipFile
 
 ALLOWED_PREFIX = "docs/"
 FORBIDDEN_DIRS = {"canonical", "locked", "deprecated"}
-FORBIDDEN_FILES = {
-    "docs/document_lifecycle_v1.json",
-    "docs/DOCUMENT_LIFECYCLE_V1.MD",
-}
+FORBIDDEN_FILES = set()
 SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -35,7 +31,7 @@ def _utc_iso() -> str:
 
 
 def _write_log(zip_name, status, manifest_sha, files_written, notes):
-    applied_dir = _repo_root() / "workflows" / "updates-inbox" / "applied"
+    applied_dir = _repo_root() / "ops_tooling" / "workflows" / "updates-inbox" / "applied"
     applied_dir.mkdir(parents=True, exist_ok=True)
     log_name = f"{_utc_timestamp()}_{Path(zip_name).stem}.json"
     log_path = applied_dir / log_name
@@ -81,12 +77,6 @@ def _validate_src(src: str) -> PurePosixPath:
     if not src.startswith("payload/"):
         raise ValueError(f"Invalid src path (must start with payload/): {src}")
     return posix
-
-
-def _run_validator() -> int:
-    validator = _repo_root() / "scripts" / "validate_docs_lifecycle_v1.py"
-    result = subprocess.run([sys.executable, str(validator)])
-    return result.returncode
 
 
 def _apply_zip(zip_path: Path) -> bool:
@@ -147,17 +137,7 @@ def _apply_zip(zip_path: Path) -> bool:
                 shutil.copyfile(src_path, dest_path)
                 files_written.append(dest_posix)
 
-            if _run_validator() != 0:
-                _write_log(
-                    zip_name,
-                    "failed",
-                    manifest_sha,
-                    files_written,
-                    "docs lifecycle validation failed",
-                )
-                return False
-
-        applied_zips = _repo_root() / "workflows" / "updates-inbox" / "applied" / "zips"
+        applied_zips = _repo_root() / "ops_tooling" / "workflows" / "updates-inbox" / "applied" / "zips"
         applied_zips.mkdir(parents=True, exist_ok=True)
         os.replace(zip_path, applied_zips / zip_name)
         _write_log(zip_name, "applied", manifest_sha, files_written, "")
@@ -169,7 +149,7 @@ def _apply_zip(zip_path: Path) -> bool:
 
 
 def main() -> int:
-    inbox = _repo_root() / "workflows" / "updates-inbox" / "inbox"
+    inbox = _repo_root() / "ops_tooling" / "workflows" / "updates-inbox" / "inbox"
     if not inbox.exists():
         print("No packages in ops_tooling/workflows/updates-inbox/inbox")
         return 0

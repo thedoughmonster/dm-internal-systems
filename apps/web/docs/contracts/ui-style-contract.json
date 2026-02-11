@@ -1,0 +1,169 @@
+// apps/web/docs/contracts/ui-style-contract.json
+{
+  "version": "v1.1",
+  "status": "active",
+  "last_updated": "2026-01-31",
+  "scope": {
+    "apps": ["apps/web"],
+    "component_roots": ["components/ui", "components/ui/dm"],
+    "css_entrypoints": ["apps/web/app/globals.css"]
+  },
+  "goals": [
+    "Terminal synth vibe, readable first",
+    "Deterministic layout with zero edge bleed",
+    "Only shadcn primitives and DM composites for UI construction",
+    "No global element styling leaks into shadcn primitives"
+  ],
+  "non_goals": [
+    "Do not redesign shadcn variants beyond light-touch class composition",
+    "Do not introduce new design systems or CSS frameworks",
+    "Do not add one-off page styling that bypasses primitives"
+  ],
+  "page_layout": {
+    "default_main_container": "mx-auto w-full max-w-6xl p-6",
+    "wide_main_container": "mx-auto w-full max-w-7xl p-6",
+    "page_header_block": {
+      "wrapper": "mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+      "title": "text-2xl font-semibold tracking-tight",
+      "subtitle": "mt-1 text-sm text-muted-foreground"
+    },
+    "page_header_actions": "flex flex-wrap items-center gap-2",
+    "page_header_meta": "flex flex-wrap items-center gap-2 text-xs text-muted-foreground",
+    "spacing": {
+      "section_gap": "gap-5",
+      "stack_gap": "gap-4",
+      "dense_stack_gap": "gap-2",
+      "section_stack": "space-y-5"
+    },
+    "hard_rules": [
+      "No page content touches viewport edges",
+      "All pages render inside the main container",
+      "No page applies its own background system"
+    ]
+  },
+  "shell_background": {
+    "contract": "App shell applies dm-app-bg once at the shell level",
+    "class": "dm-app-bg",
+    "notes": [
+      "Body stays bg-background text-foreground",
+      "dm-app-bg provides the grid and gradient layer"
+    ]
+  },
+  "primitives_policy": {
+    "allowed": [
+      "Use shadcn components from components/ui",
+      "Use DM composites from components/ui/dm to wire primitives",
+      "Use Tailwind utility classes in components and pages"
+    ],
+    "forbidden": [
+      "Global element selectors that restyle semantics across the app, for example label, button, input, textarea",
+      "Custom bespoke UI controls that duplicate shadcn primitives",
+      "Inline style attributes for theme or spacing"
+    ],
+    "legacy_notes": [
+      "Global element selectors already present are legacy and must not be expanded in new changes."
+    ],
+    "exception_process": [
+      "If a global selector is required, scope it to a DM wrapper class",
+      "Document the exception in the companion MD and justify it"
+    ]
+  },
+  "typography": {
+    "headline_xl": "text-2xl font-semibold tracking-tight",
+    "headline_lg": "text-lg font-semibold tracking-tight",
+    "body": "text-sm",
+    "muted": "text-sm text-muted-foreground",
+    "micro_muted": "text-xs text-muted-foreground",
+    "mono_code": "font-mono text-xs",
+    "mono_label": "text-xs font-mono uppercase tracking-wide text-muted-foreground",
+    "rules": [
+      "Readable first, avoid ultra low contrast text",
+      "Use muted-foreground for secondary text"
+    ]
+  },
+  "cards_and_sections": {
+    "section_card": "relative rounded-2xl border border-border/60 bg-card/40 p-5 shadow-sm",
+    "panel_card": "rounded-2xl border border-border/60 bg-black/40 p-4",
+    "inline_block": "rounded-xl border border-border/60 bg-muted/30 p-3",
+    "pill": "inline-flex items-center rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 text-xs",
+    "card_stack": "space-y-4"
+  },
+  "forms_and_labels": {
+    "label_source_of_truth": "components/ui/label",
+    "label_style": "dm-label",
+    "label_rules": [
+      "Labels must use the shadcn Label component",
+      "Do not style raw label elements globally in CSS",
+      "If a label look is desired everywhere, implement it inside components/ui/label"
+    ],
+    "inputs": {
+      "input": "components/ui/input",
+      "textarea": "components/ui/textarea",
+      "select": "components/ui/select",
+      "checkbox": "components/ui/checkbox",
+      "switch": "components/ui/switch",
+      "slider": "components/ui/slider"
+    }
+  },
+  "tables": {
+    "source_of_truth": "components/ui/table",
+    "container": "overflow-x-auto rounded-xl border border-border/60 bg-card/40",
+    "header": "text-xs uppercase tracking-wide text-muted-foreground",
+    "row": "border-b border-border/40",
+    "cell": "p-3 align-top text-sm",
+    "cell_mono": "font-mono text-xs text-foreground/90",
+    "empty_state": "text-sm text-muted-foreground",
+    "rules": [
+      "Tables must remain readable with adequate padding",
+      "Do not shrink text below text-xs for dense tables unless explicitly required",
+      "Use an overflow container when tables are wider than the viewport"
+    ]
+  },
+  "content_blocks": {
+    "preformatted": "rounded-xl border border-border/60 bg-black/40 p-4 font-mono text-xs text-foreground/90 whitespace-pre-wrap",
+    "muted_text": "text-sm text-muted-foreground",
+    "error_text": "text-sm text-destructive"
+  },
+  "interaction_rules": {
+    "button_state_stability": "Buttons must keep stable width across loading and disabled states, use min width or consistent labels.",
+    "json_debug_visibility": "JSON debug views must be hidden by default behind a secondary action or disclosure."
+  },
+  "state_and_motion": {
+    "loader": "components/ui/loader",
+    "cursor": "dm-cursor",
+    "rules": [
+      "No layout shifts when toggling loading states",
+      "Prefer skeletons and reserved space for async data"
+    ]
+  },
+  "token_integrity": {
+    "tailwind_variables_must_exist_in_css": true,
+    "known_variables": [
+      "--background",
+      "--foreground",
+      "--card",
+      "--card-foreground",
+      "--popover",
+      "--popover-foreground",
+      "--primary",
+      "--primary-foreground",
+      "--secondary",
+      "--secondary-foreground",
+      "--muted",
+      "--muted-foreground",
+      "--accent",
+      "--accent-foreground",
+      "--destructive",
+      "--destructive-foreground",
+      "--border",
+      "--input",
+      "--ring",
+      "--neon-green",
+      "--neon-cyan",
+      "--neon-magenta"
+    ],
+    "notes": [
+      "If tailwind config references sidebar variables, define them in globals.css or remove them from tailwind config"
+    ]
+  }
+}

@@ -60,6 +60,6 @@ jobs:
       - name: Install dependencies
         run: npm --prefix apps/web ci
       - name: Guard test environment
-        run: scripts/ci/check-test-env.sh
+        run: ops_tooling/scripts/ci/check-test-env.sh
       - name: Run integration tests
         run: npm --prefix apps/web run test:integration

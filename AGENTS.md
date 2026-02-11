@@ -10,13 +10,25 @@ Which role am I being assigned?
 1. Architect  
 2. Executor  
 3. Pair  
+4. Auditor  
 
 The agent must not proceed until one role is explicitly selected.
 After role selection and required reading, list available directive sessions under `apps/web/.local/directives/` and exclude archived sessions by default.
 
+Role assignment exception for automatic handoff:
+- A valid `=== AUTO HANDOFF ===` packet from the prior role counts as explicit role selection for `to_role`.
+- On valid handoff packet, receiving role must complete required reading and continue without asking for manual role re-selection.
+- Role transition is allowed only by valid handoff packet or explicit operator role reset.
+
+## Automatic role handoff protocol
+
+- Sender role must stop immediately after emitting a valid handoff packet.
+- Receiver role must continue automatically using packet context when packet is valid and targets that role.
+- Trigger mappings and required packet fields are defined in `docs/agent-rules/shared/role-handoff-automation.md`.
+
 ## Required Reading
 
-- `apps/web/README_COMPONENT_PARADIGM.md`
+- `apps/web/docs/guides/component-paradigm.md`
 - The agent must read the required file at session start.
 - The agent must not proceed with any request until the required reading has been completed.
 
@@ -26,6 +38,11 @@ After role selection and required reading, list available directive sessions und
 - Do not call Supabase REST endpoints directly from UI code.
 - Phase in this rule where required, but treat new work as Edge Function only.
 - Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
+
+## Repo tooling location rule
+
+- Repository scripts, validators, and workflow programs must live under `ops_tooling/`.
+- Root-level `scripts/` must not be used for active tooling.
 
 ## Command allowlist rule
 
@@ -51,29 +68,30 @@ After role selection and required reading, list available directive sessions und
 
 - Architect  
   Must follow rules defined in:  
-  docs/AGENT_RULES_ARCHITECT.MD  
+  docs/agent-rules/architect/README.md  
 
 - Executor  
   Must follow rules defined in:  
-  docs/AGENT_RULES_EXECUTOR.MD  
+  docs/agent-rules/executor/README.md  
 
 - Pair  
   Must follow rules defined in:  
-  docs/AGENT_RULES_PAIR.MD  
+  docs/agent-rules/pair/README.md  
 
 - Auditor  
   Must follow rules defined in:  
-  docs/AGENT_RULES_AUDITOR.MD  
+  docs/agent-rules/auditor/README.md  
 
 
-Agents must not mix roles within a single conversation or thread.
+Agents must not mix roles inside a single response.
+In-thread role transitions are allowed only through the automatic handoff packet protocol or explicit operator role reset.
 Architects are read only and produce directives.
 Executors apply directives exactly and must not infer intent.
 
 ## Standard operating procedure
 
 - Default start state is a clean working tree.
-- At the start of every session, read `apps/web/README_COMPONENT_PARADIGM.md` and treat it as non negotiable.
+- At the start of every session, read `apps/web/docs/guides/component-paradigm.md` and treat it as non negotiable.
 - Feature updates that require multiple steps must use a feature branch.
 - Operator prefers no commits until the end of a feature update.
 - Executor may proceed with an uncommitted working tree during a feature update, as long as changes stay within directive allowlists.
@@ -85,6 +103,8 @@ Executors apply directives exactly and must not infer intent.
 - Directive task `Steps` must be explicit and drift resistant: each numbered step names exact files, exact actions, and expected completion artifact.
 - Directive tasks should generally be scoped to a roughly 15 minute execution stretch.
 - Directive task `Steps` should be small, explicit, and atomic, but do not need to be individually time boxed to 15 minutes.
+- Session priority determines global execution order across directives.
+- Task priority is only for ordering tasks within a selected directive session.
 
 ## Directive storage model
 
@@ -95,7 +115,11 @@ Executors apply directives exactly and must not infer intent.
 - All directive files use YAML front matter with a `meta` block and a short summary field.
 
 ## Repo reference
-See `REPO_LINK.md` for the canonical repository URL and access guidance.
+Canonical repository URL:
+https://github.com/thedoughmonster/dm-internal-systems
+
+This repo is public and may be used by agents to reduce repeated context.
+If an agent cannot access the repo, it must request specific files by path.
 
 ## Purpose
 This repository is worked on using a verified-only operating model.
@@ -128,7 +152,6 @@ If a rule:
 It does not belong here.
 
 ## Constraints
-- No em dashes in generated writing.
 - No claims of capability unless verified in this repo.
 
 ## Changelog requirement
@@ -140,13 +163,12 @@ It does not belong here.
 ## Documentation and changelog requirements
 - Every Codex session adds a new session entry file under `changelog/` if the work touches root scope files.
 - Every Codex session adds a new session entry file under `apps/web/changelog/` if the work touches apps/web scope files.
-- Update the relevant `MASTER_CHANGELOG.MD` if present, otherwise note that the master changelog is optional until created.
 - Each session entry includes: summary, files touched, decisions, risks and followups, commands run, verification.
 - Updates inbox workflow assets live under `ops_tooling/workflows/updates-inbox/`.
 
-## Doc lifecycle status
-- Lifecycle docs are no longer gating operational changes.
-- Lifecycle docs can be updated opportunistically, but changes must always be recorded in changelog entries.
+## Docs governance status
+- Lifecycle governance docs are archived and are not operational gates.
+- Active governance lives in role rules, directives, and changelog requirements.
 
 ## SECRET HANDLING AND REDACTION (MANDATORY)
 - Never print, paste, or echo secret values into chat output.
@@ -163,9 +185,8 @@ Agent guidance files may be updated without adding repository changelog entries.
 
 This exception is strictly limited to these files:
 - `AGENTS.md`
-- `apps/web/AGENTS.md`
- - `docs/AGENT_RULES_ARCHITECT.MD`
- - `docs/AGENT_RULES_EXECUTOR.MD`
+- `apps/web/docs/guides/agent-guidance.md`
+- `docs/agent-rules/**`
 
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).

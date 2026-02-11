@@ -19,9 +19,9 @@ def format_path(error_path):
 
 
 def main():
-    root = Path(__file__).resolve().parents[1]
-    data_path = root / "docs" / "dm_actor_model_v1.json"
-    schema_path = root / "docs" / "dm_actor_model_v1.schema.json"
+    root = Path(__file__).resolve().parents[2]
+    data_path = root / "contracts" / "actors" / "dm_actor_model_v1.json"
+    schema_path = root / "contracts" / "actors" / "dm_actor_model_v1.schema.json"
 
     try:
         data = json.loads(data_path.read_text())
