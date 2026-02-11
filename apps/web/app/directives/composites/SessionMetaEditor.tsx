@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import { updateTodo } from "../actions"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -150,6 +149,7 @@ export default function SessionMetaEditor({
           >
             {(["low", "medium", "high"] as const).map((value) => (
               <Label
+                id={`${formId}-priority-label-${value}`}
                 key={value}
                 htmlFor={`${formId}-priority-${value}`}
                 className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"

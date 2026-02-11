@@ -47,6 +47,18 @@ function normalizeArrayParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value : [value]
 }
 
+function parseUpdatedTimestamp(value: string | undefined) {
+  if (!value) return 0
+  const parsed = Date.parse(value)
+  return Number.isNaN(parsed) ? 0 : parsed
+}
+
+function toStatusLabel(value: string) {
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
 function filterEntries(entries: DirectiveFile[], params: DirectivesViewProps["searchParams"]) {
   const query = normalizeParam(params?.query).toLowerCase()
   const statuses = normalizeArrayParam(params?.status).map((status) =>
@@ -124,6 +136,21 @@ function relationOptions(
 
 export default async function DirectivesView({ searchParams }: DirectivesViewProps) {
   const entries = await listDirectiveFiles()
+  const statusOptionsMap = new Map<string, string>(
+    STATUS_OPTIONS.map((option) => [option.value, option.label])
+  )
+
+  for (const entry of entries) {
+    const status = (entry.meta.status ?? "").toLowerCase()
+    if (!status || statusOptionsMap.has(status)) {
+      continue
+    }
+    statusOptionsMap.set(status, toStatusLabel(status))
+  }
+
+  const statusOptions = Array.from(statusOptionsMap.entries()).map(
+    ([value, label]) => ({ value, label })
+  )
   const filtered = filterEntries(entries, searchParams)
   const queryValue = normalizeParam(searchParams?.query)
   const statusValues = normalizeArrayParam(searchParams?.status)
@@ -144,6 +171,13 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
     }
     return acc
   }, new Map<string, DirectiveFile[]>())
+  const orderedGroups = Array.from(grouped.entries()).sort((a, b) => {
+    const aParent = a[1].find((entry) => entry.kind === "parent")
+    const bParent = b[1].find((entry) => entry.kind === "parent")
+    const aUpdated = parseUpdatedTimestamp(aParent?.meta.updated)
+    const bUpdated = parseUpdatedTimestamp(bParent?.meta.updated)
+    return bUpdated - aUpdated
+  })
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
@@ -214,20 +248,26 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
           <DirectivesFiltersPanel
             queryValue={queryValue}
             statusValues={statusValues}
-            statusOptions={[...STATUS_OPTIONS]}
+            statusOptions={statusOptions}
             tagValues={tagsValue}
             tagOptions={tagList}
           />
           {filtered.length === 0 ? (
             <p className="text-sm text-muted-foreground">No directives found.</p>
           ) : (
-            Array.from(grouped.entries()).map(([sessionId, sessionEntries]) => {
+            orderedGroups.map(([sessionId, sessionEntries]) => {
               const title = parentTitles.get(sessionId) ?? "Untitled session"
               const parentEntry = sessionEntries.find((entry) => entry.kind === "parent")
               const sessionDirective = parentEntry?.meta.directive ?? "unknown"
               const sessionStatus = parentEntry?.meta.status ?? "unknown"
               const sessionUpdated = parentEntry?.meta.updated ?? "unknown"
-              const taskEntries = sessionEntries.filter((entry) => entry.kind !== "parent")
+              const taskEntries = sessionEntries
+                .filter((entry) => entry.kind !== "parent")
+                .sort(
+                  (a, b) =>
+                    parseUpdatedTimestamp(b.meta.updated) -
+                    parseUpdatedTimestamp(a.meta.updated)
+                )
               const sessionMetaEntry = parentEntry
                 ? {
                     sessionId: parentEntry.sessionId,
