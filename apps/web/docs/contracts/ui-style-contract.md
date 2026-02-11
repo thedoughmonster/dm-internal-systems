@@ -130,3 +130,24 @@ When a page or component violates these rules, remediation is to:
 - replace bespoke markup with shadcn primitives
 - move style into the primitive component implementation or a DM composite
 - remove page specific CSS and rely on the contract
+
+## Storybook preview consistency
+
+Storybook is the local component consistency workbench for `apps/web`.
+
+Storybook preview rules:
+
+- Storybook preview must load `app/globals.css`.
+- Storybook preview must use a shared decorator frame that applies baseline container spacing and neutral surface styling.
+- Storybook preview should render with layout `fullscreen` to reflect real page composition.
+- Storybook config must enable docs/autodocs and a11y coverage for component review.
+
+Decorator baseline expectations:
+
+- Use centered page container conventions from this contract (`mx-auto`, `max-w-6xl`, `p-6`).
+- Use neutral card surface wrapper (`rounded-2xl`, `border-border/60`, `bg-card/40`, `p-5`).
+- Preserve typography baseline with standard app text classes.
+
+Validation expectation:
+
+- Storybook preview updates must keep component rendering consistent with this contract and must pass local Storybook smoke-test/build commands.

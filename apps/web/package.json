@@ -6,8 +6,11 @@
     "dev": "next dev --webpack -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint --ignore-pattern storybook-static",
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "storybook:build:ci": "storybook build --output-dir storybook-static --quiet"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -65,6 +68,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.2.8",
+    "@storybook/nextjs": "^10.2.8",
     "@types/d3-array": "^3.2.2",
     "@types/d3-color": "^3.1.3",
     "@types/d3-ease": "^3.0.2",
@@ -81,6 +86,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.3",
     "postcss": "^8.5.3",
+    "storybook": "^10.2.8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

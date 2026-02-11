@@ -37,6 +37,35 @@ jobs:
       - name: Run typecheck
         run: npm --prefix apps/web run typecheck
 
+  visual-regression:
+    name: visual-regression
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - typecheck
+    env:
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm --prefix apps/web ci
+      - name: Run visual regression (Chromatic)
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN != '' }}
+        uses: chromaui/action@v11
+        with:
+          projectToken: ${{ env.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: apps/web
+          buildScriptName: storybook:build:ci
+      - name: Skip visual regression (missing secret)
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN == '' }}
+        run: echo "Skipping Chromatic visual regression because CHROMATIC_PROJECT_TOKEN is not configured."
+
   integration-test-testenv:
     name: integration-test-testenv
     if: ${{ github.event_name == 'pull_request' }}
