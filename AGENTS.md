@@ -82,6 +82,9 @@ Executors apply directives exactly and must not infer intent.
 - Executors run the full directive end to end with minimal operator input.
 - Executors stop only under explicit stop conditions.
 - Architects may write directive artifacts under `apps/web/.local/directives/`.
+- Directive task `Steps` must be explicit and drift resistant: each numbered step names exact files, exact actions, and expected completion artifact.
+- Directive tasks should generally be scoped to a roughly 15 minute execution stretch.
+- Directive task `Steps` should be small, explicit, and atomic, but do not need to be individually time boxed to 15 minutes.
 
 ## Directive storage model
 

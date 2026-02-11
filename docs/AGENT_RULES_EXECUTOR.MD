@@ -91,8 +91,12 @@ Executor tasks are stored under `apps/web/.local/directives/<guid>/`.
 - Session folder name pattern: `<guid>/`
 - Task filename pattern: `TASK_<slug>.md`
 
-The Executor must be given a specific task file path by the operator, or a session selection by number from a numbered list.
-The Executor must not guess which task to use.
+The Executor must be given either:
+- a task path, or
+- a session selection by number from a numbered list.
+
+The Executor must not require a full file path when a valid numeric session selection is provided.
+The Executor must not guess which task to use when multiple runnable tasks exist in a selected session.
 
 ## Non executable artifacts
 
@@ -101,7 +105,7 @@ The Executor must not execute session `README.md` files.
 - `README.md` is intake and context only.
 - `TASK_<slug>.md` is executable instruction.
 
-If the operator provides a README path instead of a task path, the Executor must stop and request a task.
+If the operator provides a README path instead of a task path, the Executor must treat it as session context and continue with numeric task selection flow when needed.
 
 The Executor must not create or delete directive files unless explicitly instructed.
 The Executor may update the task file meta `result` field when executing the assigned task. The Executor must not update task status or any other session metadata.
@@ -120,22 +124,30 @@ The Executor must not edit the directive file after execution.
 ## Initialization protocol
 
 1. Confirm role assignment and required reading are complete.
-2. If the operator provides a task path, verify it exists and proceed.
-3. If no task path is provided, list available directive sessions under `apps/web/.local/directives/`, excluding archived sessions.
-4. When listing sessions, include `meta.title`, `meta.status`, and `meta.session_priority` from the session README, using human readable values, in a numbered list. The list must be numbered.
-5. Do not list or reference sessions by folder name alone.
-6. If a session README is missing, unreadable, or lacks `meta.title`, stop and ask the operator how to proceed.
-7. Ask the operator to select a session by number, then request a specific task file path within that session before proceeding. Treat any numeric reply following a numbered list as selection or reference to that item.
+2. Check for `meta.auto_run: true` sessions with `meta.status: in_progress`. If any exist, select the highest priority session, then earliest created timestamp, and run it immediately.
+3. If the operator provides a task path, verify it exists and proceed.
+4. If no task path is provided, list available directive sessions under `apps/web/.local/directives/`, excluding archived sessions.
+5. When listing sessions, include `meta.title`, `meta.status`, and `meta.session_priority` from the session README, using human readable values, in a numbered list. The list must be numbered.
+6. Do not list or reference sessions by folder name alone.
+7. If a session README is missing, unreadable, or lacks `meta.title`, stop and ask the operator how to proceed.
+8. Accept a numeric reply as both selection and confirmation to run the selected session.
+9. After session selection:
+   - If exactly one runnable task exists, run it.
+   - If multiple runnable tasks exist, list tasks in a numbered list and accept a numeric reply as selection and confirmation to run.
+   - If no runnable tasks exist, report and stop.
 
 Startup actions:
 1. Confirm role assignment and complete required reading.
-2. If a task path is provided, verify it exists and read it fully before any work.
-3. If no task path is provided, list available directive sessions as described above and request a session number. Treat any numeric reply following a numbered list as selection or reference to that item.
-4. Validate the task file includes Objective, Constraints, Allowed files, Steps, Validation, Expected output, and Stop conditions. Stop if any are missing.
-5. Restate the task objective in your own words and ask the operator to confirm before making changes. Skip confirmation only when `meta.auto_run: true` and the task is explicitly selected.
-6. If any session READMEs have `meta.auto_run: true` and `meta.status: in_progress`, automatically select the session with the highest priority, then earliest created timestamp.
-7. If auto run is triggered, proceed with the selected session and request the specific task path within that session before proceeding.
-8. If any session has `meta.session_priority: ultra` and `meta.status: in_progress`, immediately proceed with its single task without user input or task path selection.
+2. If any session READMEs have `meta.auto_run: true` and `meta.status: in_progress`, automatically select the session with the highest priority, then earliest created timestamp, and proceed immediately without requesting a task path.
+3. If a task path is provided, verify it exists and read it fully before any work.
+4. If no task path is provided, list available directive sessions as described above and request a session number. Treat any numeric reply following a numbered list as selection and confirmation to run.
+5. For a selected session, run the single runnable task automatically. If multiple runnable tasks exist, list them in a numbered list and accept a numeric reply as selection and confirmation to run.
+6. Validate the selected task file includes Objective, Constraints, Allowed files, Steps, Validation, Expected output, and Stop conditions. Stop if any are missing.
+7. Validate the selected task file includes `meta.execution_model` and `meta.thinking_level`. Stop if either is missing.
+8. Restate the task objective in your own words and ask the operator to confirm before making changes. Skip confirmation when auto run selected the session.
+9. Before starting each task, prompt the operator to confirm switching to the task specified `meta.execution_model` and `meta.thinking_level`.
+10. When progressing from one task to the next in the same session, repeat the model and thinking confirmation prompt for the next task.
+11. If any session has `meta.session_priority: ultra` and `meta.status: in_progress`, immediately proceed with its single task without user input or task path selection.
 
 ## Directive priority conventions
 
@@ -143,6 +155,8 @@ Startup actions:
 - Task file `meta.priority` should be one of: `urgent`, `high`, `medium`, `low`.
 - Task file `meta.status` should be one of: `todo`, `in_progress`, `blocked`, `done`, `archived`.
 - Task file `meta.title` is required.
+- Task file `meta.execution_model` is required.
+- Task file `meta.thinking_level` is required and should be one of: `low`, `medium`, `high`.
 - `ultra` is reserved for Auditor only.
 
 ## Streamlining conventions
@@ -161,6 +175,8 @@ The Executor must obey directive constraints exactly.
 - Delete files only if explicitly allowed.
 - Do not perform recursive scans unless explicitly allowed.
 - Do not add tooling, helpers, or refactors outside the directive scope.
+- Treat task `Steps` as strict atomic instructions.
+- If a step lacks exact file paths, concrete action, or completion criteria, stop and request clarification before proceeding.
 
 ## Verification Requirement
 

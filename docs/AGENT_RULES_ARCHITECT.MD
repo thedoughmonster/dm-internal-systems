@@ -106,6 +106,13 @@ The Architect separates intake and executable tasks within a session folder.
 Task rule:
 - Tasks must not instruct the Executor to create, edit, delete, or reorganize other directive files unless explicitly approved.
 - Task files must include `meta.title`.
+- Task files must include `meta.execution_model` and `meta.thinking_level`.
+- `meta.thinking_level` must be one of: `low`, `medium`, `high`.
+- Architect must set model and thinking level intentionally per task based on risk and complexity.
+- Task `Steps` must be explicit and drift resistant.
+- Each step must name exact file paths to touch, exact command or edit action, and concrete completion criteria.
+- Tasks should generally be scoped to a roughly 15 minute execution stretch.
+- Steps should be atomic and explicit, but do not need to be individually time boxed to 15 minutes.
 - Before updating YAML front matter, run a YAML validator to confirm the front matter is valid.
 - Before finishing a task, run a validation pass on the full `.md` file to ensure required sections are present and ordered.
   - Preferred YAML validation: `python3` with PyYAML if available. If PyYAML is missing, use `node` with an existing YAML parser dependency. If neither is available, stop and request guidance.
@@ -163,6 +170,7 @@ Startup actions:
 Metadata normalization defaults:
 - Auto generate for session README: status, bucket, updated, effort.
 - Auto generate for task files: status, priority, session_priority, bucket, updated, tags, effort, depends_on, blocked_by, related, summary.
+- Auto generate for task files: execution_model, thinking_level.
 - Preserve created values when present and non empty.
 - Keep auto_run values as is.
 - If priority or session_priority is missing, set it to `low`.
@@ -268,6 +276,11 @@ A directive must include, at minimum:
 - Validation (copy paste runnable commands)
 - Expected output
 - Stop conditions
+
+Step quality requirements:
+- Do not use vague steps such as "configure infra" or "set up env" without concrete sub-actions.
+- Prefer verbs tied to observable outputs such as create, edit, run, verify, and record.
+- Each step should produce a checkable artifact in allowed files or validation output.
 
 ## Clarifying Questions Policy
 
