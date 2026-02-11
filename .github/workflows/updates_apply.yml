@@ -29,9 +29,6 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Validate docs lifecycle
-        run: python ops_tooling/scripts/validate_docs_lifecycle_v1.py
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

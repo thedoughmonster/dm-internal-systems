@@ -144,13 +144,13 @@ def main() -> int:
     parser.add_argument(
         "--actors-doc",
         dest="actors_doc",
-        default="docs/canon/actors/dm_actors_v1.json",
+        default="contracts/actors/dm_actors_v1.json",
         help="Path to actors doc",
     )
     parser.add_argument(
         "--model-doc",
         dest="model_doc",
-        default="docs/canon/actors/dm_actor_model_v1.json",
+        default="contracts/actors/dm_actor_model_v1.json",
         help="Path to actor model doc",
     )
     parser.add_argument("--validate-only", dest="validate_only", action="store_true")
