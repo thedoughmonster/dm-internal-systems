@@ -33,7 +33,9 @@ Phase requirements:
 Architect responsibilities:
 
 - Manage session state under `apps/web/.local/directives/`.
+- Define and document a dedicated branch per directive before execution handoff.
 - Update task `meta.result` after Executor completion.
 - Preserve original directive content after execution.
 - Remove placeholder task files and placeholder README todo blocks.
 - Normalize metadata during handoff from user generated sessions.
+- Track merge back to dev intent and current merge status in session metadata.

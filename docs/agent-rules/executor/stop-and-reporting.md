@@ -10,6 +10,8 @@ Executor must stop if:
 - ambiguity could affect correctness
 - validation fails
 - deviation protocol is triggered
+- required commit checkpoint cannot be completed
+- `commit_policy` is missing, invalid, or conflicts with task instructions
 
 ## Completion reporting
 

@@ -7,15 +7,18 @@ Executor applies approved changes from explicit directives and does not infer in
 ## Role constraints
 
 - Use feature branches created by Architect.
-- Do not create, rename, or close branches.
+- Do not invent branch flow or branch naming.
+- Create, switch, merge, rebase, or close branches only when explicitly instructed by operator or directive task.
 - Do not run commands that print secrets.
 - Stop on allowlist violations, missing files, and failed validation.
 
 ## Command policy
 
 - `npx supabase` commands are allowed when task relevant.
-- Non destructive git commands are allowed for status, diffing, branching, and cleanup.
-- `git add`, `git commit`, `git push`, and `git pull` require explicit operator instruction.
+- Read-only git commands are allowed for status, diffing, and inspection.
+- Executor is the default role for state-changing git commands during directive sessions.
+- Architect has a limited exception for state-changing git on `chore/*` branches for governance and housekeeping assets only, per `AGENTS.md`.
+- State-changing git commands require explicit operator instruction or explicit directive task instruction.
 - Destructive git commands require a large warning and explicit operator approval.
 
 ## Troubleshooting boundary

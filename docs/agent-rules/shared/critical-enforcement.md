@@ -29,6 +29,17 @@ These rules are non negotiable. Every role must enforce them exactly.
 6. Directive contract gate
 - Work must follow explicit Objective, Constraints, Allowed files, Steps, Validation, Expected output, and Stop conditions when using directives.
 - If contract is incomplete for safe execution, stop and request clarification.
+- Missing required commit checkpoint or unresolved merge-safety evidence is fail-closed and blocks continuation.
+
+7. Git authority gate
+- During directive sessions, state-changing git commands are Executor-owned by default.
+- Architect may run state-changing git commands only on `chore/*` branches, with explicit operator instruction or explicit directive task instruction.
+- Architect `chore/*` state-changing git is limited to governance and housekeeping assets only: `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, `apps/web/.local/directives/**`, and `ops_tooling/**`.
+- If planned or staged files include product code, Architect must stop and hand off to Executor before any state-changing git.
+- Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
+- Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.
+- Non-Executor roles other than Architect may use read-only git inspection commands only.
+- If state-changing git is required outside these rules, emit handoff packet or request explicit operator role reset.
 
 ## Fail closed behavior
 

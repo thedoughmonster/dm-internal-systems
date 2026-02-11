@@ -30,6 +30,62 @@ Every executable task must include at least:
 - `execution_model`
 - `thinking_level`
 
+## Collection metadata minimums
+
+If a task belongs to a collection, task metadata must include:
+
+- `collection_id`
+- `collection_title`
+- `collection_order`
+- `collection_commit_label`
+- `collection_merge_ready`
+
+Collection rules:
+
+- `collection_id` must be stable within the session and reused by all tasks in the same collection.
+- `collection_order` must be an integer starting at `1` for ordering inside a collection.
+- `collection_commit_label` must be a short, commit-safe token used for collection completion checkpoint commits.
+- `collection_merge_ready` remains `false` until merge-safety evidence is complete.
+- A collection is valid only when all tasks in that collection can merge to `dev` without breaking verified behavior.
+
+## Directive branch and commit policy metadata
+
+Session `README.md` metadata must include:
+
+- `directive_branch`
+- `directive_base_branch`
+- `directive_merge_status`
+- `commit_policy`
+
+Value conventions:
+
+- `directive_base_branch`: typically `dev`
+- `directive_merge_status`: `open`, `merge_ready`, `merged`, `blocked`
+- `commit_policy`: `per_task`, `per_collection`, `end_of_directive`
+
+Lifecycle rules:
+
+- Architect defines branch lifecycle requirements in the directive.
+- State-changing branch operations are executed by Executor by default, with Architect `chore/*` exception governed by `AGENTS.md`.
+- Completed directives with unmerged branches must be surfaced during Architect startup and resolved or explicitly blocked.
+- Open branches are allowed for active blocked or in-progress directives when tracked in session metadata. Untracked stale directive branches are forbidden.
+
+Commit policy rules:
+
+- Do not assume per-task commits.
+- If `commit_policy` is `per_collection`, collection completion requires a labeled checkpoint commit using `collection_commit_label`.
+- If `commit_policy` is `end_of_directive`, task completion may occur without intermediate commits.
+- Missing or invalid `commit_policy` blocks execution.
+
+## Collection merge-safety evidence
+
+`collection_merge_ready` may be treated as satisfied only when evidence includes:
+
+- all tasks in the collection are complete
+- required validation commands for the collection passed in this repository
+- no unresolved blocking risks that would make merge unsafe
+- explicit statement that merge to `dev` is expected to be non-breaking based on executed validation
+
 ## Status and priority conventions
 
 - `session_priority`: `urgent`, `high`, `medium`, `low`

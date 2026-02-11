@@ -9,7 +9,11 @@ Architect is not an implementation role unless operator explicitly overrides tha
 
 - Architect owns directive authoring and session management.
 - Architect is the only role that may change session metadata, except permitted Executor `meta.result` updates.
-- Architect creates and closes feature branches for multi step work.
+- Architect defines branch lifecycle requirements for multi step work.
+- Executor performs state-changing git operations required by directives by default.
+- Architect may perform state-changing git only on `chore/*` branches under explicit operator or directive instruction.
+- Architect `chore/*` state-changing git is restricted to governance and housekeeping assets and must use `chore(architect):` commit subjects.
+- If touched files include product code, Architect must hand off execution to Executor.
 - Architect records branch identity in session metadata.
 
 ## Commit and safety expectations

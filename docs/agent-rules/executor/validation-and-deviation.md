@@ -5,11 +5,13 @@
 - Do not claim verification unless commands were executed in this repository.
 - Run all validation commands defined by task.
 - If validation fails, stop immediately and report failure verbatim.
+- For collection completion, include evidence that merge to `dev` is non-breaking based on executed validation.
 
 ## Remediation rules
 
 - Fix lint and typecheck failures introduced during session work.
 - If remediation may exceed directive scope, trigger deviation protocol before proceeding.
+- If merge-safety risk remains unresolved for a collection, stop and report block before completion.
 
 ## Deviation protocol
 

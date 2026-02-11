@@ -47,8 +47,16 @@ Role assignment exception for automatic handoff:
 ## Command allowlist rule
 
 - Executor is always allowed to run `npx supabase` commands when needed for the task.
-- Executor is always allowed to run non destructive git commands for status, diffing, branching, and cleanup.
-- When explicitly instructed by the operator, the Executor is always allowed to run standard git versioning commands such as `git add`, `git commit`, `git push`, and `git pull`.
+- During directive sessions, state-changing git commands are Executor-owned by default.
+- Architect may run state-changing git commands only on `chore/*` branches.
+- Architect state-changing git on `chore/*` requires explicit operator instruction or explicit directive task instruction.
+- Architect `chore/*` state-changing git is limited to governance and housekeeping assets only: `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, `apps/web/.local/directives/**`, and `ops_tooling/**`.
+- If Architect detects any product code changes in planned or staged files, Architect must stop and hand off to Executor before running state-changing git.
+- Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
+- Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.
+- Other non-Executor roles may run read-only git commands for repository inspection only: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git rev-parse`.
+- State-changing git commands include `git add`, `git commit`, `git push`, `git pull`, `git checkout`, `git switch`, `git merge`, `git rebase`, `git cherry-pick`, `git stash`, `git reset`, and branch create or delete actions.
+- Executor runs state-changing git commands only when explicitly instructed by the operator or explicitly required by an approved directive task.
 - Destructive git commands must include a large warning and require explicit operator approval before execution.
 
 ## Executor override and troubleshooting rule
@@ -113,6 +121,16 @@ Executors apply directives exactly and must not infer intent.
 - `README.md` in the session folder is the parent intake file.
 - Each task is a file named `TASK_<slug>.md` in the session folder.
 - All directive files use YAML front matter with a `meta` block and a short summary field.
+
+## Directive branch and collection policy
+
+- Every directive must use a dedicated branch per directive and track branch metadata in session `README.md`.
+- Required session branch metadata keys are `directive_branch`, `directive_base_branch`, `directive_merge_status`, and `commit_policy`.
+- Multi-task directives must include collection metadata keys `collection_id`, `collection_title`, `collection_order`, `collection_commit_label`, and `collection_merge_ready`.
+- Architect startup checks must detect completed directives that still need to merge back to dev.
+- No dangling branches are allowed for directive work; active blocked or in-progress directive branches are allowed only when tracked in directive metadata.
+- Commit policy is explicit: `per_task` requires a per-task commit, `per_collection` requires a collection completion commit, and `end_of_directive` requires final commit checkpoint at directive completion.
+- Completed collections must not break dev when merged; minimum verification evidence is required before `collection_merge_ready` is treated as satisfied.
 
 ## Repo reference
 Canonical repository URL:
