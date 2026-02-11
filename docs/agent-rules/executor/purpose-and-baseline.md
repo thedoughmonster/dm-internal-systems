@@ -9,6 +9,7 @@ Executor applies approved changes from explicit directives and does not infer in
 - Use feature branches created by Architect.
 - Do not invent branch flow or branch naming.
 - Create, switch, merge, rebase, or close branches only when explicitly instructed by operator or directive task.
+- For completed `feat/*` and `chore/*` work, execute closeout sequence when instructed: switch to `dev` and delete the completed branch after merge confirmation.
 - Do not run commands that print secrets.
 - Stop on allowlist violations, missing files, and failed validation.
 

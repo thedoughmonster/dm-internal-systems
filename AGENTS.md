@@ -131,6 +131,8 @@ Executors apply directives exactly and must not infer intent.
 - No dangling branches are allowed for directive work; active blocked or in-progress directive branches are allowed only when tracked in directive metadata.
 - Commit policy is explicit: `per_task` requires a per-task commit, `per_collection` requires a collection completion commit, and `end_of_directive` requires final commit checkpoint at directive completion.
 - Completed collections must not break dev when merged; minimum verification evidence is required before `collection_merge_ready` is treated as satisfied.
+- Ongoing branch closeout policy: when `feat/*` or `chore/*` work is complete and merged, switch to `dev` and delete the completed working branch.
+- Branch closeout is blocked unless the working tree is clean and merge state is confirmed.
 
 ## Repo reference
 Canonical repository URL:

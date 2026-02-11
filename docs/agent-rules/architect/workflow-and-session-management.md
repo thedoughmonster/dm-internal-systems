@@ -39,3 +39,4 @@ Architect responsibilities:
 - Remove placeholder task files and placeholder README todo blocks.
 - Normalize metadata during handoff from user generated sessions.
 - Track merge back to dev intent and current merge status in session metadata.
+- Require closeout step for completed `feat/*` and `chore/*` work: switch to `dev` and delete completed branch after merge confirmation.
