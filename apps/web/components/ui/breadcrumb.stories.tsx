@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Slash } from "lucide-react"
 
+import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
+import { ModulePlayground } from "@/lib/storybook/module-playground"
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -10,6 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./breadcrumb"
+import * as ComponentModule from "./breadcrumb"
 
 const meta = {
   title: "UI/Breadcrumb",
@@ -27,6 +30,7 @@ const meta = {
         component:
           "Breadcrumb provides semantic path navigation for nested screens and records. Use it to show location context and support quick backtracking. Keep only the current page non-interactive and ensure truncation or collapse behavior is used for deep hierarchies.",
       },
+      page: () => <ModuleDocsPage moduleName="Breadcrumb" moduleExports={ComponentModule} />,
     },
   },
 } satisfies Meta<typeof Breadcrumb>
@@ -36,6 +40,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Overview: Story = {
+  render: () => <ModulePlayground moduleName="Breadcrumb" moduleExports={ComponentModule} />,
+}
+
+export const VisibleBaseline: Story = {
   render: () => (
     <Breadcrumb id="sb-breadcrumb-overview">
       <BreadcrumbList id="sb-breadcrumb-overview-list">

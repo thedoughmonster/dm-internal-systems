@@ -35,10 +35,22 @@ class StoryErrorBoundary extends Component<StoryErrorBoundaryProps, StoryErrorBo
 }
 
 function toComponent(value: unknown): AnyComponent | null {
-  if (typeof value !== "function") {
+  if (!isComponentLike(value)) {
     return null
   }
   return value as AnyComponent
+}
+
+function isComponentLike(value: unknown): boolean {
+  if (typeof value === "function") {
+    return true
+  }
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "$$typeof" in value &&
+      typeof (value as { $$typeof?: unknown }).$$typeof === "symbol",
+  )
 }
 
 function isRenderableExport([name, value]: [string, unknown]): boolean {
@@ -48,7 +60,7 @@ function isRenderableExport([name, value]: [string, unknown]): boolean {
   if (name.endsWith("Props")) {
     return false
   }
-  return typeof value === "function"
+  return isComponentLike(value)
 }
 
 function sampleProps(exportName: string): Record<string, unknown> {
@@ -181,6 +193,41 @@ type ModulePlaygroundProps = {
   moduleExports: ModuleExports
 }
 
+export function ModuleVisibleBaseline({ moduleName, moduleExports }: ModulePlaygroundProps) {
+  const entries = Object.entries(moduleExports).filter(isRenderableExport)
+  const primary = entries[0]
+
+  return (
+    <div className="rounded-md bg-background/40 p-3">
+      {primary ? (
+        <StoryErrorBoundary
+          fallback={
+            <p className="text-xs text-muted-foreground">
+              Needs composed usage. Add a dedicated scenario for <code>{primary[0]}</code>.
+            </p>
+          }
+        >
+          <div className="flex min-h-12 items-center gap-2 overflow-auto">
+            {(() => {
+              const ExportComponent = toComponent(primary[1])
+              if (!ExportComponent) {
+                return null
+              }
+              return (
+                <ExportComponent {...sampleProps(primary[0])}>{sampleChildren(primary[0])}</ExportComponent>
+              )
+            })()}
+          </div>
+        </StoryErrorBoundary>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          No renderable component exports detected for <code>{moduleName}</code>.
+        </p>
+      )}
+    </div>
+  )
+}
+
 export function ModulePlayground({ moduleName, moduleExports }: ModulePlaygroundProps) {
   const entries = Object.entries(moduleExports).filter(isRenderableExport)
   const primary = entries[0]
@@ -191,7 +238,7 @@ export function ModulePlayground({ moduleName, moduleExports }: ModulePlayground
         Auto-preview for <code>{moduleName}</code>. Replace with scenario stories as this component is adopted.
       </p>
 
-      <div className="rounded-md border border-border/60 bg-background p-3">
+      <div className="rounded-md bg-background/40 p-3">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Primary preview
         </p>
@@ -220,28 +267,6 @@ export function ModulePlayground({ moduleName, moduleExports }: ModulePlayground
         ) : (
           <p className="text-xs text-muted-foreground">No renderable component exports detected.</p>
         )}
-      </div>
-
-      <div className="rounded-md border border-border/60 bg-background p-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Exports</p>
-        <div className="mt-2 overflow-x-auto">
-          <table className="w-full min-w-[300px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="py-2 pr-4">Name</th>
-                <th className="py-2">Kind</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map(([name]) => (
-                <tr key={name} className="border-b border-border/40 align-top">
-                  <td className="py-2 pr-4 font-mono text-xs">{name}</td>
-                  <td className="py-2 text-xs text-muted-foreground">component</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   )

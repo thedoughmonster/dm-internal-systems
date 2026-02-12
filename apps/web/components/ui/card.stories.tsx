@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 
+import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
+import { ModulePlayground } from "@/lib/storybook/module-playground"
 import { Badge } from "./badge"
 import { Button } from "./button"
 import { Card, CardContent, CardDescription, CardTitleBar } from "./card"
+import * as ComponentModule from "./card"
 
 const meta = {
   title: "UI/Card",
@@ -18,6 +21,7 @@ const meta = {
         component:
           "Card is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Card in product routes. Validate heading hierarchy, content readability, and action affordances in the scenarios below before shipping changes.",
       },
+      page: () => <ModuleDocsPage moduleName="Card" moduleExports={ComponentModule} />,
     },
   },
 } satisfies Meta<typeof Card>
@@ -27,9 +31,12 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Overview: Story = {
-  render: (args) => (
+  render: () => <ModulePlayground moduleName="Card" moduleExports={ComponentModule} />,
+}
+
+export const VisibleBaseline: Story = {
+  render: () => (
     <Card
-      {...args}
       id="sb-card-overview"
       headerTitle="Service status"
       headerBadges={[

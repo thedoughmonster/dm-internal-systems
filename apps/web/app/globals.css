@@ -291,6 +291,13 @@
     padding-left: 0.75rem;
     color: hsl(var(--muted-foreground));
   }
+
+  /* Storybook docs: flatten built-in preview cards to avoid nested borders. */
+  .sbdocs .sbdocs-preview {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
 }
 
 @layer utilities {
