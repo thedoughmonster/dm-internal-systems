@@ -156,7 +156,3 @@ export const AlertPanel: Story = {
     </Card>
   ),
 }
-
-export const VisibleBaseline: Story = {
-  ...Overview,
-}

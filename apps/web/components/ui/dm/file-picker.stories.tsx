@@ -33,10 +33,3 @@ export const Disabled: Story = {
     helpText: "Picker disabled until a vendor source is selected.",
   },
 }
-
-export const VisibleBaseline: Story = {
-  args: {
-    id: "sb-dm-file-picker-visible-baseline",
-    onPickText: async () => {},
-  },
-}

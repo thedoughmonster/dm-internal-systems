@@ -181,41 +181,6 @@ type ModulePlaygroundProps = {
   moduleExports: ModuleExports
 }
 
-export function ModuleVisibleBaseline({ moduleName, moduleExports }: ModulePlaygroundProps) {
-  const entries = Object.entries(moduleExports).filter(isRenderableExport)
-  const primary = entries[0]
-
-  return (
-    <div className="rounded-md border border-border/60 bg-background p-3">
-      {primary ? (
-        <StoryErrorBoundary
-          fallback={
-            <p className="text-xs text-muted-foreground">
-              Needs composed usage. Add a dedicated scenario for <code>{primary[0]}</code>.
-            </p>
-          }
-        >
-          <div className="flex min-h-12 items-center gap-2 overflow-auto">
-            {(() => {
-              const ExportComponent = toComponent(primary[1])
-              if (!ExportComponent) {
-                return null
-              }
-              return (
-                <ExportComponent {...sampleProps(primary[0])}>{sampleChildren(primary[0])}</ExportComponent>
-              )
-            })()}
-          </div>
-        </StoryErrorBoundary>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          No renderable component exports detected for <code>{moduleName}</code>.
-        </p>
-      )}
-    </div>
-  )
-}
-
 export function ModulePlayground({ moduleName, moduleExports }: ModulePlaygroundProps) {
   const entries = Object.entries(moduleExports).filter(isRenderableExport)
   const primary = entries[0]

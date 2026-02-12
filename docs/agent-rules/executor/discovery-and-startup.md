@@ -14,11 +14,11 @@ Executor selection input:
 ## Startup actions
 
 1. If valid incoming auto handoff packet targets Executor, treat role selection as satisfied, complete required reading, and continue without manual role selection prompt.
-2. If valid incoming handoff packet provides `task_file`, verify and read that task directly, then skip manual session and directive selection prompts.
-3. If no valid incoming handoff packet is present, require a directive-contained handoff file `apps/web/.local/directives/<guid>/HANDOFF.md` before directive execution. If missing, stop and request Architect to create it.
-4. If no explicit task path is provided and session exists with `meta.auto_run: true` and `meta.status: in_progress`, select highest `session_priority` then earliest `created`, load that session `HANDOFF.md`, and proceed directly when it resolves a single executable task.
+2. If no valid incoming handoff packet is present, require a directive-contained handoff file `apps/web/.local/directives/<guid>/HANDOFF.md`. If missing, stop and request Architect to create it.
+3. If session exists with `meta.auto_run: true` and `meta.status: in_progress`, select highest priority then earliest created and proceed.
+4. If valid incoming handoff packet provides `task_file`, verify and read that task directly.
 5. Otherwise if task path provided, verify and read task fully.
-6. If execution context is still unresolved, list non archived sessions with numbered output.
+6. If no task path, list non archived sessions with numbered output.
 7. Include `meta.title`, `meta.status`, and `meta.session_priority` in session list.
 8. Stop if README is missing, unreadable, or missing `meta.title`.
 
@@ -49,7 +49,6 @@ Session selection precedence:
 - If no runnable tasks exist, report and stop.
 - If valid incoming handoff packet provides task context, skip manual selection prompts.
 - If valid handoff or eligible auto-run context resolves a single executable task, start execution directly with no operator confirmation prompts.
-- Prompt for manual directive or task selection only when handoff and auto-run context do not resolve a single executable task.
 
 ## Pre execution gate
 

@@ -80,10 +80,3 @@ export const Destructive: Story = {
     children: "Delete item",
   },
 }
-
-export const VisibleBaseline: Story = {
-  args: {
-    id: "sb-button-visible-baseline",
-    children: "Run task",
-  },
-}
