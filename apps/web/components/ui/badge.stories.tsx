@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 
+import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
+import { ModulePlayground } from "@/lib/storybook/module-playground"
 import { Badge } from "./badge"
+import * as ComponentModule from "./badge"
 
 const meta = {
   title: "UI/Badge",
@@ -16,6 +19,7 @@ const meta = {
         component:
           "Badge is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Badge in product routes. Confirm semantic meaning, text clarity, and readable contrast across variants before shipping changes.",
       },
+      page: () => <ModuleDocsPage moduleName="Badge" moduleExports={ComponentModule} />,
     },
   },
 } satisfies Meta<typeof Badge>
@@ -24,7 +28,9 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Overview: Story = {}
+export const Overview: Story = {
+  render: () => <ModulePlayground moduleName="Badge" moduleExports={ComponentModule} />,
+}
 
 export const Variants: Story = {
   render: () => (

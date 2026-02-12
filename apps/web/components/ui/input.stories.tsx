@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 
+import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
+import { ModulePlayground } from "@/lib/storybook/module-playground"
 import { Input } from "./input"
 import { Label } from "./label"
+import * as ComponentModule from "./input"
 
 const meta = {
   title: "UI/Input",
@@ -18,6 +21,7 @@ const meta = {
         component:
           "Input is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Input in product routes. Validate focus visibility, keyboard behavior, and assistive text in the scenarios below before shipping changes.",
       },
+      page: () => <ModuleDocsPage moduleName="Input" moduleExports={ComponentModule} />,
     },
   },
 } satisfies Meta<typeof Input>
@@ -26,7 +30,9 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Overview: Story = {}
+export const Overview: Story = {
+  render: () => <ModulePlayground moduleName="Input" moduleExports={ComponentModule} />,
+}
 
 export const Variants: Story = {
   render: (args) => (

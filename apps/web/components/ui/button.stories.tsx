@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 
+import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
+import { ModulePlayground } from "@/lib/storybook/module-playground"
 import { Button } from "./button"
+import * as ComponentModule from "./button"
 
 const meta = {
   title: "UI/Button",
@@ -16,6 +19,7 @@ const meta = {
         component:
           "Button is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Button in product routes. Validate focus visibility, keyboard behavior, and assistive text in the scenarios below before shipping changes.",
       },
+      page: () => <ModuleDocsPage moduleName="Button" moduleExports={ComponentModule} />,
     },
   },
 } satisfies Meta<typeof Button>
@@ -24,7 +28,9 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Overview: Story = {}
+export const Overview: Story = {
+  render: () => <ModulePlayground moduleName="Button" moduleExports={ComponentModule} />,
+}
 
 export const Variants: Story = {
   render: () => (

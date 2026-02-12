@@ -17,7 +17,7 @@ function ConsistencyFrame({ children }: { children: ReactNode }) {
       { className: "mx-auto w-full max-w-6xl" },
       createElement(
         "div",
-        { className: "rounded-2xl border border-border/60 bg-card/40 p-5 shadow-sm" },
+        { className: "rounded-2xl bg-card/30 p-5 shadow-sm" },
         children
       )
     )

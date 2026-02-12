@@ -33,6 +33,8 @@ Storybook provides a local workbench for UI component development and consistenc
 
 - Stories should be placed under `app/**` or `components/**` using `*.stories.tsx` naming.
 - Preview conventions are aligned with `apps/web/docs/contracts/ui-style-contract.md`.
+- Story structure and docs formatting should follow `apps/web/docs/guides/storybook-normalization-standard.md`.
+- Canonical baseline naming is `Overview` plus `VisibleBaseline`; `VisibleBaseline` must be concrete and must not use `ModulePlayground`.
 
 ## Baseline story coverage
 
