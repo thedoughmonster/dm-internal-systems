@@ -61,3 +61,11 @@ export const ValidationExample: Story = {
     </div>
   ),
 }
+
+export const VisibleBaseline: Story = {
+  args: {
+    id: "sb-input-visible-baseline",
+    type: "text",
+    placeholder: "server.example.internal",
+  },
+}

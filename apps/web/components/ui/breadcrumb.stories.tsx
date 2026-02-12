@@ -144,3 +144,7 @@ export const CustomSeparator: Story = {
     </Breadcrumb>
   ),
 }
+
+export const VisibleBaseline: Story = {
+  ...Overview,
+}
