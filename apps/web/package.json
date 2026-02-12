@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.2.8",
+    "@storybook/addon-docs": "^10.2.8",
     "@storybook/nextjs": "^10.2.8",
     "@types/d3-array": "^3.2.2",
     "@types/d3-color": "^3.1.3",

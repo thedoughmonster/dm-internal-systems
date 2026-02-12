@@ -25,6 +25,8 @@ Role assignment exception for automatic handoff:
 - Sender role must stop immediately after emitting a valid handoff packet.
 - Receiver role must continue automatically using packet context when packet is valid and targets that role.
 - Trigger mappings and required packet fields are defined in `docs/agent-rules/shared/role-handoff-automation.md`.
+ - For directive execution handoffs, the handoff packet must include `directive_branch`.
+ - For profile-based execution, directives must include a session-local `HANDOFF.md` handoff artifact.
 
 ## Required Reading
 
@@ -54,6 +56,9 @@ Role assignment exception for automatic handoff:
 - If Architect detects any product code changes in planned or staged files, Architect must stop and hand off to Executor before running state-changing git.
 - Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
 - Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.
+- Exception: Architect may create and switch to the directive branch named by `directive_branch` in a directive session README as part of directive setup prior to Executor handoff (chore branch only).
+  - `directive_branch` must be non empty.
+  - This Architect exception is limited to `chore/*` branches only.
 - Other non-Executor roles may run read-only git commands for repository inspection only: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git rev-parse`.
 - State-changing git commands include `git add`, `git commit`, `git push`, `git pull`, `git checkout`, `git switch`, `git merge`, `git rebase`, `git cherry-pick`, `git stash`, `git reset`, and branch create or delete actions.
 - Executor runs state-changing git commands only when explicitly instructed by the operator or explicitly required by an approved directive task.
@@ -95,6 +100,11 @@ Agents must not mix roles inside a single response.
 In-thread role transitions are allowed only through the automatic handoff packet protocol or explicit operator role reset.
 Architects are read only and produce directives.
 Executors apply directives exactly and must not infer intent.
+
+Executor execution gate:
+- Executor must not perform directive edits unless execution context is provided by a valid incoming `=== AUTO HANDOFF ===` packet.
+- Executor must verify the current git branch matches `directive_branch` from the handoff packet before any edits.
+ - When no chat handoff is available (profile-based execution), Executor must require and use `apps/web/.local/directives/<guid>/HANDOFF.md` and treat it as the handoff source of truth.
 
 ## Standard operating procedure
 

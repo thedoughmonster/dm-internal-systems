@@ -12,11 +12,36 @@ const meta = {
     type: "text",
     placeholder: "server.example.internal",
   },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Input is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Input in product routes. Validate focus visibility, keyboard behavior, and assistive text in the scenarios below before shipping changes.",
+      },
+    },
+  },
 } satisfies Meta<typeof Input>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Overview: Story = {}
+
+export const Variants: Story = {
+  render: (args) => (
+    <div className="grid w-full max-w-md gap-3">
+      <Input {...args} id="sb-input-variants-default" />
+      <Input
+        {...args}
+        id="sb-input-variants-invalid"
+        aria-invalid="true"
+        className="border-destructive focus-visible:ring-destructive"
+        defaultValue="bad host"
+      />
+    </div>
+  ),
+}
 
 export const Default: Story = {}
 

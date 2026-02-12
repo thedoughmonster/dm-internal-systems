@@ -5,6 +5,7 @@
 - Session root: `apps/web/.local/directives/<guid>/`
 - Session intake: `README.md` (non executable)
 - Executable tasks: `TASK_<slug>.md`
+- Execution handoff artifact (required for profile-based execution): `HANDOFF.md`
 
 ## Task minimum contract
 
@@ -57,6 +58,11 @@ Session `README.md` metadata must include:
 - `directive_merge_status`
 - `commit_policy`
 
+Branch metadata rules:
+
+- `directive_branch` must be a non empty string.
+- Missing or empty `directive_branch` blocks drafting and execution (fail closed).
+
 Value conventions:
 
 - `directive_base_branch`: typically `dev`
@@ -66,6 +72,9 @@ Value conventions:
 Lifecycle rules:
 
 - Architect defines branch lifecycle requirements in the directive.
+- Architect must ensure `directive_branch` exists before handing off execution.
+- Handoff packets for directive execution must include `directive_branch`.
+- Executor must verify it is on `directive_branch` before any edits; if the branch does not exist locally, stop and request Architect to create it.
 - State-changing branch operations are executed by Executor by default, with Architect `chore/*` exception governed by `AGENTS.md`.
 - Completed directives with unmerged branches must be surfaced during Architect startup and resolved or explicitly blocked.
 - Open branches are allowed for active blocked or in-progress directives when tracked in session metadata. Untracked stale directive branches are forbidden.

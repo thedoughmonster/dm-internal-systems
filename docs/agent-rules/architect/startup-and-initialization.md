@@ -12,10 +12,13 @@
 8. Rewrite selected session summary and request operator confirmation before drafting tasks unless execution context came from valid incoming handoff packet.
 9. Verify selected README has `meta.title` and `meta.summary`; stop if missing.
 10. Verify selected README has `directive_branch`, `directive_base_branch`, `directive_merge_status`, and `commit_policy`; block session if any are missing.
-11. Flag tasks with missing Validation, empty Allowed files, or invalid collection metadata as blocked.
-12. Normalize `effort` to `small`, `medium`, or `large`.
-13. Scan for completed directives where `directive_merge_status` is `open` or `merge_ready` and branch is not merged.
-14. For merge-ready directives, issue explicit Executor instruction to perform merge to `dev` only after required merge-safety evidence is present; otherwise keep session blocked with missing evidence called out.
+11. Verify `directive_branch` is non empty; block session if empty.
+12. If starting a `chore/*` directive as Architect, immediately create the branch (from `directive_base_branch`) and switch to it before any other work.
+13. Otherwise verify local git branch exists for `directive_branch`; if missing, request Executor to create/switch or request explicit operator guidance.
+14. Flag tasks with missing Validation, empty Allowed files, or invalid collection metadata as blocked.
+15. Normalize `effort` to `small`, `medium`, or `large`.
+16. Scan for completed directives where `directive_merge_status` is `open` or `merge_ready` and branch is not merged.
+17. For merge-ready directives, issue explicit Executor instruction to perform merge to `dev` only after required merge-safety evidence is present; otherwise keep session blocked with missing evidence called out.
 
 Priority rule for startup selection:
 

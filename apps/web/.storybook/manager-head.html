@@ -1,0 +1,29 @@
+<style>
+  html,
+  body,
+  #root,
+  #storybook-root,
+  #storybook-explorer-root,
+  .sbdocs,
+  .sbdocs-wrapper,
+  .sbdocs-content {
+    background: hsl(232 42% 7%) !important;
+    color: hsl(140 80% 85%) !important;
+  }
+
+  body {
+    margin: 0 !important;
+    transition: none !important;
+  }
+
+  iframe#storybook-preview-iframe,
+  iframe[data-is-storybook="true"] {
+    background: hsl(232 42% 7%) !important;
+  }
+
+  .sb-show-preparing-story .sb-preparing-story,
+  .sb-show-preparing-docs .sb-preparing-docs {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+</style>

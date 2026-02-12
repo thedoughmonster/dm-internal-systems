@@ -12,11 +12,91 @@ const meta = {
     id: "sb-card-default",
     headerTitle: "Service status",
   },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Card is a DM UI primitive for consistent interface composition. Use this Storybook module as the reference when implementing Card in product routes. Validate heading hierarchy, content readability, and action affordances in the scenarios below before shipping changes.",
+      },
+    },
+  },
 } satisfies Meta<typeof Card>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Overview: Story = {
+  render: (args) => (
+    <Card
+      {...args}
+      id="sb-card-overview"
+      headerTitle="Service status"
+      headerBadges={[
+        <Badge id="sb-card-overview-badge" key="status" variant="secondary">
+          Active
+        </Badge>,
+      ]}
+      headerMeta={["region: us-east-1", "updated: now"]}
+      footerActions={[
+        <Button id="sb-card-overview-action" key="inspect" size="sm" variant="outline">
+          Inspect
+        </Button>,
+      ]}
+    >
+      <CardContent id="sb-card-overview-content" className="space-y-3">
+        <CardTitleBar
+          id="sb-card-overview-titlebar"
+          title="Gateway API"
+          siblingTitle="v2.9.1"
+          subtitle="Latency within threshold"
+        />
+        <CardDescription id="sb-card-overview-description">
+          Requests are stable. Error budget consumption is below warning level.
+        </CardDescription>
+      </CardContent>
+    </Card>
+  ),
+}
+
+export const Variants: Story = {
+  render: () => (
+    <div className="grid gap-3">
+      <Card
+        id="sb-card-variants-service"
+        headerTitle="Service status"
+        headerBadges={[
+          <Badge id="sb-card-variants-service-badge" key="status" variant="secondary">
+            Active
+          </Badge>,
+        ]}
+      >
+        <CardContent id="sb-card-variants-service-content" className="space-y-2">
+          <CardTitleBar id="sb-card-variants-service-titlebar" title="Gateway API" />
+          <CardDescription id="sb-card-variants-service-description">
+            Stable service panel variant.
+          </CardDescription>
+        </CardContent>
+      </Card>
+      <Card
+        id="sb-card-variants-alert"
+        headerTitle="Alert details"
+        headerBadges={[
+          <Badge id="sb-card-variants-alert-badge" key="severity" variant="destructive">
+            Critical
+          </Badge>,
+        ]}
+      >
+        <CardContent id="sb-card-variants-alert-content" className="space-y-2">
+          <CardTitleBar id="sb-card-variants-alert-titlebar" title="Queue processing lag" />
+          <CardDescription id="sb-card-variants-alert-description">
+            Escalated alert panel variant.
+          </CardDescription>
+        </CardContent>
+      </Card>
+    </div>
+  ),
+}
 
 export const ServicePanel: Story = {
   render: (args) => (

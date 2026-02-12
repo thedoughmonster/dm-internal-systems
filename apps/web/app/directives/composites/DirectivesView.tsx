@@ -1,19 +1,14 @@
 import Link from "next/link"
 
-import { archiveDirective, completeDirective, createTodo } from "../actions"
 import { listDirectiveFiles } from "../lib/directives-store"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import type { DirectiveFile } from "@/lib/types/directives/task"
 import DirectivesFiltersPanel from "./DirectivesFiltersPanel"
 import type { TagOption } from "./TagsMultiSelect"
-import type { MultiSelectOption } from "./MultiSelectDropdown"
 import SessionCard from "./SessionCard"
-import SessionMetaEditor from "./SessionMetaEditor"
+import SessionAutoRunToggle from "./SessionAutoRunToggle"
 
 const STATUS_COLOR: Record<string, string> = {
   todo: "bg-muted text-muted-foreground",
@@ -51,6 +46,13 @@ function parseUpdatedTimestamp(value: string | undefined) {
   if (!value) return 0
   const parsed = Date.parse(value)
   return Number.isNaN(parsed) ? 0 : parsed
+}
+
+function formatShortDate(value: string | undefined) {
+  if (!value) return "unknown"
+  const parsed = Date.parse(value)
+  if (Number.isNaN(parsed)) return value
+  return new Date(parsed).toISOString().slice(0, 10)
 }
 
 function toStatusLabel(value: string) {
@@ -114,26 +116,6 @@ function tagOptions(entries: DirectiveFile[]): TagOption[] {
   return Array.from(tags).map((tag) => ({ value: tag, label: tag }))
 }
 
-function relationOptions(
-  entries: DirectiveFile[],
-  parentTitles: Map<string, string>
-): MultiSelectOption[] {
-  return entries
-    .filter((entry) => Boolean(entry.meta.id))
-    .map((entry) => {
-      const title = entry.meta.title || entry.filename
-      const label =
-        entry.kind === "parent"
-          ? `Session: ${title}`
-          : `Task: ${parentTitles.get(entry.sessionId) ?? "Session"} / ${title}`
-      return {
-        value: entry.meta.id,
-        label,
-      }
-    })
-    .sort((a, b) => a.label.localeCompare(b.label))
-}
-
 export default async function DirectivesView({ searchParams }: DirectivesViewProps) {
   const entries = await listDirectiveFiles()
   const statusOptionsMap = new Map<string, string>(
@@ -161,7 +143,6 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
       .filter((entry) => entry.kind === "parent")
       .map((entry) => [entry.sessionId, entry.meta.title])
   )
-  const relationOptionList = relationOptions(entries, parentTitles)
   const grouped = filtered.reduce((acc, entry) => {
     const existing = acc.get(entry.sessionId)
     if (existing) {
@@ -199,43 +180,6 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
       </section>
 
       <Card
-        id="directives-new-session"
-        headerTitle="Create new session"
-      >
-        <CardContent id="directives-new-session-content">
-          <p className="text-xs text-muted-foreground">
-            Create a new session and then expand its meta details below.
-          </p>
-          <form className="mt-3 grid gap-3" action={createTodo}>
-            <div className="space-y-2">
-              <Label id="directives-new-session-title-label" htmlFor="directives-new-session-title">
-                Title
-              </Label>
-              <Input
-                id="directives-new-session-title"
-                name="title"
-                placeholder="Session title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label id="directives-new-session-summary-label" htmlFor="directives-new-session-summary">
-                Summary
-              </Label>
-              <Textarea
-                id="directives-new-session-summary"
-                name="summary"
-                placeholder="Brief summary"
-                rows={2}
-              />
-            </div>
-            <Button id="directives-new-session-submit" type="submit">
-              Create session
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card
         id="directives-list"
         headerTitle="Directive files"
         headerBadges={[
@@ -268,100 +212,63 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                     parseUpdatedTimestamp(b.meta.updated) -
                     parseUpdatedTimestamp(a.meta.updated)
                 )
-              const sessionMetaEntry = parentEntry
-                ? {
-                    sessionId: parentEntry.sessionId,
-                    filename: parentEntry.filename,
-                    status: parentEntry.meta.status,
-                    meta: {
-                      title: parentEntry.meta.title,
-                      summary: parentEntry.meta.summary,
-                      tags: parentEntry.meta.tags ?? [],
-                      session_priority: parentEntry.meta.session_priority,
-                      auto_run: parentEntry.meta.auto_run,
-                      depends_on: parentEntry.meta.depends_on ?? [],
-                      blocked_by: parentEntry.meta.blocked_by ?? [],
-                      related: parentEntry.meta.related ?? [],
-                    },
-                  }
-                : null
+
+              const sessionBadges = [
+                <Badge
+                  key={`${sessionId}-status`}
+                  id={`directives-session-${sessionId}-status`}
+                  className={STATUS_COLOR[sessionStatus] ?? ""}
+                >
+                  {sessionStatus}
+                </Badge>,
+                <Badge
+                  id={`directives-session-${sessionId}-tasks`}
+                  key={`${sessionId}-tasks`}
+                  variant="outline"
+                >
+                  {taskEntries.length} tasks
+                </Badge>,
+              ]
+
+              if (parentEntry) {
+                sessionBadges.push(
+                  <SessionAutoRunToggle
+                    key={`${sessionId}-auto-run`}
+                    sessionId={parentEntry.sessionId}
+                    filename={parentEntry.filename}
+                    autoRun={Boolean(parentEntry.meta.auto_run)}
+                  />
+                )
+              }
+
               return (
                 <SessionCard
                   key={sessionId}
                   id={`directives-session-${sessionId}`}
                   title={title}
-                  badges={[
-                    <Badge
-                      key={`${sessionId}-status`}
-                      id={`directives-session-${sessionId}-status`}
-                      className={STATUS_COLOR[sessionStatus] ?? ""}
-                    >
-                      {sessionStatus}
-                    </Badge>,
-                    <Badge key={`${sessionId}-kind`} id={`directives-session-${sessionId}-kind`}>
-                      session
-                    </Badge>,
-                    <Badge
-                      id={`directives-session-${sessionId}-tasks`}
-                      key={`${sessionId}-tasks`}
-                      variant="outline"
-                    >
-                      {taskEntries.length} tasks
-                    </Badge>,
-                    <Button
-                      key={`${sessionId}-markdown`}
-                      id={`directives-session-${sessionId}-markdown`}
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
-                      <Link href={`/directives/session/${sessionId}`}>
-                        View markdown
-                      </Link>
-                    </Button>,
-                  ]}
+                  badges={sessionBadges}
                   meta={[
-                    <span key={`${sessionId}-meta-session`}>Session: {sessionId}</span>,
-                    <span key={`${sessionId}-meta-directive`}>
-                      Directive: {sessionDirective}
+                    <span key={`${sessionId}-meta-updated`}>
+                      Updated: {formatShortDate(sessionUpdated)}
                     </span>,
-                    <span key={`${sessionId}-meta-updated`}>Updated: {sessionUpdated}</span>,
                   ]}
                 >
                   {parentEntry ? (
                     <div className="space-y-2">
-                      {sessionMetaEntry ? (
-                        <SessionMetaEditor
-                          entry={sessionMetaEntry}
-                          tagOptions={tagList}
-                          relationOptions={relationOptionList}
-                          onArchive={
-                            parentEntry.meta.status === "todo" ? (
-                              <form action={archiveDirective}>
-                                <input
-                                  id={`directives-archive-${sessionId}-session`}
-                                  type="hidden"
-                                  name="sessionId"
-                                  value={parentEntry.sessionId}
-                                />
-                                <input
-                                  id={`directives-archive-${sessionId}-filename`}
-                                  type="hidden"
-                                  name="filename"
-                                  value={parentEntry.filename}
-                                />
-                                <Button
-                                  id={`directives-archive-${sessionId}`}
-                                  type="submit"
-                                  variant="secondary"
-                                >
-                                  Archive todo
-                                </Button>
-                              </form>
-                            ) : null
-                          }
-                        />
-                      ) : null}
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/20 px-3 py-2">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                          <span className="font-mono">Session: {sessionId}</span>
+                          <span className="font-mono">Directive: {sessionDirective}</span>
+                        </div>
+                        <Button
+                          id={`directives-session-${sessionId}-markdown`}
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <Link href={`/directives/session/${sessionId}`}>View markdown</Link>
+                        </Button>
+                      </div>
                     </div>
                   ) : null}
 
@@ -378,54 +285,21 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                         >
                           {entry.meta.status}
                         </Badge>,
-                        <Badge
-                          key={`${entry.sessionId}-${entry.filename}-kind`}
-                          id={`directives-kind-${entry.sessionId}-${entry.filename}`}
-                        >
-                          {entry.kind}
-                        </Badge>,
-                      ]}
-                      headerMeta={[
-                        <span key={`${entry.sessionId}-${entry.filename}-meta-id`}>
-                          Id: {entry.meta.id}
-                        </span>,
-                        <span key={`${entry.sessionId}-${entry.filename}-meta-file`}>
-                          File: {entry.filename}
-                        </span>,
-                        <span key={`${entry.sessionId}-${entry.filename}-meta-updated`}>
-                          Updated: {entry.meta.updated}
-                        </span>,
                       ]}
                       footerActions={[
-                        ...(entry.meta.status !== "archived" &&
-                        entry.meta.status !== "done"
-                          ? [
-                              <form
-                                key={`${entry.sessionId}-${entry.filename}-complete`}
-                                action={completeDirective}
-                              >
-                                <input
-                                  id={`directives-complete-${entry.sessionId}-session`}
-                                  type="hidden"
-                                  name="sessionId"
-                                  value={entry.sessionId}
-                                />
-                                <input
-                                  id={`directives-complete-${entry.sessionId}-filename`}
-                                  type="hidden"
-                                  name="filename"
-                                  value={entry.filename}
-                                />
-                                <Button
-                                  id={`directives-complete-${entry.sessionId}`}
-                                  type="submit"
-                                  variant="secondary"
-                                >
-                                  Mark as complete
-                                </Button>
-                              </form>,
-                            ]
-                          : []),
+                        <Button
+                          key={`${entry.sessionId}-${entry.filename}-markdown`}
+                          id={`directives-task-${entry.sessionId}-${entry.filename}-markdown`}
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <Link
+                            href={`/directives/session/${entry.sessionId}#session-markdown-${entry.sessionId}-${entry.filename}`}
+                          >
+                            View markdown
+                          </Link>
+                        </Button>,
                       ]}
                     >
                       <CardContent
@@ -436,7 +310,8 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                           {entry.meta.summary}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>Directive: {entry.meta.directive}</span>
+                          <span className="font-mono">File: {entry.filename}</span>
+                          <span>Updated: {formatShortDate(entry.meta.updated)}</span>
                         </div>
                       </CardContent>
                     </Card>

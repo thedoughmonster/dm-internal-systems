@@ -1,0 +1,134 @@
+<style>
+  html,
+  body,
+  #storybook-root,
+  #storybook-docs {
+    background: hsl(232 42% 7%) !important;
+    color: hsl(140 80% 85%) !important;
+  }
+
+  body {
+    margin: 0 !important;
+    transition: none !important;
+  }
+
+  .sb-wrapper,
+  .sb-preparing-story,
+  .sb-preparing-docs {
+    background: hsl(232 42% 7%) !important;
+  }
+
+  .sb-preparing-story,
+  .sb-preparing-docs {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  .sb-loader {
+    border-color: hsl(225 25% 20% / 0.7) !important;
+    border-top-color: hsl(140 85% 55%) !important;
+    mix-blend-mode: normal !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .sb-previewBlock,
+  .sb-argstableBlock {
+    background: hsl(232 42% 9%) !important;
+    border-color: hsl(225 25% 20% / 0.8) !important;
+    box-shadow: none !important;
+    color: hsl(140 80% 85%) !important;
+  }
+
+  .sb-previewBlock_header {
+    box-shadow: hsl(225 25% 20% / 0.8) 0 -1px 0 0 inset !important;
+  }
+
+  .sb-previewBlock_icon,
+  .sb-argstableBlock-head span,
+  .sb-argstableBlock-body span {
+    background: hsl(225 25% 20%) !important;
+    color: hsl(140 80% 85%) !important;
+    animation: none !important;
+  }
+
+  /* Storybook Docs surfaces */
+  .sbdocs,
+  .sbdocs-wrapper,
+  .sbdocs-content,
+  .sb-main-padded,
+  .sb-main-fullscreen,
+  .sb-main-centered,
+  .sbdocs-preview,
+  .sbdocs-preview *,
+  .docs-story,
+  .docs-story > div {
+    background: hsl(232 42% 7%) !important;
+    color: hsl(140 80% 85%) !important;
+  }
+
+  .sbdocs-title,
+  .sbdocs-h1,
+  .sbdocs-h2,
+  .sbdocs-h3,
+  .sbdocs-p,
+  .sbdocs-li,
+  .sbdocs-a,
+  .sbdocs-code,
+  .sbdocs-pre {
+    color: hsl(140 80% 85%) !important;
+  }
+
+  .sbdocs table,
+  .sbdocs thead,
+  .sbdocs tbody,
+  .sbdocs tr,
+  .sbdocs th,
+  .sbdocs td {
+    background: hsl(232 42% 9%) !important;
+    color: hsl(140 80% 85%) !important;
+    border-color: hsl(225 25% 20% / 0.8) !important;
+  }
+</style>
+<script>
+  document.documentElement.style.colorScheme = "dark";
+
+  (function applyDocsSurfaceTheme() {
+    const bg = "hsl(232 42% 7%)";
+    const fg = "hsl(140 80% 85%)";
+
+    const paint = () => {
+      const html = document.documentElement;
+      const body = document.body;
+      const root = document.getElementById("storybook-root");
+      const docs = document.getElementById("storybook-docs");
+
+      [html, body, root, docs].forEach((el) => {
+        if (!el) return;
+        el.style.background = bg;
+        el.style.color = fg;
+      });
+
+      if (!docs) return;
+
+      docs
+        .querySelectorAll(
+          ".sbdocs, .sbdocs-wrapper, .sbdocs-content, .sbdocs-preview, .docs-story, [class*='docblock']"
+        )
+        .forEach((el) => {
+          const node = el;
+          node.style.background = bg;
+          node.style.color = fg;
+        });
+    };
+
+    const schedulePaint = () => requestAnimationFrame(paint);
+
+    schedulePaint();
+    window.addEventListener("load", schedulePaint);
+    new MutationObserver(schedulePaint).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  })();
+</script>

@@ -2,13 +2,15 @@ import type { Preview } from "@storybook/nextjs"
 import { createElement } from "react"
 import type { ReactNode } from "react"
 
+import { dmStorybookTheme } from "./theme"
+
 import "../app/globals.css"
 
 function ConsistencyFrame({ children }: { children: ReactNode }) {
   return createElement(
     "div",
     {
-      className: "min-h-screen bg-background px-6 py-6 text-foreground antialiased",
+      className: "bg-background px-4 py-6 text-foreground antialiased sm:px-6",
     },
     createElement(
       "div",
@@ -45,6 +47,9 @@ const preview: Preview = {
     },
     a11y: {
       test: "todo",
+    },
+    docs: {
+      theme: dmStorybookTheme,
     },
   },
 }

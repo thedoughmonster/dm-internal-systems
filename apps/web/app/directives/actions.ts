@@ -6,6 +6,7 @@ import { redirect } from "next/navigation"
 import {
   createTask,
   createTodoSession,
+  updateDirectiveAutoRun,
   updateDirectiveStatus,
   updateTodoSession,
 } from "@/app/directives/lib/directives-store"
@@ -150,6 +151,19 @@ export async function updateTodo(formData: FormData) {
     filename,
   })
 
+  revalidatePath("/directives")
+}
+
+export async function updateAutoRun(formData: FormData) {
+  const sessionId = getFormValue(formData, "sessionId")
+  const filename = getFormValue(formData, "filename")
+  const autoRun = getBooleanValue(formData, "auto_run")
+
+  if (!sessionId || !filename) {
+    throw new Error("Session and filename are required.")
+  }
+
+  await updateDirectiveAutoRun({ sessionId, filename, autoRun })
   revalidatePath("/directives")
 }
 

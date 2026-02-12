@@ -96,6 +96,47 @@ async function writeAtomic(filePath: string, content: string) {
   await fs.rename(tempPath, filePath)
 }
 
+async function disableOtherSessionsAutoRun(targetSessionId: string, now: string) {
+  const sessionIds = await fs.readdir(DIRECTIVES_ROOT)
+  for (const sessionId of sessionIds) {
+    if (sessionId === targetSessionId) {
+      continue
+    }
+
+    const sessionPath = path.join(DIRECTIVES_ROOT, sessionId)
+    let stat: Awaited<ReturnType<typeof fs.stat>> | null = null
+    try {
+      stat = await fs.stat(sessionPath)
+    } catch {
+      continue
+    }
+    if (!stat.isDirectory()) {
+      continue
+    }
+
+    const otherReadmePath = path.join(sessionPath, "README.md")
+    try {
+      const otherContent = await fs.readFile(otherReadmePath, "utf-8")
+      const otherParsed = parseFrontMatter(otherContent)
+      if (!otherParsed.meta.auto_run) {
+        continue
+      }
+
+      const otherUpdatedMeta: DirectiveMeta = {
+        ...otherParsed.meta,
+        auto_run: false,
+        updated: now,
+      }
+
+      const otherUpdatedContent = serializeFrontMatter(otherUpdatedMeta, otherParsed.body)
+      await writeAtomic(otherReadmePath, otherUpdatedContent)
+    } catch {
+      // Ignore missing/invalid sessions so toggling remains usable.
+      continue
+    }
+  }
+}
+
 export async function listDirectiveFiles(): Promise<DirectiveFile[]> {
   await ensureRoot()
   const sessionIds = await fs.readdir(DIRECTIVES_ROOT)
@@ -251,6 +292,12 @@ export async function updateTodoSession(input: {
   related?: string[]
 }) {
   await ensureRoot()
+  const now = new Date().toISOString()
+
+  if (input.autoRun && input.filename.toLowerCase() === "readme.md") {
+    await disableOtherSessionsAutoRun(input.sessionId, now)
+  }
+
   const sessionPath = path.join(DIRECTIVES_ROOT, input.sessionId)
   const filePath = path.join(sessionPath, input.filename)
   const content = await fs.readFile(filePath, "utf-8")
@@ -266,7 +313,38 @@ export async function updateTodoSession(input: {
     depends_on: input.dependsOn ?? parsed.meta.depends_on,
     blocked_by: input.blockedBy ?? parsed.meta.blocked_by,
     related: input.related ?? parsed.meta.related,
-    updated: new Date().toISOString(),
+    updated: now,
+  }
+
+  const updatedContent = serializeFrontMatter(updatedMeta, parsed.body)
+  await writeAtomic(filePath, updatedContent)
+}
+
+export async function updateDirectiveAutoRun(input: {
+  sessionId: string
+  filename: string
+  autoRun: boolean
+}) {
+  await ensureRoot()
+  if (input.filename.toLowerCase() !== "readme.md") {
+    throw new Error("Auto run can only be updated on the session README.md.")
+  }
+
+  const now = new Date().toISOString()
+
+  if (input.autoRun) {
+    await disableOtherSessionsAutoRun(input.sessionId, now)
+  }
+
+  const sessionPath = path.join(DIRECTIVES_ROOT, input.sessionId)
+  const filePath = path.join(sessionPath, input.filename)
+  const content = await fs.readFile(filePath, "utf-8")
+  const parsed = parseFrontMatter(content)
+
+  const updatedMeta: DirectiveMeta = {
+    ...parsed.meta,
+    auto_run: input.autoRun,
+    updated: now,
   }
 
   const updatedContent = serializeFrontMatter(updatedMeta, parsed.body)

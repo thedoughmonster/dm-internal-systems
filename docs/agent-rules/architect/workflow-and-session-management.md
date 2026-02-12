@@ -34,6 +34,10 @@ Architect responsibilities:
 
 - Manage session state under `apps/web/.local/directives/`.
 - Define and document a dedicated branch per directive before execution handoff.
+- Create the directive branch (or verify it already exists) before any Executor handoff.
+- Include `directive_branch` in every Architect -> Executor handoff packet for directive execution.
+- For profile-based execution, create `HANDOFF.md` in the directive session folder before any Executor work begins.
+- When starting any `chore/*` directive, immediately create the `directive_branch` and switch to it before any other work.
 - Update task `meta.result` after Executor completion.
 - Preserve original directive content after execution.
 - Remove placeholder task files and placeholder README todo blocks.

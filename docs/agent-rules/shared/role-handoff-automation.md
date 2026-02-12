@@ -15,10 +15,47 @@ to_role: <architect|executor|pair|auditor>
 trigger: <short deterministic trigger id>
 session_id: <directive session guid or n/a>
 task_file: <task path or n/a>
+directive_branch: <non empty git branch name>
 required_reading: apps/web/docs/guides/component-paradigm.md
 objective: <one line objective for receiving role>
 blocking_rule: <rule that prevents sender from continuing>
 ```
+
+Directive execution rule:
+
+- For any handoff that leads to directive execution, `directive_branch` must be present and must be a non empty git branch name.
+- `directive_branch` must match the session README `meta.directive_branch` when `session_id` points at a directive session.
+
+## Directive-contained handoff (profile-based execution)
+
+When role selection is handled outside chat (for example via Codex profiles), directive execution must still be gated behind an explicit handoff artifact stored inside the directive session folder.
+
+Required file:
+
+- `apps/web/.local/directives/<guid>/HANDOFF.md`
+
+Required `HANDOFF.md` front matter format:
+
+```text
+---
+handoff:
+  from_role: architect
+  to_role: executor
+  trigger: <short deterministic trigger id>
+  session_id: <directive session guid>
+  task_file: <task path>
+  directive_branch: <non empty git branch name>
+  required_reading: apps/web/docs/guides/component-paradigm.md
+  objective: <one line objective>
+  blocking_rule: <rule that prevents sender from continuing>
+---
+```
+
+Rules:
+
+- Executor must treat `HANDOFF.md` as equivalent to a chat `=== AUTO HANDOFF ===` packet.
+- `handoff.directive_branch` must match session README `meta.directive_branch`.
+- If `HANDOFF.md` is missing, incomplete, or mismatched, Executor must stop.
 
 ## Sender behavior
 
@@ -36,6 +73,7 @@ When most recent context contains a valid handoff packet targeting receiver role
 2. complete required reading
 3. continue execution without requesting manual role re-selection
 4. use packet `session_id` and `task_file` when present to continue directly
+5. verify current git branch matches `directive_branch` before any edits
 
 If packet is incomplete or malformed, receiver must stop and request correction.
 

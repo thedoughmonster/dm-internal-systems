@@ -52,9 +52,12 @@ export default function SessionCard({
           }
         >
           <CardHeader id={`${id}-header`}>
-            <AccordionTrigger id={`${id}-trigger`} className="py-2">
-              <div className="flex w-full flex-col gap-1">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <AccordionTrigger
+                id={`${id}-trigger`}
+                className="py-2"
+              >
+                <div className="flex w-full flex-col gap-1">
                   <CardTitle
                     id={`${id}-title`}
                     className="dm-title"
@@ -62,28 +65,29 @@ export default function SessionCard({
                   >
                     <span>{">_"}</span> {resolvedTitle}
                   </CardTitle>
-                  {badges.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      {badges.slice(0, 5).map((badge, index) => (
-                        <div key={`${resolvedTitle}-badge-${index}`}>{badge}</div>
-                      ))}
+                  {meta.length > 0 ? (
+                    <div className="dm-machine-mono w-full text-left text-[0.62rem] leading-tight text-muted-foreground/80">
+                      <div className="truncate text-left group-open:whitespace-normal group-open:break-words">
+                        {meta.map((item, index) => (
+                          <span key={`${resolvedTitle}-meta-${index}`}>
+                            {index > 0 ? " · " : null}
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ) : null}
                 </div>
-                {meta.length > 0 ? (
-                  <div className="dm-machine-mono text-[0.62rem] leading-tight text-muted-foreground/80">
-                    <div className="truncate group-open:whitespace-normal group-open:break-words">
-                      {meta.map((item, index) => (
-                        <span key={`${resolvedTitle}-meta-${index}`}>
-                          {index > 0 ? " · " : null}
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </AccordionTrigger>
+              </AccordionTrigger>
+
+              {badges.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  {badges.slice(0, 5).map((badge, index) => (
+                    <div key={`${resolvedTitle}-badge-${index}`}>{badge}</div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </CardHeader>
           <AccordionContent id={`${id}-content`}>
             <div
