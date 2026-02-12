@@ -43,7 +43,8 @@ Architect responsibilities:
 - Complete governance-only rule edits directly as Architect and create a `chore(architect):` commit when edits are complete.
 - For profile-based execution, create `HANDOFF.md` in the directive session folder before any Executor work begins.
 - When starting any `chore/*` directive, immediately create the `directive_branch` and switch to it before any other work.
-- Update task `meta.result` after Executor completion.
+- Reconcile task and session metadata after Executor completion using Executor-provided task `meta.result` evidence.
+- Architect metadata reconciliation updates task `meta.status`, task `meta.bucket`, task `meta.updated`, and any required session `README.md` metadata.
 - Preserve original directive content after execution.
 - Remove placeholder task files and placeholder README todo blocks.
 - Normalize metadata during handoff from user generated sessions.
