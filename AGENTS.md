@@ -141,6 +141,18 @@ Executor execution gate:
 - Each task is a file named `TASK_<slug>.md` in the session folder.
 - All directive files use YAML front matter with a `meta` block and a short summary field.
 
+## Directive task update contract
+
+- Executor is the only role that may write task `meta.result`.
+- Executor may update `meta.result` only in the task file that was executed.
+- Task `meta.result` must include:
+  - `summary`: one line factual outcome
+  - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
+  - `updated`: UTC timestamp
+- Executor must not change task `meta.status`, task `meta.bucket`, task `meta.updated`, or any session `README.md` metadata.
+- Architect reconciles task and session metadata after execution by using Executor `meta.result` evidence.
+- Architect must not mark completion metadata as done when required validation evidence is missing or failing.
+
 ## Directive branch and collection policy
 
 - Every directive must use a dedicated branch per directive and track branch metadata in session `README.md`.

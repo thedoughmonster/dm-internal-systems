@@ -31,6 +31,18 @@ Every executable task must include at least:
 - `execution_model`
 - `thinking_level`
 
+## Task result update contract
+
+- Executor is the only role that may write task `meta.result`.
+- Executor may update `meta.result` only for the task file that was executed.
+- Task `meta.result` must include:
+  - `summary`: one line factual outcome
+  - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
+  - `updated`: UTC timestamp
+- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `README.md` metadata.
+- Architect reconciles task and session metadata after execution by using Executor `meta.result` evidence.
+- Completion metadata must not be set to done when required validation evidence is missing or failing.
+
 ## Collection metadata minimums
 
 If a task belongs to a collection, task metadata must include:

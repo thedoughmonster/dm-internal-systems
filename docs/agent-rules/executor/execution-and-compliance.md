@@ -27,5 +27,9 @@ If any step lacks exact path scope, concrete action, or completion criteria:
 
 ## Session metadata boundary
 
-Executor may only update task `meta.result` for executed task.
-No other directive metadata changes are allowed.
+- Executor may only update task `meta.result` for the executed task.
+- Task `meta.result` must include:
+  - `summary`: one line factual outcome
+  - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
+  - `updated`: UTC timestamp
+- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `README.md` metadata.
