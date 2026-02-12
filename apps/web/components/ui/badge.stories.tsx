@@ -63,3 +63,10 @@ export const Destructive: Story = {
     children: "Failed",
   },
 }
+
+export const VisibleBaseline: Story = {
+  args: {
+    id: "sb-badge-visible-baseline",
+    children: "Healthy",
+  },
+}

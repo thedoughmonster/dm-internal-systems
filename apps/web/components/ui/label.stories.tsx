@@ -93,3 +93,7 @@ export const DisabledPeer: Story = {
     </div>
   ),
 }
+
+export const VisibleBaseline: Story = {
+  ...Overview,
+}

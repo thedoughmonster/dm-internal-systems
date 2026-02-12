@@ -33,3 +33,10 @@ export const Disabled: Story = {
     helpText: "Picker disabled until intake mode is set to batch import.",
   },
 }
+
+export const VisibleBaseline: Story = {
+  args: {
+    id: "sb-dm-multi-file-picker-visible-baseline",
+    onPickText: async () => {},
+  },
+}

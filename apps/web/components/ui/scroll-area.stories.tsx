@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs"
 
 import { ModuleDocsPage } from "@/lib/storybook/module-docs-page"
-import { ModulePlayground } from "@/lib/storybook/module-playground"
+import { ModulePlayground, ModuleVisibleBaseline } from "@/lib/storybook/module-playground"
 import * as ComponentModule from "./scroll-area"
 
 const meta = {
@@ -37,3 +37,14 @@ export const Overview: Story = {
   },
 }
 
+
+export const VisibleBaseline: Story = {
+  render: () => <ModuleVisibleBaseline moduleName="Scroll Area" moduleExports={ComponentModule} />,
+  parameters: {
+    docs: {
+      description: {
+        story: "Concrete baseline render for quick visual verification of the primary export.",
+      },
+    },
+  },
+}
