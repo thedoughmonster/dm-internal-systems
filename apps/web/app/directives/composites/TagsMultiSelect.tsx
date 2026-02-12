@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import styles from "./TagsMultiSelect.module.css"
 
 export type TagOption = {
   label: string
@@ -32,7 +33,7 @@ export default function TagsMultiSelect({
   }, [])
 
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       {selected.map((value) => (
         <input
           id={`${id}-value-${value}`}
@@ -43,20 +44,20 @@ export default function TagsMultiSelect({
           hidden
         />
       ))}
-      <div className="flex flex-wrap gap-3">
+      <div className={styles.optionsRow}>
         {options.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No tags available.</p>
+          <p className={styles.empty}>No tags available.</p>
         ) : (
           options.map((option) => {
             const checkboxId = `${id}-option-${option.value}`
             return (
-              <div key={option.value} className="flex items-center gap-2">
+              <div key={option.value} className={styles.optionItem}>
                 <Checkbox
                   id={checkboxId}
                   checked={selected.includes(option.value)}
                   onCheckedChange={() => toggleTag(option.value)}
                 />
-                <Label id={`${checkboxId}-label`} htmlFor={checkboxId} className="text-xs">
+                <Label id={`${checkboxId}-label`} htmlFor={checkboxId} className={styles.optionLabel}>
                   {option.label}
                 </Label>
               </div>

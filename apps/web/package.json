@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint --ignore-pattern storybook-static",
     "typecheck": "tsc --noEmit",
+    "validate:global-css-boundary": "node ../../ops_tooling/scripts/css/validate_global_css_boundary.mjs",
+    "validate:directives-css-contract": "node ../../ops_tooling/scripts/css/validate_directives_css_contract.mjs",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
     "storybook:build:ci": "storybook build --output-dir storybook-static --quiet"

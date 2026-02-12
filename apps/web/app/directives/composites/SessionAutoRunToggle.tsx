@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { updateAutoRun } from "../actions"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import styles from "./SessionAutoRunToggle.module.css"
 
 type SessionAutoRunToggleProps = {
   sessionId: string
@@ -32,7 +33,7 @@ export default function SessionAutoRunToggle({
     <Badge
       id={`${id}-badge`}
       variant="outline"
-      className="gap-2 pr-2 font-mono text-[0.68rem] font-semibold"
+      className={styles.badge}
     >
       <span>Auto</span>
       <Switch
@@ -55,4 +56,3 @@ export default function SessionAutoRunToggle({
     </Badge>
   )
 }
-

@@ -1,0 +1,86 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dm-space-2);
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.ghostOverlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+}
+
+.ghostText {
+  padding-left: var(--dm-space-8);
+  padding-right: var(--dm-space-10);
+  font-size: var(--dm-font-size-sm);
+  font-family: var(--dm-font-family-label);
+  color: hsl(var(--muted-foreground) / 0.7);
+}
+
+.invisiblePrefix {
+  visibility: hidden;
+}
+
+.suggestionsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dm-space-2);
+}
+
+.suggestionsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dm-space-2);
+}
+
+.suggestionButton {
+  height: 1.75rem;
+  padding-inline: var(--dm-space-2);
+  font-size: var(--dm-font-size-xs);
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.suggestionButton:hover {
+  background: hsl(var(--muted) / 0.6);
+}
+
+.suggestionActive {
+  border: 1px solid hsl(var(--border));
+  height: 2rem;
+  padding-inline: var(--dm-space-2-5);
+  font-size: 13px;
+}
+
+.suggestionHint {
+  margin: 0;
+  font-size: var(--dm-font-size-xs);
+  color: hsl(var(--muted-foreground));
+}
+
+.chipsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dm-space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dm-space-1);
+  cursor: pointer;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.chip:hover {
+  background: hsl(var(--muted) / 0.6);
+}

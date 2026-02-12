@@ -1,0 +1,177 @@
+/* apps/web/app/styles/utilities.css */
+  .dm-machine-mono {
+    font-family: var(--font-machine-mono), ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .dm-title {
+    font-family: var(--title-font-family), ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: var(--title-font-weight, 600);
+    letter-spacing: var(--title-letter-spacing, 0.02em) !important;
+  }
+
+  .dm-app-bg {
+    background:
+      radial-gradient(
+        1200px 700px at 12% 10%,
+        hsl(var(--neon-magenta) / 0.10),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 600px at 90% 20%,
+        hsl(var(--neon-cyan) / 0.10),
+        transparent 55%
+      ),
+      radial-gradient(
+        900px 700px at 50% 100%,
+        hsl(var(--neon-green) / 0.08),
+        transparent 60%
+      ),
+      linear-gradient(
+        90deg,
+        hsl(var(--border) / 0.14) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        hsl(var(--border) / 0.12) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--background) / 1),
+        hsl(var(--background) / 1)
+      );
+    background-size:
+      auto,
+      auto,
+      auto,
+      44px 44px,
+      44px 44px,
+      auto;
+  }
+
+  .dm-loader {
+    position: relative;
+    overflow: hidden;
+    border-radius: 999px;
+    background: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .dm-loader::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 45%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--neon-green) / 0.85),
+      hsl(var(--neon-cyan) / 0.70),
+      transparent
+    );
+    filter: drop-shadow(0 0 0.8rem hsl(var(--neon-green) / 0.25));
+    animation: dm-sweep var(--motion-loader-sweep) linear infinite;
+  }
+
+  .dm-markdown h1,
+  .dm-markdown h2,
+  .dm-markdown h3 {
+    margin-top: 1.2rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dm-markdown h1::after,
+  .dm-markdown h2::after,
+  .dm-markdown h3::after {
+    content: "";
+    display: block;
+    margin-top: 0.4rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  .dm-markdown ul,
+  .dm-markdown ol {
+    padding-left: 1.5rem;
+    margin: 0.4rem 0;
+  }
+
+  .dm-markdown ul {
+    list-style: disc;
+  }
+
+  .dm-markdown ol {
+    list-style: decimal;
+  }
+
+  .dm-markdown li {
+    margin: 0.2rem 0;
+  }
+
+  .dm-markdown pre {
+    overflow-x: auto;
+    border-radius: 0.6rem;
+    border: 1px solid hsl(var(--border) / 0.7);
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    background: hsl(var(--background) / 0.65);
+    color: hsl(0 0% 100%);
+    box-shadow: inset 0 0 0.6rem hsl(var(--border) / 0.35);
+  }
+
+  .dm-markdown code {
+    font-family: "Courier New", Courier, ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", monospace;
+    color: hsl(0 0% 100%);
+  }
+
+  .dm-markdown :not(pre) > code {
+    background: hsl(var(--muted));
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .dm-markdown blockquote {
+    border-left: 2px solid hsl(var(--border) / 0.7);
+    padding-left: 0.75rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dm-cursor {
+    display: inline-block;
+    width: 0.6ch;
+    height: 1em;
+    transform: translateY(0.15em);
+    background: hsl(var(--neon-green));
+    box-shadow: 0 0 0.8rem hsl(var(--neon-green) / 0.28);
+    animation: dm-blink var(--motion-cursor-blink) steps(1, end) infinite;
+  }
+
+  .sbdocs .sbdocs-preview {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  @keyframes dm-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes dm-sweep {
+    0% {
+      transform: translateX(-120%);
+    }
+    100% {
+      transform: translateX(260%);
+    }
+  }

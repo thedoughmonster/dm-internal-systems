@@ -52,6 +52,19 @@ function getKindFromFilename(filename: string): DirectiveFile["kind"] {
   return "unknown"
 }
 
+function isDirectiveMarkdownFile(filename: string) {
+  const lower = filename.toLowerCase()
+  if (!lower.endsWith(".md")) {
+    return false
+  }
+
+  return (
+    lower === "readme.md" ||
+    filename.startsWith("TASK_") ||
+    filename.startsWith("ARCHIVE_TASK_")
+  )
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -151,7 +164,7 @@ export async function listDirectiveFiles(): Promise<DirectiveFile[]> {
 
     const files = await fs.readdir(sessionPath)
     for (const filename of files) {
-      if (!filename.endsWith(".md")) {
+      if (!isDirectiveMarkdownFile(filename)) {
         continue
       }
 
@@ -183,7 +196,7 @@ export async function listSessionFiles(sessionId: string): Promise<DirectiveFile
   const results: DirectiveFile[] = []
 
   for (const filename of files) {
-    if (!filename.endsWith(".md")) {
+    if (!isDirectiveMarkdownFile(filename)) {
       continue
     }
 
@@ -216,7 +229,7 @@ export async function listSessionFileContents(sessionId: string): Promise<
   const results: Array<DirectiveFile & { content: string }> = []
 
   for (const filename of files) {
-    if (!filename.endsWith(".md")) {
+    if (!isDirectiveMarkdownFile(filename)) {
       continue
     }
 

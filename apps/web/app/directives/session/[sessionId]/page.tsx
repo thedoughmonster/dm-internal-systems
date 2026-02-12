@@ -10,6 +10,7 @@ import { listSessionFileContents } from "@/app/directives/lib/directives-store"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import RefreshButton from "@/app/directives/composites/RefreshButton"
+import styles from "./page.module.css"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -60,16 +61,13 @@ export default async function SessionMarkdownPage({
   )
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <main className={styles.main}>
+      <div className={styles.headerRow}>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Session markdown</h1>
-          <p className="text-sm text-muted-foreground">Session: {sessionId}</p>
+          <h1 className={styles.title}>Session markdown</h1>
+          <p className={styles.subtitle}>Session: {sessionId}</p>
         </div>
-        <Link
-          href="/directives"
-          className="text-xs text-muted-foreground underline underline-offset-4"
-        >
+        <Link href="/directives" className={styles.backLink}>
           Back to directives
         </Link>
       </div>
@@ -97,28 +95,26 @@ export default async function SessionMarkdownPage({
           ]}
         >
           <CardContent id={`session-markdown-${entry.sessionId}-${entry.filename}-content`}>
-            <div className="grid gap-3 lg:grid-cols-[220px_1fr]">
-              <div className="text-xs text-muted-foreground">
-                <div className="dm-machine-mono text-[0.62rem] uppercase tracking-[0.2em] text-muted-foreground/70">
-                  Meta
-                </div>
-                <dl className="mt-2 space-y-2">
+            <div className={styles.markdownContent}>
+              <div className={styles.metaPanel}>
+                <div className={styles.metaHeading}>Meta</div>
+                <dl className={styles.metaList}>
                   <div>
-                    <dt className="text-[0.62rem] uppercase tracking-[0.18em]">Title</dt>
-                    <dd className="text-sm text-foreground">{entry.meta.title}</dd>
+                    <dt className={styles.metaTerm}>Title</dt>
+                    <dd className={styles.metaValue}>{entry.meta.title}</dd>
                   </div>
                   <div>
-                    <dt className="text-[0.62rem] uppercase tracking-[0.18em]">Status</dt>
-                    <dd className="text-sm text-foreground">{entry.meta.status}</dd>
+                    <dt className={styles.metaTerm}>Status</dt>
+                    <dd className={styles.metaValue}>{entry.meta.status}</dd>
                   </div>
                   <div>
-                    <dt className="text-[0.62rem] uppercase tracking-[0.18em]">Updated</dt>
-                    <dd className="text-sm text-foreground">{entry.meta.updated}</dd>
+                    <dt className={styles.metaTerm}>Updated</dt>
+                    <dd className={styles.metaValue}>{entry.meta.updated}</dd>
                   </div>
                 </dl>
               </div>
               <article
-                className="dm-markdown space-y-4 text-sm leading-6 text-foreground"
+                className={styles.markdownArticle}
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             </div>

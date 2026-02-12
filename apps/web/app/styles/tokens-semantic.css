@@ -1,0 +1,44 @@
+/* apps/web/app/styles/tokens-semantic.css */
+  :root {
+    --dm-color-surface-canvas: var(--dm-color-neutral-950);
+    --dm-color-surface-elevated: var(--dm-color-neutral-925);
+    --dm-color-surface-muted: var(--dm-color-neutral-900);
+
+    --dm-color-text-primary: var(--dm-color-emerald-300);
+    --dm-color-text-secondary: 145 35% 70%;
+    --dm-color-text-inverse: var(--dm-color-black);
+
+    --dm-color-border-default: var(--dm-color-border-700);
+    --dm-color-border-strong: var(--dm-color-border-700);
+
+    --dm-color-brand-primary: var(--dm-color-emerald-500);
+    --dm-color-brand-secondary: var(--dm-color-cyan-500);
+    --dm-color-brand-accent: var(--dm-color-magenta-500);
+    --dm-color-danger: var(--dm-color-danger-500);
+
+    --background: var(--dm-color-surface-canvas);
+    --foreground: var(--dm-color-text-primary);
+    --card: var(--dm-color-surface-elevated);
+    --card-foreground: var(--dm-color-text-primary);
+    --popover: var(--dm-color-surface-elevated);
+    --popover-foreground: var(--dm-color-text-primary);
+    --primary: var(--dm-color-brand-primary);
+    --primary-foreground: var(--dm-color-text-inverse);
+    --secondary: var(--dm-color-brand-secondary);
+    --secondary-foreground: var(--dm-color-text-inverse);
+    --muted: var(--dm-color-surface-muted);
+    --muted-foreground: var(--dm-color-text-secondary);
+    --accent: var(--dm-color-brand-accent);
+    --accent-foreground: var(--dm-color-text-inverse);
+    --destructive: var(--dm-color-danger);
+    --destructive-foreground: var(--dm-color-neutral-50);
+    --border: var(--dm-color-border-default);
+    --input: var(--dm-color-border-default);
+    --ring: var(--dm-color-brand-primary);
+
+    --radius: var(--dm-radius-lg);
+
+    --neon-green: var(--dm-color-brand-primary);
+    --neon-cyan: var(--dm-color-brand-secondary);
+    --neon-magenta: var(--dm-color-brand-accent);
+  }

@@ -1,0 +1,66 @@
+/* apps/web/app/styles/base.css */
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--dm-color-border-default) / 0.7) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--dm-color-border-default) / 0.7);
+    border-radius: var(--dm-radius-pill);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--dm-color-border-strong) / 0.95);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: var(--dm-font-family-body);
+    font-size: var(--dm-font-size-md);
+    line-height: var(--dm-font-line-height-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--dm-font-family-title);
+    font-weight: var(--dm-font-weight-medium);
+    letter-spacing: var(--title-letter-spacing) !important;
+    line-height: var(--dm-font-line-height-tight);
+  }
+
+  label {
+    font-family: var(--dm-font-family-label);
+    font-size: var(--dm-font-size-xs);
+    letter-spacing: var(--dm-font-tracking-wide);
+    text-transform: uppercase;
+    color: hsl(var(--dm-color-text-secondary));
+  }
+
+  ::selection {
+    background: hsl(var(--dm-color-brand-primary) / 0.25);
+    color: hsl(var(--dm-color-text-primary));
+  }

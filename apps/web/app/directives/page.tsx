@@ -1,4 +1,5 @@
 import DirectivesView from "@/app/directives/composites/DirectivesView"
+import styles from "./page.module.css"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -9,5 +10,9 @@ type DirectivesPageProps = {
 
 export default async function DirectivesPage({ searchParams }: DirectivesPageProps) {
   const resolved = await searchParams
-  return <DirectivesView searchParams={resolved} />
+  return (
+    <div className={styles.page}>
+      <DirectivesView searchParams={resolved} />
+    </div>
+  )
 }

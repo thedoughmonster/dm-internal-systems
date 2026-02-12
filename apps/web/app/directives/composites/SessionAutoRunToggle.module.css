@@ -1,0 +1,12 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dm-space-2);
+  padding-right: var(--dm-space-2);
+  font-family: var(--dm-font-family-mono);
+  font-size: 0.68rem;
+  font-weight: var(--dm-font-weight-semibold);
+  border-color: hsl(var(--dm-color-border-default));
+  color: hsl(var(--dm-color-text-primary));
+  background: hsl(var(--dm-color-surface-elevated) / 0.55);
+}

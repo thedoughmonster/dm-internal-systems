@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import styles from "./MultiSelectDropdown.module.css"
 
 export type MultiSelectOption = {
   label: string
@@ -81,8 +81,8 @@ export default function MultiSelectDropdown({
   )
 
   return (
-    <div className="space-y-2">
-      <Label id={`${id}-label`} htmlFor={id} className="text-xs text-muted-foreground">
+    <div className={styles.root}>
+      <Label id={`${id}-label`} htmlFor={id} className={styles.label}>
         {label}
       </Label>
       <DropdownMenu id={`${id}-menu`}>
@@ -91,17 +91,17 @@ export default function MultiSelectDropdown({
             id={id}
             variant="outline"
             type="button"
-            className={cn("w-full justify-between text-left text-sm")}
+            className={styles.triggerButton}
             aria-labelledby={`${id}-label`}
           >
-            <span className="truncate">{selectionLabel}</span>
-            <ChevronDown className="h-4 w-4 opacity-50" />
+            <span className={styles.selectionText}>{selectionLabel}</span>
+            <ChevronDown className={styles.chevron} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           id={`${id}-content`}
           align="start"
-          className="w-[--radix-dropdown-menu-trigger-width]"
+          className={styles.menuContent}
         >
           <DropdownMenuCheckboxItem
             id={`${id}-option-any`}

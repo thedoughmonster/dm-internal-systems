@@ -1,0 +1,35 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dm-space-4);
+}
+
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dm-space-2);
+}
+
+.resetButton {
+  font-size: var(--dm-font-size-xs);
+}
+
+.fieldsGrid {
+  display: grid;
+  gap: var(--dm-space-3);
+  align-items: end;
+}
+
+@media (min-width: 48rem) {
+  .fieldsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dm-space-2);
+}

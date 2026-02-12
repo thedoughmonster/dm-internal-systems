@@ -1,0 +1,15 @@
+/* apps/web/app/styles/motion-tokens.css */
+  :root {
+    --dm-motion-duration-ui-fast: var(--dm-motion-duration-fast);
+    --dm-motion-duration-ui-medium: var(--dm-motion-duration-medium);
+    --dm-motion-duration-cursor: var(--dm-motion-duration-cursor-blink);
+    --dm-motion-duration-loader: var(--dm-motion-duration-loader-sweep);
+    --dm-motion-ease-ui: var(--dm-motion-ease-standard);
+    --dm-motion-ease-emphasis: var(--dm-motion-ease-emphasized);
+
+    --dm-motion-cursor-blink: var(--dm-motion-duration-cursor);
+    --dm-motion-loader-sweep: var(--dm-motion-duration-loader);
+
+    --motion-cursor-blink: var(--dm-motion-cursor-blink);
+    --motion-loader-sweep: var(--dm-motion-loader-sweep);
+  }

@@ -5,7 +5,9 @@ import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 import type { TagOption } from "./TagsMultiSelect"
+import styles from "./TagsInput.module.css"
 
 type TagsInputProps = {
   id: string
@@ -102,9 +104,13 @@ export default function TagsInput({
   placeholder = "Add tags",
   onChange,
 }: TagsInputProps) {
+  const normalizedValues = React.useMemo(
+    () => values.map((value) => normalizeTag(value)).filter(Boolean),
+    [values]
+  )
   const [inputValue, setInputValue] = React.useState("")
   const [selected, setSelected] = React.useState<string[]>(
-    values.map((value) => normalizeTag(value)).filter(Boolean)
+    normalizedValues
   )
   const [activeIndex, setActiveIndex] = React.useState<number>(-1)
 
@@ -114,14 +120,14 @@ export default function TagsInput({
   )
 
   React.useEffect(() => {
-    const next = values.map((value) => normalizeTag(value)).filter(Boolean)
+    const next = normalizedValues
     setSelected((prev) => {
       if (prev.length === next.length && prev.every((value, index) => value === next[index])) {
         return prev
       }
       return next
     })
-  }, [JSON.stringify(values)])
+  }, [normalizedValues])
 
   React.useEffect(() => {
     onChange?.(selected)
@@ -193,7 +199,7 @@ export default function TagsInput({
       : ""
 
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       {selected.map((value) => (
         <Input
           id={`${id}-value-${value}`}
@@ -203,11 +209,11 @@ export default function TagsInput({
           value={value}
         />
       ))}
-      <div className="relative">
+      <div className={styles.inputWrap}>
         {ghostSuffix ? (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-center">
-            <span className="pl-8 pr-10 text-sm dm-machine-mono text-muted-foreground/70">
-              <span className="invisible">{inputValue}</span>
+          <div className={styles.ghostOverlay}>
+            <span className={styles.ghostText}>
+              <span className={styles.invisiblePrefix}>{inputValue}</span>
               <span>{ghostSuffix}</span>
             </span>
           </div>
@@ -223,38 +229,37 @@ export default function TagsInput({
         />
       </div>
       {suggestions.length > 0 ? (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
+        <div className={styles.suggestionsWrap}>
+          <div className={styles.suggestionsList}>
             {suggestions.map((suggestion, index) => (
               <Button
                 key={suggestion.value}
                 id={`${id}-suggestion-${suggestion.value}`}
                 type="button"
                 variant="secondary"
-                className={`h-7 px-2 text-xs bg-muted text-muted-foreground hover:bg-muted/60 ${
-                  index === activeIndex
-                    ? "border border-border h-8 px-2.5 text-[13px]"
-                    : ""
-                }`}
+                className={cn(
+                  styles.suggestionButton,
+                  index === activeIndex ? styles.suggestionActive : undefined
+                )}
                 onClick={() => handleSuggestionClick(suggestion.value, index)}
               >
                 {suggestion.label}
               </Button>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className={styles.suggestionHint}>
             Tab to cycle suggestions, Enter to accept.
           </p>
         </div>
       ) : null}
       {selected.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className={styles.chipsWrap}>
           {selected.map((tag) => (
             <Badge
               key={tag}
               id={`${id}-chip-${tag}`}
               variant="secondary"
-              className="flex items-center gap-1 bg-muted text-muted-foreground cursor-pointer hover:bg-muted/60"
+              className={styles.chip}
               role="button"
               tabIndex={0}
               onClick={() => removeTag(tag)}

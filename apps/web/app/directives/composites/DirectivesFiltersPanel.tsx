@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { MultiSelectOption } from "./MultiSelectDropdown"
 import MultiSelectDropdown from "./MultiSelectDropdown"
+import styles from "./DirectivesFiltersPanel.module.css"
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -109,13 +110,13 @@ export default function DirectivesFiltersPanel({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className={styles.root}>
+      <div className={styles.actionsRow}>
         <Button
           id="directives-filter-reset"
           type="button"
           variant="ghost"
-          className="text-xs"
+          className={styles.resetButton}
           onClick={() => {
             setQuery("")
             setStatuses(defaultStatuses)
@@ -126,8 +127,8 @@ export default function DirectivesFiltersPanel({
           Reset filters
         </Button>
       </div>
-      <div className="grid items-end gap-3 md:grid-cols-3">
-        <div className="space-y-2">
+      <div className={styles.fieldsGrid}>
+        <div className={styles.fieldGroup}>
           <Label id="directives-filter-query-label" htmlFor="directives-filter-query">
             Search
           </Label>

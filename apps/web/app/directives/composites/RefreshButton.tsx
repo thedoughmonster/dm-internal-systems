@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import styles from "./RefreshButton.module.css"
 
 type RefreshButtonProps = {
   id: string
@@ -20,7 +21,7 @@ export default function RefreshButton({ id, label = "Refresh" }: RefreshButtonPr
       id={id}
       type="button"
       variant="secondary"
-      className="fixed bottom-6 right-6 z-50 gap-2 shadow-lg"
+      className={styles.button}
       disabled={isPending}
       onClick={() => {
         startTransition(() => {
@@ -28,7 +29,7 @@ export default function RefreshButton({ id, label = "Refresh" }: RefreshButtonPr
         })
       }}
     >
-      <RefreshCw className={isPending ? "animate-spin" : ""} />
+      <RefreshCw className={isPending ? styles.iconSpinning : undefined} />
       {label}
     </Button>
   )

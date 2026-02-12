@@ -1,0 +1,27 @@
+/* apps/web/app/styles/typography-tokens.css */
+  :root {
+    --dm-font-family-body: var(--font-space-grotesk);
+    --dm-font-family-title: var(--font-tektur);
+    --dm-font-family-label: var(--font-machine-mono);
+    --dm-font-family-mono: var(--font-share-tech-mono);
+
+    --dm-font-size-xs: 0.75rem;
+    --dm-font-size-sm: 0.875rem;
+    --dm-font-size-md: 1rem;
+    --dm-font-size-lg: 1.125rem;
+    --dm-font-size-xl: 1.5rem;
+
+    --dm-font-line-height-tight: 1.15;
+    --dm-font-line-height-base: 1.5;
+
+    --dm-font-weight-regular: 400;
+    --dm-font-weight-medium: 500;
+    --dm-font-weight-semibold: 600;
+
+    --dm-font-tracking-tight: 0.01em;
+    --dm-font-tracking-wide: 0.08em;
+
+    --title-font-family: var(--dm-font-family-title);
+    --title-font-weight: var(--dm-font-weight-medium);
+    --title-letter-spacing: 0.02em;
+  }

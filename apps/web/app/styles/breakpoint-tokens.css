@@ -1,0 +1,12 @@
+/* apps/web/app/styles/breakpoint-tokens.css */
+  :root {
+    --dm-breakpoint-layout-compact: var(--dm-breakpoint-sm);
+    --dm-breakpoint-layout-standard: var(--dm-breakpoint-md);
+    --dm-breakpoint-layout-wide: var(--dm-breakpoint-lg);
+    --dm-breakpoint-layout-ultra: var(--dm-breakpoint-xl);
+
+    --breakpoint-sm: var(--dm-breakpoint-layout-compact);
+    --breakpoint-md: var(--dm-breakpoint-layout-standard);
+    --breakpoint-lg: var(--dm-breakpoint-layout-wide);
+    --breakpoint-xl: var(--dm-breakpoint-layout-ultra);
+  }

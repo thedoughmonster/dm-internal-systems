@@ -1,0 +1,70 @@
+.accordionItem {
+  border: 0;
+}
+
+.shell {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--dm-radius-lg);
+  color: hsl(var(--card-foreground));
+  box-shadow: var(--dm-shadow-card);
+  background: var(--card-surface-current);
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dm-space-3);
+}
+
+.trigger {
+  padding-block: var(--dm-space-2);
+}
+
+.triggerBody {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--dm-space-1);
+}
+
+.title {
+  font-family: var(--dm-font-family-title);
+  font-size: 15px;
+  font-weight: var(--dm-font-weight-medium);
+}
+
+.metaRow {
+  width: 100%;
+  text-align: left;
+  font-family: var(--dm-font-family-label);
+  font-size: 0.62rem;
+  line-height: 1.25;
+  color: hsl(var(--muted-foreground) / 0.8);
+}
+
+.metaText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.accordionItem[data-state="open"] .metaText {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dm-space-2);
+  padding-top: var(--dm-space-2);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dm-space-4);
+}

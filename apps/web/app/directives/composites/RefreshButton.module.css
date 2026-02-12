@@ -1,0 +1,22 @@
+.button {
+  position: fixed;
+  right: var(--dm-space-6);
+  bottom: var(--dm-space-6);
+  z-index: var(--dm-z-sticky);
+  gap: var(--dm-space-2);
+  box-shadow: var(--dm-shadow-glow-green);
+}
+
+.iconSpinning {
+  animation: refresh-spin 1s linear infinite;
+}
+
+@keyframes refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
