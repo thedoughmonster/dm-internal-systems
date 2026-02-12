@@ -30,6 +30,10 @@ Before any edits:
 - Require `directive_branch` to be non empty.
 - Verify current git branch matches `directive_branch`; if not, switch to `directive_branch`.
 - If `directive_branch` does not exist locally, stop and request Architect to create it before continuing.
+- Require explicit worktree mode from handoff context:
+  - `clean_required`
+  - `known_dirty_allowlist` with explicit `worktree_allowlist_paths`
+- If worktree mode metadata is missing or invalid, stop and request Architect correction.
 
 Session selection precedence:
 
@@ -44,11 +48,16 @@ Session selection precedence:
 - If multiple runnable tasks exist, list and request numeric selection.
 - If no runnable tasks exist, report and stop.
 - If valid incoming handoff packet provides task context, skip manual selection prompts.
+- If valid handoff or eligible auto-run context resolves a single executable task, start execution directly with no operator confirmation prompts.
 
 ## Pre execution gate
 
 Before edits, enforce task contract and metadata minimums from `docs/agent-rules/shared/directives-model.md`.
-Before each task, request operator confirmation for `meta.execution_model` and `meta.thinking_level` unless execution context was provided by valid incoming handoff packet.
+Do not request operator confirmation for `meta.execution_model` or `meta.thinking_level` when execution context is already resolved by valid handoff or auto-run selection.
+Enforce worktree state contract before edits:
+- `clean_required`: fail closed if `git status --short` reports tracked or untracked changes.
+- `known_dirty_allowlist`: fail closed unless every dirty path matches `worktree_allowlist_paths` exactly.
+- If additional dirty paths appear beyond allowlist, stop and emit Executor to Architect handoff with exact path list.
 
 ## Automatic outbound handoff
 

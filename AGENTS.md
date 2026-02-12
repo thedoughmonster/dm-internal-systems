@@ -64,6 +64,14 @@ Role assignment exception for automatic handoff:
 - Executor runs state-changing git commands only when explicitly instructed by the operator or explicitly required by an approved directive task.
 - Destructive git commands must include a large warning and require explicit operator approval before execution.
 
+## Rules governance ownership
+
+- Rule and policy adjustments are Architect-owned only.
+- Only Architect may edit governance rule assets: `AGENTS.md`, `docs/agent-rules/**`, and `apps/web/docs/guides/agent-guidance.md`.
+- For governance-only rule updates, Architect must execute end to end and must not hand off implementation to Executor.
+- Before the first governance rule edit, Architect must create and switch to a dedicated `chore/*` branch.
+- Governance rule updates must be committed by Architect on that `chore/*` branch once requirements are understood and edits are complete.
+
 ## Executor override and troubleshooting rule
 
 - The operator may explicitly override rules during execution. Overrides must be written by the operator in the chat.
@@ -105,6 +113,7 @@ Executor execution gate:
 - Executor must not perform directive edits unless execution context is provided by a valid incoming `=== AUTO HANDOFF ===` packet.
 - Executor must verify the current git branch matches `directive_branch` from the handoff packet before any edits.
  - When no chat handoff is available (profile-based execution), Executor must require and use `apps/web/.local/directives/<guid>/HANDOFF.md` and treat it as the handoff source of truth.
+- When valid handoff or auto-run context resolves a single executable task, Executor proceeds directly after required reading and must not pause for discretionary confirmation prompts.
 
 ## Standard operating procedure
 

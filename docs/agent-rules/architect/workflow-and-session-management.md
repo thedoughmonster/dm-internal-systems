@@ -36,6 +36,11 @@ Architect responsibilities:
 - Define and document a dedicated branch per directive before execution handoff.
 - Create the directive branch (or verify it already exists) before any Executor handoff.
 - Include `directive_branch` in every Architect -> Executor handoff packet for directive execution.
+- Include explicit handoff worktree policy in every Architect -> Executor execution handoff:
+  - `worktree_mode: clean_required`, or
+  - `worktree_mode: known_dirty_allowlist` with exact `worktree_allowlist_paths`.
+- For governance-only rule edits (`AGENTS.md`, `docs/agent-rules/**`, `apps/web/docs/guides/agent-guidance.md`), create and switch to a dedicated `chore/*` branch before the first edit.
+- Complete governance-only rule edits directly as Architect and create a `chore(architect):` commit when edits are complete.
 - For profile-based execution, create `HANDOFF.md` in the directive session folder before any Executor work begins.
 - When starting any `chore/*` directive, immediately create the `directive_branch` and switch to it before any other work.
 - Update task `meta.result` after Executor completion.

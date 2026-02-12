@@ -19,12 +19,19 @@ directive_branch: <non empty git branch name>
 required_reading: apps/web/docs/guides/component-paradigm.md
 objective: <one line objective for receiving role>
 blocking_rule: <rule that prevents sender from continuing>
+worktree_mode: <clean_required|known_dirty_allowlist>
+worktree_allowlist_paths: <json array or n/a>
 ```
 
 Directive execution rule:
 
 - For any handoff that leads to directive execution, `directive_branch` must be present and must be a non empty git branch name.
 - `directive_branch` must match the session README `meta.directive_branch` when `session_id` points at a directive session.
+- `worktree_mode` must be explicit for directive execution handoffs:
+  - `clean_required`: execution requires clean working tree before edits.
+  - `known_dirty_allowlist`: execution may proceed only when dirty paths match `worktree_allowlist_paths` exactly.
+- For `clean_required`, set `worktree_allowlist_paths: n/a`.
+- For `known_dirty_allowlist`, `worktree_allowlist_paths` must be a non empty JSON array of exact relative paths.
 
 ## Directive-contained handoff (profile-based execution)
 
@@ -48,6 +55,8 @@ handoff:
   required_reading: apps/web/docs/guides/component-paradigm.md
   objective: <one line objective>
   blocking_rule: <rule that prevents sender from continuing>
+  worktree_mode: <clean_required|known_dirty_allowlist>
+  worktree_allowlist_paths: <[] or omitted when clean_required>
 ---
 ```
 
@@ -55,6 +64,8 @@ Rules:
 
 - Executor must treat `HANDOFF.md` as equivalent to a chat `=== AUTO HANDOFF ===` packet.
 - `handoff.directive_branch` must match session README `meta.directive_branch`.
+- `handoff.worktree_mode` must be present for directive execution handoffs.
+- If `handoff.worktree_mode` is `known_dirty_allowlist`, `handoff.worktree_allowlist_paths` must be present and non empty.
 - If `HANDOFF.md` is missing, incomplete, or mismatched, Executor must stop.
 
 ## Sender behavior
@@ -74,6 +85,7 @@ When most recent context contains a valid handoff packet targeting receiver role
 3. continue execution without requesting manual role re-selection
 4. use packet `session_id` and `task_file` when present to continue directly
 5. verify current git branch matches `directive_branch` before any edits
+6. when packet context resolves execution target, do not request additional operator confirmation prompts before starting execution
 
 If packet is incomplete or malformed, receiver must stop and request correction.
 

@@ -42,6 +42,14 @@ These rules are non negotiable. Every role must enforce them exactly.
 - Non-Executor roles other than Architect may use read-only git inspection commands only.
 - If state-changing git is required outside these rules, emit handoff packet or request explicit operator role reset.
 
+8. Unexpected changes gate
+- If unexpected working tree changes are detected, stop immediately and report.
+- Exception: changes explicitly declared through handoff `worktree_mode: known_dirty_allowlist` and exact `worktree_allowlist_paths` are treated as expected for that handoff only.
+
+9. Governance ownership gate
+- Governance rule updates in `AGENTS.md`, `docs/agent-rules/**`, and `apps/web/docs/guides/agent-guidance.md` are Architect-owned.
+- For governance-only rule updates, Architect executes end to end on a dedicated `chore/*` branch and does not hand off implementation to Executor.
+
 ## Fail closed behavior
 
 When any critical rule is violated or cannot be satisfied:
