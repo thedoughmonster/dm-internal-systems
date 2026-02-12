@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import styles from "./SessionSelect.module.css"
 
 type SessionOption = {
   sessionId: string
@@ -30,7 +31,7 @@ export default function SessionSelect({ id, name, options }: SessionSelectProps)
   )
 
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       <Input id={`${id}-value`} type="hidden" name={name} value={value} />
       <Select id={`${id}-select`} value={value} onValueChange={setValue}>
         <SelectTrigger id={id}>

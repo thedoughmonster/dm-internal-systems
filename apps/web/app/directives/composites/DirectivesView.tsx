@@ -9,11 +9,12 @@ import DirectivesFiltersPanel from "./DirectivesFiltersPanel"
 import type { TagOption } from "./TagsMultiSelect"
 import SessionCard from "./SessionCard"
 import SessionAutoRunToggle from "./SessionAutoRunToggle"
+import styles from "./DirectivesView.module.css"
 
-const STATUS_COLOR: Record<string, string> = {
-  todo: "bg-muted text-muted-foreground",
-  open: "bg-primary/20 text-primary",
-  archived: "bg-muted text-muted-foreground",
+const STATUS_CLASS: Record<string, string> = {
+  todo: styles.statusTodo,
+  open: styles.statusOpen,
+  archived: styles.statusArchived,
 }
 
 const STATUS_OPTIONS = [
@@ -161,19 +162,16 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
   })
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
-      <section className="space-y-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <main className={styles.main}>
+      <section className={styles.headerSection}>
+        <div className={styles.headerRow}>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Directives</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={styles.title}>Directives</h1>
+            <p className={styles.subtitle}>
               Local only directive tasks and session intake for agent workflows.
             </p>
           </div>
-          <Link
-            href="/settings"
-            className="text-xs text-muted-foreground underline underline-offset-4"
-          >
+          <Link href="/settings" className={styles.settingsLink}>
             Settings
           </Link>
         </div>
@@ -188,7 +186,7 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
           </Badge>,
         ]}
       >
-        <CardContent id="directives-list-content" className="space-y-6">
+        <CardContent id="directives-list-content" className={styles.listContent}>
           <DirectivesFiltersPanel
             queryValue={queryValue}
             statusValues={statusValues}
@@ -197,7 +195,7 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
             tagOptions={tagList}
           />
           {filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No directives found.</p>
+            <p className={styles.emptyState}>No directives found.</p>
           ) : (
             orderedGroups.map(([sessionId, sessionEntries]) => {
               const title = parentTitles.get(sessionId) ?? "Untitled session"
@@ -217,7 +215,7 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                 <Badge
                   key={`${sessionId}-status`}
                   id={`directives-session-${sessionId}-status`}
-                  className={STATUS_COLOR[sessionStatus] ?? ""}
+                  className={STATUS_CLASS[sessionStatus] ?? styles.statusTodo}
                 >
                   {sessionStatus}
                 </Badge>,
@@ -254,16 +252,17 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                   ]}
                 >
                   {parentEntry ? (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/20 px-3 py-2">
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span className="font-mono">Session: {sessionId}</span>
-                          <span className="font-mono">Directive: {sessionDirective}</span>
+                    <div className={styles.sessionParentWrapper}>
+                      <div className={styles.sessionParentRow}>
+                        <div className={styles.sessionMetaRow}>
+                          <span className={styles.metaMono}>Session: {sessionId}</span>
+                          <span className={styles.metaMono}>Directive: {sessionDirective}</span>
                         </div>
                         <Button
                           id={`directives-session-${sessionId}-markdown`}
                           variant="outline"
                           size="sm"
+                          className={styles.markdownButton}
                           asChild
                         >
                           <Link href={`/directives/session/${sessionId}`}>View markdown</Link>
@@ -281,7 +280,7 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                         <Badge
                           key={`${entry.sessionId}-${entry.filename}-status`}
                           id={`directives-status-${entry.sessionId}-${entry.filename}`}
-                          className={STATUS_COLOR[entry.meta.status] ?? ""}
+                          className={STATUS_CLASS[entry.meta.status] ?? styles.statusTodo}
                         >
                           {entry.meta.status}
                         </Badge>,
@@ -292,6 +291,7 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                           id={`directives-task-${entry.sessionId}-${entry.filename}-markdown`}
                           variant="outline"
                           size="sm"
+                          className={styles.markdownButton}
                           asChild
                         >
                           <Link
@@ -304,13 +304,11 @@ export default async function DirectivesView({ searchParams }: DirectivesViewPro
                     >
                       <CardContent
                         id={`directives-entry-${entry.sessionId}-${entry.filename}-content`}
-                        className="space-y-3"
+                        className={styles.entryContent}
                       >
-                        <p className="text-sm text-muted-foreground">
-                          {entry.meta.summary}
-                        </p>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span className="font-mono">File: {entry.filename}</span>
+                        <p className={styles.entrySummary}>{entry.meta.summary}</p>
+                        <div className={styles.entryMetaRow}>
+                          <span className={styles.taskFileMeta}>File: {entry.filename}</span>
                           <span>Updated: {formatShortDate(entry.meta.updated)}</span>
                         </div>
                       </CardContent>

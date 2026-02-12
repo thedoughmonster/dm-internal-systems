@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import MultiSelectDropdown, { type MultiSelectOption } from "./MultiSelectDropdown"
+import styles from "./RelationsMultiSelect.module.css"
 
 type RelationsMultiSelectProps = {
   id: string
@@ -24,7 +25,7 @@ export default function RelationsMultiSelect({
   anyLabel,
 }: RelationsMultiSelectProps) {
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       {values.map((value) => (
         <input
           key={value}

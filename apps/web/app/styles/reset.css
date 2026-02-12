@@ -1,0 +1,6 @@
+/* apps/web/app/styles/reset.css */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }

@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import styles from "./TaskListInput.module.css"
 
 const EMPTY_ROW = ""
 
@@ -24,7 +25,7 @@ export default function TaskListInput({ id, name }: TaskListInputProps) {
   }, [])
 
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       {rows.map((row, index) => (
         <Input
           key={`${id}-row-${index}`}

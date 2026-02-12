@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import styles from "./FilterSelect.module.css"
 
 export type FilterOption = {
   label: string
@@ -34,7 +35,7 @@ export default function FilterSelect({
   const [selected, setSelected] = React.useState(initial)
 
   return (
-    <div className="space-y-2">
+    <div className={styles.root}>
       <input id={`${id}-value`} type="hidden" name={name} value={selected} hidden />
       <Select id={`${id}-select`} value={selected} onValueChange={setSelected}>
         <SelectTrigger id={id}>
