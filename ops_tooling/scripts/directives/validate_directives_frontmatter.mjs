@@ -74,8 +74,8 @@ function sessionFromFile(repoRoot, filePath) {
   const rel = path.relative(repoRoot, abs);
   if (!rel.startsWith("apps/web/.local/directives/")) return null;
   const parts = rel.split(path.sep);
-  if (parts.length < 5) return null;
-  return path.join(repoRoot, parts[0], parts[1], parts[2], parts[3]);
+  if (parts.length < 6) return null;
+  return path.join(repoRoot, parts[0], parts[1], parts[2], parts[3], parts[4]);
 }
 
 function isUuid(value) {
@@ -235,8 +235,8 @@ function main() {
 
   if (args.verbose) {
     for (const s of allChecks) {
-      process.stdout.write(`[${s.ok ? "PASS" : "FAIL"}] session ${s.session}\n`);
-      for (const c of s.checks) process.stdout.write(`  [${c.ok ? "PASS" : "FAIL"}] ${c.file}\n`);
+      process.stdout.write(`[${s.ok ? "PASS" : "FAIL"}] session ${path.basename(s.session)}\n`);
+      for (const c of s.checks) process.stdout.write(`  [${c.ok ? "PASS" : "FAIL"}] ${path.basename(c.file)}\n`);
     }
   }
 

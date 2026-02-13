@@ -17,6 +17,7 @@ Commands:
   architect-updatemeta   Update metadata with architect role guard
   executor-updatemeta    Update metadata with executor role guard
   migrate                Migrate legacy directive files to <slug>.<type>.json format
+  test                   Run directive script test suite
   help                   Show this help
 EOF
 }
@@ -50,6 +51,9 @@ case "$cmd" in
     ;;
   migrate)
     exec "${SCRIPT_DIR}/migratedirectives" "$@"
+    ;;
+  test)
+    exec "${SCRIPT_DIR}/testdirectives" "$@"
     ;;
   help|-h|--help)
     usage
