@@ -916,19 +916,66 @@ function upsertProfileBlock(configPath, profileName, block, dryRun) {
   }
 }
 
+function normalizeAbsolutePath(filePath) {
+  return path.resolve(String(filePath || ""));
+}
+
+function startupInstructionsPathFromBundle(bundleOutPath) {
+  return path.join(path.dirname(normalizeAbsolutePath(bundleOutPath)), "startup.md");
+}
+
+function writeStartupInstructionsFile(startupFilePath, startupContextPath, bundlePath, role, profileName) {
+  const startupJson = fs.readFileSync(startupContextPath, "utf8").trim();
+  const bundleContent = fs.readFileSync(bundlePath, "utf8").trimEnd();
+  const content = [
+    "# dc startup context",
+    "",
+    `Generated at: ${new Date().toISOString()}`,
+    `Role: ${role}`,
+    `Profile: ${profileName}`,
+    "",
+    "Startup enforcement:",
+    "- Role assignment is already satisfied by startup context.",
+    "- Required reading is already bundled below.",
+    "- Do not re-run manual role prompts.",
+    "- Do not perform broad directive/task rediscovery when directive/task is present in startup context.",
+    "- Prefer scripted lifecycle commands (dc directive/task/runbook/meta/validate).",
+    "",
+    "## Startup Context",
+    "",
+    "```json",
+    startupJson,
+    "```",
+    "",
+    "## Role Bundle",
+    "",
+    bundleContent,
+    "",
+  ].join("\n");
+  fs.mkdirSync(path.dirname(startupFilePath), { recursive: true });
+  fs.writeFileSync(startupFilePath, `${content}\n`, "utf8");
+}
+
 async function runBootstrap(root, args) {
   const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
   const configPath = path.join(codexHome, "config.toml");
   const role = await requireBundleRole(args);
   const profileName = await requireBootstrapProfile(args, configPath);
+  const launchConfig = readDcConfig(root, args);
 
   const bundle = runBuild(root, { ...args, role, json: false });
-  const bundlePath = bundle.outPath.replace(/\\/g, "/");
+  let startupContextPath = String(args["__startup_context_path"] || "").trim();
+  if (!startupContextPath) {
+    startupContextPath = writeStartupContext(root, args, role, profileName, null, null, launchConfig);
+  }
+  const startupFilePath = startupInstructionsPathFromBundle(bundle.outPath);
+  writeStartupInstructionsFile(startupFilePath, startupContextPath, bundle.outPath, role, profileName);
+  const startupPath = startupFilePath.replace(/\\/g, "/");
 
   const profileBlock = [
     `[profiles.${profileName}]`,
-    `instructions_file = "${bundlePath}"`,
-    `repo_instructions_file = "${bundlePath}"`,
+    `instructions_file = "${startupPath}"`,
+    `repo_instructions_file = "${startupPath}"`,
     `dc_role = "${role}"`,
     `generated_by = "dc agent bootstrap"`,
   ].join("\n");
@@ -942,6 +989,8 @@ async function runBootstrap(root, args) {
     profile: profileName,
     codex_home: codexHome,
     config_toml: configPath,
+    startup_file: startupFilePath,
+    startup_context_file: startupContextPath,
     bundle_file: bundle.outPath,
     policy_bundle_file: bundle.policyOutPath,
   });
@@ -1063,7 +1112,14 @@ async function runStart(root, args) {
   if (!args["no-bootstrap"]) {
     const includes = Array.isArray(args.include) ? args.include.slice() : [];
     includes.push(relative(root, startupContextPath));
-    await runBootstrap(root, { ...args, role, profile: profileName, include: includes, json: false });
+    await runBootstrap(root, {
+      ...args,
+      role,
+      profile: profileName,
+      include: includes,
+      "__startup_context_path": startupContextPath,
+      json: false,
+    });
   }
 
   output(args, {

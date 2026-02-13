@@ -566,7 +566,12 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
 
   assert.match(output, /Updated codex profile/);
   assert.match(output, /Starting codex with profile 'itest_start'/);
-  assert.ok(fs.existsSync(path.join(tmpCodex, "config.toml")), "Expected codex config.toml to be created");
+  const configPath = path.join(tmpCodex, "config.toml");
+  assert.ok(fs.existsSync(configPath), "Expected codex config.toml to be created");
+  const startupInstructionsPath = path.join(tmpBundleDir, "startup.md");
+  const configText = fs.readFileSync(configPath, "utf8");
+  assert.ok(configText.includes(startupInstructionsPath), "Expected profile block to reference startup.md");
+  assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
   assert.ok(fs.existsSync(outPath), "Expected context bundle file to be created");
   assert.ok(fs.existsSync(metaPath), "Expected context bundle metadata file to be created");
   const startupPath = path.join(tmpBundleDir, "architect.startup.json");
@@ -629,6 +634,8 @@ test("cli agent start marks selected directive with no tasks as none_available",
   ]);
 
   assert.match(output, /has no tasks yet/);
+  const startupInstructionsPath = path.join(tmpBundleDir, "startup.md");
+  assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
   const startupPath = path.join(tmpBundleDir, "architect.startup.json");
   assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
   const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
@@ -668,7 +675,9 @@ test("context bootstrap writes managed profile block to codex config", (t) => {
   const configText = fs.readFileSync(configPath, "utf8");
   assert.match(configText, /BEGIN dc-context profile itest_profile/);
   assert.match(configText, /\[profiles\.itest_profile\]/);
-  assert.ok(configText.includes(outPath), "Expected profile block to reference compiled bundle path");
+  const startupInstructionsPath = path.join(path.dirname(outPath), "startup.md");
+  assert.ok(configText.includes(startupInstructionsPath), "Expected profile block to reference startup instructions path");
+  assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
   assert.match(configText, /dc_role = "architect"/);
 });
 
