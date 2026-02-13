@@ -5,7 +5,7 @@ import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
-const scriptsRoot = path.join(repoRoot, "ops_tooling", "scripts");
+const directivesBinRoot = path.join(repoRoot, "ops_tooling", "scripts", "directives", "bin");
 const directivesRoot = path.join(repoRoot, "apps", "web", ".local", "directives");
 
 function run(scriptPath, args = []) {
@@ -43,7 +43,7 @@ function findSessionByTitleSlug(titleSlug) {
 }
 
 test("directives-cli help exposes expected command set", () => {
-  const output = run(path.join(scriptsRoot, "directives-cli"), ["help"]);
+  const output = run(path.join(directivesBinRoot, "cli"), ["help"]);
   assert.match(output, /newdirective/);
   assert.match(output, /newtask/);
   assert.match(output, /newhandoff/);
@@ -52,7 +52,7 @@ test("directives-cli help exposes expected command set", () => {
 });
 
 test("newdirective dry-run emits json session metadata path", () => {
-  const output = run(path.join(scriptsRoot, "newdirective"), [
+  const output = run(path.join(directivesBinRoot, "newdirective"), [
     "--dry-run",
     "--title",
     "test directive",
@@ -66,7 +66,7 @@ test("newdirective dry-run emits json session metadata path", () => {
 test("newtask dry-run emits json task path in existing session", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
-  const output = run(path.join(scriptsRoot, "newtask"), [
+  const output = run(path.join(directivesBinRoot, "newtask"), [
     "--dry-run",
     "--session",
     sessions[0],
@@ -81,7 +81,7 @@ test("newtask dry-run emits json task path in existing session", () => {
 test("newhandoff dry-run emits json handoff path", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
-  const output = run(path.join(scriptsRoot, "newhandoff"), [
+  const output = run(path.join(directivesBinRoot, "newhandoff"), [
     "--dry-run",
     "--session",
     sessions[0],
@@ -100,7 +100,7 @@ test("newhandoff dry-run emits json handoff path", () => {
 });
 
 test("validatedirectives verbose output uses short names, not absolute paths", () => {
-  const output = run(path.join(scriptsRoot, "validatedirectives"), ["--verbose"]);
+  const output = run(path.join(directivesBinRoot, "validatedirectives"), ["--verbose"]);
   const passFileLines = output
     .split("\n")
     .filter((line) => line.startsWith("  [PASS]") || line.startsWith("  [FAIL]"));
@@ -111,7 +111,7 @@ test("validatedirectives verbose output uses short names, not absolute paths", (
 });
 
 test("newtask fails with invalid session", () => {
-  const result = runExpectFailure(path.join(scriptsRoot, "newtask"), [
+  const result = runExpectFailure(path.join(directivesBinRoot, "newtask"), [
     "--session",
     "does-not-exist",
     "--title",
@@ -127,7 +127,7 @@ test("newtask fails with invalid session", () => {
 test("executor-updatemeta blocks directive metadata edits", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
-  const result = runExpectFailure(path.join(scriptsRoot, "executor-updatemeta"), [
+  const result = runExpectFailure(path.join(directivesBinRoot, "executor-updatemeta"), [
     "--session",
     sessions[0],
     "--directive-meta",
@@ -150,7 +150,7 @@ test("integration: create directive, create task, create handoff, update metadat
     if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
   });
 
-  run(path.join(scriptsRoot, "newdirective"), [
+  run(path.join(directivesBinRoot, "newdirective"), [
     "--session",
     sessionName,
     "--title",
@@ -167,7 +167,7 @@ test("integration: create directive, create task, create handoff, update metadat
   const metaFile = path.join(sessionDir, `${titleSlug}.meta.json`);
   assert.ok(fs.existsSync(metaFile), "Directive metadata file should exist");
 
-  run(path.join(scriptsRoot, "newtask"), [
+  run(path.join(directivesBinRoot, "newtask"), [
     "--session",
     resolvedSession,
     "--title",
@@ -182,7 +182,7 @@ test("integration: create directive, create task, create handoff, update metadat
   const taskFile = path.join(sessionDir, "integration-task.task.json");
   assert.ok(fs.existsSync(taskFile), "Task file should exist");
 
-  run(path.join(scriptsRoot, "newhandoff"), [
+  run(path.join(directivesBinRoot, "newhandoff"), [
     "--session",
     resolvedSession,
     "--from-role",
@@ -200,7 +200,7 @@ test("integration: create directive, create task, create handoff, update metadat
   const handoffFile = path.join(sessionDir, `${titleSlug}.handoff.json`);
   assert.ok(fs.existsSync(handoffFile), "Handoff file should exist");
 
-  run(path.join(scriptsRoot, "updatemeta"), [
+  run(path.join(directivesBinRoot, "updatemeta"), [
     "--session",
     resolvedSession,
     "--directive-meta",
@@ -211,7 +211,7 @@ test("integration: create directive, create task, create handoff, update metadat
   const metaDoc = JSON.parse(fs.readFileSync(metaFile, "utf8"));
   assert.equal(metaDoc.meta.assignee, "executor");
 
-  const validateOutput = run(path.join(scriptsRoot, "validatedirectives"), [
+  const validateOutput = run(path.join(directivesBinRoot, "validatedirectives"), [
     "--strict",
     "--file",
     path.relative(repoRoot, metaFile),
