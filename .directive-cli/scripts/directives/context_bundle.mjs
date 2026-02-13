@@ -1009,7 +1009,10 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
     env.DC_TASK_SLUG = selectedTask.task_slug;
     env.DC_TASK_FILE = selectedTask.task_file;
   }
-  const result = spawnSync(codexBin, ["--profile", profileName], {
+  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig);
+  const codexArgs = ["--profile", profileName];
+  if (initialPrompt) codexArgs.push(initialPrompt);
+  const result = spawnSync(codexBin, codexArgs, {
     stdio: "inherit",
     env,
   });
@@ -1024,6 +1027,26 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
   if (typeof result.status === "number" && result.status !== 0) {
     process.exit(result.status);
   }
+}
+
+function buildInitialPrompt(selectedDirective, selectedTask) {
+  const lines = [
+    "Startup context is preselected by dc agent start. Use it as authoritative.",
+    "Do not ask for role selection.",
+  ];
+  if (selectedDirective) {
+    lines.push(
+      `Selected directive session: ${selectedDirective.session}`,
+      `Directive title: ${selectedDirective.title}`,
+    );
+  }
+  if (selectedTask) {
+    lines.push(`Selected task: ${selectedTask.task_slug}`);
+  } else if (selectedDirective) {
+    lines.push("No task selected yet.");
+  }
+  lines.push("First response must briefly confirm active role/directive/task context and proceed directly with the next concrete lifecycle step.");
+  return lines.join("\n");
 }
 
 function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig) {
