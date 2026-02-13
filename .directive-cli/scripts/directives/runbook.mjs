@@ -32,11 +32,18 @@ function usage() {
     "",
     "Runbooks:",
     "  executor-task-cycle       Directive+task execution checkpoints",
-    "    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--dry-run]",
+    "    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]",
     "  executor-directive-closeout",
-    "    --session <id> [--dry-run]",
+    "    --session <id> [--confirm <token>] [--dry-run]",
     "  architect-authoring",
-    "    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--dry-run]",
+    "    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--confirm <token>] [--dry-run]",
+    "",
+    "Safety gates:",
+    "  Non-dry-run runbooks require --confirm with an exact token:",
+    "    architect-authoring         --confirm architect-authoring",
+    "    executor-task-cycle pre     --confirm executor-task-cycle-pre",
+    "    executor-task-cycle post    --confirm executor-task-cycle-post",
+    "    executor-directive-closeout --confirm executor-directive-closeout",
   ].join("\n");
 }
 
@@ -64,6 +71,13 @@ function runBin(name, args, { dryRun = false } = {}) {
   if (result.status !== 0) throw new Error(`${name} failed`);
 }
 
+function requireConfirm(args, requiredToken, runbookName, dryRun) {
+  if (dryRun) return;
+  const actual = String(args.confirm || "").trim();
+  if (actual === requiredToken) return;
+  throw new Error(`Runbook '${runbookName}' requires --confirm ${requiredToken} for non-dry-run execution.`);
+}
+
 function resolveSessionFiles(session) {
   const repoRoot = path.resolve(scriptDir(), "../../..");
   const sessionDir = path.join(repoRoot, "apps", "web", ".local", "directives", session);
@@ -83,6 +97,8 @@ function runbookExecutorTaskCycle(args) {
   if (!["pre", "post"].includes(phase)) throw new Error("--phase must be pre or post");
 
   const dryRun = Boolean(args["dry-run"]);
+  const confirmToken = phase === "pre" ? "executor-task-cycle-pre" : "executor-task-cycle-post";
+  requireConfirm(args, confirmToken, "executor-task-cycle", dryRun);
 
   if (phase === "pre") {
     runBin("directivestart", ["--session", session], { dryRun });
@@ -99,7 +115,9 @@ function runbookExecutorTaskCycle(args) {
 function runbookExecutorDirectiveCloseout(args) {
   const session = String(args.session || args.guid || "").trim();
   if (!session) throw new Error("executor-directive-closeout requires --session");
-  runBin("directivefinish", ["--session", session], { dryRun: Boolean(args["dry-run"]) });
+  const dryRun = Boolean(args["dry-run"]);
+  requireConfirm(args, "executor-directive-closeout", "executor-directive-closeout", dryRun);
+  runBin("directivefinish", ["--session", session], { dryRun });
 }
 
 function runbookArchitectAuthoring(args) {
@@ -111,6 +129,7 @@ function runbookArchitectAuthoring(args) {
   }
 
   const dryRun = Boolean(args["dry-run"]);
+  requireConfirm(args, "architect-authoring", "architect-authoring", dryRun);
   runBin("newdirective", ["--session", session, "--title", title, "--summary", summary, "--no-prompt"], { dryRun });
 
   const taskTitle = String(args["task-title"] || "").trim();

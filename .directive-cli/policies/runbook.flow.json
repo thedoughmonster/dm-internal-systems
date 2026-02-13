@@ -7,6 +7,7 @@
     "architect": {
       "phase": "authoring",
       "steps": [
+        "operator confirmation gate",
         "dc directive new",
         "dc meta architect",
         "dc directive task",
@@ -17,6 +18,7 @@
     "executor": {
       "phase": "execution",
       "steps": [
+        "operator confirmation gate",
         "dc directive start",
         "dc task start",
         "implement scoped changes",

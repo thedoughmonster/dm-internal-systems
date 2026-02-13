@@ -1045,7 +1045,9 @@ function buildInitialPrompt(selectedDirective, selectedTask) {
   } else if (selectedDirective) {
     lines.push("No task selected yet.");
   }
-  lines.push("First response must briefly confirm active role/directive/task context and proceed directly with the next concrete lifecycle step.");
+  lines.push("First response must briefly confirm active role/directive/task context.");
+  lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
+  lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
   return lines.join("\n");
 }
 

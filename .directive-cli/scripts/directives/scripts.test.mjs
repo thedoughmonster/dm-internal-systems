@@ -134,6 +134,36 @@ test("runbook executor-task-cycle pre works in dry-run mode", () => {
   assert.match(output, /PAUSE_FOR_IMPLEMENTATION/);
 });
 
+test("runbook executor-task-cycle pre requires confirmation token in non-dry-run", () => {
+  const sessions = listSessions();
+  assert.ok(sessions.length > 0, "Expected at least one existing directive session");
+  let selectedSession = "";
+  let firstTaskFile = "";
+  for (const session of sessions) {
+    const sessionDir = path.join(directivesRoot, session);
+    const task = fs.readdirSync(sessionDir).find((f) => f.endsWith(".task.json"));
+    if (!task) continue;
+    selectedSession = session;
+    firstTaskFile = task;
+    break;
+  }
+  assert.ok(selectedSession, "Expected at least one session with task files");
+  const taskSlug = firstTaskFile.replace(/\.task\.json$/, "");
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "runbook",
+    "executor-task-cycle",
+    "--session",
+    selectedSession,
+    "--task",
+    taskSlug,
+    "--phase",
+    "pre",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /requires --confirm executor-task-cycle-pre/);
+});
+
 test("dc init writes config with explicit agent/model", (t) => {
   const tag = randomTag();
   const configPath = path.join("/tmp", `dc-init-${tag}.json`);
