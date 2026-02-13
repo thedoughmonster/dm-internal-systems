@@ -40,7 +40,7 @@ These rules are non negotiable. Every role must enforce them exactly.
 - Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
 - Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.
 - Non-Executor roles other than Architect may use read-only git inspection commands only.
-- If state-changing git is required outside these rules, emit handoff packet or request explicit operator role reset.
+- If state-changing git is required outside these rules, write `<directive_slug>.handoff.json` for the next role or request explicit operator role reset.
 
 8. Unexpected changes gate
 - If unexpected working tree changes are detected, stop immediately and report.

@@ -2,9 +2,9 @@
 
 ## Directive discovery
 
-- Session path: `apps/web/.local/directives/<guid>/`
-- Intake file: `README.md` (non executable)
-- Executable file: `TASK_<slug>.md`
+- Session path: `apps/web/.local/directives/<session_dir>/`
+- Intake file: `<directive_slug>.meta.json` (non executable)
+- Executable file: `<task_slug>.task.json`
 
 Executor selection input:
 
@@ -13,20 +13,20 @@ Executor selection input:
 
 ## Startup actions
 
-1. If valid incoming auto handoff packet targets Executor, treat role selection as satisfied, complete required reading, and continue without manual role selection prompt.
-2. If valid incoming handoff packet provides `task_file`, verify and read that task directly, then skip manual session and directive selection prompts.
-3. If no valid incoming handoff packet is present, require a directive-contained handoff file `apps/web/.local/directives/<guid>/HANDOFF.md` before directive execution. If missing, stop and request Architect to create it.
-4. If no explicit task path is provided and session exists with `meta.auto_run: true` and `meta.status: in_progress`, select highest `session_priority` then earliest `created`, load that session `HANDOFF.md`, and proceed directly when it resolves a single executable task.
+1. If valid incoming `<directive_slug>.handoff.json` targets Executor, treat role selection as satisfied, complete required reading, and continue without manual role selection prompt.
+2. If valid incoming `<directive_slug>.handoff.json` provides `handoff.task_file`, verify and read that task directly, then skip manual session and directive selection prompts.
+3. If no valid incoming `<directive_slug>.handoff.json` is present, stop and request Architect to create `apps/web/.local/directives/<session_dir>/<directive_slug>.handoff.json` before directive execution.
+4. If no explicit task path is provided and session exists with `meta.auto_run: true` and `meta.status: in_progress`, select highest `session_priority` then earliest `created`, load that session `<directive_slug>.handoff.json`, and proceed directly when it resolves a single executable task.
 5. Otherwise if task path provided, verify and read task fully.
 6. If execution context is still unresolved, list non archived sessions with numbered output.
 7. Include `meta.title`, `meta.status`, and `meta.session_priority` in session list.
-8. Stop if README is missing, unreadable, or missing `meta.title`.
+8. Stop if session metadata `<directive_slug>.meta.json` is missing, unreadable, or missing `meta.title`.
 
 ## Branch gate
 
 Before any edits:
 
-- Require `directive_branch` from the incoming handoff packet or from `HANDOFF.md`.
+- Require `handoff.directive_branch` from `<directive_slug>.handoff.json`.
 - Require `directive_branch` to be non empty.
 - Verify current git branch matches `directive_branch`; if not, switch to `directive_branch`.
 - If `directive_branch` does not exist locally, stop and request Architect to create it before continuing.
@@ -47,7 +47,7 @@ Session selection precedence:
 - If one runnable task exists, run it.
 - If multiple runnable tasks exist, list and request numeric selection.
 - If no runnable tasks exist, report and stop.
-- If valid incoming handoff packet provides task context, skip manual selection prompts.
+- If valid incoming `<directive_slug>.handoff.json` provides task context, skip manual selection prompts.
 - If valid handoff or eligible auto-run context resolves a single executable task, start execution directly with no operator confirmation prompts.
 - Prompt for manual directive or task selection only when handoff and auto-run context do not resolve a single executable task.
 
@@ -60,6 +60,15 @@ Enforce worktree state contract before edits:
 - `known_dirty_allowlist`: fail closed unless every dirty path matches `worktree_allowlist_paths` exactly.
 - If additional dirty paths appear beyond allowlist, stop and emit Executor to Architect handoff with exact path list.
 
+## Directive metadata handling
+
+- Do not manually edit directive metadata in normal flow.
+- Executor metadata updates must use:
+  - `executor-updatemeta ...`
+  - fallback: `node ops_tooling/scripts/directives/update_directive_metadata.mjs --role executor ...`
+- Executor must not update session `<directive_slug>.meta.json` via tooling.
+- Executor must not update task `meta.status`, `meta.bucket`, or `meta.updated` via tooling.
+
 ## Automatic outbound handoff
 
-If Executor cannot continue due to scope or contract block, emit automatic Executor to Architect handoff packet using `trigger: executor_scope_or_contract_block` and stop.
+If Executor cannot continue due to scope or contract block, write `<directive_slug>.handoff.json` for Architect using `trigger: executor_scope_or_contract_block` and stop.

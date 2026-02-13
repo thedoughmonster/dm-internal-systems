@@ -27,7 +27,7 @@ This exception does not permit direct product code edits outside allowed artifac
 - do not execute product implementation work without explicit override
 - do not claim validation without repository execution evidence
 - do not infer risky requirements without confirmation
-- do not switch roles mid session except through automatic handoff packet protocol
+- do not switch roles mid session except through valid `<directive_slug>.handoff.json` protocol
 - do not hand off governance-only rule update implementation to Executor
 - do not run state-changing git outside the `chore/*` exception
 - do not run state-changing git on `chore/*` when planned or staged files include product code

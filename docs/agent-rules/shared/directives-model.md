@@ -2,10 +2,23 @@
 
 ## Storage model
 
-- Session root: `apps/web/.local/directives/<guid>/`
-- Session intake: `README.md` (non executable)
-- Executable tasks: `TASK_<slug>.md`
-- Execution handoff artifact (required for profile-based execution): `HANDOFF.md`
+- Session root: `apps/web/.local/directives/<session_dir>/`
+- Session intake content: `<directive_slug>.meta.json` (non executable)
+- Session intake metadata: `<directive_slug>.meta.json`
+- Executable task content: `<task_slug>.task.json`
+- Executable task metadata: `<task_slug>.task.json`
+- Execution handoff artifact (required): `<directive_slug>.handoff.json`
+
+Session identity rules:
+
+- Session directory names are human-readable and unique.
+- Canonical session UUID is stored in `<directive_slug>.meta.json` as `meta.id`.
+
+Pairing rules:
+
+- Session metadata file name is `<directive_slug>.meta.json`.
+- Task file names are `<task_slug>.task.json`.
+- Handoff file name is `<directive_slug>.handoff.json`.
 
 ## Task minimum contract
 
@@ -39,7 +52,7 @@ Every executable task must include at least:
   - `summary`: one line factual outcome
   - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
   - `updated`: UTC timestamp
-- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `README.md` metadata.
+- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `<directive_slug>.meta.json` metadata.
 - Architect reconciles task and session metadata after execution by using Executor `meta.result` evidence.
 - Completion metadata must not be set to done when required validation evidence is missing or failing.
 
@@ -63,7 +76,7 @@ Collection rules:
 
 ## Directive branch and commit policy metadata
 
-Session `README.md` metadata must include:
+Session `<directive_slug>.meta.json` metadata must include:
 
 - `directive_branch`
 - `directive_base_branch`
@@ -85,7 +98,7 @@ Lifecycle rules:
 
 - Architect defines branch lifecycle requirements in the directive.
 - Architect must ensure `directive_branch` exists before handing off execution.
-- Handoff packets for directive execution must include `directive_branch`.
+- `<directive_slug>.handoff.json` for directive execution must include `handoff.directive_branch`.
 - Executor must verify it is on `directive_branch` before any edits; if the branch does not exist locally, stop and request Architect to create it.
 - State-changing branch operations are executed by Executor by default, with Architect `chore/*` exception governed by `AGENTS.md`.
 - Completed directives with unmerged branches must be surfaced during Architect startup and resolved or explicitly blocked.

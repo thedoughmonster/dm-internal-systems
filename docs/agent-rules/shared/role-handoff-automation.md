@@ -4,90 +4,72 @@ This module defines automatic handoff behavior when a role boundary is reached.
 
 ## Handoff contract
 
-Automatic handoff is valid only when sender emits a complete handoff packet.
+Automatic handoff is valid only when sender writes a complete session-local handoff artifact.
 
-Required packet format:
+Required artifact path:
 
-```text
-=== AUTO HANDOFF ===
-from_role: <architect|executor|pair|auditor>
-to_role: <architect|executor|pair|auditor>
-trigger: <short deterministic trigger id>
-session_id: <directive session guid or n/a>
-task_file: <task path or n/a>
-directive_branch: <non empty git branch name>
-required_reading: apps/web/docs/guides/component-paradigm.md
-objective: <one line objective for receiving role>
-blocking_rule: <rule that prevents sender from continuing>
-worktree_mode: <clean_required|known_dirty_allowlist>
-worktree_allowlist_paths: <json array or n/a>
+- `apps/web/.local/directives/<session_dir>/<directive_slug>.handoff.json`
+
+Required `<directive_slug>.handoff.json` format:
+
+```json
+{
+  "handoff": {
+    "from_role": "<architect|executor|pair|auditor>",
+    "to_role": "<architect|executor|pair|auditor>",
+    "trigger": "<short deterministic trigger id>",
+    "session_id": "<directive session UUID from <directive_slug>.meta.json meta.id or null>",
+    "task_file": "<task path or null>",
+    "directive_branch": "<non empty git branch name>",
+    "required_reading": "apps/web/docs/guides/component-paradigm.md",
+    "objective": "<one line objective for receiving role>",
+    "blocking_rule": "<rule that prevents sender from continuing>",
+    "worktree_mode": "<clean_required|known_dirty_allowlist>",
+    "worktree_allowlist_paths": []
+  }
+}
 ```
 
 Directive execution rule:
 
-- For any handoff that leads to directive execution, `directive_branch` must be present and must be a non empty git branch name.
-- `directive_branch` must match the session README `meta.directive_branch` when `session_id` points at a directive session.
-- `worktree_mode` must be explicit for directive execution handoffs:
+- For any handoff that leads to directive execution, `handoff.directive_branch` must be present and be a non empty git branch name.
+- `handoff.directive_branch` must match session metadata `meta.directive_branch` when `handoff.session_id` points at a directive session.
+- `handoff.worktree_mode` must be explicit for directive execution handoffs:
   - `clean_required`: execution requires clean working tree before edits.
   - `known_dirty_allowlist`: execution may proceed only when dirty paths match `worktree_allowlist_paths` exactly.
-- For `clean_required`, set `worktree_allowlist_paths: n/a`.
-- For `known_dirty_allowlist`, `worktree_allowlist_paths` must be a non empty JSON array of exact relative paths.
-
-## Directive-contained handoff (profile-based execution)
-
-When role selection is handled outside chat (for example via Codex profiles), directive execution must still be gated behind an explicit handoff artifact stored inside the directive session folder.
-
-Required file:
-
-- `apps/web/.local/directives/<guid>/HANDOFF.md`
-
-Required `HANDOFF.md` front matter format:
-
-```text
----
-handoff:
-  from_role: architect
-  to_role: executor
-  trigger: <short deterministic trigger id>
-  session_id: <directive session guid>
-  task_file: <task path>
-  directive_branch: <non empty git branch name>
-  required_reading: apps/web/docs/guides/component-paradigm.md
-  objective: <one line objective>
-  blocking_rule: <rule that prevents sender from continuing>
-  worktree_mode: <clean_required|known_dirty_allowlist>
-  worktree_allowlist_paths: <[] or omitted when clean_required>
----
-```
+- For `clean_required`, set `handoff.worktree_allowlist_paths: []`.
+- For `known_dirty_allowlist`, `handoff.worktree_allowlist_paths` must be a non empty JSON array of exact relative paths.
 
 Rules:
 
-- Executor must treat `HANDOFF.md` as equivalent to a chat `=== AUTO HANDOFF ===` packet.
-- `handoff.directive_branch` must match session README `meta.directive_branch`.
+- Chat handoffs are not allowed.
+- Receiver must treat `<directive_slug>.handoff.json` as the sole handoff source of truth.
+- `handoff.directive_branch` must match session metadata `meta.directive_branch`.
 - `handoff.worktree_mode` must be present for directive execution handoffs.
 - If `handoff.worktree_mode` is `known_dirty_allowlist`, `handoff.worktree_allowlist_paths` must be present and non empty.
-- If `HANDOFF.md` is missing, incomplete, or mismatched, Executor must stop.
+- If `handoff.worktree_mode` is `clean_required`, `handoff.worktree_allowlist_paths` must be `[]`.
+- If `<directive_slug>.handoff.json` is missing, incomplete, or mismatched, Executor must stop.
 
 ## Sender behavior
 
 When a handoff trigger is met, sender must:
 
 1. stop execution immediately
-2. emit one complete handoff packet
-3. avoid additional discretionary work after packet emission
+2. write one complete `<directive_slug>.handoff.json` artifact
+3. avoid additional discretionary work after artifact write
 
 ## Receiver behavior
 
-When most recent context contains a valid handoff packet targeting receiver role:
+When a valid `<directive_slug>.handoff.json` targets receiver role:
 
 1. treat target role as explicitly selected
 2. complete required reading
 3. continue execution without requesting manual role re-selection
-4. use packet `session_id` and `task_file` when present to continue directly
-5. verify current git branch matches `directive_branch` before any edits
-6. when packet context resolves execution target, do not request additional operator confirmation prompts before starting execution
+4. use `handoff.session_id` and `handoff.task_file` to continue directly
+5. verify current git branch matches `handoff.directive_branch` before any edits
+6. when handoff context resolves execution target, do not request additional operator confirmation prompts before starting execution
 
-If packet is incomplete or malformed, receiver must stop and request correction.
+If `<directive_slug>.handoff.json` is incomplete or malformed, receiver must stop and request correction.
 
 ## No-manual-confirmation mode
 

@@ -16,17 +16,18 @@ The agent must not proceed until one role is explicitly selected.
 After role selection and required reading, list available directive sessions under `apps/web/.local/directives/` and exclude archived sessions by default.
 
 Role assignment exception for automatic handoff:
-- A valid `=== AUTO HANDOFF ===` packet from the prior role counts as explicit role selection for `to_role`.
-- On valid handoff packet, receiving role must complete required reading and continue without asking for manual role re-selection.
-- Role transition is allowed only by valid handoff packet or explicit operator role reset.
+- A valid session-local `<directive_slug>.handoff.json` artifact from the prior role counts as explicit role selection for `to_role`.
+- On valid handoff artifact, receiving role must complete required reading and continue without asking for manual role re-selection.
+- Role transition is allowed only by valid `<directive_slug>.handoff.json` artifact or explicit operator role reset.
 
 ## Automatic role handoff protocol
 
-- Sender role must stop immediately after emitting a valid handoff packet.
-- Receiver role must continue automatically using packet context when packet is valid and targets that role.
+- Sender role must stop immediately after creating a valid `<directive_slug>.handoff.json` artifact.
+- Receiver role must continue automatically using handoff context when `<directive_slug>.handoff.json` is valid and targets that role.
 - Trigger mappings and required packet fields are defined in `docs/agent-rules/shared/role-handoff-automation.md`.
- - For directive execution handoffs, the handoff packet must include `directive_branch`.
- - For profile-based execution, directives must include a session-local `HANDOFF.md` handoff artifact.
+ - For directive execution handoffs, `<directive_slug>.handoff.json` must include `directive_branch`.
+ - Chat handoffs are not allowed.
+- Preferred creation command for handoff artifacts: `newhandoff ...` (fallback: `node ops_tooling/scripts/directives/create_handoff.mjs ...`).
 
 ## Required Reading
 
@@ -56,7 +57,7 @@ Role assignment exception for automatic handoff:
 - If Architect detects any product code changes in planned or staged files, Architect must stop and hand off to Executor before running state-changing git.
 - Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
 - Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.
-- Exception: Architect may create and switch to the directive branch named by `directive_branch` in a directive session README as part of directive setup prior to Executor handoff (chore branch only).
+- Exception: Architect may create and switch to the directive branch named by `directive_branch` in a directive session `<directive_slug>.meta.json` as part of directive setup prior to Executor handoff (chore branch only).
   - `directive_branch` must be non empty.
   - This Architect exception is limited to `chore/*` branches only.
 - Other non-Executor roles may run read-only git commands for repository inspection only: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git rev-parse`.
@@ -105,14 +106,13 @@ Role assignment exception for automatic handoff:
 
 
 Agents must not mix roles inside a single response.
-In-thread role transitions are allowed only through the automatic handoff packet protocol or explicit operator role reset.
+In-thread role transitions are allowed only through a valid session-local `<directive_slug>.handoff.json` artifact or explicit operator role reset.
 Architects are read only and produce directives.
 Executors apply directives exactly and must not infer intent.
 
 Executor execution gate:
-- Executor must not perform directive edits unless execution context is provided by a valid incoming `=== AUTO HANDOFF ===` packet.
-- Executor must verify the current git branch matches `directive_branch` from the handoff packet before any edits.
- - When no chat handoff is available (profile-based execution), Executor must require and use `apps/web/.local/directives/<guid>/HANDOFF.md` and treat it as the handoff source of truth.
+- Executor must not perform directive edits unless execution context is provided by a valid session-local `apps/web/.local/directives/<session_dir>/<directive_slug>.handoff.json`.
+- Executor must verify the current git branch matches `handoff.directive_branch` from `<directive_slug>.handoff.json` before any edits.
 - When valid handoff or auto-run context resolves a single executable task, Executor proceeds directly after required reading and must not pause for discretionary confirmation prompts.
 
 ## Standard operating procedure
@@ -122,8 +122,8 @@ Executor execution gate:
 - Feature updates that require multiple steps must use a feature branch.
 - Operator prefers no commits until the end of a feature update.
 - Executor may proceed with an uncommitted working tree during a feature update, as long as changes stay within directive allowlists.
-- Directive tasks live under `apps/web/.local/directives/<guid>/`.
-- Each directive session folder contains a parent `README.md` and task files named `TASK_<slug>.md`.
+- Directive tasks live under `apps/web/.local/directives/<session_dir>/`.
+- Each directive session folder contains a parent `<directive_slug>.meta.json` and task files named `<task_slug>.task.json`.
 - Executors run the full directive end to end with minimal operator input.
 - Executors stop only under explicit stop conditions.
 - Architects may write directive artifacts under `apps/web/.local/directives/`.
@@ -136,10 +136,24 @@ Executor execution gate:
 ## Directive storage model
 
 - `apps/web/.local/directives/` is local only and git ignored.
-- Each session folder is a GUID.
-- `README.md` in the session folder is the parent intake file.
-- Each task is a file named `TASK_<slug>.md` in the session folder.
-- All directive files use YAML front matter with a `meta` block and a short summary field.
+- Each session folder uses a human-readable unique directory name.
+- Session UUID remains canonical in `<directive_slug>.meta.json` under `meta.id`.
+- `<directive_slug>.meta.json` in the session folder is the parent intake file.
+- Each task is a file named `<task_slug>.task.json` in the session folder.
+- Optional handoff artifact is `<directive_slug>.handoff.json` in the session folder.
+
+## Directive metadata tooling policy
+
+- Do not edit directive metadata manually in normal flow.
+- Required tooling for directive metadata operations:
+  - `newdirective` for session `<directive_slug>.meta.json` creation
+  - `newtask` for task file creation
+  - `newhandoff` for `<directive_slug>.handoff.json` creation
+  - `architect-updatemeta` for Architect metadata updates
+  - `executor-updatemeta` for Executor metadata updates
+- Manual metadata edits are exception-only and require an explicit instruction deviation alert with operator authorization.
+- Metadata validation must pass before handoff or closeout:
+  - `node ops_tooling/scripts/directives/validate_directives_frontmatter.mjs`
 
 ## Directive task update contract
 
@@ -149,13 +163,13 @@ Executor execution gate:
   - `summary`: one line factual outcome
   - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
   - `updated`: UTC timestamp
-- Executor must not change task `meta.status`, task `meta.bucket`, task `meta.updated`, or any session `README.md` metadata.
+- Executor must not change task `meta.status`, task `meta.bucket`, task `meta.updated`, or any session `<directive_slug>.meta.json` metadata.
 - Architect reconciles task and session metadata after execution by using Executor `meta.result` evidence.
 - Architect must not mark completion metadata as done when required validation evidence is missing or failing.
 
 ## Directive branch and collection policy
 
-- Every directive must use a dedicated branch per directive and track branch metadata in session `README.md`.
+- Every directive must use a dedicated branch per directive and track branch metadata in session `<directive_slug>.meta.json`.
 - Required session branch metadata keys are `directive_branch`, `directive_base_branch`, `directive_merge_status`, and `commit_policy`.
 - Multi-task directives must include collection metadata keys `collection_id`, `collection_title`, `collection_order`, `collection_commit_label`, and `collection_merge_ready`.
 - Architect startup checks must detect completed directives that still need to merge back to dev.
@@ -242,4 +256,4 @@ This exception is strictly limited to these files:
 Constraints:
 - This exception is for quality of life edits only (clarity, formatting, and process wording).
 - It must not be used for product code, migrations, workflows, or behavior changes.
-- Every use of this exception must be recorded in the current session `README.md` under a Notes section with date and a short summary of what changed.
+- Every use of this exception must be recorded in the current session metadata notes with date and a short summary of what changed.

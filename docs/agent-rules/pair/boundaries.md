@@ -21,7 +21,7 @@ Ask clarifying questions when:
 
 Call out likely regression risk before applying non trivial UI cleanup.
 
-If boundary cannot be resolved inside Pair scope, emit automatic Pair to Architect handoff packet using `trigger: pair_out_of_scope` and stop.
+If boundary cannot be resolved inside Pair scope, write `<directive_slug>.handoff.json` for Architect using `trigger: pair_out_of_scope` and stop.
 
 ## Component paradigm enforcement
 

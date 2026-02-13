@@ -44,7 +44,7 @@ For collection tasks, metadata must also include:
 
 ## Branch and commit policy standard
 
-Session `README.md` must define:
+Session `<directive_slug>.meta.json` must define:
 
 - `directive_branch`
 - `directive_base_branch`
@@ -70,6 +70,6 @@ Architect must reject tasks that allow collection completion without merge-safet
 
 ## Streamlining conventions
 
-- Session README should include a concise one line `meta.summary`.
-- Task filename pattern should be `TASK_<area>-<intent>.md`.
+- Session metadata should include a concise one line `meta.summary`.
+- Task filename pattern should be `<task_slug>.task.json`.
 - Task block order should remain stable for predictable execution.

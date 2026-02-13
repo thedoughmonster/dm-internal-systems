@@ -1,0 +1,59 @@
+name: directives-frontmatter-guard
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/.local/directives/**'
+      - 'ops_tooling/scripts/directives/**'
+      - '.github/workflows/directives-frontmatter-guard.yml'
+  push:
+    branches: [dev, prod]
+    paths:
+      - 'apps/web/.local/directives/**'
+      - 'ops_tooling/scripts/directives/**'
+      - '.github/workflows/directives-frontmatter-guard.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Collect changed directive files
+        id: changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+            head_ref="${{ github.event.pull_request.head.sha }}"
+          else
+            base_ref="${{ github.event.before }}"
+            head_ref="${{ github.sha }}"
+          fi
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMRT "$base_ref" "$head_ref" -- 'apps/web/.local/directives/*' 'apps/web/.local/directives/**/*')
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          {
+            echo "has_files=true"
+            echo "files<<EOF"
+            printf '%s\n' "${files[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Validate changed directive frontmatter
+        if: steps.changed.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            args+=(--file "$f")
+          done <<< "${{ steps.changed.outputs.files }}"
+          node ops_tooling/scripts/directives/validate_directives_frontmatter.mjs --strict "${args[@]}"

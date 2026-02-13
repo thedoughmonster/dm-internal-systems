@@ -32,4 +32,4 @@ If any step lacks exact path scope, concrete action, or completion criteria:
   - `summary`: one line factual outcome
   - `validation`: commands run and pass or fail outcomes, or explicit not-run reason
   - `updated`: UTC timestamp
-- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `README.md` metadata.
+- Executor must not modify task `meta.status`, task `meta.bucket`, task `meta.updated`, or session `<directive_slug>.meta.json` metadata.

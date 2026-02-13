@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  directives <command> [args...]
+
+Commands:
+  validate               Run directives validator (supports --strict, --verbose, --file ...)
+  newdirective           Create <directive_slug>.meta.json
+  newtask                Create <task_slug>.task.json
+  newhandoff             Create <directive_slug>.handoff.json
+  updatemeta             Update metadata (architect role default)
+  architect-updatemeta   Update metadata with architect role guard
+  executor-updatemeta    Update metadata with executor role guard
+  migrate                Migrate legacy directive files to <slug>.<type>.json format
+  help                   Show this help
+EOF
+}
+
+cmd="${1:-help}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$cmd" in
+  validate)
+    exec "${SCRIPT_DIR}/validatedirectives" "$@"
+    ;;
+  newdirective)
+    exec "${SCRIPT_DIR}/newdirective" "$@"
+    ;;
+  newtask)
+    exec "${SCRIPT_DIR}/newtask" "$@"
+    ;;
+  newhandoff)
+    exec "${SCRIPT_DIR}/newhandoff" "$@"
+    ;;
+  updatemeta)
+    exec "${SCRIPT_DIR}/updatemeta" "$@"
+    ;;
+  architect-updatemeta)
+    exec "${SCRIPT_DIR}/architect-updatemeta" "$@"
+    ;;
+  executor-updatemeta)
+    exec "${SCRIPT_DIR}/executor-updatemeta" "$@"
+    ;;
+  migrate)
+    exec "${SCRIPT_DIR}/migratedirectives" "$@"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

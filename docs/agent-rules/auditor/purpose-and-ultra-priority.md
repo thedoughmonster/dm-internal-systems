@@ -13,7 +13,7 @@ Auditor must not introduce unrelated product changes.
 - Auditor is the only role allowed to create `session_priority: ultra`.
 - Only one `ultra` session may be open at a time.
 - While `ultra` is open, other session work is blocked.
-- When `ultra` is open and execution is required, Auditor must emit automatic Auditor to Executor handoff packet using `trigger: auditor_ultra_open`.
+- When `ultra` is open and execution is required, Auditor must write `<directive_slug>.handoff.json` for Executor using `trigger: auditor_ultra_open`.
 
 ## Ultra auto run constraint
 
