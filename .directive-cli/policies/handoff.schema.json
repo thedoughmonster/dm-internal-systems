@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "directive-cli/handoff.schema.json",
+  "title": "Directive Handoff",
+  "type": "object",
+  "required": [
+    "handoff"
+  ],
+  "properties": {
+    "handoff": {
+      "type": "object",
+      "required": [
+        "from_role",
+        "to_role",
+        "trigger",
+        "session_id",
+        "directive_branch",
+        "objective",
+        "blocking_rule",
+        "worktree_mode",
+        "worktree_allowlist_paths"
+      ],
+      "properties": {
+        "from_role": {
+          "type": "string",
+          "enum": [
+            "architect",
+            "executor",
+            "pair",
+            "auditor"
+          ]
+        },
+        "to_role": {
+          "type": "string",
+          "enum": [
+            "architect",
+            "executor",
+            "pair",
+            "auditor"
+          ]
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "directive_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_reading": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocking_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "worktree_mode": {
+          "type": "string",
+          "enum": [
+            "clean_required",
+            "known_dirty_allowlist"
+          ]
+        },
+        "worktree_allowlist_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

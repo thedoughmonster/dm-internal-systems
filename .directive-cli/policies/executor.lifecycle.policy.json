@@ -1,0 +1,27 @@
+{
+  "kind": "directive_cli_policy",
+  "policy_id": "executor_lifecycle",
+  "version": "1.0.0",
+  "summary": "Executor lifecycle policy enforced by directive/task scripts.",
+  "lifecycle": {
+    "branch_source": "directive_meta",
+    "branch_bootstrap_mode": "create_from_base_if_missing_local",
+    "require_clean_tree_on": [
+      "directive_start",
+      "task_start"
+    ],
+    "allow_task_status_updates_via_lifecycle": true,
+    "allow_task_updated_timestamp_via_lifecycle": true,
+    "forbid_manual_task_meta_fields": [
+      "bucket"
+    ],
+    "commit_policy_values": [
+      "per_task",
+      "per_collection",
+      "end_of_directive"
+    ]
+  },
+  "handoff_enforcement": {
+    "require_branch_match_when_handoff_present": true
+  }
+}

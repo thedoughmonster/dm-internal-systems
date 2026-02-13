@@ -1,0 +1,119 @@
+{
+  "flow_version": "1.0",
+  "canonical_name": "directive_session_flow",
+  "roles": {
+    "architect": {
+      "phase": "authoring",
+      "steps": [
+        {
+          "id": "architect_01",
+          "type": "DIR",
+          "command": "dc directive new --title <title> --summary <summary>",
+          "purpose": "Create directive metadata file"
+        },
+        {
+          "id": "architect_02",
+          "type": "DIR",
+          "command": "dc meta architect --session <s> --directive-meta --set directive_branch=<branch> --set directive_base_branch=dev --set commit_policy=<policy> --set status=draft",
+          "purpose": "Set directive execution policy and branch metadata"
+        },
+        {
+          "id": "architect_03",
+          "type": "DIR",
+          "command": "dc directive task --session <s> --title <title> --summary <summary>",
+          "purpose": "Create task file",
+          "repeatable": true
+        },
+        {
+          "id": "architect_04",
+          "type": "DIR",
+          "command": "dc meta architect --session <s> --task <t> --set status=draft ...",
+          "purpose": "Define task constraints, allowed files, validation"
+        },
+        {
+          "id": "architect_05",
+          "type": "TEST",
+          "command": "dc validate --strict --file <directive.meta.json> --file <task*.task.json>",
+          "purpose": "Validate directive/task structure before handoff"
+        },
+        {
+          "id": "architect_06",
+          "type": "DIR",
+          "command": "dc directive handoff --session <s> --from-role architect --to-role executor ...",
+          "purpose": "Create execution handoff artifact"
+        },
+        {
+          "id": "architect_07",
+          "type": "DIR",
+          "command": "dc meta architect --session <s> --directive-meta --set status=ready",
+          "purpose": "Mark directive ready for execution"
+        }
+      ]
+    },
+    "executor": {
+      "phase": "execution",
+      "steps": [
+        {
+          "id": "executor_01",
+          "type": "DIR",
+          "command": "dc directive start --session <s>",
+          "purpose": "Initialize execution context from directive metadata",
+          "includes": [
+            "dirty_tree_guard",
+            "branch_bootstrap",
+            "startup_validation"
+          ]
+        },
+        {
+          "id": "executor_02",
+          "type": "DIR",
+          "command": "dc task start --session <s> --task <t>",
+          "purpose": "Begin task"
+        },
+        {
+          "id": "executor_03",
+          "type": "DIR",
+          "command": "manual edits (no raw git)",
+          "purpose": "Apply scoped file changes per task allowlist"
+        },
+        {
+          "id": "executor_04",
+          "type": "DIR",
+          "command": "dc task finish --session <s> --task <t> --summary <summary>",
+          "purpose": "Complete task and write results",
+          "includes": [
+            "task_validation",
+            "result_write",
+            "policy_git_action"
+          ]
+        },
+        {
+          "id": "executor_05",
+          "type": "DIR",
+          "command": "repeat task start/finish for remaining tasks",
+          "purpose": "Execute all directive tasks",
+          "repeatable": true
+        },
+        {
+          "id": "executor_06",
+          "type": "DIR",
+          "command": "dc directive finish --session <s>",
+          "purpose": "Finalize directive",
+          "includes": [
+            "dirty_tree_guard",
+            "final_validation",
+            "final_git_action",
+            "directive_closeout_write"
+          ]
+        }
+      ]
+    }
+  },
+  "global_rules": {
+    "git_is_script_owned": true,
+    "raw_git_by_agent_default": false,
+    "dirty_tree_required_clean_on_start_finish": true,
+    "metadata_is_source_of_truth_for_branch_and_policy": true,
+    "no_color_fallback": true
+  }
+}

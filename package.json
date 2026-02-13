@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test:directives-scripts": "node --test ops_tooling/scripts/directives/scripts.test.mjs"
+    "test:directives-scripts": "node --test .directive-cli/scripts/directives/scripts.test.mjs"
   },
   "devDependencies": {
     "@openai/codex": "^0.89.0",

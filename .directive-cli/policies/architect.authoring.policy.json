@@ -1,0 +1,21 @@
+{
+  "kind": "directive_cli_policy",
+  "policy_id": "architect_authoring",
+  "version": "1.0.0",
+  "summary": "Architect policy for directive authoring and handoff.",
+  "authoring": {
+    "scaffold_commands": [
+      "dc directive new",
+      "dc directive task",
+      "dc directive handoff",
+      "dc meta architect"
+    ],
+    "require_validation_before_handoff": true,
+    "required_directive_meta_fields": [
+      "directive_branch",
+      "directive_base_branch",
+      "directive_merge_status",
+      "commit_policy"
+    ]
+  }
+}

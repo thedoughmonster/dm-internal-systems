@@ -1,0 +1,221 @@
+{
+  "kind": "directive_cli_policy_bundle",
+  "schema_version": "1.0",
+  "generated_at": "2026-02-13T22:45:42.840Z",
+  "role": "auditor",
+  "hash": "8e35667a35426467c4238c6be368c2922b3a32a05db5c62701d046791a1209d5",
+  "sources": [
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json"
+  ],
+  "policies": [
+    {
+      "source": ".directive-cli/policies/architect.authoring.policy.json",
+      "document": {
+        "kind": "directive_cli_policy",
+        "policy_id": "architect_authoring",
+        "version": "1.0.0",
+        "summary": "Architect policy for directive authoring and handoff.",
+        "authoring": {
+          "scaffold_commands": [
+            "dc directive new",
+            "dc directive task",
+            "dc directive handoff",
+            "dc meta architect"
+          ],
+          "require_validation_before_handoff": true,
+          "required_directive_meta_fields": [
+            "directive_branch",
+            "directive_base_branch",
+            "directive_merge_status",
+            "commit_policy"
+          ]
+        }
+      }
+    },
+    {
+      "source": ".directive-cli/policies/core.policy.json",
+      "document": {
+        "kind": "directive_cli_policy",
+        "policy_id": "core",
+        "version": "1.0.0",
+        "summary": "Core execution policy for directive-cli lifecycle automation.",
+        "rules": {
+          "operational_source_of_truth": [
+            "dc runbook",
+            "dc directive start",
+            "dc directive finish",
+            "dc task start",
+            "dc task finish"
+          ],
+          "directive_tooling_root": ".directive-cli",
+          "metadata_edit_mode": "tooling_only"
+        },
+        "executor_execution_context": {
+          "allowed_sources": [
+            "handoff_file",
+            "dc_operator_selection"
+          ],
+          "require_handoff_for_execution": false
+        }
+      }
+    },
+    {
+      "source": ".directive-cli/policies/executor.lifecycle.policy.json",
+      "document": {
+        "kind": "directive_cli_policy",
+        "policy_id": "executor_lifecycle",
+        "version": "1.0.0",
+        "summary": "Executor lifecycle policy enforced by directive/task scripts.",
+        "lifecycle": {
+          "branch_source": "directive_meta",
+          "branch_bootstrap_mode": "create_from_base_if_missing_local",
+          "require_clean_tree_on": [
+            "directive_start",
+            "task_start"
+          ],
+          "allow_task_status_updates_via_lifecycle": true,
+          "allow_task_updated_timestamp_via_lifecycle": true,
+          "forbid_manual_task_meta_fields": [
+            "bucket"
+          ],
+          "commit_policy_values": [
+            "per_task",
+            "per_collection",
+            "end_of_directive"
+          ]
+        },
+        "handoff_enforcement": {
+          "require_branch_match_when_handoff_present": true
+        }
+      }
+    },
+    {
+      "source": ".directive-cli/policies/handoff.schema.json",
+      "document": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "directive-cli/handoff.schema.json",
+        "title": "Directive Handoff",
+        "type": "object",
+        "required": [
+          "handoff"
+        ],
+        "properties": {
+          "handoff": {
+            "type": "object",
+            "required": [
+              "from_role",
+              "to_role",
+              "trigger",
+              "session_id",
+              "directive_branch",
+              "objective",
+              "blocking_rule",
+              "worktree_mode",
+              "worktree_allowlist_paths"
+            ],
+            "properties": {
+              "from_role": {
+                "type": "string",
+                "enum": [
+                  "architect",
+                  "executor",
+                  "pair",
+                  "auditor"
+                ]
+              },
+              "to_role": {
+                "type": "string",
+                "enum": [
+                  "architect",
+                  "executor",
+                  "pair",
+                  "auditor"
+                ]
+              },
+              "trigger": {
+                "type": "string",
+                "minLength": 1
+              },
+              "session_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "task_file": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "directive_branch": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required_reading": {
+                "type": "string"
+              },
+              "objective": {
+                "type": "string",
+                "minLength": 1
+              },
+              "blocking_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "worktree_mode": {
+                "type": "string",
+                "enum": [
+                  "clean_required",
+                  "known_dirty_allowlist"
+                ]
+              },
+              "worktree_allowlist_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "source": ".directive-cli/policies/runbook.flow.json",
+      "document": {
+        "kind": "directive_cli_policy",
+        "policy_id": "runbook_flow",
+        "version": "1.0.0",
+        "flow_version": "1.0",
+        "roles": {
+          "architect": {
+            "phase": "authoring",
+            "steps": [
+              "dc directive new",
+              "dc meta architect",
+              "dc directive task",
+              "dc validate",
+              "dc directive handoff"
+            ]
+          },
+          "executor": {
+            "phase": "execution",
+            "steps": [
+              "dc directive start",
+              "dc task start",
+              "implement scoped changes",
+              "dc task finish",
+              "repeat remaining tasks",
+              "dc directive finish"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
