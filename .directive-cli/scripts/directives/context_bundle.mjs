@@ -670,6 +670,11 @@ function listAvailableDirectiveTasks(root) {
   return tasks;
 }
 
+function listTasksForDirective(root, session) {
+  if (!session) return [];
+  return listAvailableDirectiveTasks(root).filter((t) => t.session === session);
+}
+
 function listAvailableDirectives(root) {
   const base = path.join(root, "apps", "web", ".local", "directives");
   if (!fs.existsSync(base)) return [];
@@ -972,6 +977,65 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
   }
 }
 
+function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig) {
+  const { outPath } = resolveRolePaths(root, args, role || undefined);
+  const startupPath = path.join(path.dirname(outPath), `${role || "all"}.startup.json`);
+  const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
+  const taskSelectionState = selectedTask
+    ? "selected"
+    : selectedDirective
+      ? (directiveTasks.length === 0 ? "none_available" : "available_unselected")
+      : "not_requested";
+  const nextActions = [];
+  if (role === "architect" && selectedDirective && taskSelectionState === "none_available") {
+    nextActions.push(
+      `Create initial tasks in selected directive with 'dc directive task --session ${selectedDirective.session} --title ... --summary ...'`,
+      "Populate task contract fields (objective, constraints, allowed_files, steps, validation) before handoff.",
+    );
+  }
+  const doc = {
+    kind: "dc_startup_context",
+    schema_version: "1.0",
+    generated_at: new Date().toISOString(),
+    profile: profileName,
+    role,
+    directive: selectedDirective
+      ? {
+        session: selectedDirective.session,
+        slug: selectedDirective.directive_slug,
+        title: selectedDirective.title,
+        status: selectedDirective.status,
+      }
+      : null,
+    task: selectedTask
+      ? {
+        session: selectedTask.session,
+        slug: selectedTask.task_slug,
+        title: selectedTask.task_title,
+        status: selectedTask.task_status,
+        file: selectedTask.task_file,
+      }
+      : null,
+    runtime: {
+      agent: launchConfig.agent || "codex",
+      model: launchConfig.model || null,
+    },
+    startup_rules: {
+      role_assignment_already_satisfied: true,
+      required_reading_already_in_bundle: true,
+      skip_manual_role_prompt: true,
+      skip_manual_directive_listing_when_directive_selected: Boolean(selectedDirective),
+      skip_manual_task_listing_when_task_selected: Boolean(selectedTask),
+      task_selection_state: taskSelectionState,
+      prefer_scripted_lifecycle_commands: true,
+    },
+    next_actions: nextActions,
+  };
+  fs.mkdirSync(path.dirname(startupPath), { recursive: true });
+  fs.writeFileSync(startupPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
+  return startupPath;
+}
+
 async function runStart(root, args) {
   const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
   const configPath = path.join(codexHome, "config.toml");
@@ -984,10 +1048,22 @@ async function runStart(root, args) {
   const selectedDirective = await requireStartDirective(args, root);
   const directiveKey = selectedDirective ? selectedDirective.session : String(args.directive || args.session || "").trim();
   const selectedTask = await requireStartTask({ ...args, directive: directiveKey, session: directiveKey }, root);
+  const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
   const codexBin = String(args["codex-bin"] || "codex");
+  const startupContextPath = writeStartupContext(
+    root,
+    args,
+    role,
+    profileName,
+    selectedDirective,
+    selectedTask,
+    launchConfig,
+  );
 
   if (!args["no-bootstrap"]) {
-    await runBootstrap(root, { ...args, role, profile: profileName, json: false });
+    const includes = Array.isArray(args.include) ? args.include.slice() : [];
+    includes.push(relative(root, startupContextPath));
+    await runBootstrap(root, { ...args, role, profile: profileName, include: includes, json: false });
   }
 
   output(args, {
@@ -1001,6 +1077,15 @@ async function runStart(root, args) {
     model: launchConfig.model || null,
     codex_bin: codexBin,
   });
+  if (selectedDirective && !selectedTask && directiveTasks.length === 0 && role === "architect") {
+    output(args, {
+      message: `Selected directive '${selectedDirective.session}' has no tasks yet. Proceed with task authoring flow.`,
+      status: "info",
+      role,
+      selected_directive: selectedDirective.session,
+      next_step: "dc directive task --session <session> ...",
+    });
+  }
 
   if (args["dry-run"]) return;
   launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig);

@@ -13,6 +13,7 @@ Executor selection input:
 
 ## Startup actions
 
+0. If startup context from `dc agent start` already provides role and selected directive/task, skip manual role confirmation and broad session/task discovery; proceed directly with that context.
 1. If valid incoming `<directive_slug>.handoff.json` targets Executor, treat role selection as satisfied, complete required reading, and continue without manual role selection prompt.
 2. If valid incoming `<directive_slug>.handoff.json` provides `handoff.task_file`, verify and read that task directly, then skip manual session and directive selection prompts.
 3. If no valid incoming `<directive_slug>.handoff.json` is present, operator-selected session and task via `dc` lifecycle commands or runbooks is valid execution context.

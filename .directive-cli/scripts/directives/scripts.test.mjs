@@ -171,6 +171,25 @@ test("newdirective dry-run emits json session metadata path", () => {
   assert.doesNotMatch(output, /README\.md/);
 });
 
+test("newdirective dry-run includes goals from repeatable --goal flags", () => {
+  const output = run(path.join(directivesBinRoot, "newdirective"), [
+    "--dry-run",
+    "--title",
+    "goal test directive",
+    "--summary",
+    "goal summary",
+    "--goal",
+    "first goal",
+    "--goal",
+    "second goal",
+    "--no-prompt",
+  ]);
+  const jsonStart = output.indexOf("{");
+  assert.ok(jsonStart >= 0, "Expected JSON payload in dry-run output");
+  const doc = JSON.parse(output.slice(jsonStart));
+  assert.deepEqual(doc.meta.goals, ["first goal", "second goal"]);
+});
+
 test("newtask dry-run emits json task path in existing session", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
@@ -550,6 +569,71 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   assert.ok(fs.existsSync(path.join(tmpCodex, "config.toml")), "Expected codex config.toml to be created");
   assert.ok(fs.existsSync(outPath), "Expected context bundle file to be created");
   assert.ok(fs.existsSync(metaPath), "Expected context bundle metadata file to be created");
+  const startupPath = path.join(tmpBundleDir, "architect.startup.json");
+  assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
+  const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
+  assert.equal(startupDoc.kind, "dc_startup_context");
+  assert.equal(startupDoc.role, "architect");
+  const bundleMeta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+  assert.ok(
+    Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("architect.startup.json")),
+    "Expected startup context to be included in bundle sources",
+  );
+});
+
+test("cli agent start marks selected directive with no tasks as none_available", (t) => {
+  const tag = randomTag();
+  const sessionName = `itest-start-no-task-${tag}`;
+  const title = `start-no-task-${tag}`;
+  const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const tmpCodex = path.join("/tmp", `dc-codex-start-no-task-home-${tag}`);
+  const tmpBundleDir = path.join("/tmp", `dc-codex-start-no-task-bundle-${tag}`);
+  const outPath = path.join(tmpBundleDir, "compiled.md");
+  const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
+
+  t.after(() => {
+    const sessionDir = path.join(directivesRoot, sessionName);
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+  });
+
+  run(path.join(directivesBinRoot, "newdirective"), [
+    "--session",
+    sessionName,
+    "--title",
+    title,
+    "--summary",
+    "integration summary",
+    "--no-prompt",
+  ]);
+
+  const resolvedSession = findSessionByTitleSlug(titleSlug) || sessionName;
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "agent",
+    "start",
+    "--codex-home",
+    tmpCodex,
+    "--role",
+    "architect",
+    "--profile",
+    "itest_start_no_task",
+    "--directive",
+    resolvedSession,
+    "--codex-bin",
+    "/bin/true",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+
+  assert.match(output, /has no tasks yet/);
+  const startupPath = path.join(tmpBundleDir, "architect.startup.json");
+  assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
+  const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
+  assert.equal(startupDoc.startup_rules.task_selection_state, "none_available");
+  assert.ok(Array.isArray(startupDoc.next_actions) && startupDoc.next_actions.length > 0, "Expected next_actions guidance");
 });
 
 test("context bootstrap writes managed profile block to codex config", (t) => {

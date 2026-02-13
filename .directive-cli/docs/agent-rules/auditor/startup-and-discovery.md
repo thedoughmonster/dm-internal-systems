@@ -2,6 +2,7 @@
 
 ## Startup actions
 
+0. If startup context from `dc agent start` already provides role and selected directive/task, skip manual role confirmation and broad session discovery; proceed directly with that context.
 1. Confirm role assignment and required reading.
 2. List non archived sessions in numbered form.
 3. If unrelated `ultra` session exists, stop and request direction.

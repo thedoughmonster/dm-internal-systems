@@ -26,12 +26,21 @@ function slugify(input) {
 }
 
 function parseArgs(argv) {
-  const args = {};
+  const args = { goal: [] };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (!token.startsWith("--")) continue;
     const key = token.slice(2);
     const next = argv[i + 1];
+    if (key === "goal") {
+      if (!next || next.startsWith("--")) {
+        args.goal.push("");
+      } else {
+        args.goal.push(String(next));
+        i += 1;
+      }
+      continue;
+    }
     if (!next || next.startsWith("--")) args[key] = true;
     else {
       args[key] = next;
@@ -63,6 +72,7 @@ function usage() {
     "  --directive-slug <slug>          Filename slug for <directive_slug>.meta.json",
     "  --title <text>                   Directive title (default: prompted)",
     "  --summary <text>                 One-line summary (default: prompted)",
+    "  --goal <text>                    Goal line (repeatable; prompts when interactive)",
     "  --directive-branch <name>        Branch name (default: feat/<directive-slug>)",
     "  --directive-base-branch <name>   Base branch (default: dev)",
     "  --owner <name>                   Owner metadata (default: operator)",
@@ -85,15 +95,28 @@ function usage() {
 async function resolvePromptedValue(args) {
   let title = args.title ? String(args.title).trim() : "";
   let summary = args.summary ? String(args.summary).trim() : "";
-  if (!args["no-prompt"] && stdin.isTTY && (!title || !summary)) {
+  const goals = Array.isArray(args.goal)
+    ? args.goal.map((g) => String(g || "").trim()).filter(Boolean)
+    : [];
+
+  if (!args["no-prompt"] && stdin.isTTY) {
     const rl = createInterface({ input: stdin, output: stdout });
     if (!title) title = (await rl.question("Directive title: ")).trim();
     if (!summary) summary = (await rl.question("Directive summary (one line): ")).trim();
+    if (goals.length === 0) {
+      process.stdout.write("Add directive goals, one per line (blank line to finish).\n");
+      while (true) {
+        const goal = (await rl.question(`Goal ${goals.length + 1}: `)).trim();
+        if (!goal) break;
+        goals.push(goal);
+      }
+    }
     rl.close();
   }
   return {
     title: title || "new directive",
     summary: summary || "Define and execute the next verified directive scope.",
+    goals,
   };
 }
 
@@ -155,6 +178,7 @@ async function main() {
       related: [],
       title,
       summary,
+      goals: prompted.goals,
       directive_branch: String(args["directive-branch"] || `feat/${directiveSlug}`),
       directive_base_branch: String(args["directive-base-branch"] || "dev"),
       directive_merge_status: "open",

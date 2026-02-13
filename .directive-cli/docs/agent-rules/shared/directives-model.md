@@ -92,6 +92,12 @@ Session `<directive_slug>.meta.json` metadata must include:
 - `directive_merge_status`
 - `commit_policy`
 
+Session goal metadata:
+
+- `meta.goals` is optional but recommended.
+- When present, `meta.goals` must be an array of non-empty one-line strings.
+- Goals are operator intent anchors and should be preserved through task drafting, handoff, and reconciliation.
+
 Branch metadata rules:
 
 - `directive_branch` must be a non empty string.

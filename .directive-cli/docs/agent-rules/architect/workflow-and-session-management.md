@@ -25,8 +25,8 @@ Phase requirements:
 ## Directive scaffolding workflow
 
 - Architect must scaffold new session intake files and metadata pairs using repository tooling instead of manual creation.
-- Primary command: `newdirective --title "<title>" --summary "<one line summary>"`.
-- Fallback command when `newdirective` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_directive_readme.mjs --title "<title>" --summary "<one line summary>"`.
+- Primary command: `newdirective --title "<title>" --summary "<one line summary>" [--goal "<goal line>" ...]`.
+- Fallback command when `newdirective` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_directive_readme.mjs --title "<title>" --summary "<one line summary>" [--goal "<goal line>" ...]`.
 - Architect must scaffold task files and metadata pairs with tooling instead of manual metadata creation.
 - Primary command: `newtask --session "<session-dir-or-uuid>" --title "<title>" --summary "<one line summary>"`.
 - Fallback command when `newtask` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_directive_task.mjs --session "<session-dir-or-uuid>" --title "<title>" --summary "<one line summary>"`.
@@ -35,6 +35,7 @@ Phase requirements:
 - Fallback command when `newhandoff` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_handoff.mjs ...`.
 - Architect metadata updates must use `architect-updatemeta` (or `node .directive-cli/scripts/directives/update_directive_metadata.mjs --role architect ...` fallback).
 - Prompts are allowed when title or summary flags are omitted; resulting output must still be reviewed before task drafting.
+- During `newdirective`, Architect should capture operator goals one line at a time and store them in `meta.goals`.
 - Manual metadata edits are allowed only when tooling is unavailable or failing in this environment, and this exception must be noted in session notes with explicit operator authorization.
 
 ## Validation before handoff

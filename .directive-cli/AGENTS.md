@@ -5,9 +5,11 @@ Canonical machine-operational rules are policy JSON files under `.directive-cli/
 
 ## Role assignment requirement
 
-All new conversations or threads must begin with explicit role assignment.
+All new conversations or threads must begin with explicit role assignment unless role is already fixed by startup context.
 
-Ask:
+When startup context is provided by `dc agent start` role bundle (and optional `*.startup.json` in bundle sources), role assignment is already satisfied. Do not ask for role again.
+
+Only ask:
 
 Which role am I being assigned?
 1. Architect
@@ -15,7 +17,7 @@ Which role am I being assigned?
 3. Pair
 4. Auditor
 
-Do not proceed until one role is selected.
+when role is not already fixed by startup context or valid handoff.
 
 Exception:
 - A valid session-local `<directive_slug>.handoff.json` targeting the receiver role counts as explicit role assignment.
@@ -24,6 +26,8 @@ Exception:
 
 - Primary startup context must come from active role bundle output by `dc agent bootstrap` or `dc agent start`.
 - If no compiled bundle is active, read `apps/web/docs/guides/component-paradigm.md` and selected role `README.md`.
+- If compiled bundle is active, treat included files as already read. Do not re-open bundle source files unless operator requests deep audit or specific source verification.
+- If startup context includes selected directive/task, use them as active execution context and skip manual repository-wide session/task discovery.
 
 ## Operational source of truth
 
@@ -62,6 +66,10 @@ Use tooling:
 - `dc meta architect`
 - `dc meta executor`
 - `dc validate`
+
+Directive intake policy:
+- Capture operator goals during `dc directive new` (interactive goal lines or repeatable `--goal` flags).
+- Store goals in session metadata as `meta.goals` and preserve them during later metadata updates.
 
 ## Execution context gate
 

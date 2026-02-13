@@ -58,6 +58,12 @@ Directive drafting rules:
 - If `commit_policy` requires commit checkpoints, task steps must include exact commit action and expected artifact.
 - Missing commit policy or branch lifecycle metadata is a hard block.
 
+## Goal capture standard
+
+- Directive intake should include `meta.goals` to reflect operator intent.
+- Goals should be captured as one-line items and kept stable unless operator changes scope.
+- Task objective and constraints should map back to one or more directive goals.
+
 ## Collection merge-safety standard
 
 Collection completion criteria must include:

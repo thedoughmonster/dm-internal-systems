@@ -2,6 +2,8 @@
 
 ## Startup actions
 
+0. If startup context from `dc agent start` already provides role and selected directive/task, skip manual role confirmation and broad session discovery; proceed directly with that context.
+0.1. If startup context selects a directive and indicates no available tasks, do not re-scan repository sessions; begin task authoring for the selected directive.
 1. If valid incoming `<directive_slug>.handoff.json` targets Architect, treat role assignment as satisfied, complete required reading, and continue with handoff context without manual role selection prompt.
 2. Otherwise confirm role assignment and required reading.
 3. If planned work includes governance rule edits (`.directive-cli/AGENTS.md`, `AGENTS.md`, `.directive-cli/docs/agent-rules/**`, `apps/web/docs/guides/agent-guidance.md`), immediately create and switch to a dedicated `chore/*` branch before any file edits.
