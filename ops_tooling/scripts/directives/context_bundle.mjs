@@ -5,6 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { createInterface } from "node:readline/promises";
+import { stdin, stdout } from "node:process";
 
 function repoRoot() {
   const scriptFile = fileURLToPath(import.meta.url);
@@ -51,7 +53,7 @@ function usage() {
     "",
     "Bootstrap options:",
     "  --codex-home <path>     Codex home (default: ~/.codex)",
-    "  --profile <name>        Profile name (default: repo slug)",
+    "  --profile <name>        Profile name (required; prompts in TTY if omitted)",
     "  --dry-run               Preview config changes without writing",
     "",
     "General:",
@@ -279,8 +281,20 @@ function sanitizeProfileName(name) {
     .replace(/^-+|-+$/g, "") || "project";
 }
 
-function defaultProfileName(root) {
-  return sanitizeProfileName(path.basename(root));
+async function requireBootstrapProfile(args) {
+  if (args.profile && String(args.profile).trim()) return sanitizeProfileName(args.profile);
+
+  if (stdin.isTTY) {
+    const rl = createInterface({ input: stdin, output: stdout });
+    try {
+      const input = (await rl.question("Profile name (required): ")).trim();
+      if (input) return sanitizeProfileName(input);
+    } finally {
+      rl.close();
+    }
+  }
+
+  throw new Error("Missing required --profile for context bootstrap.");
 }
 
 function upsertProfileBlock(configPath, profileName, block, dryRun) {
@@ -309,10 +323,10 @@ function upsertProfileBlock(configPath, profileName, block, dryRun) {
   }
 }
 
-function runBootstrap(root, args) {
+async function runBootstrap(root, args) {
   const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
   const configPath = path.join(codexHome, "config.toml");
-  const profileName = sanitizeProfileName(args.profile || defaultProfileName(root));
+  const profileName = await requireBootstrapProfile(args);
 
   const bundle = runBuild(root, { ...args, json: false });
   const bundlePath = bundle.outPath.replace(/\\/g, "/");
@@ -366,4 +380,7 @@ function main() {
   process.exit(1);
 }
 
-main();
+Promise.resolve(main()).catch((error) => {
+  process.stderr.write(`${error.message}\n`);
+  process.exit(1);
+});

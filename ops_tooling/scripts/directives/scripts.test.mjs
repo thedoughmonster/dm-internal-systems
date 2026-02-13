@@ -291,3 +291,17 @@ test("context bootstrap writes managed profile block to codex config", (t) => {
   assert.match(configText, /\[profiles\.itest_profile\]/);
   assert.ok(configText.includes(outPath), "Expected profile block to reference compiled bundle path");
 });
+
+test("context bootstrap requires profile in non-interactive mode", () => {
+  const result = runExpectFailure(path.join(directivesBinRoot, "context"), [
+    "bootstrap",
+    "--codex-home",
+    "/tmp/dc-codex-no-profile",
+    "--out",
+    "/tmp/dc-context-no-profile/compiled.md",
+    "--meta",
+    "/tmp/dc-context-no-profile/compiled.meta.json",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Missing required --profile/);
+});
