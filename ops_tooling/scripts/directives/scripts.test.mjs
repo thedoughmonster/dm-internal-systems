@@ -258,3 +258,36 @@ test("context bundle build/check/show works with custom output paths", (t) => {
   ]);
   assert.match(showOutput, /Context bundle:/);
 });
+
+test("context bootstrap writes managed profile block to codex config", (t) => {
+  const tag = randomTag();
+  const tmpCodex = path.join("/tmp", `dc-codex-home-${tag}`);
+  const outPath = path.join("/tmp", `dc-context-bootstrap-${tag}`, "compiled.md");
+  const metaPath = path.join("/tmp", `dc-context-bootstrap-${tag}`, "compiled.meta.json");
+
+  t.after(() => {
+    if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
+    const tmpBundleDir = path.dirname(outPath);
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+  });
+
+  const output = run(path.join(directivesBinRoot, "context"), [
+    "bootstrap",
+    "--codex-home",
+    tmpCodex,
+    "--profile",
+    "itest_profile",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+  assert.match(output, /Updated codex profile/);
+
+  const configPath = path.join(tmpCodex, "config.toml");
+  assert.ok(fs.existsSync(configPath), "Expected codex config.toml to be created");
+  const configText = fs.readFileSync(configPath, "utf8");
+  assert.match(configText, /BEGIN dc-context profile itest_profile/);
+  assert.match(configText, /\[profiles\.itest_profile\]/);
+  assert.ok(configText.includes(outPath), "Expected profile block to reference compiled bundle path");
+});

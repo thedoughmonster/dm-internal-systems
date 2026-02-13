@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -40,13 +41,20 @@ function parseArgs(argv) {
 function usage() {
   return [
     "Usage:",
-    "  node ops_tooling/scripts/directives/context_bundle.mjs <build|check|show> [options]",
+    "  node ops_tooling/scripts/directives/context_bundle.mjs <build|check|show|bootstrap> [options]",
     "",
-    "Options:",
+    "Bundle options:",
     "  --out <path>            Output compiled context path (default: .codex/context/compiled.md)",
     "  --meta <path>           Output metadata path (default: .codex/context/compiled.meta.json)",
     "  --include <path>        Additional file to include (repeatable, repo-relative)",
     "  --print                 With show, print compiled content",
+    "",
+    "Bootstrap options:",
+    "  --codex-home <path>     Codex home (default: ~/.codex)",
+    "  --profile <name>        Profile name (default: repo slug)",
+    "  --dry-run               Preview config changes without writing",
+    "",
+    "General:",
     "  --json                  Emit JSON summary",
     "  --help                  Show this help",
   ].join("\n");
@@ -55,6 +63,12 @@ function usage() {
 function resolvePath(root, input, fallback) {
   const raw = String(input || fallback);
   return path.resolve(root, raw);
+}
+
+function resolveHomePath(input, fallback) {
+  const raw = String(input || fallback);
+  if (raw.startsWith("~/")) return path.join(os.homedir(), raw.slice(2));
+  return path.resolve(raw);
 }
 
 function existsFile(filePath) {
@@ -164,12 +178,11 @@ function output(args, payload) {
   process.stdout.write(`${payload.message}\n`);
 }
 
-function runBuild(root, args) {
+function computeBundle(root, args) {
   const outPath = resolvePath(root, args.out, ".codex/context/compiled.md");
   const metaPath = resolvePath(root, args.meta, ".codex/context/compiled.meta.json");
   const sources = loadSources(root, args.include);
   const { compiled, digest } = compileBundle(root, sources);
-
   const meta = {
     bundle_kind: "codex_context_bundle",
     schema_version: "1.0",
@@ -179,16 +192,20 @@ function runBuild(root, args) {
     hash: digest,
     sources: sources.map((s) => relative(root, s)),
   };
+  return { outPath, metaPath, compiled, meta };
+}
 
-  writeBundle(outPath, metaPath, { compiled, meta });
-
+function runBuild(root, args) {
+  const bundle = computeBundle(root, args);
+  writeBundle(bundle.outPath, bundle.metaPath, bundle);
   output(args, {
-    message: `Built context bundle: ${outPath}`,
-    out_file: outPath,
-    meta_file: metaPath,
-    hash: digest,
-    sources: meta.sources,
+    message: `Built context bundle: ${bundle.outPath}`,
+    out_file: bundle.outPath,
+    meta_file: bundle.metaPath,
+    hash: bundle.meta.hash,
+    sources: bundle.meta.sources,
   });
+  return bundle;
 }
 
 function runCheck(root, args) {
@@ -254,6 +271,71 @@ function runShow(root, args) {
   });
 }
 
+function sanitizeProfileName(name) {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "project";
+}
+
+function defaultProfileName(root) {
+  return sanitizeProfileName(path.basename(root));
+}
+
+function upsertProfileBlock(configPath, profileName, block, dryRun) {
+  const begin = `# BEGIN dc-context profile ${profileName}`;
+  const end = `# END dc-context profile ${profileName}`;
+
+  const current = existsFile(configPath) ? fs.readFileSync(configPath, "utf8") : "";
+  const startIdx = current.indexOf(begin);
+  const endIdx = current.indexOf(end);
+
+  const fullBlock = `${begin}\n${block}\n${end}`;
+  let next;
+
+  if (startIdx >= 0 && endIdx > startIdx) {
+    const before = current.slice(0, startIdx).replace(/[\s\n]*$/, "\n");
+    const after = current.slice(endIdx + end.length).replace(/^\n*/, "\n");
+    next = `${before}${fullBlock}${after}`.replace(/\n{3,}/g, "\n\n");
+  } else {
+    const prefix = current.trim().length ? `${current.replace(/\s*$/, "")}\n\n` : "";
+    next = `${prefix}${fullBlock}\n`;
+  }
+
+  if (!dryRun) {
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(configPath, next, "utf8");
+  }
+}
+
+function runBootstrap(root, args) {
+  const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
+  const configPath = path.join(codexHome, "config.toml");
+  const profileName = sanitizeProfileName(args.profile || defaultProfileName(root));
+
+  const bundle = runBuild(root, { ...args, json: false });
+  const bundlePath = bundle.outPath.replace(/\\/g, "/");
+
+  const profileBlock = [
+    `[profiles.${profileName}]`,
+    `instructions_file = "${bundlePath}"`,
+    `repo_instructions_file = "${bundlePath}"`,
+    `generated_by = "dc context bootstrap"`,
+  ].join("\n");
+
+  upsertProfileBlock(configPath, profileName, profileBlock, Boolean(args["dry-run"]));
+
+  output(args, {
+    message: `${args["dry-run"] ? "Previewed" : "Updated"} codex profile '${profileName}' in ${configPath}`,
+    status: "ok",
+    profile: profileName,
+    codex_home: codexHome,
+    config_toml: configPath,
+    bundle_file: bundle.outPath,
+  });
+}
+
 function main() {
   let args;
   try {
@@ -278,6 +360,7 @@ function main() {
   if (cmd === "build") return runBuild(root, args);
   if (cmd === "check") return runCheck(root, args);
   if (cmd === "show") return runShow(root, args);
+  if (cmd === "bootstrap") return runBootstrap(root, args);
 
   process.stderr.write(`Unknown command: ${cmd}\n${usage()}\n`);
   process.exit(1);

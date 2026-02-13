@@ -17,7 +17,11 @@ Commands:
   architect-updatemeta   Update metadata with architect role guard
   executor-updatemeta    Update metadata with executor role guard
   migrate                Migrate legacy directive files to <slug>.<type>.json format
-  context                Manage codex context bundle (build|show|check)
+  context                Manage codex context bundle
+    context build        Build compiled context bundle
+    context show         Show bundle metadata (use --print for content)
+    context check        Check whether bundle is up to date
+    context bootstrap    Build bundle and update ~/.codex/config.toml profile
   test                   Run directive script test suite
   help                   Show this help
 EOF
