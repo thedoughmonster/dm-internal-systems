@@ -2,7 +2,7 @@
 
 import path from "node:path";
 import { resolveDirectiveContext, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
-import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal, branchExistsRemote } from "./_git_helpers.mjs";
+import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -90,20 +90,18 @@ function main() {
   log("GIT", "Checking clean working tree");
   ensureCleanWorkingTree(repoRoot);
 
-  log("GIT", `Fetching origin/${baseBranch}`);
-  runGit(["fetch", "origin", baseBranch], repoRoot);
-
   const current = currentBranch(repoRoot);
   if (current !== directiveBranch) {
     log("GIT", `Switching branch to ${directiveBranch}`);
     if (branchExistsLocal(directiveBranch, repoRoot)) {
       runGit(["checkout", directiveBranch], repoRoot);
-    } else if (branchExistsRemote(directiveBranch, repoRoot, "origin")) {
-      runGit(["checkout", "-b", directiveBranch, "--track", `origin/${directiveBranch}`], repoRoot);
     } else {
       const bootstrapMode = String(lifecyclePolicy.lifecycle?.branch_bootstrap_mode || "").trim();
-      if (bootstrapMode === "create_from_base_if_missing_local") {
-        runGit(["checkout", "-b", directiveBranch, `origin/${baseBranch}`], repoRoot);
+      if (bootstrapMode === "create_from_local_base_if_missing_local") {
+        if (!branchExistsLocal(baseBranch, repoRoot)) {
+          throw new Error(`Local base branch '${baseBranch}' not found. Create/switch it locally before directive start.`);
+        }
+        runGit(["checkout", "-b", directiveBranch, baseBranch], repoRoot);
       } else {
         throw new Error(`Branch '${directiveBranch}' missing locally/remotely and policy '${bootstrapMode}' does not allow bootstrap.`);
       }

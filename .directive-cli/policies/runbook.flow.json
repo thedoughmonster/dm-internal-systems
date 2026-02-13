@@ -24,7 +24,8 @@
         "implement scoped changes",
         "dc task finish",
         "repeat remaining tasks",
-        "dc directive finish"
+        "dc directive finish",
+        "dc directive cleanup"
       ]
     }
   }

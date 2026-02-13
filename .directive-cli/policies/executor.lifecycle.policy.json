@@ -5,7 +5,9 @@
   "summary": "Executor lifecycle policy enforced by directive/task scripts.",
   "lifecycle": {
     "branch_source": "directive_meta",
-    "branch_bootstrap_mode": "create_from_base_if_missing_local",
+    "branch_bootstrap_mode": "create_from_local_base_if_missing_local",
+    "remote_sync_mode": "none",
+    "push_on_task_finish": true,
     "require_clean_tree_on": [
       "directive_start",
       "task_start"

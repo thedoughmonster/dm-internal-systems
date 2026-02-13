@@ -142,6 +142,17 @@ function main() {
     log("GIT", `Commit deferred by policy: ${commitPolicy}`);
   }
 
+  const pushOnTaskFinish = lifecyclePolicy.lifecycle?.push_on_task_finish !== false;
+  if (pushOnTaskFinish) {
+    log("GIT", `Pushing branch '${branch}' to origin`);
+    const hasUpstream = runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoRoot, { allowFail: true }).status === 0;
+    if (hasUpstream) {
+      runGit(["push"], repoRoot);
+    } else {
+      runGit(["push", "-u", "origin", branch], repoRoot);
+    }
+  }
+
   const sha = shortSha(repoRoot);
   taskDoc.meta.result.validation.commit = sha;
   writeJson(taskPath, taskDoc);

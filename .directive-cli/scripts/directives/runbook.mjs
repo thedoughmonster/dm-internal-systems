@@ -35,6 +35,8 @@ function usage() {
     "    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]",
     "  executor-directive-closeout",
     "    --session <id> [--confirm <token>] [--dry-run]",
+    "  executor-directive-cleanup",
+    "    --session <id> [--confirm <token>] [--dry-run]",
     "  architect-authoring",
     "    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--confirm <token>] [--dry-run]",
     "",
@@ -44,6 +46,7 @@ function usage() {
     "    executor-task-cycle pre     --confirm executor-task-cycle-pre",
     "    executor-task-cycle post    --confirm executor-task-cycle-post",
     "    executor-directive-closeout --confirm executor-directive-closeout",
+    "    executor-directive-cleanup  --confirm executor-directive-cleanup",
   ].join("\n");
 }
 
@@ -120,6 +123,14 @@ function runbookExecutorDirectiveCloseout(args) {
   runBin("directivefinish", ["--session", session], { dryRun });
 }
 
+function runbookExecutorDirectiveCleanup(args) {
+  const session = String(args.session || args.guid || "").trim();
+  if (!session) throw new Error("executor-directive-cleanup requires --session");
+  const dryRun = Boolean(args["dry-run"]);
+  requireConfirm(args, "executor-directive-cleanup", "executor-directive-cleanup", dryRun);
+  runBin("directivecleanup", ["--session", session], { dryRun });
+}
+
 function runbookArchitectAuthoring(args) {
   const session = String(args.session || args.guid || "").trim();
   const title = String(args.title || "").trim();
@@ -160,6 +171,7 @@ function main() {
 
   if (name === "executor-task-cycle") return runbookExecutorTaskCycle(args);
   if (name === "executor-directive-closeout") return runbookExecutorDirectiveCloseout(args);
+  if (name === "executor-directive-cleanup") return runbookExecutorDirectiveCleanup(args);
   if (name === "architect-authoring") return runbookArchitectAuthoring(args);
 
   throw new Error(`Unknown runbook: ${name}`);
