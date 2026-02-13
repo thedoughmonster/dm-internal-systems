@@ -218,3 +218,43 @@ test("integration: create directive, create task, create handoff, update metadat
   ]);
   assert.match(validateOutput, /Validation passed/);
 });
+
+test("context bundle build/check/show works with custom output paths", (t) => {
+  const tag = randomTag();
+  const tmpDir = path.join("/tmp", `dc-context-${tag}`);
+  const outPath = path.join(tmpDir, "compiled.md");
+  const metaPath = path.join(tmpDir, "compiled.meta.json");
+
+  t.after(() => {
+    if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  const buildOutput = run(path.join(directivesBinRoot, "context"), [
+    "build",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+  assert.match(buildOutput, /Built context bundle/);
+  assert.ok(fs.existsSync(outPath), "Compiled context file should exist");
+  assert.ok(fs.existsSync(metaPath), "Compiled context metadata file should exist");
+
+  const checkOutput = run(path.join(directivesBinRoot, "context"), [
+    "check",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+  assert.match(checkOutput, /up to date/);
+
+  const showOutput = run(path.join(directivesBinRoot, "context"), [
+    "show",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+  assert.match(showOutput, /Context bundle:/);
+});
