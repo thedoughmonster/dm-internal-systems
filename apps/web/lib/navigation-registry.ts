@@ -42,9 +42,4 @@ export const topNavItems: TopNavItem[] = [
       ...uiKitSidebarSections,
     ],
   },
-  {
-    id: "directives",
-    title: "Directives",
-    href: "/directives",
-  },
 ]

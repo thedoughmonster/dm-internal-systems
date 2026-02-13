@@ -6,7 +6,7 @@ This file provides web-scope guidance pointers.
 
 ## Read first
 - `apps/web/docs/guides/component-paradigm.md`
-- `docs/agent-rules/web-ui/README.md`
+- `.directive-cli/docs/agent-rules/web-ui/README.md`
 
 ## Scope
 - Web UI guidance only.

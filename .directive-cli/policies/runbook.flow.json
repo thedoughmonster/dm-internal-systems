@@ -1,0 +1,29 @@
+{
+  "kind": "directive_cli_policy",
+  "policy_id": "runbook_flow",
+  "version": "1.0.0",
+  "flow_version": "1.0",
+  "roles": {
+    "architect": {
+      "phase": "authoring",
+      "steps": [
+        "dc directive new",
+        "dc meta architect",
+        "dc directive task",
+        "dc validate",
+        "dc directive handoff"
+      ]
+    },
+    "executor": {
+      "phase": "execution",
+      "steps": [
+        "dc directive start",
+        "dc task start",
+        "implement scoped changes",
+        "dc task finish",
+        "repeat remaining tasks",
+        "dc directive finish"
+      ]
+    }
+  }
+}

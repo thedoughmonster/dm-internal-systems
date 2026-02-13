@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_RESET=$'\033[0m'
+  C_CYAN=$'\033[36m'
+  C_GREEN=$'\033[32m'
+  C_YELLOW=$'\033[33m'
+else
+  C_RESET=""
+  C_CYAN=""
+  C_GREEN=""
+  C_YELLOW=""
+fi
+
+color() {
+  local c="$1"
+  shift
+  printf "%s%s%s" "${c}" "$*" "${C_RESET}"
+}
+
+print_row() {
+  local indent="$1"
+  local label_raw="$2"
+  local desc="$3"
+  local row_color="$4"
+  local width=22
+  local pad=$(( width - ${#label_raw} ))
+  if (( pad < 1 )); then
+    pad=1
+  fi
+  local line
+  line="$(printf "%s%s%*s%s" "${indent}" "${label_raw}" "${pad}" "" "${desc}")"
+  printf "%s\n" "$(color "${row_color}" "${line}")"
+}
+
+usage() {
+  printf "%s\n" "Usage:"
+  printf "  %s\n" "$(color "${C_GREEN}" "directives <category> <command> [args...]")"
+  printf "\n%s\n" "$(color "${C_CYAN}" "Categories:")"
+  print_row "  " "init" "Initialize dc companion config (agent/model defaults)" "${C_YELLOW}"
+  print_row "  " "repo" "Repository helpers" "${C_YELLOW}"
+  print_row "    " "repo map" "Show high-signal repo paths and execution zones" "${C_GREEN}"
+  print_row "  " "policy" "Policy helpers" "${C_YELLOW}"
+  print_row "    " "policy validate" "Validate required .directive-cli policy JSON files" "${C_GREEN}"
+  print_row "  " "runbook" "Scripted multi-step workflows" "${C_YELLOW}"
+  print_row "    " "runbook <name>" "Execute predefined flow checkpoints (executor/architect)" "${C_GREEN}"
+  print_row "  " "agent" "Manage agent context bundle and profiles" "${C_YELLOW}"
+  print_row "    " "agent build" "Build compiled context bundle" "${C_GREEN}"
+  print_row "    " "agent show" "View directive file (interactive) or show bundle metadata with flags" "${C_GREEN}"
+  print_row "    " "agent check" "Check whether bundle is up to date" "${C_GREEN}"
+  print_row "    " "agent bootstrap" "Build bundle and update ~/.codex/config.toml profile" "${C_GREEN}"
+  print_row "    " "agent start" "Prompt/select profile, bootstrap, then launch codex" "${C_GREEN}"
+  print_row "  " "directive" "Manage directive artifacts" "${C_YELLOW}"
+  print_row "    " "directive new" "Create <directive_slug>.meta.json" "${C_GREEN}"
+  print_row "    " "directive task" "Create <task_slug>.task.json" "${C_GREEN}"
+  print_row "    " "directive handoff" "Create <directive_slug>.handoff.json" "${C_GREEN}"
+  print_row "    " "directive view" "View directive JSON files (prompt or --directive/--file)" "${C_GREEN}"
+  print_row "    " "directive start" "Executor directive startup flow (branch/validation gates)" "${C_GREEN}"
+  print_row "    " "directive finish" "Executor directive closeout flow" "${C_GREEN}"
+  print_row "    " "directive migrate" "Migrate legacy directive files to <slug>.<type>.json format" "${C_GREEN}"
+  print_row "  " "task" "Executor task lifecycle" "${C_YELLOW}"
+  print_row "    " "task start" "Start task with branch/clean-tree guards" "${C_GREEN}"
+  print_row "    " "task finish" "Finish task with validation + policy-driven git actions" "${C_GREEN}"
+  print_row "  " "meta" "Manage directive metadata updates" "${C_YELLOW}"
+  print_row "    " "meta update" "Update metadata (architect role default)" "${C_GREEN}"
+  print_row "    " "meta architect" "Update metadata with architect role guard" "${C_GREEN}"
+  print_row "    " "meta executor" "Update metadata with executor role guard" "${C_GREEN}"
+  print_row "  " "validate" "Run directives validator (supports --strict, --verbose, --file ...)" "${C_YELLOW}"
+  print_row "  " "test" "Run directive script test suite" "${C_YELLOW}"
+  print_row "  " "help" "Show this help" "${C_YELLOW}"
+}
+
+cmd="${1:-help}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$cmd" in
+  init)
+    exec "${SCRIPT_DIR}/init" "$@"
+    ;;
+  repo)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    case "$sub" in
+      map)
+        exec "${SCRIPT_DIR}/repomap" "$@"
+        ;;
+      *)
+        echo "Unknown repo command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  policy)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    case "$sub" in
+      validate)
+        exec "${SCRIPT_DIR}/validatepolicies" "$@"
+        ;;
+      *)
+        echo "Unknown policy command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  runbook)
+    exec "${SCRIPT_DIR}/runbook" "$@"
+    ;;
+  agent)
+    exec "${SCRIPT_DIR}/context" "$@"
+    ;;
+  directive)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    case "$sub" in
+      new)
+        exec "${SCRIPT_DIR}/newdirective" "$@"
+        ;;
+      task)
+        exec "${SCRIPT_DIR}/newtask" "$@"
+        ;;
+      handoff)
+        exec "${SCRIPT_DIR}/newhandoff" "$@"
+        ;;
+      view)
+        exec "${SCRIPT_DIR}/viewdirective" "$@"
+        ;;
+      start)
+        exec "${SCRIPT_DIR}/directivestart" "$@"
+        ;;
+      finish)
+        exec "${SCRIPT_DIR}/directivefinish" "$@"
+        ;;
+      migrate)
+        exec "${SCRIPT_DIR}/migratedirectives" "$@"
+        ;;
+      *)
+        echo "Unknown directive command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  task)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    case "$sub" in
+      start)
+        exec "${SCRIPT_DIR}/taskstart" "$@"
+        ;;
+      finish)
+        exec "${SCRIPT_DIR}/taskfinish" "$@"
+        ;;
+      *)
+        echo "Unknown task command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  meta)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    case "$sub" in
+      update)
+        exec "${SCRIPT_DIR}/updatemeta" "$@"
+        ;;
+      architect)
+        exec "${SCRIPT_DIR}/architect-updatemeta" "$@"
+        ;;
+      executor)
+        exec "${SCRIPT_DIR}/executor-updatemeta" "$@"
+        ;;
+      *)
+        echo "Unknown meta command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  validate)
+    exec "${SCRIPT_DIR}/validatedirectives" "$@"
+    ;;
+  test)
+    exec "${SCRIPT_DIR}/testdirectives" "$@"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
