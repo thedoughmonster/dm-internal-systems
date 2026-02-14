@@ -616,12 +616,14 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-codex-start-home-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-codex-start-bundle-${tag}`);
+  const tmpLogDir = path.join("/tmp", `dc-codex-start-logs-${tag}`);
   const outPath = path.join(tmpBundleDir, "compiled.md");
   const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
 
   t.after(() => {
     if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
     if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpLogDir)) fs.rmSync(tmpLogDir, { recursive: true, force: true });
   });
 
   const output = run(path.join(directivesBinRoot, "cli"), [
@@ -635,6 +637,8 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
     "itest_start",
     "--codex-bin",
     "/bin/true",
+    "--session-log-dir",
+    tmpLogDir,
     "--out",
     outPath,
     "--meta",
@@ -643,6 +647,7 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
 
   assert.match(output, /Updated codex profile/);
   assert.match(output, /Starting codex with profile 'itest_start'/);
+  assert.match(output, /Observe live session log: tail -f /);
   const configPath = path.join(tmpCodex, "config.toml");
   assert.ok(fs.existsSync(configPath), "Expected codex config.toml to be created");
   const startupInstructionsPath = path.join(tmpBundleDir, "startup.md");
@@ -668,6 +673,8 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
     Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("dc.commands.json")),
     "Expected dc command reference to be included in bundle sources",
   );
+  const logFiles = fs.existsSync(tmpLogDir) ? fs.readdirSync(tmpLogDir).filter((f) => f.endsWith(".log")) : [];
+  assert.ok(logFiles.length >= 1, "Expected at least one session log file");
 });
 
 test("cli agent start marks selected directive with no tasks as none_available", (t) => {
@@ -677,6 +684,7 @@ test("cli agent start marks selected directive with no tasks as none_available",
   const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const tmpCodex = path.join("/tmp", `dc-codex-start-no-task-home-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-codex-start-no-task-bundle-${tag}`);
+  const tmpLogDir = path.join("/tmp", `dc-codex-start-no-task-logs-${tag}`);
   const outPath = path.join(tmpBundleDir, "compiled.md");
   const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
 
@@ -685,6 +693,7 @@ test("cli agent start marks selected directive with no tasks as none_available",
     if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
     if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
     if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpLogDir)) fs.rmSync(tmpLogDir, { recursive: true, force: true });
   });
 
   run(path.join(directivesBinRoot, "newdirective"), [
@@ -711,6 +720,8 @@ test("cli agent start marks selected directive with no tasks as none_available",
     resolvedSession,
     "--codex-bin",
     "/bin/true",
+    "--session-log-dir",
+    tmpLogDir,
     "--out",
     outPath,
     "--meta",
