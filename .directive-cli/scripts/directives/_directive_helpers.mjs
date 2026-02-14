@@ -93,3 +93,65 @@ export function listTaskFiles(sessionDir) {
     .map((d) => path.join(sessionDir, d.name))
     .sort();
 }
+
+function normalizeScopePath(rawPath) {
+  const raw = String(rawPath || "").trim();
+  if (!raw) return "";
+  let out = raw.replace(/`/g, "").trim();
+  out = out.replace(/\\/g, "/");
+  out = out.replace(/\s+\([^)]*\)\s*$/u, "");
+  out = out.replace(/^\.\//, "");
+
+  if (out.endsWith("/...")) out = out.slice(0, -4);
+  if (out.includes("*")) out = out.slice(0, out.indexOf("*"));
+  out = out.replace(/\/+$/u, "");
+
+  if (!out || out === ".") return "";
+  if (path.isAbsolute(out)) return "";
+  if (out.startsWith("../") || out.includes("/../")) return "";
+  return out;
+}
+
+function inScope(filePath, prefixes) {
+  const normalizedFile = String(filePath || "").replace(/\\/g, "/").trim();
+  return prefixes.some((prefix) => normalizedFile === prefix || normalizedFile.startsWith(`${prefix}/`));
+}
+
+export function directiveScopePrefixes(repoRoot, sessionDir) {
+  const prefixes = new Set();
+  const relSession = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
+  if (relSession) prefixes.add(relSession);
+
+  for (const taskPath of listTaskFiles(sessionDir)) {
+    let taskDoc;
+    try {
+      taskDoc = readJson(taskPath);
+    } catch {
+      continue;
+    }
+    const allowedFiles = Array.isArray(taskDoc?.task?.allowed_files) ? taskDoc.task.allowed_files : [];
+    for (const entry of allowedFiles) {
+      if (!entry || typeof entry !== "object") continue;
+      const normalized = normalizeScopePath(entry.path);
+      if (normalized) prefixes.add(normalized);
+    }
+  }
+  return Array.from(prefixes).sort();
+}
+
+export function assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, dirtyFiles, { extraAllowed = [] } = {}) {
+  const base = directiveScopePrefixes(repoRoot, sessionDir);
+  const extras = Array.isArray(extraAllowed) ? extraAllowed.map((p) => normalizeScopePath(p)).filter(Boolean) : [];
+  const allowed = Array.from(new Set([...base, ...extras]));
+  if (allowed.length === 0) return;
+
+  const disallowed = (dirtyFiles || []).filter((f) => !inScope(f, allowed));
+  if (disallowed.length === 0) return;
+
+  const show = disallowed.slice(0, 20).map((f) => `  - ${f}`).join("\n");
+  const more = disallowed.length > 20 ? `\n  ... (${disallowed.length - 20} more)` : "";
+  throw new Error(
+    `Out-of-scope dirty files detected for directive flow.\nDirty files:\n${show}${more}\n` +
+    `Allowed scope prefixes:\n${allowed.map((p) => `  - ${p}`).join("\n")}`,
+  );
+}

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import { directiveScopePrefixes, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
 const directivesBinRoot = path.join(repoRoot, ".directive-cli", "scripts", "directives", "bin");
@@ -58,6 +59,56 @@ function findSessionByTitleSlug(titleSlug) {
   const sessions = listSessions();
   return sessions.find((name) => name.includes(titleSlug)) || "";
 }
+
+test("directive scope helpers normalize allowed paths and block out-of-scope dirty files", (t) => {
+  const tag = randomTag();
+  const session = `itest-scope-${tag}`;
+  const sessionDir = path.join(directivesRoot, session);
+  const metaPath = path.join(sessionDir, "itest-scope.meta.json");
+  const taskPath = path.join(sessionDir, "scope-check.task.json");
+
+  t.after(() => {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(metaPath, `${JSON.stringify({
+    kind: "directive_session_meta",
+    schema_version: "1.0",
+    meta: { directive_slug: "itest-scope" },
+  }, null, 2)}\n`);
+  fs.writeFileSync(taskPath, `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: {},
+    task: {
+      allowed_files: [
+        { path: "`apps/web/src` (edit)" },
+        { path: "apps/web/..." },
+        { path: ".directive-cli/scripts/directives/*" },
+      ],
+    },
+  }, null, 2)}\n`);
+
+  const prefixes = directiveScopePrefixes(repoRoot, sessionDir);
+  const relSession = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
+  assert.ok(prefixes.includes(relSession));
+  assert.ok(prefixes.includes("apps/web/src"));
+  assert.ok(prefixes.includes("apps/web"));
+  assert.ok(prefixes.includes(".directive-cli/scripts/directives"));
+
+  assert.doesNotThrow(() =>
+    assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, [
+      "apps/web/src/example.ts",
+      `${relSession}/itest-scope.meta.json`,
+    ]),
+  );
+
+  assert.throws(
+    () => assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, ["README.md"]),
+    /Out-of-scope dirty files detected/,
+  );
+});
 
 test("directives-cli help exposes expected command set", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["help"]);

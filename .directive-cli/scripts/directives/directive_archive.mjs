@@ -174,28 +174,42 @@ async function main() {
     throw new Error(`Archive branch already exists: ${branch}`);
   }
 
-  log("GIT", `Creating archive branch ${branch}`);
-  runGit(["checkout", "-b", branch, "dev"], repoRoot);
+  try {
+    log("GIT", `Creating archive branch ${branch}`);
+    runGit(["checkout", "-b", branch, "dev"], repoRoot);
 
-  directiveDoc.meta = directiveDoc.meta || {};
-  directiveDoc.meta.status = "archived";
-  directiveDoc.meta.bucket = "archived";
-  directiveDoc.meta.updated = nextUpdated;
-  writeJson(directiveMetaPath, directiveDoc);
-  log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
+    directiveDoc.meta = directiveDoc.meta || {};
+    directiveDoc.meta.status = "archived";
+    directiveDoc.meta.bucket = "archived";
+    directiveDoc.meta.updated = nextUpdated;
+    writeJson(directiveMetaPath, directiveDoc);
+    log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
 
-  runGit(["add", sessionRel], repoRoot);
-  runGit(["commit", "-m", commitMsg], repoRoot);
+    runGit(["add", sessionRel], repoRoot);
+    runGit(["commit", "-m", commitMsg], repoRoot);
 
-  log("GIT", "Merging archive branch into dev");
-  runGit(["checkout", "dev"], repoRoot);
-  runGit(["merge", "--no-ff", branch, "-m", `merge: ${commitMsg}`], repoRoot);
-  runGit(["branch", "-D", branch], repoRoot);
-  const endingBranch = currentBranch(repoRoot);
-  if (endingBranch !== "dev") {
-    throw new Error(`Archive flow ended on '${endingBranch}' instead of 'dev'.`);
+    log("GIT", "Merging archive branch into dev");
+    runGit(["checkout", "dev"], repoRoot);
+    runGit(["merge", "--no-ff", branch, "-m", `merge: ${commitMsg}`], repoRoot);
+    runGit(["branch", "-D", branch], repoRoot);
+    const endingBranch = currentBranch(repoRoot);
+    if (endingBranch !== "dev") {
+      throw new Error(`Archive flow ended on '${endingBranch}' instead of 'dev'.`);
+    }
+    log("DIR", `Directive archived and merged to dev: ${session}`);
+  } catch (error) {
+    const current = currentBranch(repoRoot);
+    const recovery = [
+      `Archive flow failed for '${session}'.`,
+      `Current branch: ${current}`,
+      `Recovery steps:`,
+      `  git status --short`,
+      current === "dev" ? "" : `  git checkout dev`,
+      `  git branch -D ${branch}   # only if branch is unneeded`,
+      `  # Directive files remain at: ${sessionRel}`,
+    ].filter(Boolean).join("\n");
+    throw new Error(`${error.message}\n${recovery}`);
   }
-  log("DIR", `Directive archived and merged to dev: ${session}`);
 }
 
 try {

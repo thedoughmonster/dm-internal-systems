@@ -8,6 +8,7 @@
     "branch_bootstrap_mode": "create_from_local_base_if_missing_local",
     "remote_sync_mode": "none",
     "push_on_task_finish": true,
+    "push_on_directive_finish": true,
     "require_clean_tree_on": [
       "directive_start",
       "task_start"

@@ -39,10 +39,32 @@ export function runGit(args, cwd, { allowFail = false } = {}) {
   return result;
 }
 
-export function ensureCleanWorkingTree(cwd) {
-  const result = runGit(["status", "--porcelain"], cwd);
-  const dirty = String(result.stdout || "").trim();
-  if (dirty) throw new Error("Working tree must be clean before this command.");
+function formatDirtyList(files) {
+  const list = files.slice(0, 20).map((f) => `  - ${f}`).join("\n");
+  const extra = files.length > 20 ? `\n  ... (${files.length - 20} more)` : "";
+  return `${list}${extra}`;
+}
+
+export function ensureCleanWorkingTree(cwd, { allowlistPrefixes = [] } = {}) {
+  const dirty = changedFiles(cwd);
+  if (dirty.length === 0) return;
+
+  const allow = Array.isArray(allowlistPrefixes)
+    ? allowlistPrefixes.map((p) => String(p || "").replace(/\\/g, "/").trim()).filter(Boolean)
+    : [];
+  const disallowed = allow.length === 0
+    ? dirty
+    : dirty.filter((f) => !allow.some((prefix) => f === prefix || f.startsWith(`${prefix}/`)));
+
+  if (disallowed.length > 0) {
+    const reason = allow.length === 0
+      ? "Working tree must be clean before this command."
+      : "Working tree has changes outside allowed paths for this command.";
+    const hint = allow.length === 0
+      ? ""
+      : `\nAllowed path prefixes:\n${allow.map((p) => `  - ${p}`).join("\n")}`;
+    throw new Error(`${reason}\nDirty files:\n${formatDirtyList(disallowed)}${hint}`);
+  }
 }
 
 export function currentBranch(cwd) {

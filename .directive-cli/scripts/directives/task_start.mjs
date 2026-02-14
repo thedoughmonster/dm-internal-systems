@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
-import { ensureCleanWorkingTree, log, currentBranch } from "./_git_helpers.mjs";
+import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
+import { ensureCleanWorkingTree, log, currentBranch, changedFiles } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -54,7 +54,15 @@ function main() {
   const corePolicy = loadCorePolicy();
   const lifecyclePolicy = loadExecutorLifecyclePolicy();
   const directiveBranch = String((directiveDoc.meta || {}).directive_branch || "").trim();
+  const commitPolicy = String((directiveDoc.meta || {}).commit_policy || "").trim();
+  const commitPolicies = Array.isArray(lifecyclePolicy.lifecycle?.commit_policy_values)
+    ? lifecyclePolicy.lifecycle.commit_policy_values
+    : [];
   if (!directiveBranch) throw new Error("Directive metadata missing directive_branch");
+  if (!commitPolicy) throw new Error("Directive metadata missing commit_policy");
+  if (commitPolicies.length > 0 && !commitPolicies.includes(commitPolicy)) {
+    throw new Error(`Unsupported commit_policy '${commitPolicy}' by executor lifecycle policy.`);
+  }
   const handoffState = readDirectiveHandoffIfPresent(sessionDir, directiveDoc);
   if (corePolicy.executor_execution_context?.require_handoff_for_execution && !handoffState) {
     throw new Error("Executor policy requires a valid <directive_slug>.handoff.json before execution.");
@@ -80,8 +88,14 @@ function main() {
     return;
   }
 
-  log("GIT", "Checking clean working tree");
-  ensureCleanWorkingTree(repoRoot);
+  if (commitPolicy === "per_task") {
+    log("GIT", "Checking clean working tree (commit_policy=per_task)");
+    ensureCleanWorkingTree(repoRoot);
+  } else {
+    log("GIT", `Skipping clean-tree gate for commit_policy=${commitPolicy} (deferred commits expected)`);
+    const dirty = changedFiles(repoRoot);
+    assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, dirty);
+  }
 
   const branch = currentBranch(repoRoot);
   if (branch !== directiveBranch) {

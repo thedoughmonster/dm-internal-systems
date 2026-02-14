@@ -264,16 +264,33 @@ async function main() {
     runGit(["checkout", "-b", flowBranch, "dev"], repoRoot);
   }
 
-  fs.mkdirSync(sessionDir, { recursive: true });
-  fs.writeFileSync(metaPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
-  process.stdout.write(`Created ${metaPath}\n`);
+  try {
+    fs.mkdirSync(sessionDir, { recursive: true });
+    fs.writeFileSync(metaPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
+    process.stdout.write(`Created ${metaPath}\n`);
 
-  if (autoGit) {
-    runGit(["add", relSessionDir], repoRoot);
-    runGit(["commit", "-m", commitMsg], repoRoot);
-    runGit(["checkout", "dev"], repoRoot);
-    runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);
-    runGit(["branch", "-D", flowBranch], repoRoot);
+    if (autoGit) {
+      runGit(["add", relSessionDir], repoRoot);
+      runGit(["commit", "-m", commitMsg], repoRoot);
+      runGit(["checkout", "dev"], repoRoot);
+      runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);
+      runGit(["branch", "-D", flowBranch], repoRoot);
+    }
+  } catch (error) {
+    if (autoGit) {
+      const current = currentBranch(repoRoot);
+      const recovery = [
+        `Auto-git flow failed while creating directive '${sessionName}'.`,
+        `Current branch: ${current}`,
+        `Recovery steps:`,
+        `  git status --short`,
+        current === "dev" ? "" : `  git checkout dev`,
+        `  git branch -D ${flowBranch}   # only if branch is unneeded`,
+        `  # Session files remain at: ${sessionDir}`,
+      ].filter(Boolean).join("\n");
+      throw new Error(`${error.message}\n${recovery}`);
+    }
+    throw error;
   }
 }
 

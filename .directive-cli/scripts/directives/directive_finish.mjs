@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { resolveDirectiveContext, listTaskFiles, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
-import { log, runGit, changedFiles } from "./_git_helpers.mjs";
+import { resolveDirectiveContext, listTaskFiles, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
+import { log, runGit, changedFiles, currentBranch } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -52,8 +52,9 @@ function main() {
   const corePolicy = loadCorePolicy();
   const lifecyclePolicy = loadExecutorLifecyclePolicy();
   const meta = directiveDoc.meta || {};
+  const directiveBranch = String(meta.directive_branch || "").trim();
   const commitPolicy = String(meta.commit_policy || "").trim();
-  if (!commitPolicy) throw new Error("Directive metadata missing commit_policy");
+  if (!directiveBranch || !commitPolicy) throw new Error("Directive metadata missing directive_branch or commit_policy");
   const commitPolicies = Array.isArray(lifecyclePolicy.lifecycle?.commit_policy_values)
     ? lifecyclePolicy.lifecycle.commit_policy_values
     : [];
@@ -67,6 +68,10 @@ function main() {
 
   const taskFiles = listTaskFiles(sessionDir);
   if (taskFiles.length === 0) throw new Error("No task files found for directive session.");
+  const branch = currentBranch(repoRoot);
+  if (branch !== directiveBranch) {
+    throw new Error(`Current branch '${branch}' does not match directive_branch '${directiveBranch}'`);
+  }
 
   for (const taskPath of taskFiles) {
     const taskDoc = readJson(taskPath);
@@ -87,17 +92,45 @@ function main() {
     return;
   }
 
+  const preDirty = changedFiles(repoRoot);
+  assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, preDirty);
+  if (commitPolicy === "per_task" && preDirty.length > 0) {
+    throw new Error(
+      `Directive finish blocked for per_task policy: repository has uncommitted changes before closeout.\n` +
+      `Run task finish/commit for remaining work first.\nDirty files:\n${preDirty.map((f) => `  - ${f}`).join("\n")}`,
+    );
+  }
+
   directiveDoc.meta.status = "done";
   directiveDoc.meta.updated = toUtcIso();
   writeJson(directiveMetaPath, directiveDoc);
 
+  const directiveMetaRel = path.relative(repoRoot, directiveMetaPath).replace(/\\/g, "/");
+  let committed = false;
   const dirtyFiles = changedFiles(repoRoot);
   if (dirtyFiles.length > 0 && ["end_of_directive", "per_collection"].includes(commitPolicy)) {
     log("GIT", `Committing deferred changes (${commitPolicy})`);
     runGit(["add", "-A"], repoRoot);
     runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
+    committed = true;
+  } else if (commitPolicy === "per_task") {
+    log("GIT", "Committing directive closeout metadata (per_task policy)");
+    runGit(["add", directiveMetaRel], repoRoot);
+    runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
+    committed = true;
   } else {
     log("GIT", `No finalize commit needed for policy: ${commitPolicy}`);
+  }
+
+  const pushOnDirectiveFinish = lifecyclePolicy.lifecycle?.push_on_directive_finish !== false;
+  if (pushOnDirectiveFinish && committed) {
+    log("GIT", `Pushing branch '${branch}' to origin`);
+    const hasUpstream = runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoRoot, { allowFail: true }).status === 0;
+    if (hasUpstream) {
+      runGit(["push"], repoRoot);
+    } else {
+      runGit(["push", "-u", "origin", branch], repoRoot);
+    }
   }
 
   log("DIR", "Directive finish complete");

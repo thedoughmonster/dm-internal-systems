@@ -100,7 +100,6 @@
           "command": "dc directive finish --session <s>",
           "purpose": "Finalize directive",
           "includes": [
-            "dirty_tree_guard",
             "final_validation",
             "final_git_action",
             "directive_closeout_write"

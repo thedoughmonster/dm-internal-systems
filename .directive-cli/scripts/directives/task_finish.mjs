@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
+import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
 import { log, runShell, runGit, shortSha, currentBranch, changedFiles } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
@@ -127,6 +127,7 @@ function main() {
     return;
   }
 
+  assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, gitFiles);
   writeJson(taskPath, taskDoc);
 
   if (hasFailures) {
