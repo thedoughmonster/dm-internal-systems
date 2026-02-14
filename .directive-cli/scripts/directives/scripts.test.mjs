@@ -445,6 +445,42 @@ test("directive archive dry-run executes for a valid session", () => {
   assert.match(output, /meta.status=archived/);
 });
 
+test("directive archive supports multiple sessions via comma list in dry-run", (t) => {
+  const tag = randomTag();
+  const sessions = [`itest-archive-multi-a-${tag}`, `itest-archive-multi-b-${tag}`];
+  const titles = [`archive multi a ${tag}`, `archive multi b ${tag}`];
+
+  t.after(() => {
+    for (const sessionName of sessions) {
+      const sessionDir = path.join(directivesRoot, sessionName);
+      if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+    }
+  });
+
+  for (let i = 0; i < sessions.length; i += 1) {
+    run(path.join(directivesBinRoot, "newdirective"), [
+      "--session",
+      sessions[i],
+      "--title",
+      titles[i],
+      "--summary",
+      "archive multi test",
+      "--no-git",
+      "--no-prompt",
+    ]);
+  }
+
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "archive",
+    "--session",
+    `${sessions[0]},${sessions[1]}`,
+    "--dry-run",
+  ]);
+  assert.match(output, new RegExp(`Directive archive: ${sessions[0]}`));
+  assert.match(output, new RegExp(`Directive archive: ${sessions[1]}`));
+});
+
 test("dc init writes config with explicit agent/model", (t) => {
   const tag = randomTag();
   const configPath = path.join("/tmp", `dc-init-${tag}.json`);

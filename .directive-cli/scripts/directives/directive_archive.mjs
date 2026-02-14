@@ -6,15 +6,23 @@ import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, writeJson, toUtcIso } from "./_directive_helpers.mjs";
 import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
-import { selectOption } from "./_prompt_helpers.mjs";
+import { selectOption, selectMultiOption } from "./_prompt_helpers.mjs";
 
 function parseArgs(argv) {
-  const args = {};
+  const args = { session: [] };
   for (let i = 0; i < argv.length; i += 1) {
     const t = argv[i];
     if (!t.startsWith("--")) continue;
     const k = t.slice(2);
     const n = argv[i + 1];
+    if (k === "session") {
+      if (!n || n.startsWith("--")) args.session.push("");
+      else {
+        args.session.push(n);
+        i += 1;
+      }
+      continue;
+    }
     if (!n || n.startsWith("--")) args[k] = true;
     else {
       args[k] = n;
@@ -25,7 +33,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/directive_archive.mjs --session <id> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/directive_archive.mjs --session <id[,id2,...]> [--session <id> ...] [--multi] [--dry-run]";
 }
 
 function slugify(input) {
@@ -101,16 +109,45 @@ function listDirectiveSessions() {
   return out;
 }
 
-async function resolveSession(args) {
-  const explicit = String(args.session || args.guid || "").trim();
-  if (explicit) return explicit;
+function parseSessionList(values, guid) {
+  const out = [];
+  const rawList = Array.isArray(values) ? values : [];
+  for (const entry of rawList) {
+    const parts = String(entry || "")
+      .split(",")
+      .map((v) => String(v || "").trim())
+      .filter(Boolean);
+    out.push(...parts);
+  }
+  if (guid) out.push(String(guid).trim());
+  return Array.from(new Set(out));
+}
+
+async function resolveSessions(args) {
+  const explicit = parseSessionList(args.session, args.guid);
+  if (explicit.length > 0) return explicit;
   if (!stdin.isTTY) {
     throw new Error("Missing required --session");
   }
 
   const directives = listDirectiveSessions();
   if (directives.length === 0) throw new Error("No available non-archived directives found.");
-  return await selectOption({
+  if (args.multi) {
+    const chosen = await selectMultiOption({
+      input: stdin,
+      output: stdout,
+      label: "Select directive(s) to archive:",
+      options: directives.map((d) => ({
+        label: `${d.session}  [${d.status}]  ${d.title}`,
+        value: d.session,
+      })),
+      defaultSelectedValues: [],
+    });
+    if (!Array.isArray(chosen) || chosen.length === 0) throw new Error("Archive aborted: no directives selected.");
+    return chosen;
+  }
+
+  const single = await selectOption({
     input: stdin,
     output: stdout,
     label: "Select directive to archive:",
@@ -120,13 +157,18 @@ async function resolveSession(args) {
     })),
     defaultIndex: 0,
   });
+  return [single];
 }
 
-async function confirmArchive(session, dryRun) {
-  process.stdout.write(`${badge("warning", [
-    `You are about to archive directive: ${session}`,
-    "This will set status=bucket=archived and run auto-git merge flow.",
-  ], "yellow")}\n`);
+async function confirmArchive(sessions, dryRun) {
+  const list = Array.isArray(sessions) ? sessions : [String(sessions || "")];
+  const headline = list.length === 1
+    ? `You are about to archive directive: ${list[0]}`
+    : `You are about to archive ${list.length} directives`;
+  const lines = [headline, ...list.slice(0, 8).map((s) => `- ${s}`)];
+  if (list.length > 8) lines.push(`- ... ${list.length - 8} more`);
+  lines.push("This will set status=bucket=archived and run auto-git merge flow.");
+  process.stdout.write(`${badge("warning", lines, "yellow")}\n`);
   if (dryRun || !stdin.isTTY) return;
   const decision = await selectOption({
     input: stdin,
@@ -143,11 +185,7 @@ async function confirmArchive(session, dryRun) {
   }
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const session = await resolveSession(args);
-  const dryRun = Boolean(args["dry-run"]);
-
+async function archiveOne(session, { dryRun }) {
   const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);
   const sessionDir = path.dirname(directiveMetaPath);
   const nextUpdated = toUtcIso();
@@ -157,7 +195,6 @@ async function main() {
   const directiveRel = path.relative(repoRoot, directiveMetaPath).replace(/\\/g, "/");
 
   log("DIR", `Directive archive: ${session}`);
-  await confirmArchive(session, dryRun);
 
   if (String(directiveDoc.meta?.status || "").toLowerCase() === "archived") {
     throw new Error(`Directive is already archived: ${session}`);
@@ -228,6 +265,16 @@ async function main() {
       `  # Directive files remain at: ${sessionRel}`,
     ].filter(Boolean).join("\n");
     throw new Error(`${error.message}\n${recovery}`);
+  }
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const sessions = await resolveSessions(args);
+  const dryRun = Boolean(args["dry-run"]);
+  await confirmArchive(sessions, dryRun);
+  for (const session of sessions) {
+    await archiveOne(session, { dryRun });
   }
 }
 
