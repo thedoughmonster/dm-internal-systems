@@ -70,6 +70,7 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /directive view/);
   assert.match(output, /directive start/);
   assert.match(output, /directive finish/);
+  assert.match(output, /directive archive/);
   assert.match(output, /directive cleanup/);
   assert.match(output, /task start/);
   assert.match(output, /task finish/);
@@ -209,6 +210,36 @@ test("directive cleanup dry-run executes for a valid session", () => {
     "--dry-run",
   ]);
   assert.match(output, /Dry run only/);
+});
+
+test("directive archive dry-run executes for a valid session", () => {
+  const sessions = listOpenSessions();
+  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+
+  let selectedSession = "";
+  for (const session of sessions) {
+    const trial = spawnSync(path.join(directivesBinRoot, "cli"), [
+      "directive",
+      "archive",
+      "--session",
+      session,
+      "--dry-run",
+    ], { cwd: repoRoot, encoding: "utf8" });
+    if (trial.status === 0) {
+      selectedSession = session;
+      break;
+    }
+  }
+  assert.ok(selectedSession, "Expected at least one archive-eligible session for dry-run");
+
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "archive",
+    "--session",
+    selectedSession,
+    "--dry-run",
+  ]);
+  assert.match(output, /meta.status=archived/);
 });
 
 test("dc init writes config with explicit agent/model", (t) => {

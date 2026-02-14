@@ -60,6 +60,7 @@ usage() {
   print_row "    " "directive view" "View directive JSON files (prompt or --directive/--file)" "${C_GREEN}"
   print_row "    " "directive start" "Executor directive startup flow (branch/validation gates)" "${C_GREEN}"
   print_row "    " "directive finish" "Executor directive closeout flow" "${C_GREEN}"
+  print_row "    " "directive archive" "Archive directive metadata (status/bucket/updated)" "${C_GREEN}"
   print_row "    " "directive cleanup" "Cleanup merged directive branch (switch dev + delete branch)" "${C_GREEN}"
   print_row "    " "directive migrate" "Migrate legacy directive files to <slug>.<type>.json format" "${C_GREEN}"
   print_row "  " "task" "Executor task lifecycle" "${C_YELLOW}"
@@ -144,6 +145,9 @@ case "$cmd" in
         ;;
       finish)
         exec "${SCRIPT_DIR}/directivefinish" "$@"
+        ;;
+      archive)
+        exec "${SCRIPT_DIR}/directivearchive" "$@"
         ;;
       cleanup)
         exec "${SCRIPT_DIR}/directivecleanup" "$@"
