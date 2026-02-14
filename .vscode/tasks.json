@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DC: Watch Latest Session Log",
+      "type": "shell",
+      "command": "${workspaceFolder}/.directive-cli/scripts/directives/watch_latest_session_log.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      }
+    }
+  ]
+}
+

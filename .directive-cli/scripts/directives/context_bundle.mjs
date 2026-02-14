@@ -75,6 +75,7 @@ function usage() {
     "  --file <name>           Optional file name for interactive show",
     "  --codex-bin <path>      Codex executable path for start (default: codex)",
     "  --config <path>         dc config path (default: .codex/dc.config.json)",
+    "  --session-log-dir <p>   Session log directory (default: .directive-cli/session-logs)",
     "  --no-bootstrap          With start, skip bootstrap/update before launch",
     "  --dry-run               Preview config changes without writing",
     "",
@@ -924,6 +925,61 @@ function startupInstructionsPathFromBundle(bundleOutPath) {
   return path.join(path.dirname(normalizeAbsolutePath(bundleOutPath)), "startup.md");
 }
 
+function roleStatePath(codexHome) {
+  return path.join(codexHome, "context", "role.state.json");
+}
+
+function readLastRole(codexHome) {
+  const p = roleStatePath(codexHome);
+  if (!existsFile(p)) return "";
+  try {
+    const doc = JSON.parse(fs.readFileSync(p, "utf8"));
+    return String(doc && doc.last_role ? doc.last_role : "").trim().toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function writeLastRole(codexHome, role) {
+  const p = roleStatePath(codexHome);
+  const doc = {
+    kind: "dc_role_state",
+    schema_version: "1.0",
+    updated_at: new Date().toISOString(),
+    last_role: role,
+  };
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
+}
+
+function createLiveSessionLog(root, profileName, role, selectedDirective, selectedTask, logDirArg) {
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+Z$/, "Z");
+  const safeProfile = String(profileName || "profile").replace(/[^a-zA-Z0-9_-]+/g, "-");
+  const safeRole = String(role || "role").replace(/[^a-zA-Z0-9_-]+/g, "-");
+  const sessionHint = selectedDirective
+    ? String(selectedDirective.session || "directive").replace(/[^a-zA-Z0-9._-]+/g, "-")
+    : "no-directive";
+  const taskHint = selectedTask
+    ? String(selectedTask.task_slug || "task").replace(/[^a-zA-Z0-9._-]+/g, "-")
+    : "no-task";
+  const logsDir = logDirArg
+    ? path.resolve(root, String(logDirArg))
+    : path.join(root, ".directive-cli", "session-logs");
+  const logPath = path.join(logsDir, `${stamp}_${safeProfile}_${safeRole}_${sessionHint}_${taskHint}.log`);
+  fs.mkdirSync(logsDir, { recursive: true });
+  const header = [
+    `# dc session log`,
+    `generated_at: ${new Date().toISOString()}`,
+    `profile: ${profileName}`,
+    `role: ${role}`,
+    `directive: ${selectedDirective ? selectedDirective.session : ""}`,
+    `task: ${selectedTask ? selectedTask.task_slug : ""}`,
+    "",
+  ].join("\n");
+  fs.writeFileSync(logPath, header, "utf8");
+  return logPath;
+}
+
 function buildDcCommandReference() {
   return {
     kind: "dc_command_reference",
@@ -1071,9 +1127,11 @@ async function runBootstrap(root, args) {
   });
 }
 
-function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role) {
+function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition) {
   const env = { ...process.env };
   if (role) env.DC_ROLE = String(role);
+  if (sessionLogPath) env.DC_SESSION_LOG = String(sessionLogPath);
+  if (roleTransition) env.DC_ROLE_TRANSITION = String(roleTransition);
   if (launchConfig && launchConfig.agent) env.DC_AGENT = launchConfig.agent;
   if (launchConfig && launchConfig.model) env.DC_MODEL = launchConfig.model;
   if (selectedDirective) {
@@ -1085,7 +1143,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
     env.DC_TASK_SLUG = selectedTask.task_slug;
     env.DC_TASK_FILE = selectedTask.task_file;
   }
-  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig);
+  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition);
   const codexArgs = ["--profile", profileName];
   if (initialPrompt) codexArgs.push(initialPrompt);
   const result = spawnSync(codexBin, codexArgs, {
@@ -1105,11 +1163,13 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
   }
 }
 
-function buildInitialPrompt(selectedDirective, selectedTask) {
+function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition) {
   const lines = [
     "Startup context is preselected by dc agent start. Use it as authoritative.",
     "Do not ask for role selection.",
   ];
+  if (roleTransition) lines.push(`Role transition: ${roleTransition}`);
+  if (launchConfig && launchConfig.model) lines.push(`Configured model: ${launchConfig.model}`);
   if (selectedDirective) {
     lines.push(
       `Selected directive session: ${selectedDirective.session}`,
@@ -1123,13 +1183,15 @@ function buildInitialPrompt(selectedDirective, selectedTask) {
   }
   lines.push("First response must briefly confirm active role/directive/task context and run a discovery check with operator.");
   lines.push("Discovery check must include: intended outcome, constraints, definition of done, and whether execution should start now.");
+  lines.push("Model gate: ask operator whether to keep current model or switch via /model before execution.");
+  lines.push("Thinking gate: ask operator to confirm desired thinking depth before execution.");
   lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
   lines.push("Do not execute any lifecycle command until operator confirms execution.");
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
   return lines.join("\n");
 }
 
-function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig) {
+function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig, roleTransition, sessionLogPath) {
   const { outPath } = resolveRolePaths(root, args, role || undefined);
   const startupPath = path.join(path.dirname(outPath), `${role || "all"}.startup.json`);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
@@ -1171,6 +1233,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
     runtime: {
       agent: launchConfig.agent || "codex",
       model: launchConfig.model || null,
+      session_log_file: sessionLogPath || null,
     },
     startup_rules: {
       role_assignment_already_satisfied: true,
@@ -1184,7 +1247,10 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       require_help_lookup_on_command_ambiguity: true,
       require_operator_discovery_phase: true,
       require_operator_go_ahead_before_execution: true,
+      require_model_gate: true,
+      require_thinking_gate: true,
     },
+    role_transition: roleTransition || "",
     operator_discovery: {
       required: true,
       checklist: [
@@ -1194,6 +1260,14 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
         "Ask whether to start execution now or refine plan first.",
       ],
       before_any_command: true,
+    },
+    model_thinking_gate: {
+      required: true,
+      checklist: [
+        "Ask operator whether to keep or switch model.",
+        "Ask operator to set/confirm thinking depth.",
+        "Pause execution until operator confirms model/thinking state.",
+      ],
     },
     next_actions: nextActions,
   };
@@ -1216,6 +1290,18 @@ async function runStart(root, args) {
   const selectedTask = await requireStartTask({ ...args, directive: directiveKey, session: directiveKey }, root);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
   const codexBin = String(args["codex-bin"] || "codex");
+  const previousRole = readLastRole(codexHome);
+  const roleTransition = previousRole && previousRole !== role
+    ? `${previousRole} -> ${role}`
+    : (previousRole === role ? `${role} (unchanged)` : `none -> ${role}`);
+  const sessionLogPath = createLiveSessionLog(
+    root,
+    profileName,
+    role,
+    selectedDirective,
+    selectedTask,
+    args["session-log-dir"],
+  );
   const startupContextPath = writeStartupContext(
     root,
     args,
@@ -1224,6 +1310,8 @@ async function runStart(root, args) {
     selectedDirective,
     selectedTask,
     launchConfig,
+    roleTransition,
+    sessionLogPath,
   );
 
   if (!args["no-bootstrap"]) {
@@ -1249,6 +1337,27 @@ async function runStart(root, args) {
     agent: launchConfig.agent || "codex",
     model: launchConfig.model || null,
     codex_bin: codexBin,
+    role_transition: roleTransition,
+    session_log_file: sessionLogPath,
+    observe_log_command: `tail -f ${sessionLogPath}`,
+  });
+  output(args, {
+    message: `Observe live session log: tail -f ${sessionLogPath}`,
+    status: "info",
+    role,
+    profile: profileName,
+  });
+  output(args, {
+    message: `Role switch announcement: ${roleTransition}`,
+    status: "info",
+    role,
+    profile: profileName,
+  });
+  output(args, {
+    message: "Model/thinking gate: confirm desired model and thinking depth with operator before any execution.",
+    status: "info",
+    role,
+    profile: profileName,
   });
   if (selectedDirective && !selectedTask && directiveTasks.length === 0 && role === "architect") {
     output(args, {
@@ -1260,8 +1369,9 @@ async function runStart(root, args) {
     });
   }
 
+  writeLastRole(codexHome, role);
   if (args["dry-run"]) return;
-  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role);
+  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition);
 }
 
 function main() {

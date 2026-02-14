@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -16,7 +17,17 @@ export function tag(kind) {
 }
 
 export function log(kind, message) {
-  process.stdout.write(`${tag(kind)} ${message}\n`);
+  const line = `${tag(kind)} ${message}\n`;
+  process.stdout.write(line);
+  const logFile = String(process.env.DC_SESSION_LOG || "").trim();
+  if (logFile) {
+    try {
+      const ts = new Date().toISOString();
+      fs.appendFileSync(logFile, `[${ts}] [${kind}] ${message}\n`, "utf8");
+    } catch {
+      // Best-effort logging; never block lifecycle commands on log write failure.
+    }
+  }
 }
 
 export function runGit(args, cwd, { allowFail = false } = {}) {
