@@ -44,6 +44,18 @@ function renderMenu(label, options, selected) {
   return out.join("\n");
 }
 
+function renderMultiMenu(label, options, selected, toggled) {
+  const out = [label, color("Space: toggle  Enter: apply  Esc/Ctrl+C: cancel", "2")];
+  for (let i = 0; i < options.length; i += 1) {
+    const cursor = i === selected ? color("❯", "32") : " ";
+    const idx = color(`${i + 1})`, "33");
+    const mark = toggled.has(i) ? color("[x]", "32") : color("[ ]", "2");
+    const text = i === selected ? color(options[i].label, "36") : options[i].label;
+    out.push(`${cursor} ${idx} ${mark} ${text}`);
+  }
+  return out.join("\n");
+}
+
 export async function selectOption({ input, output, label, options, defaultIndex = 0 }) {
   if (!Array.isArray(options) || options.length === 0) throw new Error("selectOption requires non-empty options");
   const safeDefault = Math.max(0, Math.min(defaultIndex, options.length - 1));
@@ -107,6 +119,106 @@ export async function selectOption({ input, output, label, options, defaultIndex
         const idx = Number(key.name) - 1;
         if (idx >= 0 && idx < options.length) {
           selected = idx;
+          redraw();
+        }
+        return;
+      }
+      if (key.name === "escape" || (key.ctrl && key.name === "c")) {
+        return done(() => reject(new Error("Selection cancelled.")));
+      }
+    }
+
+    try {
+      emitKeypressEvents(input);
+      input.setRawMode(true);
+      input.resume();
+      input.on("keypress", onKeypress);
+      redraw();
+    } catch (error) {
+      done(() => reject(error));
+    }
+  });
+}
+
+export async function selectMultiOption({ input, output, label, options, defaultSelectedValues = [] }) {
+  if (!Array.isArray(options) || options.length === 0) return [];
+  const selectedFromDefaults = new Set(
+    options
+      .map((opt, idx) => ({ opt, idx }))
+      .filter(({ opt }) => defaultSelectedValues.includes(opt.value))
+      .map(({ idx }) => idx),
+  );
+
+  if (!supportsInteractiveMenu(input, output)) {
+    const rl = createInterface({ input, output });
+    try {
+      output.write(`${label}\n`);
+      for (let i = 0; i < options.length; i += 1) {
+        output.write(`  ${i + 1}) ${options[i].label}\n`);
+      }
+      const answer = String(await rl.question("Select one or more numbers (comma-separated, blank=none): ")).trim();
+      if (!answer) return [];
+      const picked = Array.from(new Set(
+        answer.split(",").map((s) => Number(String(s).trim()) - 1).filter((n) => Number.isInteger(n) && n >= 0 && n < options.length),
+      ));
+      return picked.map((idx) => options[idx].value);
+    } finally {
+      rl.close();
+    }
+  }
+
+  const previousRawMode = typeof input.isRaw === "boolean" ? input.isRaw : false;
+  let cursor = 0;
+  const toggled = new Set(selectedFromDefaults);
+  let lines = 0;
+
+  return await new Promise((resolve, reject) => {
+    function redraw() {
+      clearMenu(lines);
+      const frame = renderMultiMenu(label, options, cursor, toggled);
+      output.write(`${frame}\n`);
+      lines = countRenderedLines(frame, output.columns);
+    }
+    function cleanup() {
+      input.removeListener("keypress", onKeypress);
+      clearMenu(lines);
+      lines = 0;
+      try {
+        input.setRawMode(previousRawMode);
+      } catch {
+        // noop
+      }
+    }
+    function done(fn) {
+      cleanup();
+      fn();
+    }
+    function onKeypress(str, key = {}) {
+      if (key.name === "up") {
+        cursor = cursor > 0 ? cursor - 1 : options.length - 1;
+        redraw();
+        return;
+      }
+      if (key.name === "down") {
+        cursor = cursor < options.length - 1 ? cursor + 1 : 0;
+        redraw();
+        return;
+      }
+      if (key.name === "space" || str === " ") {
+        if (toggled.has(cursor)) toggled.delete(cursor);
+        else toggled.add(cursor);
+        redraw();
+        return;
+      }
+      if (key.name === "return" || key.name === "enter") {
+        return done(() => resolve(Array.from(toggled).sort((a, b) => a - b).map((idx) => options[idx].value)));
+      }
+      if (key.name && /^[1-9]$/.test(key.name)) {
+        const idx = Number(key.name) - 1;
+        if (idx >= 0 && idx < options.length) {
+          cursor = idx;
+          if (toggled.has(idx)) toggled.delete(idx);
+          else toggled.add(idx);
           redraw();
         }
         return;

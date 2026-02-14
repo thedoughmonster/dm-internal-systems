@@ -247,6 +247,7 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /directive new/);
   assert.match(output, /directive task/);
   assert.match(output, /directive handoff/);
+  assert.match(output, /directive list/);
   assert.match(output, /directive view/);
   assert.match(output, /directive start/);
   assert.match(output, /directive finish/);
@@ -266,6 +267,27 @@ test("directives-cli help exposes expected command set", () => {
 test("policy validate passes for required policy files", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["policy", "validate"]);
   assert.match(output, /Policy validation passed/);
+});
+
+test("directive list supports detailed and field output in json mode", () => {
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "list",
+    "--detailed",
+    "--field",
+    "owner",
+    "--json",
+  ]);
+  const doc = JSON.parse(output);
+  assert.equal(doc.mode, "detailed");
+  assert.ok(Array.isArray(doc.fields));
+  assert.ok(doc.fields.includes("owner"));
+  assert.ok(Array.isArray(doc.rows));
+  if (doc.rows.length > 0) {
+    assert.ok(Object.prototype.hasOwnProperty.call(doc.rows[0], "status"));
+    assert.ok(Object.prototype.hasOwnProperty.call(doc.rows[0], "title"));
+    assert.ok(Object.prototype.hasOwnProperty.call(doc.rows[0], "owner"));
+  }
 });
 
 test("repo map command prints key paths", () => {
