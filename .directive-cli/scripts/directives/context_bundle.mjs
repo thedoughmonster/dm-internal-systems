@@ -18,6 +18,7 @@ const COLORS = {
   green: "\x1b[32m",
   yellow: "\x1b[33m",
   magenta: "\x1b[35m",
+  red: "\x1b[31m",
 };
 
 function repoRoot() {
@@ -597,6 +598,23 @@ function lower(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function humanizeSlug(value) {
+  return String(value || "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function statusColor(status) {
+  const s = lower(status);
+  if (s === "todo" || s === "open") return "yellow";
+  if (s === "in_progress" || s === "ready") return "cyan";
+  if (s === "blocked") return "red";
+  if (s === "done" || s === "completed") return "green";
+  if (s === "archived" || s === "cancelled") return "dim";
+  return "magenta";
+}
+
 function isArchivedStatus(status) {
   return ["archived", "done", "completed", "cancelled"].includes(lower(status));
 }
@@ -689,7 +707,7 @@ function listAvailableDirectives(root) {
       session,
       session_dir: sessionDir,
       directive_slug: metaFile.replace(/\.meta\.json$/u, ""),
-      title: String(meta.title || metaFile.replace(/\.meta\.json$/u, "")),
+      title: String(meta.title || humanizeSlug(metaFile.replace(/\.meta\.json$/u, ""))),
       status: String(meta.status || "open"),
     });
   }
@@ -838,7 +856,7 @@ async function requireStartDirective(args, root) {
     output: stdout,
     label: "Select directive:",
     options: directives.map((d) => ({
-      label: `${d.session}  [${d.status}]  ${d.title}`,
+      label: `${colorize(statusColor(d.status), `[${d.status}]`)} ${d.title}`,
       value: d.session,
     })),
     defaultIndex: 0,
