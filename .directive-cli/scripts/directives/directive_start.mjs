@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import path from "node:path";
+import { createInterface } from "node:readline/promises";
+import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, readDirectiveHandoffIfPresent, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
 import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
@@ -24,7 +26,33 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/directive_start.mjs --session <id> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/directive_start.mjs --session <id> [--dry-run] [--strict-overlaps] [--overlap-mode warn|prompt|fail]";
+}
+
+async function handleOverlapPolicy(intersections, args) {
+  if (intersections.length === 0) return;
+  const overlapMode = String(args["overlap-mode"] || "").trim().toLowerCase();
+  let mode = overlapMode || "warn";
+  if (args["strict-overlaps"]) mode = "fail";
+  if (!["warn", "prompt", "fail"].includes(mode)) {
+    throw new Error(`Invalid --overlap-mode value '${mode}'. Use warn|prompt|fail.`);
+  }
+  if (mode === "warn") return;
+  if (mode === "fail") {
+    throw new Error("Task allowlist intersections detected. Resolve overlaps or rerun with --overlap-mode warn.");
+  }
+  if (!stdin.isTTY || !stdout.isTTY) {
+    throw new Error("Overlap prompt requested in non-interactive mode. Use --overlap-mode warn|fail.");
+  }
+  const rl = createInterface({ input: stdin, output: stdout });
+  try {
+    const answer = String(await rl.question("Allowlist overlaps detected. Continue directive start? [y/N]: ")).trim().toLowerCase();
+    if (answer !== "y" && answer !== "yes") {
+      throw new Error("Directive start cancelled by operator due to allowlist intersections.");
+    }
+  } finally {
+    rl.close();
+  }
 }
 
 function runDirectiveValidation(repoRoot, directiveMetaPath) {
@@ -40,7 +68,7 @@ function runDirectiveValidation(repoRoot, directiveMetaPath) {
   }
 }
 
-function main() {
+async function main() {
   assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
@@ -94,6 +122,7 @@ function main() {
       log("WARN", `... ${intersections.length - 12} additional intersection(s) not shown`);
     }
   }
+  await handleOverlapPolicy(intersections, args);
 
   if (args["dry-run"]) {
     log("DIR", "Dry run only. No git or metadata changes applied.");
@@ -127,7 +156,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
 } catch (error) {
   process.stderr.write(`${error.message}\n`);
   process.exit(1);

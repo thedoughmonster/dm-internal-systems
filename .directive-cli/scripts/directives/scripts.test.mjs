@@ -140,6 +140,103 @@ test("task allowed_files intersection helper detects overlaps", (t) => {
   assert.equal(hits[0].linked_by_dependency, false);
 });
 
+test("directive start fails with strict overlap mode when task scopes intersect", (t) => {
+  const tag = randomTag();
+  const session = `itest-start-overlap-${tag}`;
+  const sessionDir = path.join(directivesRoot, session);
+  const metaSlug = "itest-start-overlap";
+  const branch = run("git", ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
+
+  t.after(() => {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(path.join(sessionDir, `${metaSlug}.meta.json`), `${JSON.stringify({
+    kind: "directive_session_meta",
+    schema_version: "1.0",
+    meta: {
+      id: "33333333-3333-4333-8333-333333333333",
+      directive_slug: metaSlug,
+      directive_branch: branch,
+      directive_base_branch: "dev",
+      commit_policy: "per_task",
+    },
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(sessionDir, "a.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "44444444-4444-4444-8444-444444444444", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app/vendors" }] },
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(sessionDir, "b.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "55555555-5555-4555-8555-555555555555", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app" }] },
+  }, null, 2)}\n`);
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "start",
+    "--session",
+    session,
+    "--dry-run",
+    "--strict-overlaps",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Task allowlist intersections detected/);
+});
+
+test("directive start prompt overlap mode errors in non-interactive runs", (t) => {
+  const tag = randomTag();
+  const session = `itest-start-overlap-prompt-${tag}`;
+  const sessionDir = path.join(directivesRoot, session);
+  const metaSlug = "itest-start-overlap-prompt";
+  const branch = run("git", ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
+
+  t.after(() => {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(path.join(sessionDir, `${metaSlug}.meta.json`), `${JSON.stringify({
+    kind: "directive_session_meta",
+    schema_version: "1.0",
+    meta: {
+      id: "66666666-6666-4666-8666-666666666666",
+      directive_slug: metaSlug,
+      directive_branch: branch,
+      directive_base_branch: "dev",
+      commit_policy: "per_task",
+    },
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(sessionDir, "a.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "77777777-7777-4777-8777-777777777777", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app/vendors" }] },
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(sessionDir, "b.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "88888888-8888-4888-8888-888888888888", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app" }] },
+  }, null, 2)}\n`);
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "start",
+    "--session",
+    session,
+    "--dry-run",
+    "--overlap-mode",
+    "prompt",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /non-interactive mode/);
+});
+
 test("directives-cli help exposes expected command set", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["help"]);
   assert.match(output, /Audience: Operator \+ Machine/);
