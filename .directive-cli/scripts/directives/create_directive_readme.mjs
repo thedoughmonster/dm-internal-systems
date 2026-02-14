@@ -5,8 +5,10 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { randomUUID } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import {
   getDirectivesRoot,
+  getRepoRoot,
   assertInside,
   isUuid,
   generateSessionDirName,
@@ -83,6 +85,7 @@ function usage() {
     "  --commit-policy <policy>         per_task|per_collection|end_of_directive (default: end_of_directive)",
     "  --source <role>                  Metadata source (default: architect)",
     "  --scope <name>                   Metadata scope (default: directives)",
+    "  --no-git                         Disable auto branch/commit/merge workflow",
     "  --no-prompt                      Disable prompts for missing title/summary",
     "  --dry-run                        Print output path and content only",
     "  --help                           Show this help",
@@ -90,6 +93,36 @@ function usage() {
     "Default session naming:",
     "  YY-MM-DD_<slug> in UTC (auto-suffixed with -2, -3, ... when needed)",
   ].join("\n");
+}
+
+function runGit(args, cwd, { allowFail = false } = {}) {
+  const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+  if (!allowFail && result.status !== 0) {
+    const msg = (result.stderr || result.stdout || "git command failed").trim();
+    throw new Error(msg);
+  }
+  return result;
+}
+
+function currentBranch(cwd) {
+  const result = runGit(["rev-parse", "--abbrev-ref", "HEAD"], cwd);
+  return String(result.stdout || "").trim();
+}
+
+function ensureCleanWorkingTree(cwd) {
+  const result = runGit(["status", "--porcelain"], cwd);
+  const dirty = String(result.stdout || "").trim();
+  if (dirty) throw new Error("Working tree must be clean before creating a directive with auto-git.");
+}
+
+function branchExistsLocal(branch, cwd) {
+  const result = runGit(["show-ref", "--verify", `refs/heads/${branch}`], cwd, { allowFail: true });
+  return result.status === 0;
+}
+
+function archiveBranchName(sessionName) {
+  const slug = String(sessionName || "").toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
+  return `chore/directive-new-${slug}`;
 }
 
 async function resolvePromptedValue(args) {
@@ -213,9 +246,35 @@ async function main() {
     process.stderr.write(`Session directory already exists: ${sessionDir}\n`);
     process.exit(1);
   }
+  const autoGit = !args["no-git"];
+  const repoRoot = getRepoRoot();
+  const relSessionDir = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
+  const flowBranch = archiveBranchName(sessionName);
+  const commitMsg = `chore(directive): create ${sessionName}`;
+
+  if (autoGit) {
+    ensureCleanWorkingTree(repoRoot);
+    const branch = currentBranch(repoRoot);
+    if (branch !== "dev") {
+      throw new Error(`Directive creation with auto-git must start on 'dev' (current: '${branch}').`);
+    }
+    if (branchExistsLocal(flowBranch, repoRoot)) {
+      throw new Error(`Auto-git branch already exists: ${flowBranch}`);
+    }
+    runGit(["checkout", "-b", flowBranch, "dev"], repoRoot);
+  }
+
   fs.mkdirSync(sessionDir, { recursive: true });
   fs.writeFileSync(metaPath, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
   process.stdout.write(`Created ${metaPath}\n`);
+
+  if (autoGit) {
+    runGit(["add", relSessionDir], repoRoot);
+    runGit(["commit", "-m", commitMsg], repoRoot);
+    runGit(["checkout", "dev"], repoRoot);
+    runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);
+    runGit(["branch", "-D", flowBranch], repoRoot);
+  }
 }
 
 main();

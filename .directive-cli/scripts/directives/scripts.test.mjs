@@ -410,6 +410,7 @@ test("integration: create directive, create task, create handoff, update metadat
     title,
     "--summary",
     "integration summary",
+    "--no-git",
     "--no-prompt",
   ]);
 
@@ -734,6 +735,7 @@ test("cli agent start marks selected directive with no tasks as none_available",
     title,
     "--summary",
     "integration summary",
+    "--no-git",
     "--no-prompt",
   ]);
 
