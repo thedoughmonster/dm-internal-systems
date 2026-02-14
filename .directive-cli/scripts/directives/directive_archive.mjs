@@ -41,13 +41,34 @@ function archiveBranchName(session) {
   return `chore/archive-${slug}`;
 }
 
-function colorizeRed(text) {
+function colorize(color, text) {
   if (!stdout.isTTY || process.env.NO_COLOR) return text;
-  return `\x1b[31m${text}\x1b[0m`;
+  const map = {
+    red: "\x1b[31m",
+    yellow: "\x1b[33m",
+    cyan: "\x1b[36m",
+    reset: "\x1b[0m",
+  };
+  const code = map[color] || "";
+  if (!code) return text;
+  return `${code}${text}${map.reset}`;
+}
+
+function badge(level, lines, color = "yellow") {
+  const items = Array.isArray(lines) ? lines : [String(lines || "")];
+  const clean = items.map((l) => String(l || ""));
+  const header = ` ${String(level || "NOTICE").toUpperCase()} `;
+  const width = Math.max(header.length, ...clean.map((l) => l.length));
+  const top = `+${"=".repeat(width + 2)}+`;
+  const headerLine = `| ${header.padEnd(width, " ")} |`;
+  const sep = `+${"-".repeat(width + 2)}+`;
+  const body = clean.map((l) => `| ${l.padEnd(width, " ")} |`).join("\n");
+  const bottom = top;
+  return colorize(color, `${top}\n${headerLine}\n${sep}\n${body}\n${bottom}`);
 }
 
 function isArchivedStatus(status) {
-  return ["archived", "done", "completed", "cancelled"].includes(String(status || "").trim().toLowerCase());
+  return ["archived"].includes(String(status || "").trim().toLowerCase());
 }
 
 function listDirectiveSessions() {
@@ -102,8 +123,10 @@ async function resolveSession(args) {
 }
 
 async function confirmArchive(session, dryRun) {
-  const warning = colorizeRed(`WARNING: You are about to archive directive '${session}'.`);
-  process.stdout.write(`${warning}\n`);
+  process.stdout.write(`${badge("warning", [
+    `You are about to archive directive: ${session}`,
+    "This will set status=bucket=archived and run auto-git merge flow.",
+  ], "yellow")}\n`);
   if (dryRun || !stdin.isTTY) return;
   const decision = await selectOption({
     input: stdin,
@@ -162,9 +185,9 @@ async function main() {
   const dirty = changedFiles(repoRoot).map((p) => p.replace(/\\/g, "/"));
   const unrelated = dirty.filter((p) => p !== directiveRel && !p.startsWith(`${sessionRel}/`));
   if (unrelated.length > 0) {
-    throw new Error(
-      `Archive blocked: unrelated dirty files present:\n${unrelated.map((f) => `  - ${f}`).join("\n")}`,
-    );
+    const lines = ["Archive blocked: unrelated dirty files present:", ...unrelated.map((f) => `- ${f}`)];
+    process.stderr.write(`${badge("blocked", lines, "red")}\n`);
+    throw new Error("Archive blocked due to unrelated dirty files.");
   }
   if (branchExistsLocal(branch, repoRoot)) {
     throw new Error(`Archive branch already exists: ${branch}`);
@@ -214,6 +237,6 @@ try {
   if (/Missing required --session/.test(String(error && error.message))) {
     process.stderr.write(`${usage()}\n`);
   }
-  process.stderr.write(`${error.message}\n`);
+  process.stderr.write(`${badge("error", [String(error && error.message ? error.message : "Unknown error")], "red")}\n`);
   process.exit(1);
 }

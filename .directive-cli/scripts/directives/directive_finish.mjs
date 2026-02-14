@@ -2,7 +2,7 @@
 
 import path from "node:path";
 import { resolveDirectiveContext, listTaskFiles, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
-import { log, runGit, changedFiles, currentBranch } from "./_git_helpers.mjs";
+import { log, runGit, changedFiles, currentBranch, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -44,7 +44,7 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
   if (!session) {
-    process.stderr.write(`${usage()}\n`);
+    alert("error", ["Missing required --session", usage()], { color: "red" });
     process.exit(1);
   }
 
@@ -141,6 +141,6 @@ function main() {
 try {
   main();
 } catch (error) {
-  process.stderr.write(`${error.message}\n`);
+  alert("error", String(error && error.message ? error.message : "Unknown error"), { color: "red" });
   process.exit(1);
 }

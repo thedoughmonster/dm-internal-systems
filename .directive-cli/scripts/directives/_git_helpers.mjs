@@ -7,6 +7,9 @@ const COLORS = {
   git: "\x1b[33m",
   test: "\x1b[32m",
   warn: "\x1b[31m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  cyan: "\x1b[36m",
 };
 
 export function tag(kind) {
@@ -29,6 +32,31 @@ export function log(kind, message) {
       // Best-effort logging; never block lifecycle commands on log write failure.
     }
   }
+}
+
+function colorize(color, text) {
+  if (process.env.NO_COLOR) return text;
+  const code = COLORS[String(color || "").toLowerCase()] || "";
+  if (!code) return text;
+  return `${code}${text}${COLORS.reset}`;
+}
+
+export function renderBadge(level, lines, color = "yellow") {
+  const body = (Array.isArray(lines) ? lines : [String(lines || "")]).map((l) => String(l || ""));
+  const header = ` ${String(level || "NOTICE").toUpperCase()} `;
+  const width = Math.max(header.length, ...body.map((l) => l.length));
+  const top = `+${"=".repeat(width + 2)}+`;
+  const head = `| ${header.padEnd(width, " ")} |`;
+  const sep = `+${"-".repeat(width + 2)}+`;
+  const rows = body.map((l) => `| ${l.padEnd(width, " ")} |`).join("\n");
+  const out = `${top}\n${head}\n${sep}\n${rows}\n${top}`;
+  return colorize(color, out);
+}
+
+export function alert(level, lines, { color = "yellow", stream = "stderr" } = {}) {
+  const text = `${renderBadge(level, lines, color)}\n`;
+  if (stream === "stdout") process.stdout.write(text);
+  else process.stderr.write(text);
 }
 
 export function runGit(args, cwd, { allowFail = false } = {}) {

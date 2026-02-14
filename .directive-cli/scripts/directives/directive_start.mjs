@@ -3,7 +3,7 @@
 import path from "node:path";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, readDirectiveHandoffIfPresent, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
-import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal } from "./_git_helpers.mjs";
+import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -77,7 +77,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
   if (!session) {
-    process.stderr.write(`${usage()}\n`);
+    alert("error", ["Missing required --session", usage()], { color: "red" });
     process.exit(1);
   }
 
@@ -162,6 +162,6 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  process.stderr.write(`${error.message}\n`);
+  alert("error", String(error && error.message ? error.message : "Unknown error"), { color: "red" });
   process.exit(1);
 }

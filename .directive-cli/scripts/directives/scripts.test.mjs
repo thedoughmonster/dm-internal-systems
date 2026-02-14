@@ -239,8 +239,8 @@ test("directive start prompt overlap mode errors in non-interactive runs", (t) =
 
 test("directives-cli help exposes expected command set", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["help"]);
-  assert.match(output, /Audience: Operator \+ Machine/);
-  assert.match(output, /Audience: Machine-only/);
+  assert.match(output, /Commands \(single list\)/);
+  assert.match(output, /Help filters/);
   assert.match(output, /init/);
   assert.match(output, /directive/);
   assert.match(output, /meta/);
@@ -261,7 +261,8 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /runbook/);
   assert.match(output, /meta update/);
   assert.match(output, /validate/);
-  assert.match(output, /agent/);
+  assert.match(output, /context/);
+  assert.match(output, /launch codex/);
 });
 
 test("policy validate passes for required policy files", () => {
@@ -530,6 +531,39 @@ test("newdirective fails on invalid --branch-type", () => {
   ]);
   const text = `${result.stdout}\n${result.stderr}`;
   assert.match(text, /Invalid --branch-type value/);
+});
+
+test("newdirective fails when title already exists", (t) => {
+  const tag = randomTag();
+  const sessionName = `itest-duplicate-title-${tag}`;
+  const title = `duplicate title ${tag}`;
+
+  t.after(() => {
+    const sessionDir = path.join(directivesRoot, sessionName);
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  run(path.join(directivesBinRoot, "newdirective"), [
+    "--session",
+    sessionName,
+    "--title",
+    title,
+    "--summary",
+    "original",
+    "--no-git",
+    "--no-prompt",
+  ]);
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "newdirective"), [
+    "--dry-run",
+    "--title",
+    title.toUpperCase(),
+    "--summary",
+    "duplicate attempt",
+    "--no-prompt",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Directive title already exists/);
 });
 
 test("newtask dry-run emits json task path in existing session", () => {
@@ -804,9 +838,21 @@ test("context bundle build/check/show works with custom output paths", (t) => {
     outPath,
     "--meta",
     metaPath,
+    "--human",
   ]);
   assert.match(showOutput, /Context bundle:/);
   assert.match(showOutput, /Policy file:/);
+
+  const showJson = run(path.join(directivesBinRoot, "context"), [
+    "show",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+  const parsed = JSON.parse(showJson);
+  assert.equal(parsed.out_file, outPath);
+  assert.equal(parsed.meta_file, metaPath);
 });
 
 test("context bundle build/check supports --all-roles", (t) => {
@@ -845,7 +891,7 @@ test("context bundle build/check supports --all-roles", (t) => {
   assert.match(checkOutput, /All role bundles are up to date/);
 });
 
-test("cli agent command routes to context bundle commands", (t) => {
+test("cli context command routes to context bundle commands", (t) => {
   const tag = randomTag();
   const tmpDir = path.join("/tmp", `dc-codex-alias-${tag}`);
   const outPath = path.join(tmpDir, "compiled.md");
@@ -856,7 +902,7 @@ test("cli agent command routes to context bundle commands", (t) => {
   });
 
   const buildOutput = run(path.join(directivesBinRoot, "cli"), [
-    "agent",
+    "context",
     "build",
     "--out",
     outPath,
@@ -868,7 +914,7 @@ test("cli agent command routes to context bundle commands", (t) => {
   assert.ok(fs.existsSync(metaPath), "Compiled context metadata file should exist");
 
   const checkOutput = run(path.join(directivesBinRoot, "cli"), [
-    "agent",
+    "context",
     "check",
     "--out",
     outPath,
@@ -878,7 +924,7 @@ test("cli agent command routes to context bundle commands", (t) => {
   assert.match(checkOutput, /up to date/);
 });
 
-test("cli agent start bootstraps profile and launches configured binary", (t) => {
+test("cli launch codex bootstraps profile and launches configured binary", (t) => {
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-codex-start-home-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-codex-start-bundle-${tag}`);
@@ -893,8 +939,8 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   });
 
   const output = run(path.join(directivesBinRoot, "cli"), [
-    "agent",
-    "start",
+    "launch",
+    "codex",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -943,7 +989,7 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   assert.ok(logFiles.length >= 1, "Expected at least one session log file");
 });
 
-test("cli agent start marks selected directive with no tasks as none_available", (t) => {
+test("cli launch codex marks selected directive with no tasks as none_available", (t) => {
   const tag = randomTag();
   const sessionName = `itest-start-no-task-${tag}`;
   const title = `start-no-task-${tag}`;
@@ -975,8 +1021,8 @@ test("cli agent start marks selected directive with no tasks as none_available",
 
   const resolvedSession = findSessionByTitleSlug(titleSlug) || sessionName;
   const output = run(path.join(directivesBinRoot, "cli"), [
-    "agent",
-    "start",
+    "launch",
+    "codex",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -1076,7 +1122,7 @@ test("context bootstrap requires profile in non-interactive mode", () => {
   assert.match(text, /Missing required --profile/);
 });
 
-test("agent start rejects non-codex configured agent", (t) => {
+test("launch codex rejects non-codex configured agent", (t) => {
   const tag = randomTag();
   const configPath = path.join("/tmp", `dc-init-agent-${tag}.json`);
 
@@ -1115,5 +1161,5 @@ test("agent start rejects non-codex configured agent", (t) => {
     "--dry-run",
   ]);
   const text = `${result.stdout}\n${result.stderr}`;
-  assert.match(text, /not supported by 'dc agent start'/);
+  assert.match(text, /not supported by 'dc launch codex'/);
 });

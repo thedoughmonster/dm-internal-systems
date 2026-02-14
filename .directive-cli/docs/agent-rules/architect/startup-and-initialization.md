@@ -2,7 +2,7 @@
 
 ## Startup actions
 
-0. If startup context from `dc agent start` already provides role and selected directive/task, skip manual role confirmation and broad session discovery; proceed directly with that context.
+0. If startup context from `dc launch codex` (or `dc context start`) already provides role and selected directive/task, skip manual role confirmation and broad session discovery; proceed directly with that context.
 0.1. If startup context selects a directive and indicates no available tasks, do not re-scan repository sessions; begin task authoring for the selected directive.
 0.2. Before any command execution, run an operator discovery gate and wait for explicit go-ahead.
 0.3. If command usage is ambiguous, run `dc help` or command `--help`; do not guess.

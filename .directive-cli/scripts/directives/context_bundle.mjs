@@ -57,7 +57,8 @@ function parseArgs(argv) {
 function usage() {
   return [
     "Usage:",
-    "  dc agent <build|check|show|bootstrap|start> [options]",
+    "  dc context <build|check|show|bootstrap> [options]",
+    "  dc launch codex [options]   # alias for: dc context start",
     "",
     "Bundle options:",
     "  --out <path>            Output compiled context path (default: .codex/context/compiled.md)",
@@ -66,7 +67,7 @@ function usage() {
     "  --role <name>           Role bundle target: architect|executor|pair|auditor",
     "  --all-roles             Build/check/show all role bundles",
     "  --include <path>        Additional file to include (repeatable, repo-relative)",
-    "  --print                 With show, print compiled content",
+    "  --print                 With show, print compiled bundle content",
     "",
     "Bootstrap options:",
     "  --codex-home <path>     Codex home (default: ~/.codex)",
@@ -75,7 +76,7 @@ function usage() {
     "  --directive <name>      Optional directive session for start/show selection",
     "  --session <name>        Alias for --directive (compatibility)",
     "  --task <slug>           Optional task slug (or directive/task) for start",
-    "  --file <name>           Optional file name for interactive show",
+    "  --file <name>           Reserved for compatibility (use: dc directive view)",
     "  --codex-bin <path>      Codex executable path for start (default: codex)",
     "  --config <path>         dc config path (default: .codex/dc.config.json)",
     "  --session-log-dir <p>   Session log directory (default: .directive-cli/session-logs)",
@@ -83,6 +84,7 @@ function usage() {
     "  --dry-run               Preview config changes without writing",
     "",
     "General:",
+    "  --human                 With show, emit human-readable summary",
     "  --json                  Emit JSON summary",
     "  --help                  Show this help",
   ].join("\n");
@@ -472,6 +474,10 @@ function runCheck(root, args) {
 }
 
 async function runShow(root, args) {
+  const human = Boolean(args.human);
+  const jsonMode = !human && !args.print ? true : Boolean(args.json);
+  const showArgs = jsonMode ? { ...args, json: true } : args;
+
   if (args["all-roles"]) {
     const summaries = ROLES.map((role) => {
       const { outPath, metaPath } = resolveRolePaths(root, { ...args, "all-roles-mode": true }, role);
@@ -485,8 +491,8 @@ async function runShow(root, args) {
         policy_hash: meta ? meta.policy_hash : null,
       };
     });
-    if (args.json) {
-      output(args, {
+    if (jsonMode) {
+      output(showArgs, {
         message: "Role bundle summary",
         bundles: summaries,
       });
@@ -499,10 +505,6 @@ async function runShow(root, args) {
       );
     }
     return;
-  }
-
-  if (stdin.isTTY && !args.out && !args.meta && !args.role && !args["all-roles"] && !args.print) {
-    return runDirectiveFileShow(root, args);
   }
 
   const role = args.role ? sanitizeRoleName(args.role) : "";
@@ -518,8 +520,8 @@ async function runShow(root, args) {
   }
 
   const meta = readMeta(metaPath);
-  if (args.json) {
-    output(args, {
+  if (jsonMode) {
+    output(showArgs, {
       message: `Context bundle: ${outPath}`,
       role: role || "all",
       out_file: outPath,
@@ -541,37 +543,6 @@ async function runShow(root, args) {
   process.stdout.write(
     `${colorize("cyan", "Sources:")} ${meta && Array.isArray(meta.sources) ? meta.sources.length : "n/a"}\n`,
   );
-}
-
-async function runDirectiveFileShow(root, args) {
-  const directive = await requireStartDirective(args, root);
-  if (!directive) throw new Error("Missing required --directive for non-interactive show.");
-  const files = listDirectiveFiles(directive);
-  if (files.length === 0) throw new Error(`No json files found in directive: ${directive.session}`);
-
-  let chosen = null;
-  const explicitFile = String(args.file || "").trim();
-  if (explicitFile) {
-    chosen = files.find((f) => f.name === explicitFile);
-    if (!chosen) throw new Error(`File not found in directive: ${explicitFile}`);
-  } else {
-    const selected = await selectOption({
-      input: stdin,
-      output: stdout,
-      label: "Select file:",
-      options: files.map((f) => ({ label: f.name, value: f.name })),
-      defaultIndex: 0,
-    });
-    chosen = files.find((f) => f.name === selected) || null;
-    if (!chosen) throw new Error("Invalid file selection.");
-  }
-
-  const content = fs.readFileSync(chosen.path, "utf8");
-  try {
-    process.stdout.write(`${JSON.stringify(JSON.parse(content), null, 2)}\n`);
-  } catch {
-    process.stdout.write(content);
-  }
 }
 
 function sanitizeProfileName(name) {
@@ -608,11 +579,15 @@ function humanizeSlug(value) {
 
 function statusColor(status) {
   const s = lower(status);
-  if (s === "todo" || s === "open") return "yellow";
-  if (s === "in_progress" || s === "ready") return "cyan";
+  if (s === "todo") return "yellow";
+  if (s === "open") return "cyan";
+  if (s === "ready") return "blue";
+  if (s === "in_progress") return "magenta";
   if (s === "blocked") return "red";
-  if (s === "done" || s === "completed") return "green";
-  if (s === "archived" || s === "cancelled") return "dim";
+  if (s === "done") return "green";
+  if (s === "completed") return "green";
+  if (s === "archived") return "dim";
+  if (s === "cancelled") return "dim";
   return "magenta";
 }
 
@@ -698,18 +673,6 @@ function listAvailableDirectives(root) {
     directive_slug: String((d.meta && d.meta.directive_slug) || d.meta_file.replace(/\.meta\.json$/u, "")),
     title: d.title,
     status: d.status,
-  }));
-}
-
-function listDirectiveFiles(directive) {
-  const files = fs
-    .readdirSync(directive.session_dir, { withFileTypes: true })
-    .filter((d) => d.isFile() && d.name.endsWith(".json"))
-    .map((d) => d.name)
-    .sort();
-  return files.map((name) => ({
-    name,
-    path: path.join(directive.session_dir, name),
   }));
 }
 
@@ -961,9 +924,9 @@ function buildDcCommandReference() {
       operator_only: [
         "dc init",
         "dc directive new",
-        "dc agent build",
-        "dc agent bootstrap",
-        "dc agent start",
+        "dc context build",
+        "dc context bootstrap",
+        "dc launch codex",
       ],
       operator_and_machine: [
         "dc repo map",
@@ -973,8 +936,8 @@ function buildDcCommandReference() {
         "dc validate",
         "dc test",
         "dc help",
-        "dc agent check",
-        "dc agent show",
+        "dc context check",
+        "dc context show",
       ],
       machine_only: [
         "dc policy validate",
@@ -1027,12 +990,14 @@ function buildDcCommandReference() {
         "dc policy validate",
         "dc repo map",
       ],
-      agent: [
-        "dc agent build",
-        "dc agent check",
-        "dc agent show",
-        "dc agent bootstrap",
-        "dc agent start",
+      context: [
+        "dc context build",
+        "dc context check",
+        "dc context show",
+        "dc context bootstrap",
+      ],
+      launch: [
+        "dc launch codex",
       ],
     },
   };
@@ -1109,7 +1074,7 @@ async function runBootstrap(root, args) {
     `instructions_file = "${startupPath}"`,
     `repo_instructions_file = "${startupPath}"`,
     `dc_role = "${role}"`,
-    `generated_by = "dc agent bootstrap"`,
+    `generated_by = "dc context bootstrap"`,
   ].join("\n");
 
   upsertProfileBlock(configPath, profileName, profileBlock, Boolean(args["dry-run"]));
@@ -1131,6 +1096,7 @@ async function runBootstrap(root, args) {
 
 function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition) {
   const env = { ...process.env };
+  env.DC_NAMESPACE = "agent";
   if (role) env.DC_ROLE = String(role);
   if (sessionLogPath) env.DC_SESSION_LOG = String(sessionLogPath);
   if (roleTransition) env.DC_ROLE_TRANSITION = String(roleTransition);
@@ -1167,7 +1133,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
 
 function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition) {
   const lines = [
-    "Startup context is preselected by dc agent start. Use it as authoritative.",
+    "Startup context is preselected by dc launch codex (dc context start). Use it as authoritative.",
     "Do not ask for role selection.",
   ];
   if (roleTransition) lines.push(`Role transition: ${roleTransition}`);
@@ -1285,7 +1251,7 @@ async function runStart(root, args) {
   const role = await requireBundleRole(args);
   const launchConfig = readDcConfig(root, args);
   if (launchConfig.agent && launchConfig.agent !== "codex") {
-    throw new Error(`Configured agent '${launchConfig.agent}' is not supported by 'dc agent start'. Run 'dc init --agent codex' or use an agent-specific start command.`);
+    throw new Error(`Configured agent '${launchConfig.agent}' is not supported by 'dc launch codex'. Run 'dc init --agent codex' or use an agent-specific start command.`);
   }
   const selectedDirective = await requireStartDirective(args, root);
   const directiveKey = selectedDirective ? selectedDirective.session : String(args.directive || args.session || "").trim();

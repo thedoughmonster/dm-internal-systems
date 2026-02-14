@@ -29,6 +29,10 @@ function slugify(input) {
     .replace(/^-+|-+$/g, "");
 }
 
+function normalizeTitleKey(input) {
+  return slugify(input);
+}
+
 function parseArgs(argv) {
   const args = { goal: [] };
   for (let i = 0; i < argv.length; i += 1) {
@@ -348,6 +352,19 @@ async function main() {
   const duplicateId = listSessions().find((s) => s.meta && String(s.meta.id || "") === directiveId);
   if (duplicateId) {
     process.stderr.write(`Directive UUID already exists in another session directory: ${duplicateId.name}\n`);
+    process.exit(1);
+  }
+
+  const requestedTitleKey = normalizeTitleKey(title);
+  const duplicateTitle = listSessions().find((s) => {
+    const existingTitleKey = normalizeTitleKey(s && s.meta ? s.meta.title : "");
+    return Boolean(existingTitleKey) && existingTitleKey === requestedTitleKey;
+  });
+  if (duplicateTitle) {
+    const existingTitle = String((duplicateTitle.meta && duplicateTitle.meta.title) || duplicateTitle.name);
+    process.stderr.write(
+      `Directive title already exists: "${existingTitle}" (session: ${duplicateTitle.name})\n`,
+    );
     process.exit(1);
   }
 

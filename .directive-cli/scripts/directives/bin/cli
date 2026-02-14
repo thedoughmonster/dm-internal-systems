@@ -2,17 +2,25 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+NS_STATE_DIR="${HOME}/.codex/dc/namespaces"
 
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   C_RESET=$'\033[0m'
   C_CYAN=$'\033[36m'
   C_GREEN=$'\033[32m'
   C_YELLOW=$'\033[33m'
+  C_RED=$'\033[31m'
+  C_MAGENTA=$'\033[35m'
+  C_DIM=$'\033[2m'
 else
   C_RESET=""
   C_CYAN=""
   C_GREEN=""
   C_YELLOW=""
+  C_RED=""
+  C_MAGENTA=""
+  C_DIM=""
 fi
 
 color() {
@@ -26,7 +34,7 @@ print_row() {
   local label_raw="$2"
   local desc="$3"
   local row_color="$4"
-  local width=22
+  local width=32
   local pad=$(( width - ${#label_raw} ))
   if (( pad < 1 )); then
     pad=1
@@ -36,74 +44,413 @@ print_row() {
   printf "%s\n" "$(color "${row_color}" "${line}")"
 }
 
+normalize_namespace() {
+  local raw="${1:-}"
+  raw="$(printf "%s" "$raw" | tr '[:upper:]' '[:lower:]' | xargs)"
+  case "$raw" in
+    agent|agents|machine|ma) echo "agent" ;;
+    op|operator) echo "op" ;;
+    ""|all|auto) echo "all" ;;
+    *) echo "" ;;
+  esac
+}
+
+tty_key() {
+  if [[ ! -t 0 ]]; then
+    echo ""
+    return 0
+  fi
+  local t
+  t="$(tty 2>/dev/null || true)"
+  if [[ -z "$t" || "$t" == "not a tty" ]]; then
+    echo ""
+    return 0
+  fi
+  t="${t#/dev/}"
+  t="${t//\//_}"
+  printf "%s" "$t"
+}
+
+ns_state_file() {
+  local key
+  key="$(tty_key)"
+  if [[ -z "$key" ]]; then
+    echo ""
+    return 0
+  fi
+  mkdir -p "${NS_STATE_DIR}"
+  printf "%s/%s.env" "${NS_STATE_DIR}" "$key"
+}
+
+read_pinned_namespace() {
+  local f
+  f="$(ns_state_file)"
+  if [[ -z "$f" || ! -f "$f" ]]; then
+    echo ""
+    return 0
+  fi
+  local v
+  v="$(sed -n 's/^namespace=//p' "$f" | head -n1)"
+  normalize_namespace "$v"
+}
+
+read_pinned_role() {
+  local f
+  f="$(ns_state_file)"
+  if [[ -z "$f" || ! -f "$f" ]]; then
+    echo ""
+    return 0
+  fi
+  sed -n 's/^role=//p' "$f" | head -n1
+}
+
+write_pinned_namespace() {
+  local ns="$1"
+  local role="${2:-}"
+  local f
+  f="$(ns_state_file)"
+  if [[ -z "$f" ]]; then
+    return 0
+  fi
+  {
+    printf "namespace=%s\n" "$ns"
+    printf "role=%s\n" "$role"
+  } > "$f"
+}
+
+clear_pinned_namespace() {
+  local f
+  f="$(ns_state_file)"
+  if [[ -n "$f" && -f "$f" ]]; then
+    rm -f "$f"
+  fi
+}
+
+effective_namespace() {
+  local env_ns
+  env_ns="$(normalize_namespace "${DC_NAMESPACE:-}")"
+  if [[ -n "$env_ns" && "$env_ns" != "all" ]]; then
+    printf "%s" "$env_ns"
+    return 0
+  fi
+  local pinned
+  pinned="$(read_pinned_namespace)"
+  if [[ -n "$pinned" && "$pinned" != "all" ]]; then
+    printf "%s" "$pinned"
+    return 0
+  fi
+  echo ""
+}
+
+effective_role() {
+  if [[ -n "${DC_ROLE:-}" ]]; then
+    printf "%s" "${DC_ROLE}"
+    return 0
+  fi
+  read_pinned_role
+}
+
+effective_namespace_source() {
+  local env_ns
+  env_ns="$(normalize_namespace "${DC_NAMESPACE:-}")"
+  if [[ -n "$env_ns" && "$env_ns" != "all" ]]; then
+    printf "env"
+    return 0
+  fi
+  local pinned
+  pinned="$(read_pinned_namespace)"
+  if [[ -n "$pinned" && "$pinned" != "all" ]]; then
+    printf "pinned"
+    return 0
+  fi
+  printf "unset"
+}
+
+is_audience_visible() {
+  local mode="$1"
+  local audience="$2"
+  case "$mode" in
+    all)
+      return 0
+      ;;
+    op)
+      [[ "$audience" == "op" || "$audience" == "both" ]]
+      return
+      ;;
+    agents)
+      [[ "$audience" == "agent" || "$audience" == "both" ]]
+      return
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+audience_tag() {
+  local audience="$1"
+  case "$audience" in
+    op) printf "%s" "$(color "${C_YELLOW}" "[op]")" ;;
+    agent) printf "%s" "$(color "${C_MAGENTA}" "[agent]")" ;;
+    both) printf "%s" "$(color "${C_GREEN}" "[both]")" ;;
+    *) printf "%s" "[?]" ;;
+  esac
+}
+
+print_command() {
+  local mode="$1"
+  local cmd="$2"
+  local audience="$3"
+  local desc="$4"
+  if ! is_audience_visible "$mode" "$audience"; then
+    return 0
+  fi
+  print_row "  " "${cmd}" "$(audience_tag "$audience") ${desc}" "${C_GREEN}"
+}
+
 usage() {
+  local mode="${1:-all}"
+  local shown_mode="$mode"
+  if [[ "$mode" == "current" ]]; then
+    local current
+    current="$(effective_namespace)"
+    if [[ -z "$current" || "$current" == "all" ]]; then
+      shown_mode="all"
+    elif [[ "$current" == "agent" ]]; then
+      shown_mode="agents"
+    else
+      shown_mode="op"
+    fi
+  fi
+
   printf "%s\n" "Usage:"
-  printf "  %s\n" "$(color "${C_GREEN}" "directives <category> <command> [args...]")"
-  printf "\n%s\n" "$(color "${C_CYAN}" "Categories:")"
-  print_row "  " "init" "Initialize dc companion config (agent/model defaults)" "${C_YELLOW}"
-  print_row "  " "repo" "Repository helpers" "${C_YELLOW}"
-  print_row "    " "repo map" "Show high-signal repo paths and execution zones" "${C_GREEN}"
-  print_row "  " "policy" "Policy helpers" "${C_YELLOW}"
-  print_row "    " "policy validate" "Validate required .directive-cli policy JSON files" "${C_GREEN}"
-  print_row "  " "runbook" "Scripted multi-step workflows" "${C_YELLOW}"
-  print_row "    " "runbook <name>" "Execute predefined flow checkpoints (executor/architect)" "${C_GREEN}"
-  print_row "  " "agent" "Manage agent context bundle and profiles" "${C_YELLOW}"
-  print_row "    " "agent build" "Build compiled context bundle" "${C_GREEN}"
-  print_row "    " "agent show" "View directive file (interactive) or show bundle metadata with flags" "${C_GREEN}"
-  print_row "    " "agent check" "Check whether bundle is up to date" "${C_GREEN}"
-  print_row "    " "agent bootstrap" "Build bundle and update ~/.codex/config.toml profile" "${C_GREEN}"
-  print_row "    " "agent start" "Prompt/select profile, bootstrap, then launch codex" "${C_GREEN}"
-  print_row "  " "directive" "Manage directive artifacts" "${C_YELLOW}"
-  print_row "    " "directive new" "Create <directive_slug>.meta.json" "${C_GREEN}"
-  print_row "    " "directive task" "Create <task_slug>.task.json" "${C_GREEN}"
-  print_row "    " "directive handoff" "Create <directive_slug>.handoff.json" "${C_GREEN}"
-  print_row "    " "directive list" "List directives with selectable output detail" "${C_GREEN}"
-  print_row "    " "directive view" "View directive JSON files (prompt or --directive/--file)" "${C_GREEN}"
-  print_row "    " "directive start" "Executor directive startup flow (branch/validation gates)" "${C_GREEN}"
-  print_row "    " "directive finish" "Executor directive closeout flow" "${C_GREEN}"
-  print_row "    " "directive archive" "Archive directive metadata (status/bucket/updated)" "${C_GREEN}"
-  print_row "    " "directive cleanup" "Cleanup merged directive branch (switch dev + delete branch)" "${C_GREEN}"
-  print_row "    " "directive migrate" "Migrate legacy directive files to <slug>.<type>.json format" "${C_GREEN}"
-  print_row "  " "task" "Executor task lifecycle" "${C_YELLOW}"
-  print_row "    " "task start" "Start task with branch/clean-tree guards" "${C_GREEN}"
-  print_row "    " "task finish" "Finish task with validation + policy-driven git actions" "${C_GREEN}"
-  print_row "  " "meta" "Manage directive metadata updates" "${C_YELLOW}"
-  print_row "    " "meta update" "Update metadata (architect role default)" "${C_GREEN}"
-  print_row "    " "meta architect" "Update metadata with architect role guard" "${C_GREEN}"
-  print_row "    " "meta executor" "Update metadata with executor role guard" "${C_GREEN}"
-  print_row "  " "validate" "Run directives validator (supports --strict, --verbose, --file ...)" "${C_YELLOW}"
-  print_row "  " "test" "Run directive script test suite" "${C_YELLOW}"
-  print_row "  " "help" "Show this help" "${C_YELLOW}"
-  printf "\n%s\n" "$(color "${C_CYAN}" "Audience: Operator-only")"
-  print_row "  " "dc init" "Initialize local dc companion config defaults" "${C_GREEN}"
-  print_row "  " "dc directive new" "Create a new directive session" "${C_GREEN}"
-  print_row "  " "dc agent build" "Build role/context bundle before agent runs" "${C_GREEN}"
-  print_row "  " "dc agent bootstrap" "Install/update codex profile wiring for bundles" "${C_GREEN}"
-  print_row "  " "dc agent start" "Select profile/role/directive and launch codex" "${C_GREEN}"
-  printf "\n%s\n" "$(color "${C_CYAN}" "Audience: Operator + Machine")"
-  print_row "  " "dc repo map" "Show current repo path map and directive roots" "${C_GREEN}"
-  print_row "  " "dc directive list" "List directives (compact/detailed/custom fields)" "${C_GREEN}"
-  print_row "  " "dc directive view" "Inspect directive/task/handoff JSON" "${C_GREEN}"
-  print_row "  " "dc directive archive" "Archive directive with scripted git flow" "${C_GREEN}"
-  print_row "  " "dc directive migrate" "Migrate legacy directive files to JSON schema" "${C_GREEN}"
-  print_row "  " "dc validate" "Validate directive artifacts" "${C_GREEN}"
-  print_row "  " "dc test" "Run directive tooling test suite" "${C_GREEN}"
-  print_row "  " "dc help" "Show command categories and audience map" "${C_GREEN}"
-  print_row "  " "dc agent check" "Check whether context bundle is up to date" "${C_GREEN}"
-  print_row "  " "dc agent show" "Human-readable viewing helpers" "${C_GREEN}"
-  printf "\n%s\n" "$(color "${C_CYAN}" "Audience: Machine-only")"
-  print_row "  " "dc policy validate" "Lifecycle policy gate validation" "${C_GREEN}"
-  print_row "  " "dc runbook ..." "Scripted multi-step automation checkpoints" "${C_GREEN}"
-  print_row "  " "dc directive task" "Create task artifacts from directive goals" "${C_GREEN}"
-  print_row "  " "dc directive handoff" "Create handoff artifact in active lifecycle" "${C_GREEN}"
-  print_row "  " "dc directive start" "Executor lifecycle gate: begin directive execution" "${C_GREEN}"
-  print_row "  " "dc task start" "Executor lifecycle gate: begin task execution" "${C_GREEN}"
-  print_row "  " "dc task finish" "Executor lifecycle gate: finish task + validation" "${C_GREEN}"
-  print_row "  " "dc directive finish" "Executor lifecycle gate: finalize directive" "${C_GREEN}"
-  print_row "  " "dc directive cleanup" "Executor lifecycle gate: post-merge branch cleanup" "${C_GREEN}"
-  print_row "  " "dc meta update" "Update directive/task metadata fields" "${C_GREEN}"
-  print_row "  " "dc meta architect" "Architect-guarded metadata updates" "${C_GREEN}"
-  print_row "  " "dc meta executor" "Executor-guarded metadata updates" "${C_GREEN}"
+  printf "  %s\n" "$(color "${C_GREEN}" "dc <category> <command> [args...]")"
+  printf "  %s\n" "$(color "${C_GREEN}" "dc help [--all|--op|--agents]")"
+  printf "\n%s\n" "$(color "${C_CYAN}" "Namespace")"
+  local ns_now
+  ns_now="$(effective_namespace)"
+  local role_now
+  role_now="$(effective_role)"
+  local ns_src
+  ns_src="$(effective_namespace_source)"
+  print_row "  " "current" "$(color "${C_DIM}" "${ns_now:-unset} (${ns_src})")" "${C_YELLOW}"
+  print_row "  " "role" "$(color "${C_DIM}" "${role_now:-unset}")" "${C_YELLOW}"
+  printf "\n%s\n" "$(color "${C_CYAN}" "Commands (single list)")"
+
+  print_command "$shown_mode" "init" "op" "Initialize companion config (agent/model defaults)"
+  print_command "$shown_mode" "repo map" "both" "Show high-signal repo paths and execution zones"
+  print_command "$shown_mode" "policy validate" "agent" "Validate required policy JSON files"
+  print_command "$shown_mode" "runbook <name>" "agent" "Run scripted multi-step lifecycle checkpoints"
+
+  print_command "$shown_mode" "context build" "op" "Build compiled context bundle"
+  print_command "$shown_mode" "context check" "both" "Check whether context bundle is up to date"
+  print_command "$shown_mode" "context show" "both" "Show machine-readable context/profile metadata"
+  print_command "$shown_mode" "context bootstrap" "op" "Update ~/.codex/config.toml profile wiring"
+  print_command "$shown_mode" "launch codex" "op" "Prompt/select profile+role+directive, then launch codex"
+
+  print_command "$shown_mode" "directive new" "op" "Create <directive_slug>.meta.json"
+  print_command "$shown_mode" "directive task" "agent" "Create <task_slug>.task.json"
+  print_command "$shown_mode" "directive handoff" "agent" "Create <directive_slug>.handoff.json"
+  print_command "$shown_mode" "directive list" "both" "List directives with selectable output detail"
+  print_command "$shown_mode" "directive view" "both" "Human-readable directive/task/handoff viewer"
+  print_command "$shown_mode" "directive start" "agent" "Executor directive startup flow (auto-pins terminal)"
+  print_command "$shown_mode" "directive finish" "agent" "Executor directive closeout flow"
+  print_command "$shown_mode" "directive archive" "both" "Archive directive metadata and branch flow"
+  print_command "$shown_mode" "directive cleanup" "agent" "Cleanup merged directive branch"
+  print_command "$shown_mode" "directive migrate" "both" "Migrate legacy directive files to JSON format"
+
+  print_command "$shown_mode" "task start" "agent" "Start task with guards"
+  print_command "$shown_mode" "task finish" "agent" "Finish task with validation+git policy"
+
+  print_command "$shown_mode" "meta update" "agent" "Update metadata"
+  print_command "$shown_mode" "meta architect" "agent" "Architect-guarded metadata updates"
+  print_command "$shown_mode" "meta executor" "agent" "Executor-guarded metadata updates"
+
+  print_command "$shown_mode" "validate" "both" "Run directives validator"
+  print_command "$shown_mode" "test" "both" "Run directive tooling test suite"
+
+  print_command "$shown_mode" "ns show" "both" "Show active namespace+role"
+  print_command "$shown_mode" "ns env <op|agent>" "both" "Print export lines for eval"
+  print_command "$shown_mode" "ns enter <op|agent>" "both" "Start subshell pinned to namespace"
+  print_command "$shown_mode" "ns clear" "both" "Clear terminal pin for current TTY"
+
+  printf "\n%s\n" "$(color "${C_CYAN}" "Help filters")"
+  print_row "  " "--all" "Show complete command list" "${C_GREEN}"
+  print_row "  " "--op" "Show operator-visible commands" "${C_GREEN}"
+  print_row "  " "--agents" "Show agent-visible commands" "${C_GREEN}"
+}
+
+is_agent_namespace() {
+  [[ "$(effective_namespace)" == "agent" ]]
+}
+
+auto_pin_agent_namespace() {
+  local role="${1:-executor}"
+  if ! role_is_valid "$role"; then
+    role="executor"
+  fi
+  export DC_NAMESPACE="agent"
+  export DC_ROLE="${role}"
+  write_pinned_namespace "agent" "${role}"
+  if [[ -t 1 ]]; then
+    printf "%s\n" "$(color "${C_CYAN}" "Pinned terminal namespace: agent (${role})")" >&2
+  fi
+}
+
+is_operator_only_command() {
+  local cmd="$1"
+  local sub="$2"
+  case "$cmd:$sub" in
+    init:)
+      return 0
+      ;;
+    context:build|context:bootstrap)
+      return 0
+      ;;
+    launch:codex)
+      return 0
+      ;;
+    directive:new)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+enforce_namespace_policy() {
+  local cmd="$1"
+  local sub="$2"
+  if ! is_agent_namespace; then
+    return 0
+  fi
+  if is_operator_only_command "$cmd" "$sub"; then
+    printf "%s\n" "$(color "${C_RED}" "Blocked by namespace policy: '${cmd}${sub:+ ${sub}}' is operator-only.")" >&2
+    printf "%s\n" "$(color "${C_YELLOW}" "Current namespace: agent (source=$(effective_namespace_source))")" >&2
+    printf "%s\n" "Use 'dc help --agents' for allowed commands, or switch namespace with: eval \"\$(dc ns env op)\"" >&2
+    exit 1
+  fi
+}
+
+ns_usage() {
+  cat <<'USAGE'
+Usage:
+  dc ns show
+  dc ns env <op|agent> [--role <architect|executor|pair|auditor>]
+  dc ns enter <op|agent> [--role <architect|executor|pair|auditor>]
+  dc ns clear
+USAGE
+}
+
+role_is_valid() {
+  case "${1:-}" in
+    architect|executor|pair|auditor) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+ns_cmd() {
+  local sub="${1:-}"
+  if [[ $# -gt 0 ]]; then shift; fi
+
+  case "$sub" in
+    show)
+      local ns_now
+      ns_now="$(effective_namespace)"
+      local role_now
+      role_now="$(effective_role)"
+      printf "namespace=%s\n" "${ns_now:-unset}"
+      printf "role=%s\n" "${role_now:-unset}"
+      printf "source=%s\n" "$(effective_namespace_source)"
+      ;;
+    env)
+      local ns_raw="${1:-}"
+      if [[ $# -gt 0 ]]; then shift; fi
+      local ns
+      ns="$(normalize_namespace "$ns_raw")"
+      if [[ -z "$ns" || "$ns" == "all" ]]; then
+        echo "Invalid namespace '$ns_raw' (expected: op|agent)" >&2
+        exit 1
+      fi
+      local role=""
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --role)
+            shift
+            role="${1:-}"
+            ;;
+          *)
+            echo "Unknown ns env arg: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift || true
+      done
+      if [[ "$ns" == "agent" ]]; then
+        if [[ -n "$role" ]] && ! role_is_valid "$role"; then
+          echo "Invalid --role '$role' (architect|executor|pair|auditor)" >&2
+          exit 1
+        fi
+        if [[ -z "$role" ]]; then role="executor"; fi
+        printf "export DC_NAMESPACE=agent\n"
+        printf "export DC_ROLE=%q\n" "$role"
+      else
+        printf "export DC_NAMESPACE=op\n"
+        printf "unset DC_ROLE\n"
+      fi
+      ;;
+    enter)
+      local ns_raw="${1:-}"
+      if [[ $# -gt 0 ]]; then shift; fi
+      local ns
+      ns="$(normalize_namespace "$ns_raw")"
+      if [[ -z "$ns" || "$ns" == "all" ]]; then
+        echo "Invalid namespace '$ns_raw' (expected: op|agent)" >&2
+        exit 1
+      fi
+      local role=""
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --role)
+            shift
+            role="${1:-}"
+            ;;
+          *)
+            echo "Unknown ns enter arg: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift || true
+      done
+      local shell_bin="${SHELL:-bash}"
+      if [[ "$ns" == "agent" ]]; then
+        if [[ -n "$role" ]] && ! role_is_valid "$role"; then
+          echo "Invalid --role '$role' (architect|executor|pair|auditor)" >&2
+          exit 1
+        fi
+        if [[ -z "$role" ]]; then role="executor"; fi
+        echo "Entering agent namespace shell (role=$role). Exit shell to return." >&2
+        exec env DC_NAMESPACE=agent DC_ROLE="$role" "$shell_bin" -i
+      fi
+      echo "Entering operator namespace shell. Exit shell to return." >&2
+      exec env DC_NAMESPACE=op "$shell_bin" -i
+      ;;
+    clear)
+      clear_pinned_namespace
+      if [[ -t 1 ]]; then
+        echo "Cleared terminal namespace pin for current TTY." >&2
+      fi
+      ;;
+    help|-h|--help|"")
+      ns_usage
+      ;;
+    *)
+      echo "Unknown ns command: $sub" >&2
+      ns_usage >&2
+      exit 1
+      ;;
+  esac
 }
 
 cmd="${1:-help}"
@@ -111,15 +458,33 @@ if [[ $# -gt 0 ]]; then
   shift
 fi
 
+if [[ "$cmd" == "help" || "$cmd" == "-h" || "$cmd" == "--help" ]]; then
+  mode="current"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --all) mode="all" ;;
+      --op) mode="op" ;;
+      --agents) mode="agents" ;;
+      *)
+        echo "Unknown help arg: $1" >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+  usage "$mode"
+  exit 0
+fi
+
 case "$cmd" in
   init)
+    enforce_namespace_policy "init" ""
     exec "${SCRIPT_DIR}/init" "$@"
     ;;
   repo)
     sub="${1:-}"
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "repo" "$sub"
     case "$sub" in
       map)
         exec "${SCRIPT_DIR}/repomap" "$@"
@@ -133,9 +498,8 @@ case "$cmd" in
     ;;
   policy)
     sub="${1:-}"
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "policy" "$sub"
     case "$sub" in
       validate)
         exec "${SCRIPT_DIR}/validatepolicies" "$@"
@@ -148,16 +512,41 @@ case "$cmd" in
     esac
     ;;
   runbook)
+    enforce_namespace_policy "runbook" ""
     exec "${SCRIPT_DIR}/runbook" "$@"
     ;;
+  context)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "context" "$sub"
+    exec "${SCRIPT_DIR}/context" "$sub" "$@"
+    ;;
+  launch)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "launch" "$sub"
+    case "$sub" in
+      codex)
+        exec "${SCRIPT_DIR}/context" start "$@"
+        ;;
+      *)
+        echo "Unknown launch command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
   agent)
-    exec "${SCRIPT_DIR}/context" "$@"
+    # compatibility alias
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "context" "$sub"
+    exec "${SCRIPT_DIR}/context" "$sub" "$@"
     ;;
   directive)
     sub="${1:-}"
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "directive" "$sub"
     case "$sub" in
       new)
         exec "${SCRIPT_DIR}/newdirective" "$@"
@@ -175,6 +564,7 @@ case "$cmd" in
         exec "${SCRIPT_DIR}/viewdirective" "$@"
         ;;
       start)
+        auto_pin_agent_namespace "${DC_ROLE:-executor}"
         exec "${SCRIPT_DIR}/directivestart" "$@"
         ;;
       finish)
@@ -198,9 +588,8 @@ case "$cmd" in
     ;;
   task)
     sub="${1:-}"
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "task" "$sub"
     case "$sub" in
       start)
         exec "${SCRIPT_DIR}/taskstart" "$@"
@@ -217,9 +606,8 @@ case "$cmd" in
     ;;
   meta)
     sub="${1:-}"
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
+    if [[ $# -gt 0 ]]; then shift; fi
+    enforce_namespace_policy "meta" "$sub"
     case "$sub" in
       update)
         exec "${SCRIPT_DIR}/updatemeta" "$@"
@@ -238,13 +626,16 @@ case "$cmd" in
     esac
     ;;
   validate)
+    enforce_namespace_policy "validate" ""
     exec "${SCRIPT_DIR}/validatedirectives" "$@"
     ;;
   test)
+    enforce_namespace_policy "test" ""
     exec "${SCRIPT_DIR}/testdirectives" "$@"
     ;;
-  help|-h|--help)
-    usage
+  ns|namespace)
+    enforce_namespace_policy "ns" ""
+    ns_cmd "$@"
     ;;
   *)
     echo "Unknown command: $cmd" >&2

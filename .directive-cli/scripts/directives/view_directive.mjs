@@ -82,7 +82,7 @@ function renderDirectiveTask(doc) {
   let out = "";
   out += line("Kind", doc.kind || "directive_task");
   out += line("Title", colorize("blue", String(meta.title || "")));
-  out += line("Status", colorize("yellow", String(meta.status || "")));
+  out += line("Status", colorize(statusColor(meta.status), String(meta.status || "")));
   out += line("Priority", `${meta.priority || ""} / session ${meta.session_priority || ""}`);
   out += line("Assignee", meta.assignee || "");
   out += line("Created", colorize("green", String(meta.created || "")));
@@ -148,19 +148,121 @@ function renderDirectiveTask(doc) {
   return out;
 }
 
+function renderDirectiveSessionMeta(doc) {
+  const meta = doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+  let out = "";
+  out += line("Kind", doc.kind || "directive_session_meta");
+  out += line("Title", colorize("blue", String(meta.title || "")));
+  out += line("Status", colorize(statusColor(meta.status), String(meta.status || "")));
+  out += line("Priority", `${meta.priority || ""} / session ${meta.session_priority || ""}`);
+  out += line("Owner", String(meta.owner || ""));
+  out += line("Assignee", String(meta.assignee || ""));
+  out += line("Effort", String(meta.effort || ""));
+  out += line("Created", colorize("green", String(meta.created || "")));
+  out += line("Updated", colorize("green", String(meta.updated || "")));
+  out += line("Summary", String(meta.summary || ""));
+  out += "\n";
+
+  const goals = asArray(meta.goals);
+  if (goals.length > 0) {
+    out += section("Goals");
+    for (const goal of goals) out += bullet(String(goal));
+    out += "\n";
+  }
+
+  const tags = asArray(meta.tags);
+  if (tags.length > 0) {
+    out += section("Tags");
+    for (const tag of tags) out += bullet(String(tag));
+    out += "\n";
+  }
+
+  const deps = asArray(meta.depends_on);
+  const blockedBy = asArray(meta.blocked_by);
+  const related = asArray(meta.related);
+  if (deps.length > 0 || blockedBy.length > 0 || related.length > 0) {
+    out += section("Dependencies");
+    if (deps.length > 0) out += bullet(`depends_on: ${deps.join(", ")}`);
+    if (blockedBy.length > 0) out += bullet(`blocked_by: ${blockedBy.join(", ")}`);
+    if (related.length > 0) out += bullet(`related: ${related.join(", ")}`);
+    out += "\n";
+  }
+
+  out += section("Git Routing");
+  out += bullet(`directive_branch: ${String(meta.directive_branch || "")}`);
+  out += bullet(`base_branch: ${String(meta.directive_base_branch || "")}`);
+  out += bullet(`merge_status: ${String(meta.directive_merge_status || "")}`);
+  out += bullet(`commit_policy: ${String(meta.commit_policy || "")}`);
+  out += "\n";
+
+  out += section("Session");
+  out += bullet(`slug: ${String(meta.directive_slug || "")}`);
+  out += bullet(`bucket: ${String(meta.bucket || "")}`);
+  out += bullet(`scope: ${String(meta.scope || "")}`);
+  out += bullet(`source: ${String(meta.source || "")}`);
+  out += bullet(`auto_run: ${String(Boolean(meta.auto_run))}`);
+
+  return out;
+}
+
+function renderDirectiveHandoff(doc) {
+  const meta = doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+  const handoff = doc.handoff && typeof doc.handoff === "object" ? doc.handoff : {};
+  let out = "";
+  out += line("Kind", doc.kind || "directive_handoff");
+  out += line("Title", colorize("blue", String(meta.title || handoff.objective || "")));
+  out += line("Status", colorize(statusColor(meta.status), String(meta.status || "open")));
+  out += line("From", String(meta.from_role || handoff.from_role || ""));
+  out += line("To", String(meta.to_role || handoff.to_role || ""));
+  out += line("Created", colorize("green", String(meta.created || "")));
+  out += line("Updated", colorize("green", String(meta.updated || "")));
+  out += line("Summary", String(meta.summary || handoff.objective || ""));
+  out += "\n";
+
+  if (handoff.objective) {
+    out += section("Objective");
+    out += bullet(String(handoff.objective));
+    out += "\n";
+  }
+  const blocking = asArray(handoff.blocking_rules);
+  if (blocking.length === 0 && handoff.blocking_rule) blocking.push(handoff.blocking_rule);
+  if (blocking.length > 0) {
+    out += section("Blocking Rules");
+    for (const rule of blocking) out += bullet(String(rule));
+    out += "\n";
+  }
+  const acceptance = asArray(handoff.acceptance || handoff.acceptance_criteria);
+  if (acceptance.length > 0) {
+    out += section("Acceptance Criteria");
+    for (const item of acceptance) out += bullet(String(item));
+    out += "\n";
+  }
+  const nextSteps = asArray(handoff.next_steps);
+  if (nextSteps.length > 0) {
+    out += section("Next Steps");
+    for (const step of nextSteps) out += bullet(String(step));
+  }
+  return out;
+}
+
 function renderGenericJson(doc) {
   const kind = String(doc.kind || "json");
   const meta = doc.meta && typeof doc.meta === "object" ? doc.meta : {};
   let out = "";
   out += line("Kind", kind);
   if (meta.title) out += line("Title", colorize("blue", String(meta.title)));
-  if (meta.status) out += line("Status", colorize("yellow", String(meta.status)));
+  if (meta.status) out += line("Status", colorize(statusColor(meta.status), String(meta.status)));
   if (meta.created) out += line("Created", colorize("green", String(meta.created)));
   if (meta.updated) out += line("Updated", colorize("green", String(meta.updated)));
   if (meta.summary) out += line("Summary", String(meta.summary));
   out += "\n";
-  out += section("Content");
-  out += `${JSON.stringify(doc, null, 2)}\n`;
+  out += section("Metadata");
+  const important = ["id", "owner", "assignee", "priority", "session_priority", "bucket", "scope", "source"];
+  for (const key of important) {
+    if (meta[key] !== undefined && meta[key] !== null && String(meta[key]).length) {
+      out += bullet(`${key}: ${String(meta[key])}`);
+    }
+  }
   return out;
 }
 
@@ -177,8 +279,10 @@ function humanizeSlug(value) {
 
 function statusColor(status) {
   const s = lower(status);
-  if (s === "todo" || s === "open") return "yellow";
-  if (s === "in_progress" || s === "ready") return "cyan";
+  if (s === "todo") return "yellow";
+  if (s === "open") return "cyan";
+  if (s === "ready") return "blue";
+  if (s === "in_progress") return "magenta";
   if (s === "blocked") return "red";
   if (s === "done" || s === "completed") return "green";
   if (s === "archived" || s === "cancelled") return "dim";
@@ -292,7 +396,7 @@ async function main() {
   process.stdout.write(`${colorize("magenta", "---")}\n`);
 
   const content = fs.readFileSync(file.path, "utf8");
-  if (args.raw) {
+  if (args.raw || args.json) {
     process.stdout.write(content);
     return;
   }
@@ -302,6 +406,14 @@ async function main() {
     if (doc && typeof doc === "object" && !Array.isArray(doc)) {
       if (String(doc.kind || "") === "directive_task") {
         process.stdout.write(renderDirectiveTask(doc));
+        return;
+      }
+      if (String(doc.kind || "") === "directive_session_meta") {
+        process.stdout.write(renderDirectiveSessionMeta(doc));
+        return;
+      }
+      if (String(doc.kind || "") === "directive_handoff") {
+        process.stdout.write(renderDirectiveHandoff(doc));
         return;
       }
       process.stdout.write(renderGenericJson(doc));

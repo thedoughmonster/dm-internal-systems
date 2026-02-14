@@ -2,7 +2,7 @@
 
 import path from "node:path";
 import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
-import { ensureCleanWorkingTree, log, currentBranch, changedFiles } from "./_git_helpers.mjs";
+import { ensureCleanWorkingTree, log, currentBranch, changedFiles, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -46,7 +46,7 @@ function main() {
   const session = String(args.session || args.guid || "").trim();
   const task = String(args.task || "").trim();
   if (!session || !task) {
-    process.stderr.write(`${usage()}\n`);
+    alert("error", ["Missing required --session/--task", usage()], { color: "red" });
     process.exit(1);
   }
 
@@ -119,6 +119,6 @@ function main() {
 try {
   main();
 } catch (error) {
-  process.stderr.write(`${error.message}\n`);
+  alert("error", String(error && error.message ? error.message : "Unknown error"), { color: "red" });
   process.exit(1);
 }
