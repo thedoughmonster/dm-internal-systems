@@ -3,8 +3,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -230,28 +230,19 @@ async function requireDirective(root, args) {
 
   if (!stdin.isTTY) throw new Error("Missing required --directive in non-interactive mode.");
   if (directives.length === 0) throw new Error("No available directives found.");
-
-  process.stdout.write(`${colorize("cyan", "Available directives:")}\n`);
-  for (let i = 0; i < directives.length; i += 1) {
-    const d = directives[i];
-    process.stdout.write(`  ${colorize("green", String(i + 1))}) ${d.session}  ${colorize("magenta", `[${d.status}]`)}  ${d.title}\n`);
-  }
-
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Select directive number (required): ")).trim();
-    if (!input) throw new Error("Missing required directive selection.");
-    if (/^\d+$/.test(input)) {
-      const n = Number(input);
-      if (n < 1 || n > directives.length) throw new Error("Invalid directive selection.");
-      return directives[n - 1];
-    }
-    const named = directives.find((d) => d.session === input);
-    if (!named) throw new Error("Invalid directive selection.");
-    return named;
-  } finally {
-    rl.close();
-  }
+  const selected = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select directive:",
+    options: directives.map((d) => ({
+      label: `${d.session}  [${d.status}]  ${d.title}`,
+      value: d.session,
+    })),
+    defaultIndex: 0,
+  });
+  const named = directives.find((d) => d.session === selected);
+  if (!named) throw new Error("Invalid directive selection.");
+  return named;
 }
 
 async function requireFile(directive, args) {
@@ -266,28 +257,19 @@ async function requireFile(directive, args) {
   }
 
   if (!stdin.isTTY) throw new Error("Missing required --file in non-interactive mode.");
-
-  process.stdout.write(`${colorize("cyan", "Available files:")}\n`);
-  for (let i = 0; i < files.length; i += 1) {
-    const createdPart = files[i].created ? `  ${colorize("green", `created: ${files[i].created}`)}` : "";
-    process.stdout.write(`  ${colorize("green", String(i + 1))}) ${colorize("blue", files[i].description)}${createdPart}\n`);
-  }
-
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Select file number (required): ")).trim();
-    if (!input) throw new Error("Missing required file selection.");
-    if (/^\d+$/.test(input)) {
-      const n = Number(input);
-      if (n < 1 || n > files.length) throw new Error("Invalid file selection.");
-      return files[n - 1];
-    }
-    const named = files.find((f) => f.name === input);
-    if (!named) throw new Error("Invalid file selection.");
-    return named;
-  } finally {
-    rl.close();
-  }
+  const selected = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select file:",
+    options: files.map((f) => ({
+      label: `${f.description}${f.created ? `  created: ${f.created}` : ""}`,
+      value: f.name,
+    })),
+    defaultIndex: 0,
+  });
+  const named = files.find((f) => f.name === selected);
+  if (!named) throw new Error("Invalid file selection.");
+  return named;
 }
 
 async function main() {

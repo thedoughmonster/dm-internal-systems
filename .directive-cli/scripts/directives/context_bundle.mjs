@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 const ROLES = ["architect", "executor", "pair", "auditor"];
 const COLORS = {
@@ -552,25 +553,15 @@ async function runDirectiveFileShow(root, args) {
     chosen = files.find((f) => f.name === explicitFile);
     if (!chosen) throw new Error(`File not found in directive: ${explicitFile}`);
   } else {
-    process.stdout.write(`${colorize("cyan", "Available files:")}\n`);
-    for (let i = 0; i < files.length; i += 1) {
-      process.stdout.write(`  ${colorize("green", String(i + 1))}) ${files[i].name}\n`);
-    }
-    const rl = createInterface({ input: stdin, output: stdout });
-    try {
-      const input = (await rl.question("Select file number (required): ")).trim();
-      if (!input) throw new Error("Missing required file selection for show.");
-      if (/^\d+$/.test(input)) {
-        const choice = Number(input);
-        if (choice < 1 || choice > files.length) throw new Error("Invalid file selection.");
-        chosen = files[choice - 1];
-      } else {
-        chosen = files.find((f) => f.name === input);
-        if (!chosen) throw new Error("Invalid file selection.");
-      }
-    } finally {
-      rl.close();
-    }
+    const selected = await selectOption({
+      input: stdin,
+      output: stdout,
+      label: "Select file:",
+      options: files.map((f) => ({ label: f.name, value: f.name })),
+      defaultIndex: 0,
+    });
+    chosen = files.find((f) => f.name === selected) || null;
+    if (!chosen) throw new Error("Invalid file selection.");
   }
 
   const content = fs.readFileSync(chosen.path, "utf8");
@@ -726,30 +717,24 @@ async function requireBootstrapProfile(args, configPath) {
     const rl = createInterface({ input: stdin, output: stdout });
     try {
       if (existing.length > 0) {
-        process.stdout.write(`${colorize("cyan", "Available profiles:")}\n`);
-        for (let i = 0; i < existing.length; i += 1) {
-          process.stdout.write(`  ${colorize("green", String(i + 1))}) ${existing[i]}\n`);
-        }
-        process.stdout.write(`  ${colorize("yellow", String(existing.length + 1))}) create-new\n`);
+        const selected = await selectOption({
+          input: stdin,
+          output: stdout,
+          label: "Select profile:",
+          options: [
+            ...existing.map((p) => ({ label: p, value: p })),
+            { label: "create-new", value: "__create_new__" },
+          ],
+          defaultIndex: 0,
+        });
+        if (selected !== "__create_new__") return selected;
+        const custom = (await rl.question("New profile name (required): ")).trim();
+        if (!custom) throw new Error("Missing required new profile name for context bootstrap.");
+        return sanitizeProfileName(custom);
       }
 
-      const firstPrompt = existing.length > 0
-        ? "Select profile number or enter profile name (required): "
-        : "Profile name (required): ";
-      const input = (await rl.question(firstPrompt)).trim();
+      const input = (await rl.question("Profile name (required): ")).trim();
       if (!input) throw new Error("Missing required profile selection for context bootstrap.");
-
-      if (existing.length > 0 && /^\d+$/.test(input)) {
-        const choice = Number(input);
-        if (choice >= 1 && choice <= existing.length) return existing[choice - 1];
-        if (choice === existing.length + 1) {
-          const custom = (await rl.question("New profile name (required): ")).trim();
-          if (!custom) throw new Error("Missing required new profile name for context bootstrap.");
-          return sanitizeProfileName(custom);
-        }
-        throw new Error("Invalid profile selection.");
-      }
-
       return sanitizeProfileName(input);
     } finally {
       rl.close();
@@ -767,25 +752,13 @@ async function requireBundleRole(args) {
   }
 
   if (stdin.isTTY) {
-    const rl = createInterface({ input: stdin, output: stdout });
-    try {
-      process.stdout.write(`${colorize("cyan", "Available roles:")}\n`);
-      for (let i = 0; i < ROLES.length; i += 1) {
-        process.stdout.write(`  ${colorize("green", String(i + 1))}) ${ROLES[i]}\n`);
-      }
-      const input = (await rl.question("Select role number or role name (required): ")).trim();
-      if (!input) throw new Error("Missing required role selection for context bootstrap.");
-      if (/^\d+$/.test(input)) {
-        const choice = Number(input);
-        if (choice >= 1 && choice <= ROLES.length) return ROLES[choice - 1];
-        throw new Error("Invalid role selection.");
-      }
-      const named = sanitizeRoleName(input);
-      assertValidRole(named);
-      return named;
-    } finally {
-      rl.close();
-    }
+    return await selectOption({
+      input: stdin,
+      output: stdout,
+      label: "Select role:",
+      options: ROLES.map((r) => ({ label: r, value: r })),
+      defaultIndex: 0,
+    });
   }
 
   throw new Error("Missing required --role for context bootstrap.");
@@ -827,31 +800,25 @@ async function requireStartTask(args, root) {
   if (!directiveKey) return null;
   const scoped = tasks.filter((t) => t.session === directiveKey);
 
-  process.stdout.write(`${colorize("cyan", "Available tasks (optional):")}\n`);
   if (scoped.length === 0) {
-    process.stdout.write(`  ${colorize("dim", "(none)")}\n`);
+    process.stdout.write(`${colorize("cyan", "Available tasks (optional):")} ${colorize("dim", "(none)")}\n`);
     return null;
   }
-
-  process.stdout.write(`  ${colorize("yellow", "0")}) skip task selection\n`);
-  for (let i = 0; i < scoped.length; i += 1) {
-    const t = scoped[i];
-    process.stdout.write(
-      `  ${colorize("green", String(i + 1))}) ${t.task_slug}  ${colorize("magenta", `[${t.task_status}]`)}  ${t.task_title}\n`,
-    );
-  }
-
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Select task number (optional, default 0): ")).trim();
-    if (!input || input === "0") return null;
-    if (!/^\d+$/.test(input)) throw new Error("Invalid task selection.");
-    const choice = Number(input);
-    if (choice < 1 || choice > scoped.length) throw new Error("Invalid task selection.");
-    return scoped[choice - 1];
-  } finally {
-    rl.close();
-  }
+  const selected = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select task (optional):",
+    options: [
+      { label: "skip task selection", value: "__skip__" },
+      ...scoped.map((t) => ({
+        label: `${t.task_slug}  [${t.task_status}]  ${t.task_title}`,
+        value: t.task_slug,
+      })),
+    ],
+    defaultIndex: 0,
+  });
+  if (selected === "__skip__") return null;
+  return scoped.find((t) => t.task_slug === selected) || null;
 }
 
 async function requireStartDirective(args, root) {
@@ -866,29 +833,19 @@ async function requireStartDirective(args, root) {
   if (!stdin.isTTY) return null;
   if (directives.length === 0) throw new Error("No available directives found.");
 
-  process.stdout.write(`${colorize("cyan", "Available directives:")}\n`);
-  for (let i = 0; i < directives.length; i += 1) {
-    const d = directives[i];
-    process.stdout.write(
-      `  ${colorize("green", String(i + 1))}) ${d.session}  ${colorize("magenta", `[${d.status}]`)}  ${d.title}\n`,
-    );
-  }
-
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Select directive number (required): ")).trim();
-    if (!input) throw new Error("Missing required directive selection for codex start.");
-    if (/^\d+$/.test(input)) {
-      const choice = Number(input);
-      if (choice < 1 || choice > directives.length) throw new Error("Invalid directive selection.");
-      return directives[choice - 1];
-    }
-    const matched = directives.find((d) => d.session === input);
-    if (!matched) throw new Error("Invalid directive selection.");
-    return matched;
-  } finally {
-    rl.close();
-  }
+  const selected = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select directive:",
+    options: directives.map((d) => ({
+      label: `${d.session}  [${d.status}]  ${d.title}`,
+      value: d.session,
+    })),
+    defaultIndex: 0,
+  });
+  const matched = directives.find((d) => d.session === selected);
+  if (!matched) throw new Error("Invalid directive selection.");
+  return matched;
 }
 
 function upsertProfileBlock(configPath, profileName, block, dryRun) {

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 const KNOWN_AGENTS = ["codex", "claude-code", "aider", "custom"];
 
@@ -70,24 +71,13 @@ async function resolveAgent(args) {
   const explicit = sanitizeAgent(args.agent);
   if (explicit) return explicit;
   if (args["no-prompt"] || !stdin.isTTY) throw new Error("Missing required --agent");
-
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    process.stdout.write("Available agents:\n");
-    for (let i = 0; i < KNOWN_AGENTS.length; i += 1) {
-      process.stdout.write(`  ${i + 1}) ${KNOWN_AGENTS[i]}\n`);
-    }
-    const input = (await rl.question("Select agent number or name (required): ")).trim();
-    if (!input) throw new Error("Missing required agent selection.");
-    if (/^\d+$/.test(input)) {
-      const choice = Number(input);
-      if (choice >= 1 && choice <= KNOWN_AGENTS.length) return KNOWN_AGENTS[choice - 1];
-      throw new Error("Invalid agent selection.");
-    }
-    return sanitizeAgent(input);
-  } finally {
-    rl.close();
-  }
+  return await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select agent:",
+    options: KNOWN_AGENTS.map((a) => ({ label: a, value: a })),
+    defaultIndex: 0,
+  });
 }
 
 async function resolveModel(args) {

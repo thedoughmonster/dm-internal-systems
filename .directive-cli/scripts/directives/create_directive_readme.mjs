@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
@@ -97,6 +98,7 @@ function usage() {
     "  --source <role>                  Metadata source (default: architect)",
     "  --scope <name>                   Metadata scope (default: directives)",
     "  --no-git                         Disable auto branch/commit/merge workflow",
+    "  --editor                         Open terminal editor template for directive input",
     "  --no-prompt                      Disable prompts for missing title/summary",
     "  --dry-run                        Print output path and content only",
     "  --help                           Show this help",
@@ -136,6 +138,58 @@ function archiveBranchName(sessionName) {
   return `chore/directive-new-${slug}`;
 }
 
+function shellQuoteSingle(value) {
+  return `'${String(value).replace(/'/g, `'\"'\"'`)}'`;
+}
+
+function parseEditorDoc(raw, filePath) {
+  let doc;
+  try {
+    doc = JSON.parse(raw);
+  } catch {
+    throw new Error(`Editor template must remain valid JSON: ${filePath}`);
+  }
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    throw new Error(`Editor template root must be an object: ${filePath}`);
+  }
+  const goals = Array.isArray(doc.goals)
+    ? doc.goals.map((g) => String(g || "").trim()).filter(Boolean)
+    : [];
+  return {
+    title: String(doc.title || "").trim(),
+    summary: String(doc.summary || "").trim(),
+    branchType: normalizeBranchType(String(doc.branch_type || "")),
+    goals,
+  };
+}
+
+function openEditorTemplate(initial) {
+  const editor = String(process.env.VISUAL || process.env.EDITOR || "nano").trim();
+  const tmpPath = path.join(os.tmpdir(), `dc-newdirective-${Date.now()}-${process.pid}.json`);
+  const template = {
+    title: String(initial.title || ""),
+    summary: String(initial.summary || ""),
+    branch_type: String(initial.branchType || "feature"),
+    goals: Array.isArray(initial.goals) && initial.goals.length > 0 ? initial.goals : [""],
+  };
+  fs.writeFileSync(tmpPath, `${JSON.stringify(template, null, 2)}\n`, "utf8");
+  const cmd = `${editor} ${shellQuoteSingle(tmpPath)}`;
+  const result = spawnSync("bash", ["-lc", cmd], { stdio: "inherit" });
+  try {
+    if (result.status !== 0) {
+      throw new Error(`Editor exited with status ${result.status ?? "unknown"}`);
+    }
+    const edited = fs.readFileSync(tmpPath, "utf8");
+    return parseEditorDoc(edited, tmpPath);
+  } finally {
+    try {
+      fs.unlinkSync(tmpPath);
+    } catch {
+      // no-op
+    }
+  }
+}
+
 async function resolvePromptedValue(args) {
   let title = args.title ? String(args.title).trim() : "";
   let summary = args.summary ? String(args.summary).trim() : "";
@@ -146,32 +200,61 @@ async function resolvePromptedValue(args) {
 
   if (!args["no-prompt"] && stdin.isTTY) {
     const rl = createInterface({ input: stdin, output: stdout });
-    if (!title) title = (await rl.question("Directive title: ")).trim();
-    if (!summary) summary = (await rl.question("Directive summary (one line): ")).trim();
-    if (!args["directive-branch"] && !branchType) {
-      branchType = await selectOption({
-        input: stdin,
-        output: stdout,
-        label: "Select branch type:",
-        options: [
-          { label: "feature", value: "feature" },
-          { label: "chore", value: "chore" },
-          { label: "hotfix", value: "hotfix" },
-          { label: "fix", value: "fix" },
-          { label: "release", value: "release" },
-        ],
-        defaultIndex: 0,
-      });
-    }
-    if (goals.length === 0) {
-      process.stdout.write("Add directive goals, one per line (blank line to finish).\n");
-      while (true) {
-        const goal = (await rl.question(`Goal ${goals.length + 1}: `)).trim();
-        if (!goal) break;
-        goals.push(goal);
+    try {
+      let useEditor = Boolean(args.editor);
+      if (!useEditor && !title && !summary && goals.length === 0) {
+        const mode = await selectOption({
+          input: stdin,
+          output: stdout,
+          label: "Choose directive input mode:",
+          options: [
+            { label: "Prompt fields", value: "prompt" },
+            { label: "Open editor template", value: "editor" },
+          ],
+          defaultIndex: 0,
+        });
+        useEditor = mode === "editor";
       }
+
+      if (useEditor) {
+        const edited = openEditorTemplate({ title, summary, branchType, goals });
+        if (edited.title) title = edited.title;
+        if (edited.summary) summary = edited.summary;
+        if (edited.branchType) branchType = edited.branchType;
+        if (edited.goals.length > 0) {
+          goals.length = 0;
+          goals.push(...edited.goals);
+        }
+      } else {
+        if (!title) title = (await rl.question("Directive title: ")).trim();
+        if (!summary) summary = (await rl.question("Directive summary (one line): ")).trim();
+        if (!args["directive-branch"] && !branchType) {
+          branchType = await selectOption({
+            input: stdin,
+            output: stdout,
+            label: "Select branch type:",
+            options: [
+              { label: "feature", value: "feature" },
+              { label: "chore", value: "chore" },
+              { label: "hotfix", value: "hotfix" },
+              { label: "fix", value: "fix" },
+              { label: "release", value: "release" },
+            ],
+            defaultIndex: 0,
+          });
+        }
+        if (goals.length === 0) {
+          process.stdout.write("Add directive goals, one per line (blank line to finish).\n");
+          while (true) {
+            const goal = (await rl.question(`Goal ${goals.length + 1}: `)).trim();
+            if (!goal) break;
+            goals.push(goal);
+          }
+        }
+      }
+    } finally {
+      rl.close();
     }
-    rl.close();
   }
   return {
     title: title || "new directive",
