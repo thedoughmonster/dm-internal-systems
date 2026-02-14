@@ -52,6 +52,15 @@ function parseArgs(argv) {
   return args;
 }
 
+const BRANCH_TYPE_VALUES = new Set(["feature", "chore", "hotfix", "fix", "release"]);
+
+function normalizeBranchType(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (!raw) return "";
+  if (raw === "feat") return "feature";
+  return raw;
+}
+
 function nextAvailableSessionName(directivesRoot, baseName) {
   if (!fs.existsSync(path.join(directivesRoot, baseName))) return baseName;
   let n = 2;
@@ -75,7 +84,8 @@ function usage() {
     "  --title <text>                   Directive title (default: prompted)",
     "  --summary <text>                 One-line summary (default: prompted)",
     "  --goal <text>                    Goal line (repeatable; prompts when interactive)",
-    "  --directive-branch <name>        Branch name (default: feat/<directive-slug>)",
+    "  --branch-type <type>             feature|chore|hotfix|fix|release (default: prompted/feature)",
+    "  --directive-branch <name>        Branch name (default: <branch-type>/<directive-slug>)",
     "  --directive-base-branch <name>   Base branch (default: dev)",
     "  --owner <name>                   Owner metadata (default: operator)",
     "  --assignee <name>                Assignee metadata (default: null)",
@@ -128,6 +138,7 @@ function archiveBranchName(sessionName) {
 async function resolvePromptedValue(args) {
   let title = args.title ? String(args.title).trim() : "";
   let summary = args.summary ? String(args.summary).trim() : "";
+  let branchType = normalizeBranchType(args["branch-type"] || "");
   const goals = Array.isArray(args.goal)
     ? args.goal.map((g) => String(g || "").trim()).filter(Boolean)
     : [];
@@ -136,6 +147,11 @@ async function resolvePromptedValue(args) {
     const rl = createInterface({ input: stdin, output: stdout });
     if (!title) title = (await rl.question("Directive title: ")).trim();
     if (!summary) summary = (await rl.question("Directive summary (one line): ")).trim();
+    if (!args["directive-branch"] && !branchType) {
+      const prompt = "Branch type (feature|chore|hotfix|fix|release) [feature]: ";
+      const answer = normalizeBranchType(await rl.question(prompt));
+      branchType = answer || "feature";
+    }
     if (goals.length === 0) {
       process.stdout.write("Add directive goals, one per line (blank line to finish).\n");
       while (true) {
@@ -150,6 +166,7 @@ async function resolvePromptedValue(args) {
     title: title || "new directive",
     summary: summary || "Define and execute the next verified directive scope.",
     goals,
+    branchType: branchType || "feature",
   };
 }
 
@@ -165,6 +182,11 @@ async function main() {
   const title = prompted.title;
   const summary = prompted.summary;
   const titleSlug = slugify(title) || "directive";
+  const branchType = normalizeBranchType(prompted.branchType || args["branch-type"] || "");
+  if (branchType && !BRANCH_TYPE_VALUES.has(branchType)) {
+    process.stderr.write(`Invalid --branch-type value: ${branchType}\n`);
+    process.exit(1);
+  }
 
   const directiveId = String(args.id || args.guid || randomUUID()).trim();
   if (!isUuid(directiveId)) {
@@ -212,7 +234,7 @@ async function main() {
       title,
       summary,
       goals: prompted.goals,
-      directive_branch: String(args["directive-branch"] || `feat/${directiveSlug}`),
+      directive_branch: String(args["directive-branch"] || `${branchType || "feature"}/${directiveSlug}`),
       directive_base_branch: String(args["directive-base-branch"] || "dev"),
       directive_merge_status: "open",
       commit_policy: String(args["commit-policy"] || "end_of_directive"),

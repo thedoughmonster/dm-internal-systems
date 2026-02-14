@@ -351,6 +351,38 @@ test("newdirective dry-run includes goals from repeatable --goal flags", () => {
   assert.deepEqual(doc.meta.goals, ["first goal", "second goal"]);
 });
 
+test("newdirective dry-run supports --branch-type for directive branch naming", () => {
+  const output = run(path.join(directivesBinRoot, "newdirective"), [
+    "--dry-run",
+    "--title",
+    "branch type test",
+    "--summary",
+    "summary",
+    "--branch-type",
+    "hotfix",
+    "--no-prompt",
+  ]);
+  const jsonStart = output.indexOf("{");
+  assert.ok(jsonStart >= 0, "Expected JSON payload in dry-run output");
+  const doc = JSON.parse(output.slice(jsonStart));
+  assert.equal(doc.meta.directive_branch, "hotfix/branch-type-test");
+});
+
+test("newdirective fails on invalid --branch-type", () => {
+  const result = runExpectFailure(path.join(directivesBinRoot, "newdirective"), [
+    "--dry-run",
+    "--title",
+    "invalid branch type",
+    "--summary",
+    "summary",
+    "--branch-type",
+    "banana",
+    "--no-prompt",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Invalid --branch-type value/);
+});
+
 test("newtask dry-run emits json task path in existing session", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
