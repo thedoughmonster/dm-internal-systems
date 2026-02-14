@@ -263,6 +263,8 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /validate/);
   assert.match(output, /context/);
   assert.match(output, /launch codex/);
+  assert.match(output, /launch switch/);
+  assert.match(output, /launch handoff/);
 });
 
 test("architect authoring lock blocks execution-oriented commands before task selection", () => {
@@ -620,6 +622,39 @@ test("newdirective fails when title already exists", (t) => {
   ]);
   const text = `${result.stdout}\n${result.stderr}`;
   assert.match(text, /Directive title already exists/);
+});
+
+test("newdirective with auto-git pauses and writes pending state when tree is dirty", (t) => {
+  const tag = randomTag();
+  const sessionName = `itest-pending-autogit-${tag}`;
+  const title = `pending autogit ${tag}`;
+  const dirtyMarker = path.join(repoRoot, `.directive-cli/.itest-dirty-${tag}.tmp`);
+  const pendingPath = path.join(
+    repoRoot,
+    ".directive-cli",
+    "state",
+    `pending-directive-new-${sessionName}.json`,
+  );
+
+  t.after(() => {
+    const sessionDir = path.join(directivesRoot, sessionName);
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+    if (fs.existsSync(dirtyMarker)) fs.rmSync(dirtyMarker, { force: true });
+    if (fs.existsSync(pendingPath)) fs.rmSync(pendingPath, { force: true });
+  });
+
+  fs.writeFileSync(dirtyMarker, "dirty\n", "utf8");
+  const output = run(path.join(directivesBinRoot, "newdirective"), [
+    "--session",
+    sessionName,
+    "--title",
+    title,
+    "--summary",
+    "pending autogit summary",
+    "--no-prompt",
+  ]);
+  assert.match(output, /AUTO-GIT PAUSED/);
+  assert.ok(fs.existsSync(pendingPath), "Expected pending auto-git state file");
 });
 
 test("newtask dry-run emits json task path in existing session", () => {
@@ -1043,6 +1078,112 @@ test("cli launch codex bootstraps profile and launches configured binary", (t) =
   );
   const logFiles = fs.existsSync(tmpLogDir) ? fs.readdirSync(tmpLogDir).filter((f) => f.endsWith(".log")) : [];
   assert.ok(logFiles.length >= 1, "Expected at least one session log file");
+});
+
+test("cli launch switch bootstraps profile and launches configured binary", (t) => {
+  const tag = randomTag();
+  const tmpCodex = path.join("/tmp", `dc-codex-switch-home-${tag}`);
+  const tmpBundleDir = path.join("/tmp", `dc-codex-switch-bundle-${tag}`);
+  const tmpLogDir = path.join("/tmp", `dc-codex-switch-logs-${tag}`);
+  const outPath = path.join(tmpBundleDir, "compiled.md");
+  const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
+
+  t.after(() => {
+    if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpLogDir)) fs.rmSync(tmpLogDir, { recursive: true, force: true });
+  });
+
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "launch",
+    "switch",
+    "--codex-home",
+    tmpCodex,
+    "--role",
+    "executor",
+    "--profile",
+    "itest_switch",
+    "--codex-bin",
+    "/bin/true",
+    "--session-log-dir",
+    tmpLogDir,
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+  ]);
+
+  assert.match(output, /Switching codex session/);
+  assert.match(output, /Starting codex with profile 'itest_switch'/);
+  const configPath = path.join(tmpCodex, "config.toml");
+  assert.ok(fs.existsSync(configPath), "Expected codex config.toml to be created");
+  assert.ok(fs.existsSync(path.join(tmpBundleDir, "startup.md")), "Expected startup instructions file to be created");
+  const logFiles = fs.existsSync(tmpLogDir) ? fs.readdirSync(tmpLogDir).filter((f) => f.endsWith(".log")) : [];
+  assert.ok(logFiles.length >= 1, "Expected at least one session log file");
+});
+
+test("cli launch handoff creates handoff and launches configured binary", (t) => {
+  const tag = randomTag();
+  const sessionName = `itest-launch-handoff-${tag}`;
+  const title = `launch-handoff-${tag}`;
+  const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const tmpCodex = path.join("/tmp", `dc-codex-handoff-home-${tag}`);
+  const tmpBundleDir = path.join("/tmp", `dc-codex-handoff-bundle-${tag}`);
+  const tmpLogDir = path.join("/tmp", `dc-codex-handoff-logs-${tag}`);
+  const outPath = path.join(tmpBundleDir, "compiled.md");
+  const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
+
+  t.after(() => {
+    const sessionDir = path.join(directivesRoot, sessionName);
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpCodex)) fs.rmSync(tmpCodex, { recursive: true, force: true });
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(tmpLogDir)) fs.rmSync(tmpLogDir, { recursive: true, force: true });
+  });
+
+  run(path.join(directivesBinRoot, "newdirective"), [
+    "--session",
+    sessionName,
+    "--title",
+    title,
+    "--summary",
+    "handoff launch summary",
+    "--no-git",
+    "--no-prompt",
+  ]);
+
+  const resolvedSession = findSessionByTitleSlug(titleSlug) || sessionName;
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "launch",
+    "handoff",
+    "--codex-home",
+    tmpCodex,
+    "--role",
+    "executor",
+    "--from-role",
+    "architect",
+    "--profile",
+    "itest_handoff",
+    "--directive",
+    resolvedSession,
+    "--codex-bin",
+    "/bin/true",
+    "--session-log-dir",
+    tmpLogDir,
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+    "--no-prompt",
+  ]);
+
+  assert.match(output, /Creating handoff artifact for role transition architect -> executor/);
+  assert.match(output, /Handoff created/);
+  assert.match(output, /Starting codex with profile 'itest_handoff'/);
+
+  const sessionDir = path.join(directivesRoot, resolvedSession);
+  const handoffPath = path.join(sessionDir, `${titleSlug}.handoff.json`);
+  assert.ok(fs.existsSync(handoffPath), "Expected handoff file to be created");
 });
 
 test("cli launch codex marks selected directive with no tasks as none_available", (t) => {

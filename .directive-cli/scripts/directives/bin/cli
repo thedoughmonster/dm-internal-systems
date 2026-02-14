@@ -247,6 +247,8 @@ usage() {
   print_command "$shown_mode" "context show" "both" "Show machine-readable context/profile metadata"
   print_command "$shown_mode" "context bootstrap" "op" "Update ~/.codex/config.toml profile wiring"
   print_command "$shown_mode" "launch codex" "op" "Prompt/select profile+role+directive, then launch codex"
+  print_command "$shown_mode" "launch switch" "op" "Switch to a new codex profile/role session"
+  print_command "$shown_mode" "launch handoff" "op" "Create handoff artifact, then switch codex role/session"
 
   print_command "$shown_mode" "directive new" "op" "Create <directive_slug>.meta.json"
   print_command "$shown_mode" "directive task" "agent" "Create <task_slug>.task.json"
@@ -308,6 +310,12 @@ is_operator_only_command() {
       return 0
       ;;
     launch:codex)
+      return 0
+      ;;
+    launch:switch)
+      return 0
+      ;;
+    launch:handoff)
       return 0
       ;;
     directive:new)
@@ -587,6 +595,12 @@ case "$cmd" in
     case "$sub" in
       codex)
         exec "${SCRIPT_DIR}/context" start "$@"
+        ;;
+      switch)
+        exec "${SCRIPT_DIR}/context" switch "$@"
+        ;;
+      handoff)
+        exec "${SCRIPT_DIR}/context" handoff "$@"
         ;;
       *)
         echo "Unknown launch command: ${sub:-<none>}" >&2

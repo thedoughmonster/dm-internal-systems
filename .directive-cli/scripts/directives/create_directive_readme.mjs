@@ -102,6 +102,7 @@ function usage() {
     "  --source <role>                  Metadata source (default: architect)",
     "  --scope <name>                   Metadata scope (default: directives)",
     "  --no-git                         Disable auto branch/commit/merge workflow",
+    "  --resume-auto-git                Resume pending auto-git finalize for an existing session",
     "  --editor                         Open terminal editor template for directive input",
     "  --no-prompt                      Disable prompts for missing title/summary",
     "  --dry-run                        Print output path and content only",
@@ -126,10 +127,14 @@ function currentBranch(cwd) {
   return String(result.stdout || "").trim();
 }
 
-function ensureCleanWorkingTree(cwd) {
+function listDirtyFiles(cwd) {
   const result = runGit(["status", "--porcelain"], cwd);
-  const dirty = String(result.stdout || "").trim();
-  if (dirty) throw new Error("Working tree must be clean before creating a directive with auto-git.");
+  return String(result.stdout || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.slice(3).trim())
+    .filter(Boolean);
 }
 
 function branchExistsLocal(branch, cwd) {
@@ -140,6 +145,67 @@ function branchExistsLocal(branch, cwd) {
 function archiveBranchName(sessionName) {
   const slug = String(sessionName || "").toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
   return `chore/directive-new-${slug}`;
+}
+
+function stateDir(repoRoot) {
+  return path.join(repoRoot, ".directive-cli", "state");
+}
+
+function pendingAutoGitPath(repoRoot, sessionName) {
+  const safe = String(sessionName || "").replace(/[^a-zA-Z0-9._-]+/g, "-");
+  return path.join(stateDir(repoRoot), `pending-directive-new-${safe}.json`);
+}
+
+function writePendingAutoGit(repoRoot, payload) {
+  const outPath = pendingAutoGitPath(repoRoot, payload.session_name);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  return outPath;
+}
+
+function readPendingAutoGit(repoRoot, sessionName) {
+  const p = pendingAutoGitPath(repoRoot, sessionName);
+  if (!fs.existsSync(p)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(p, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function removePendingAutoGit(repoRoot, sessionName) {
+  const p = pendingAutoGitPath(repoRoot, sessionName);
+  if (fs.existsSync(p)) fs.unlinkSync(p);
+}
+
+function printAlert(title, lines) {
+  const border = "=".repeat(110);
+  process.stdout.write(`+${border}+\n`);
+  process.stdout.write(`|  ${title}\n`);
+  process.stdout.write(`+${"-".repeat(110)}+\n`);
+  for (const line of lines) process.stdout.write(`|  ${line}\n`);
+  process.stdout.write(`+${border}+\n`);
+}
+
+function evaluateAutoGitReadiness(repoRoot, flowBranch) {
+  const dirtyFiles = listDirtyFiles(repoRoot);
+  const branch = currentBranch(repoRoot);
+  const branchAlreadyExists = branchExistsLocal(flowBranch, repoRoot);
+  return {
+    dirtyFiles,
+    branch,
+    branchAlreadyExists,
+    isReady: dirtyFiles.length === 0 && branch === "dev" && !branchAlreadyExists,
+  };
+}
+
+function executeAutoGitFlow(repoRoot, relSessionDir, flowBranch, commitMsg) {
+  runGit(["checkout", "-b", flowBranch, "dev"], repoRoot);
+  runGit(["add", "-f", relSessionDir], repoRoot);
+  runGit(["commit", "-m", commitMsg], repoRoot);
+  runGit(["checkout", "dev"], repoRoot);
+  runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);
+  runGit(["branch", "-D", flowBranch], repoRoot);
 }
 
 function shellQuoteSingle(value) {
@@ -276,6 +342,49 @@ async function main() {
   }
 
   const now = toUtcIso();
+
+  const repoRoot = getRepoRoot();
+  if (args["resume-auto-git"]) {
+    const sessionName = String(args.session || "").trim();
+    if (!sessionName) {
+      process.stderr.write("Missing --session for --resume-auto-git\n");
+      process.exit(1);
+    }
+    const pending = readPendingAutoGit(repoRoot, sessionName);
+    if (!pending) {
+      process.stderr.write(`No pending auto-git state found for session: ${sessionName}\n`);
+      process.exit(1);
+    }
+    const readiness = evaluateAutoGitReadiness(repoRoot, String(pending.flow_branch || ""));
+    if (!readiness.isReady) {
+      const lines = [];
+      if (readiness.dirtyFiles.length > 0) {
+        lines.push("Working tree is still dirty.");
+        for (const file of readiness.dirtyFiles.slice(0, 12)) lines.push(`  - ${file}`);
+        if (readiness.dirtyFiles.length > 12) lines.push(`  ... and ${readiness.dirtyFiles.length - 12} more`);
+      }
+      if (readiness.branch !== "dev") lines.push(`Checkout 'dev' first (current: ${readiness.branch}).`);
+      if (readiness.branchAlreadyExists) lines.push(`Delete or resolve existing local branch: ${pending.flow_branch}`);
+      printAlert("AUTO-GIT RESUME BLOCKED", lines);
+      process.exit(1);
+    }
+    if (args["dry-run"]) {
+      process.stdout.write(`[dry-run] resume auto-git for session: ${sessionName}\n`);
+      process.stdout.write(`[dry-run] branch: ${pending.flow_branch}\n`);
+      process.stdout.write(`[dry-run] commit: ${pending.commit_message}\n`);
+      process.exit(0);
+    }
+    executeAutoGitFlow(
+      repoRoot,
+      String(pending.session_dir_relative || ""),
+      String(pending.flow_branch || ""),
+      String(pending.commit_message || ""),
+    );
+    removePendingAutoGit(repoRoot, sessionName);
+    process.stdout.write(`Resumed and completed auto-git flow for session: ${sessionName}\n`);
+    process.exit(0);
+  }
+
   const prompted = await resolvePromptedValue(args);
   const title = prompted.title;
   const summary = prompted.summary;
@@ -380,22 +489,10 @@ async function main() {
     process.exit(1);
   }
   const autoGit = !args["no-git"];
-  const repoRoot = getRepoRoot();
   const relSessionDir = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
   const flowBranch = archiveBranchName(sessionName);
   const commitMsg = `chore(directive): create ${sessionName}`;
-
-  if (autoGit) {
-    ensureCleanWorkingTree(repoRoot);
-    const branch = currentBranch(repoRoot);
-    if (branch !== "dev") {
-      throw new Error(`Directive creation with auto-git must start on 'dev' (current: '${branch}').`);
-    }
-    if (branchExistsLocal(flowBranch, repoRoot)) {
-      throw new Error(`Auto-git branch already exists: ${flowBranch}`);
-    }
-    runGit(["checkout", "-b", flowBranch, "dev"], repoRoot);
-  }
+  const readiness = autoGit ? evaluateAutoGitReadiness(repoRoot, flowBranch) : null;
 
   try {
     fs.mkdirSync(sessionDir, { recursive: true });
@@ -403,11 +500,35 @@ async function main() {
     process.stdout.write(`Created ${metaPath}\n`);
 
     if (autoGit) {
-      runGit(["add", "-f", relSessionDir], repoRoot);
-      runGit(["commit", "-m", commitMsg], repoRoot);
-      runGit(["checkout", "dev"], repoRoot);
-      runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);
-      runGit(["branch", "-D", flowBranch], repoRoot);
+      if (readiness && !readiness.isReady) {
+        const pendingPath = writePendingAutoGit(repoRoot, {
+          kind: "directive_auto_git_pending",
+          schema_version: "1.0",
+          created_at: now,
+          session_name: sessionName,
+          session_dir_relative: relSessionDir,
+          flow_branch: flowBranch,
+          commit_message: commitMsg,
+          blockers: {
+            dirty_files: readiness.dirtyFiles,
+            current_branch: readiness.branch,
+            flow_branch_exists: readiness.branchAlreadyExists,
+          },
+        });
+        const lines = [];
+        lines.push(`Directive metadata has been created and pending state saved: ${pendingPath}`);
+        if (readiness.dirtyFiles.length > 0) {
+          lines.push("Auto-git is paused because working tree is dirty:");
+          for (const file of readiness.dirtyFiles.slice(0, 12)) lines.push(`  - ${file}`);
+          if (readiness.dirtyFiles.length > 12) lines.push(`  ... and ${readiness.dirtyFiles.length - 12} more`);
+        }
+        if (readiness.branch !== "dev") lines.push(`Auto-git requires branch 'dev' (current: ${readiness.branch}).`);
+        if (readiness.branchAlreadyExists) lines.push(`Auto-git flow branch already exists: ${flowBranch}`);
+        lines.push(`After cleanup, resume with: ./.directive-cli/dc directive new --resume-auto-git --session ${sessionName}`);
+        printAlert("AUTO-GIT PAUSED", lines);
+      } else {
+        executeAutoGitFlow(repoRoot, relSessionDir, flowBranch, commitMsg);
+      }
     }
   } catch (error) {
     if (autoGit) {

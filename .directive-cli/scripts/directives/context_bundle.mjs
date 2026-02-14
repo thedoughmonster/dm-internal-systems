@@ -29,7 +29,7 @@ function repoRoot() {
 }
 
 function parseArgs(argv) {
-  const args = { include: [] };
+  const args = { include: [], "handoff-allowlist-path": [] };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (!token.startsWith("--")) {
@@ -45,6 +45,12 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
+    if (key === "handoff-allowlist-path") {
+      if (!next || next.startsWith("--")) throw new Error("Missing value for --handoff-allowlist-path");
+      args["handoff-allowlist-path"].push(next);
+      i += 1;
+      continue;
+    }
     if (!next || next.startsWith("--")) args[key] = true;
     else {
       args[key] = next;
@@ -57,8 +63,10 @@ function parseArgs(argv) {
 function usage() {
   return [
     "Usage:",
-    "  dc context <build|check|show|bootstrap> [options]",
+    "  dc context <build|check|show|bootstrap|start|switch|handoff> [options]",
     "  dc launch codex [options]   # alias for: dc context start",
+    "  dc launch switch [options]  # alias for: dc context switch",
+    "  dc launch handoff [options] # alias for: dc context handoff",
     "",
     "Bundle options:",
     "  --out <path>            Output compiled context path (default: .codex/context/compiled.md)",
@@ -80,6 +88,14 @@ function usage() {
     "  --codex-bin <path>      Codex executable path for start (default: codex)",
     "  --config <path>         dc config path (default: .codex/dc.config.json)",
     "  --session-log-dir <p>   Session log directory (default: .directive-cli/session-logs)",
+    "  --from-role <name>      Sender role for handoff (default: last role or architect)",
+    "  --handoff-trigger <id>  Handoff trigger id (default: role_switch_handoff)",
+    "  --handoff-objective <t> Handoff objective text",
+    "  --handoff-blocking-rule <t> Handoff blocking rule text",
+    "  --handoff-task-file <p|null> Optional explicit task file path for handoff",
+    "  --handoff-required-reading <p> Required reading for handoff receiver",
+    "  --handoff-worktree-mode <m> clean_required|known_dirty_allowlist",
+    "  --handoff-allowlist-path <p> Repeatable allowlist path when worktree mode uses allowlist",
     "  --no-bootstrap          With start, skip bootstrap/update before launch",
     "  --dry-run               Preview config changes without writing",
     "",
@@ -927,6 +943,8 @@ function buildDcCommandReference() {
         "dc context build",
         "dc context bootstrap",
         "dc launch codex",
+        "dc launch switch",
+        "dc launch handoff",
       ],
       operator_and_machine: [
         "dc repo map",
@@ -998,6 +1016,8 @@ function buildDcCommandReference() {
       ],
       launch: [
         "dc launch codex",
+        "dc launch switch",
+        "dc launch handoff",
       ],
     },
   };
@@ -1375,6 +1395,113 @@ async function runStart(root, args) {
   launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition);
 }
 
+async function runSwitch(root, args) {
+  output(args, {
+    message: "Switching codex session to selected profile/role context.",
+    status: "info",
+  });
+  return runStart(root, args);
+}
+
+function resolvedHandoffDefaults(toRole, fromRole) {
+  const targetRole = String(toRole || "").trim().toLowerCase();
+  const senderRole = String(fromRole || "").trim().toLowerCase() || "architect";
+  const objective = targetRole === "executor"
+    ? "Execute approved directive tasks strictly via dc lifecycle/runbook scripts."
+    : `Continue directive lifecycle under role '${targetRole}'.`;
+  const blockingRule = targetRole === "executor"
+    ? "Architect must stop implementation and transfer control to executor."
+    : `Sender role '${senderRole}' must stop until role '${targetRole}' takes control.`;
+  return { objective, blockingRule };
+}
+
+function createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fromRole, toRole) {
+  const scriptPath = path.join(root, ".directive-cli", "scripts", "directives", "create_handoff.mjs");
+  const trigger = String(args["handoff-trigger"] || "role_switch_handoff").trim();
+  const defaults = resolvedHandoffDefaults(toRole, fromRole);
+  const objective = String(args["handoff-objective"] || defaults.objective).trim();
+  const blockingRule = String(args["handoff-blocking-rule"] || defaults.blockingRule).trim();
+  const taskFile = String(args["handoff-task-file"] || (selectedTask ? selectedTask.task_file : "null")).trim() || "null";
+  const requiredReading = String(args["handoff-required-reading"] || "apps/web/docs/guides/component-paradigm.md").trim();
+  const worktreeMode = String(args["handoff-worktree-mode"] || "clean_required").trim();
+  const allowlistPaths = Array.isArray(args["handoff-allowlist-path"]) ? args["handoff-allowlist-path"] : [];
+
+  const handoffArgs = [
+    scriptPath,
+    "--session",
+    selectedDirective.session,
+    "--from-role",
+    fromRole,
+    "--to-role",
+    toRole,
+    "--trigger",
+    trigger,
+    "--objective",
+    objective,
+    "--blocking-rule",
+    blockingRule,
+    "--task-file",
+    taskFile,
+    "--required-reading",
+    requiredReading,
+    "--worktree-mode",
+    worktreeMode,
+  ];
+  for (const p of allowlistPaths) {
+    handoffArgs.push("--allowlist-path", String(p));
+  }
+  if (args["dry-run"]) handoffArgs.push("--dry-run");
+  if (args["no-prompt"]) handoffArgs.push("--no-prompt");
+
+  const result = spawnSync(process.execPath, handoffArgs, {
+    cwd: root,
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (result.error) throw result.error;
+  if (typeof result.status === "number" && result.status !== 0) {
+    throw new Error("Failed to create handoff artifact before role switch.");
+  }
+}
+
+async function runHandoff(root, args) {
+  const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
+  const previousRole = readLastRole(codexHome);
+  const toRole = await requireBundleRole(args);
+  const fromRole = String(args["from-role"] || previousRole || "architect").trim().toLowerCase();
+  assertValidRole(fromRole);
+
+  const selectedDirective = await requireStartDirective(args, root);
+  if (!selectedDirective) throw new Error("Handoff switch requires a selected directive.");
+  const selectedTask = await requireStartTask({ ...args, directive: selectedDirective.session, session: selectedDirective.session }, root);
+
+  output(args, {
+    message: `Creating handoff artifact for role transition ${fromRole} -> ${toRole}.`,
+    status: "info",
+    from_role: fromRole,
+    to_role: toRole,
+    selected_directive: selectedDirective.session,
+  });
+
+  createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fromRole, toRole);
+
+  output(args, {
+    message: "Handoff created. Terminate current codex session, then launching target role context.",
+    status: "info",
+    from_role: fromRole,
+    to_role: toRole,
+    selected_directive: selectedDirective.session,
+  });
+
+  return runStart(root, {
+    ...args,
+    role: toRole,
+    directive: selectedDirective.session,
+    session: selectedDirective.session,
+    task: selectedTask ? selectedTask.task_slug : args.task,
+  });
+}
+
 function main() {
   let args;
   try {
@@ -1401,6 +1528,8 @@ function main() {
   if (cmd === "show") return runShow(root, args);
   if (cmd === "bootstrap") return runBootstrap(root, args);
   if (cmd === "start") return runStart(root, args);
+  if (cmd === "switch") return runSwitch(root, args);
+  if (cmd === "handoff") return runHandoff(root, args);
 
   process.stderr.write(`Unknown command: ${cmd}\n${usage()}\n`);
   process.exit(1);
