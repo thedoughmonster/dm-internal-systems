@@ -9,7 +9,7 @@ export function getRepoRoot() {
 }
 
 export function getDirectivesRoot() {
-  return path.join(getRepoRoot(), "apps/web/.local/directives");
+  return path.join(getRepoRoot(), ".directive-cli/directives");
 }
 
 export function isUuid(value) {

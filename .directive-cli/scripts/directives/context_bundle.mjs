@@ -10,6 +10,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
 import { listDirectiveSessions } from "./_directive_listing.mjs";
+import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 const ROLES = ["architect", "executor", "pair", "auditor"];
 const COLORS = {
@@ -635,7 +636,7 @@ function readDcConfig(root, args) {
 }
 
 function listAvailableDirectiveTasks(root) {
-  const base = path.join(root, "apps", "web", ".local", "directives");
+  const base = getDirectivesRoot();
   if (!fs.existsSync(base)) return [];
   const sessions = fs
     .readdirSync(base, { withFileTypes: true })
@@ -682,7 +683,7 @@ function listTasksForDirective(root, session) {
 }
 
 function listAvailableDirectives(root) {
-  const base = path.join(root, "apps", "web", ".local", "directives");
+  const base = getDirectivesRoot();
   return listDirectiveSessions(base, { includeArchived: false }).map((d) => ({
     session: d.session,
     session_dir: d.session_dir,
@@ -690,6 +691,10 @@ function listAvailableDirectives(root) {
     title: d.title,
     status: d.status,
   }));
+}
+
+function listDirectivesWithHandoff(root) {
+  return listAvailableDirectives(root).filter((d) => Boolean(readDirectiveHandoff(root, d.session)));
 }
 
 async function requireBootstrapProfile(args, configPath) {
@@ -776,6 +781,7 @@ async function requireStartTask(args, root) {
   const tasks = listAvailableDirectiveTasks(root);
   const explicit = selectTaskByArgs(tasks, args);
   if (explicit) return explicit;
+  if (args["no-task-select"]) return null;
 
   if (!stdin.isTTY) return null;
 
@@ -893,6 +899,50 @@ function writeLastRole(codexHome, role) {
   fs.writeFileSync(p, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
 }
 
+function readLatestStartupContext(root, preferredSession = "") {
+  const dir = path.join(root, ".codex", "context");
+  if (!fs.existsSync(dir)) return null;
+  const files = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.endsWith(".startup.json"))
+    .map((d) => path.join(dir, d.name))
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+  if (files.length === 0) return null;
+
+  const docs = files
+    .map((f) => loadJson(f))
+    .filter((doc) => doc && String(doc.kind || "") === "dc_startup_context");
+  if (docs.length === 0) return null;
+
+  const preferred = String(preferredSession || "").trim();
+  if (preferred) {
+    const match = docs.find((doc) => String(doc.directive && doc.directive.session || "") === preferred);
+    if (match) return match;
+  }
+  return docs[0];
+}
+
+function readDirectiveHandoff(root, sessionName) {
+  const session = String(sessionName || "").trim();
+  if (!session) return null;
+  const sessionDir = path.join(getDirectivesRoot(), session);
+  if (!fs.existsSync(sessionDir)) return null;
+  const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith(".handoff.json")).sort();
+  if (files.length === 0) return null;
+  const handoffPath = path.join(sessionDir, files[0]);
+  const doc = loadJson(handoffPath);
+  if (!doc || !doc.handoff || typeof doc.handoff !== "object" || Array.isArray(doc.handoff)) return null;
+  return { handoffPath, handoffDoc: doc };
+}
+
+function taskSlugFromHandoffTaskFile(taskFile) {
+  const raw = String(taskFile || "").trim();
+  if (!raw || raw === "null") return "";
+  const base = path.basename(raw);
+  if (!base.endsWith(".task.json")) return "";
+  return base.replace(/\.task\.json$/u, "");
+}
+
 function createLiveSessionLog(root, profileName, role, selectedDirective, selectedTask, logDirArg) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+Z$/, "Z");
   const safeProfile = String(profileName || "profile").replace(/[^a-zA-Z0-9_-]+/g, "-");
@@ -944,7 +994,6 @@ function buildDcCommandReference() {
         "dc context bootstrap",
         "dc launch codex",
         "dc launch switch",
-        "dc launch handoff",
       ],
       operator_and_machine: [
         "dc repo map",
@@ -956,6 +1005,7 @@ function buildDcCommandReference() {
         "dc help",
         "dc context check",
         "dc context show",
+        "dc launch handoff",
       ],
       machine_only: [
         "dc policy validate",
@@ -1185,7 +1235,9 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("Do not implement code changes or edit non-directive files in this phase.");
     lines.push("First produce a proposed task breakdown and request operator approval before creating task files.");
     lines.push("After creating task files, request operator confirmation that task contracts are correct.");
-    lines.push("Then create architect->executor handoff via dc directive handoff and stop for executor.");
+    lines.push("Then create architect->executor handoff via dc directive handoff.");
+    lines.push("After handoff is written, stop and instruct operator to exit this Codex session.");
+    lines.push("Operator must run dc launch handoff from a real terminal to enter executor context.");
   }
   return lines.join("\n");
 }
@@ -1207,6 +1259,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       "Ask operator to approve proposed task breakdown before creating files.",
       "Ask operator to approve task contracts after creation.",
       `Create handoff with 'dc directive handoff --session ${selectedDirective.session} --from-role architect --to-role executor ...' and then stop.`,
+      `Manual transition: ask operator to exit this Codex session, then run 'dc launch handoff --role executor --from-role architect --profile ${profileName} --directive ${selectedDirective.session}' from a real terminal.`,
     );
   }
   const doc = {
@@ -1392,6 +1445,16 @@ async function runStart(root, args) {
 
   writeLastRole(codexHome, role);
   if (args["dry-run"]) return;
+  if (!stdin.isTTY) {
+    output(args, {
+      message: `Non-interactive shell detected. Skipping codex launch. Run manually in a TTY: ${codexBin} --profile ${profileName}`,
+      status: "info",
+      role,
+      profile: profileName,
+      codex_bin: codexBin,
+    });
+    return;
+  }
   launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition);
 }
 
@@ -1467,13 +1530,69 @@ function createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fr
 async function runHandoff(root, args) {
   const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
   const previousRole = readLastRole(codexHome);
-  const toRole = await requireBundleRole(args);
-  const fromRole = String(args["from-role"] || previousRole || "architect").trim().toLowerCase();
-  assertValidRole(fromRole);
-
-  const selectedDirective = await requireStartDirective(args, root);
+  const requestedDirective = String(args.directive || args.session || process.env.DC_DIRECTIVE_SESSION || "").trim();
+  const startupCtx = readLatestStartupContext(root, requestedDirective);
+  const directiveRef = requestedDirective || String(startupCtx && startupCtx.directive ? startupCtx.directive.session : "").trim();
+  let selectedDirective = null;
+  if (directiveRef) {
+    selectedDirective = await requireStartDirective({ ...args, directive: directiveRef, session: directiveRef }, root);
+  } else if (stdin.isTTY) {
+    const handoffReady = listDirectivesWithHandoff(root);
+    if (handoffReady.length === 0) {
+      throw new Error("No directives with handoff artifacts found. Create handoff first with 'dc directive handoff ...'.");
+    }
+    const selected = await selectOption({
+      input: stdin,
+      output: stdout,
+      label: "Select directive (handoff ready):",
+      options: handoffReady.map((d) => ({
+        label: `${statusTag(d.status)} ${d.title}`,
+        color: statusColor(d.status),
+        value: d.session,
+      })),
+      defaultIndex: 0,
+    });
+    selectedDirective = handoffReady.find((d) => d.session === selected) || null;
+  } else {
+    throw new Error("Missing directive for launch handoff (no startup context directive available in non-interactive mode).");
+  }
   if (!selectedDirective) throw new Error("Handoff switch requires a selected directive.");
-  const selectedTask = await requireStartTask({ ...args, directive: selectedDirective.session, session: selectedDirective.session }, root);
+  const existingHandoff = readDirectiveHandoff(root, selectedDirective.session);
+  if (!existingHandoff) {
+    throw new Error(
+      `No handoff artifact found for directive '${selectedDirective.session}'. Create it first: dc directive handoff --session ${selectedDirective.session} --from-role architect --to-role executor ...`,
+    );
+  }
+  const toRoleRaw = String(
+    args.role
+    || (existingHandoff && existingHandoff.handoffDoc && existingHandoff.handoffDoc.handoff ? existingHandoff.handoffDoc.handoff.to_role : "")
+    || "",
+  ).trim().toLowerCase();
+  const toRole = toRoleRaw ? (() => { assertValidRole(toRoleRaw); return toRoleRaw; })() : await requireBundleRole(args);
+  const fromRole = String(
+    args["from-role"]
+    || (existingHandoff && existingHandoff.handoffDoc && existingHandoff.handoffDoc.handoff ? existingHandoff.handoffDoc.handoff.from_role : "")
+    || previousRole
+    || String(startupCtx && startupCtx.role ? startupCtx.role : "")
+    || "architect",
+  ).trim().toLowerCase();
+  assertValidRole(fromRole);
+  const taskFromHandoff = existingHandoff ? taskSlugFromHandoffTaskFile(existingHandoff.handoffDoc.handoff.task_file) : "";
+  const taskFromStartup = String(startupCtx && startupCtx.task ? startupCtx.task.slug || "" : "").trim();
+  const selectedTask = await requireStartTask(
+    {
+      ...args,
+      directive: selectedDirective.session,
+      session: selectedDirective.session,
+      task: String(args.task || taskFromHandoff || taskFromStartup || "").trim(),
+      "no-task-select": true,
+    },
+    root,
+  );
+  const fallbackProfile = sanitizeProfileName(path.basename(root));
+  const profileName = args.profile && String(args.profile).trim()
+    ? sanitizeProfileName(args.profile)
+    : (startupCtx && startupCtx.profile ? sanitizeProfileName(startupCtx.profile) : fallbackProfile);
 
   output(args, {
     message: `Creating handoff artifact for role transition ${fromRole} -> ${toRole}.`,
@@ -1482,8 +1601,29 @@ async function runHandoff(root, args) {
     to_role: toRole,
     selected_directive: selectedDirective.session,
   });
-
-  createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fromRole, toRole);
+  const explicitHandoffOverrides = Boolean(
+    args["handoff-trigger"]
+      || args["handoff-objective"]
+      || args["handoff-blocking-rule"]
+      || args["handoff-task-file"]
+      || args["handoff-required-reading"]
+      || args["handoff-worktree-mode"]
+      || (Array.isArray(args["handoff-allowlist-path"]) && args["handoff-allowlist-path"].length > 0)
+      || args["from-role"]
+      || args.role,
+  );
+  const canReuseExisting = Boolean(existingHandoff && !explicitHandoffOverrides);
+  if (canReuseExisting) {
+    output(args, {
+      message: `Using existing handoff artifact: ${existingHandoff.handoffPath}`,
+      status: "info",
+      from_role: fromRole,
+      to_role: toRole,
+      selected_directive: selectedDirective.session,
+    });
+  } else {
+    createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fromRole, toRole);
+  }
 
   output(args, {
     message: "Handoff created. Terminate current codex session, then launching target role context.",
@@ -1495,10 +1635,12 @@ async function runHandoff(root, args) {
 
   return runStart(root, {
     ...args,
+    profile: profileName,
     role: toRole,
     directive: selectedDirective.session,
     session: selectedDirective.session,
     task: selectedTask ? selectedTask.task_slug : args.task,
+    "no-task-select": true,
   });
 }
 

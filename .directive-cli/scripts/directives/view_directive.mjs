@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
 import { listDirectiveSessions } from "./_directive_listing.mjs";
+import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -298,7 +299,7 @@ function isArchivedStatus(status) {
 }
 
 function listAvailableDirectives(root) {
-  const base = path.join(root, "apps", "web", ".local", "directives");
+  const base = getDirectivesRoot();
   return listDirectiveSessions(base, { includeArchived: false }).map((d) => ({
     session: d.session,
     session_dir: d.session_dir,

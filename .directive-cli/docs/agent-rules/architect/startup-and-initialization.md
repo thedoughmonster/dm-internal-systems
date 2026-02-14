@@ -26,6 +26,9 @@
 18. Scan for completed directives where `directive_merge_status` is `open` or `merge_ready` and branch is not merged.
 19. For merge-ready directives, issue explicit Executor instruction to perform merge to `dev` only after required merge-safety evidence is present; otherwise keep session blocked with missing evidence called out.
 20. When creating a new directive session, scaffold `<directive_slug>.meta.json` using `newdirective` (or `node .directive-cli/scripts/directives/create_directive_readme.mjs` fallback) before any manual intake edits.
+21. After Architect writes `<directive_slug>.handoff.json` for Executor, stop in-session work and instruct operator to:
+    - exit current Codex session
+    - run `dc launch handoff --role executor --from-role architect --profile <profile> --directive <session>` from a real terminal (TTY)
 
 Priority rule for startup selection:
 

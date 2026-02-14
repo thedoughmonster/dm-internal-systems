@@ -21,6 +21,8 @@ out/
 
 # Local only directives data
 apps/web/.local/
+.directive-cli/directives/
+.directive-cli/session-logs/
 
 # Local editor settings
 .vscode/

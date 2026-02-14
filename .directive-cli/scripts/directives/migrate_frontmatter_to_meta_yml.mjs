@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
+import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 const require = createRequire(import.meta.url);
 const yaml = require("js-yaml");
@@ -220,7 +221,7 @@ function main() {
     process.exit(0);
   }
 
-  const root = path.join(getRepoRoot(), "apps/web/.local/directives");
+  const root = getDirectivesRoot();
   if (!fs.existsSync(root)) {
     process.stdout.write("No directives directory found.\n");
     process.exit(0);

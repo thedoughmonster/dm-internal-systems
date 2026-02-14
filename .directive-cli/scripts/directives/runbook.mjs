@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadRunbookFlowPolicy } from "./_policy_helpers.mjs";
+import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -83,12 +84,13 @@ function requireConfirm(args, requiredToken, runbookName, dryRun) {
 
 function resolveSessionFiles(session) {
   const repoRoot = path.resolve(scriptDir(), "../../..");
-  const sessionDir = path.join(repoRoot, "apps", "web", ".local", "directives", session);
+  const sessionDir = path.join(getDirectivesRoot(), session);
   if (!fs.existsSync(sessionDir)) return [];
+  const relSessionDir = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
   return fs
     .readdirSync(sessionDir, { withFileTypes: true })
     .filter((d) => d.isFile() && d.name.endsWith(".json"))
-    .map((d) => path.join("apps", "web", ".local", "directives", session, d.name))
+    .map((d) => `${relSessionDir}/${d.name}`)
     .sort();
 }
 

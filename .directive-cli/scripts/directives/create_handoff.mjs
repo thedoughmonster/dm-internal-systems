@@ -19,7 +19,7 @@ function usage() {
     "Usage:",
     "  node .directive-cli/scripts/directives/create_handoff.mjs --session <session-dir-or-uuid> --from-role <role> --to-role <role> --trigger <id> --objective <text> --blocking-rule <text> [options]",
     "",
-    "Required:",
+    "Required (if startup context defaults are unavailable):",
     "  --session <id>                    Session directory name or session UUID (meta.id)",
     "  --guid <id>                       Legacy alias for --session",
     "  --from-role <role>                architect|executor|pair|auditor",
@@ -61,6 +61,81 @@ function parseArgs(argv) {
       i += 1;
     }
   }
+  return args;
+}
+
+function loadJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function readLatestStartupContext(root, preferredSession = "") {
+  const dir = path.join(root, ".codex", "context");
+  if (!fs.existsSync(dir)) return null;
+  const files = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.endsWith(".startup.json"))
+    .map((d) => path.join(dir, d.name))
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+  if (files.length === 0) return null;
+
+  const docs = files
+    .map((f) => loadJson(f))
+    .filter((doc) => doc && String(doc.kind || "") === "dc_startup_context");
+  if (docs.length === 0) return null;
+
+  const preferred = String(preferredSession || "").trim();
+  if (preferred) {
+    const match = docs.find((doc) => String(doc.directive && doc.directive.session || "") === preferred);
+    if (match) return match;
+  }
+  return docs[0];
+}
+
+function resolvedHandoffDefaults(toRole, fromRole) {
+  const targetRole = String(toRole || "").trim().toLowerCase();
+  const senderRole = String(fromRole || "").trim().toLowerCase() || "architect";
+  const objective = targetRole === "executor"
+    ? "Execute approved directive tasks strictly via dc lifecycle/runbook scripts."
+    : `Continue directive lifecycle under role '${targetRole}'.`;
+  const blockingRule = targetRole === "executor"
+    ? "Architect must stop implementation and transfer control to executor."
+    : `Sender role '${senderRole}' must stop until role '${targetRole}' takes control.`;
+  return { objective, blockingRule };
+}
+
+function applyContextDefaults(inputArgs, startupCtx) {
+  const args = { ...inputArgs, allowlistPath: Array.isArray(inputArgs.allowlistPath) ? [...inputArgs.allowlistPath] : [] };
+  const startupRole = String(startupCtx && startupCtx.role ? startupCtx.role : "").trim().toLowerCase();
+  const startupDirective = String(startupCtx && startupCtx.directive && startupCtx.directive.session ? startupCtx.directive.session : "").trim();
+  const startupTaskSlug = String(startupCtx && startupCtx.task && startupCtx.task.slug ? startupCtx.task.slug : "").trim();
+  const envRole = String(process.env.DC_ROLE || "").trim().toLowerCase();
+
+  if (!args.session && !args.guid) {
+    const envDirective = String(process.env.DC_DIRECTIVE_SESSION || "").trim();
+    if (envDirective) args.session = envDirective;
+    else if (startupDirective) args.session = startupDirective;
+  }
+
+  if (!args["from-role"]) {
+    if (ROLES.has(startupRole)) args["from-role"] = startupRole;
+    else if (ROLES.has(envRole)) args["from-role"] = envRole;
+    else args["from-role"] = "architect";
+  }
+  if (!args["to-role"]) {
+    args["to-role"] = String(args["from-role"]).trim().toLowerCase() === "architect" ? "executor" : "architect";
+  }
+
+  const fromRole = String(args["from-role"] || "").trim().toLowerCase();
+  const toRole = String(args["to-role"] || "").trim().toLowerCase();
+  const defaults = resolvedHandoffDefaults(toRole, fromRole);
+  if (!args.trigger) args.trigger = `${fromRole}_to_${toRole}_handoff`;
+  if (!args.objective) args.objective = defaults.objective;
+  if (!args["blocking-rule"]) args["blocking-rule"] = defaults.blockingRule;
+  if (args["task-file"] === undefined) args["task-file"] = startupTaskSlug ? `${startupTaskSlug}.task.json` : "null";
   return args;
 }
 
@@ -134,6 +209,12 @@ async function main() {
     process.exit(0);
   }
 
+  const root = process.cwd();
+  const startupCtx = readLatestStartupContext(
+    root,
+    String(args.session || args.guid || process.env.DC_DIRECTIVE_SESSION || "").trim(),
+  );
+  args = applyContextDefaults(args, startupCtx);
   args = await promptMissing(args);
 
   let v;

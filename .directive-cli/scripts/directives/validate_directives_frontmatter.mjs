@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 const SESSION_REQUIRED = [
   "id",
@@ -72,10 +73,13 @@ function listDirectiveSessions(root) {
 function sessionFromFile(repoRoot, filePath) {
   const abs = path.resolve(repoRoot, filePath);
   const rel = path.relative(repoRoot, abs);
-  if (!rel.startsWith("apps/web/.local/directives/")) return null;
+  const directivesRel = path.relative(repoRoot, getDirectivesRoot()).replace(/\\/g, "/");
+  const relNorm = rel.replace(/\\/g, "/");
+  if (!relNorm.startsWith(`${directivesRel}/`)) return null;
   const parts = rel.split(path.sep);
-  if (parts.length < 6) return null;
-  return path.join(repoRoot, parts[0], parts[1], parts[2], parts[3], parts[4]);
+  const baseParts = directivesRel.split("/").length;
+  if (parts.length < (baseParts + 1)) return null;
+  return path.join(repoRoot, ...parts.slice(0, baseParts + 1));
 }
 
 function isUuid(value) {
@@ -214,7 +218,7 @@ function main() {
   }
 
   const repoRoot = getRepoRoot();
-  const root = path.join(repoRoot, "apps/web/.local/directives");
+  const root = getDirectivesRoot();
   const sessions = new Set();
   if (args.file.length > 0) {
     for (const f of args.file) {

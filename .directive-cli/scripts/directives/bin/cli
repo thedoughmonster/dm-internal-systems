@@ -248,7 +248,7 @@ usage() {
   print_command "$shown_mode" "context bootstrap" "op" "Update ~/.codex/config.toml profile wiring"
   print_command "$shown_mode" "launch codex" "op" "Prompt/select profile+role+directive, then launch codex"
   print_command "$shown_mode" "launch switch" "op" "Switch to a new codex profile/role session"
-  print_command "$shown_mode" "launch handoff" "op" "Create handoff artifact, then switch codex role/session"
+  print_command "$shown_mode" "launch handoff" "both" "Create handoff artifact, then switch codex role/session"
 
   print_command "$shown_mode" "directive new" "op" "Create <directive_slug>.meta.json"
   print_command "$shown_mode" "directive task" "agent" "Create <task_slug>.task.json"
@@ -315,9 +315,6 @@ is_operator_only_command() {
     launch:switch)
       return 0
       ;;
-    launch:handoff)
-      return 0
-      ;;
     directive:new)
       return 0
       ;;
@@ -360,6 +357,9 @@ is_allowed_under_architect_authoring_lock() {
       return 0
       ;;
     runbook:architect-authoring)
+      return 0
+      ;;
+    launch:handoff)
       return 0
       ;;
     *)

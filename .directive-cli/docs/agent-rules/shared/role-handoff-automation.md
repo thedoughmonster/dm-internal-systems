@@ -77,6 +77,13 @@ For trigger-based handoffs defined in this module, role transition should not re
 
 Operator may still interrupt or override at any time.
 
+TTY transition clarification:
+
+- Automatic handoff applies to artifact and role context (`<directive_slug>.handoff.json` and startup context), not guaranteed in-process CLI reattachment.
+- If launch command is running in a non-interactive environment, sender must instruct operator to:
+  1. exit current Codex session
+  2. run `dc launch handoff --role <receiver> --from-role <sender> --profile <profile> --directive <session>` from a real terminal (TTY)
+
 ## Trigger matrix
 
 1. Architect to Executor
