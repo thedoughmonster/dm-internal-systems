@@ -616,6 +616,10 @@ function statusColor(status) {
   return "magenta";
 }
 
+function statusTag(status) {
+  return `[${String(status || "open")}]`;
+}
+
 function isArchivedStatus(status) {
   return ["archived", "done", "completed", "cancelled"].includes(lower(status));
 }
@@ -838,7 +842,8 @@ async function requireStartDirective(args, root) {
     output: stdout,
     label: "Select directive:",
     options: directives.map((d) => ({
-      label: `${colorize(statusColor(d.status), `[${d.status}]`)} ${d.title}`,
+      label: `${statusTag(d.status)} ${d.title}`,
+      color: statusColor(d.status),
       value: d.session,
     })),
     defaultIndex: 0,

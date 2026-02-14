@@ -1,12 +1,23 @@
 import { createInterface, emitKeypressEvents } from "node:readline";
 
+const COLOR_CODES = {
+  dim: "2",
+  red: "31",
+  green: "32",
+  yellow: "33",
+  blue: "34",
+  magenta: "35",
+  cyan: "36",
+};
+
 function supportsInteractiveMenu(input, output) {
   return Boolean(input && output && input.isTTY && output.isTTY && !process.env.NO_COLOR);
 }
 
 function color(text, code) {
   if (process.env.NO_COLOR) return text;
-  return `\x1b[${code}m${text}\x1b[0m`;
+  const resolved = COLOR_CODES[String(code || "").trim()] || String(code || "0");
+  return `\x1b[${resolved}m${text}\x1b[0m`;
 }
 
 function stripAnsi(input) {
@@ -33,12 +44,25 @@ function clearMenu(lines) {
   process.stdout.write("\x1b[0G");
 }
 
+function truncateToColumns(input, maxCols) {
+  const plain = stripAnsi(String(input || ""));
+  const limit = Math.max(8, Number(maxCols || 80));
+  if (plain.length <= limit) return plain;
+  return `${plain.slice(0, Math.max(0, limit - 1)).trimEnd()}…`;
+}
+
 function renderMenu(label, options, selected) {
   const out = [label];
+  const cols = Math.max(40, Number(process.stdout.columns || 80));
+  const labelMax = Math.max(10, cols - 10);
   for (let i = 0; i < options.length; i += 1) {
     const prefix = i === selected ? color("❯", "32") : " ";
     const idx = color(`${i + 1})`, "33");
-    const text = i === selected ? color(options[i].label, "36") : options[i].label;
+    const plain = truncateToColumns(options[i].label, labelMax);
+    const styled = i === selected
+      ? color(plain, "36")
+      : (options[i].color ? color(plain, options[i].color) : plain);
+    const text = styled;
     out.push(`${prefix} ${idx} ${text}`);
   }
   return out.join("\n");
@@ -46,11 +70,14 @@ function renderMenu(label, options, selected) {
 
 function renderMultiMenu(label, options, selected, toggled) {
   const out = [label, color("Space: toggle  Enter: apply  Esc/Ctrl+C: cancel", "2")];
+  const cols = Math.max(40, Number(process.stdout.columns || 80));
+  const labelMax = Math.max(10, cols - 14);
   for (let i = 0; i < options.length; i += 1) {
     const cursor = i === selected ? color("❯", "32") : " ";
     const idx = color(`${i + 1})`, "33");
     const mark = toggled.has(i) ? color("[x]", "32") : color("[ ]", "2");
-    const text = i === selected ? color(options[i].label, "36") : options[i].label;
+    const plain = truncateToColumns(options[i].label, labelMax);
+    const text = i === selected ? color(plain, "36") : plain;
     out.push(`${cursor} ${idx} ${mark} ${text}`);
   }
   return out.join("\n");
