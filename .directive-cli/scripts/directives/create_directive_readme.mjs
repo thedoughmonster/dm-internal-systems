@@ -6,6 +6,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
+import { selectOption } from "./_prompt_helpers.mjs";
 import {
   getDirectivesRoot,
   getRepoRoot,
@@ -148,9 +149,19 @@ async function resolvePromptedValue(args) {
     if (!title) title = (await rl.question("Directive title: ")).trim();
     if (!summary) summary = (await rl.question("Directive summary (one line): ")).trim();
     if (!args["directive-branch"] && !branchType) {
-      const prompt = "Branch type (feature|chore|hotfix|fix|release) [feature]: ";
-      const answer = normalizeBranchType(await rl.question(prompt));
-      branchType = answer || "feature";
+      branchType = await selectOption({
+        input: stdin,
+        output: stdout,
+        label: "Select branch type:",
+        options: [
+          { label: "feature", value: "feature" },
+          { label: "chore", value: "chore" },
+          { label: "hotfix", value: "hotfix" },
+          { label: "fix", value: "fix" },
+          { label: "release", value: "release" },
+        ],
+        defaultIndex: 0,
+      });
     }
     if (goals.length === 0) {
       process.stdout.write("Add directive goals, one per line (blank line to finish).\n");

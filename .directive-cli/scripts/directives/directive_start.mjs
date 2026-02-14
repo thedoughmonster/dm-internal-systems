@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, readDirectiveHandoffIfPresent, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
 import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -44,14 +44,18 @@ async function handleOverlapPolicy(intersections, args) {
   if (!stdin.isTTY || !stdout.isTTY) {
     throw new Error("Overlap prompt requested in non-interactive mode. Use --overlap-mode warn|fail.");
   }
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const answer = String(await rl.question("Allowlist overlaps detected. Continue directive start? [y/N]: ")).trim().toLowerCase();
-    if (answer !== "y" && answer !== "yes") {
-      throw new Error("Directive start cancelled by operator due to allowlist intersections.");
-    }
-  } finally {
-    rl.close();
+  const answer = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Allowlist overlaps detected. Choose action:",
+    options: [
+      { label: "Continue", value: "continue" },
+      { label: "Cancel", value: "cancel" },
+    ],
+    defaultIndex: 1,
+  });
+  if (answer !== "continue") {
+    throw new Error("Directive start cancelled by operator due to allowlist intersections.");
   }
 }
 

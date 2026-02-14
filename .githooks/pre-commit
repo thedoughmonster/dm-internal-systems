@@ -15,4 +15,4 @@ for f in "${staged[@]}"; do
   args+=(--file "$f")
 done
 
-node ops_tooling/scripts/directives/validate_directives_frontmatter.mjs --strict "${args[@]}"
+node .directive-cli/scripts/directives/validate_directives_frontmatter.mjs --strict "${args[@]}"
