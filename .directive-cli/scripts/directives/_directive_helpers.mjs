@@ -2,6 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { resolveSessionDir, getRepoRoot } from "./_session_resolver.mjs";
 
+const LIFECYCLE_ALWAYS_ALLOWED_DIRTY_PREFIXES = [
+  ".codex/context",
+  "codex/context",
+  ".directive-cli/session-logs",
+  "directive-cli/session-logs",
+];
+
 export function toUtcIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 }
@@ -117,6 +124,10 @@ function inScope(filePath, prefixes) {
   return prefixes.some((prefix) => normalizedFile === prefix || normalizedFile.startsWith(`${prefix}/`));
 }
 
+export function lifecycleAlwaysAllowedDirtyPrefixes() {
+  return [...LIFECYCLE_ALWAYS_ALLOWED_DIRTY_PREFIXES];
+}
+
 export function directiveScopePrefixes(repoRoot, sessionDir) {
   const prefixes = new Set();
   const relSession = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
@@ -142,7 +153,8 @@ export function directiveScopePrefixes(repoRoot, sessionDir) {
 export function assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, dirtyFiles, { extraAllowed = [] } = {}) {
   const base = directiveScopePrefixes(repoRoot, sessionDir);
   const extras = Array.isArray(extraAllowed) ? extraAllowed.map((p) => normalizeScopePath(p)).filter(Boolean) : [];
-  const allowed = Array.from(new Set([...base, ...extras]));
+  const globalAllow = lifecycleAlwaysAllowedDirtyPrefixes();
+  const allowed = Array.from(new Set([...base, ...extras, ...globalAllow]));
   if (allowed.length === 0) return;
 
   const disallowed = (dirtyFiles || []).filter((f) => !inScope(f, allowed));

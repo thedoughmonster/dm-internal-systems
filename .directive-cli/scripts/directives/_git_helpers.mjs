@@ -1,6 +1,13 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
+const LIFECYCLE_ALWAYS_ALLOWED_DIRTY_PREFIXES = [
+  ".codex/context",
+  "codex/context",
+  ".directive-cli/session-logs",
+  "directive-cli/session-logs",
+];
+
 const COLORS = {
   reset: "\x1b[0m",
   dir: "\x1b[34m",
@@ -81,9 +88,10 @@ export function ensureCleanWorkingTree(cwd, { allowlistPrefixes = [] } = {}) {
   const allow = Array.isArray(allowlistPrefixes)
     ? allowlistPrefixes.map((p) => String(p || "").replace(/\\/g, "/").trim()).filter(Boolean)
     : [];
+  const mergedAllow = Array.from(new Set([...allow, ...LIFECYCLE_ALWAYS_ALLOWED_DIRTY_PREFIXES]));
   const disallowed = allow.length === 0
-    ? dirty
-    : dirty.filter((f) => !allow.some((prefix) => f === prefix || f.startsWith(`${prefix}/`)));
+    ? dirty.filter((f) => !mergedAllow.some((prefix) => f === prefix || f.startsWith(`${prefix}/`)))
+    : dirty.filter((f) => !mergedAllow.some((prefix) => f === prefix || f.startsWith(`${prefix}/`)));
 
   if (disallowed.length > 0) {
     const reason = allow.length === 0

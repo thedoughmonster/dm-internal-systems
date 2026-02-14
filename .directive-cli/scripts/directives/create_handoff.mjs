@@ -268,6 +268,10 @@ async function main() {
   const handoffPath = path.join(sessionDir, `${directiveSlug}.handoff.json`);
   const taskFileRaw = String(args["task-file"] ?? "null").trim();
   const taskFile = taskFileRaw === "" || taskFileRaw.toLowerCase() === "null" ? null : taskFileRaw;
+  if (v.toRole === "executor" && !taskFile) {
+    process.stderr.write("Executor handoff requires a concrete task_file. Pass --task-file <task_slug>.task.json\n");
+    process.exit(1);
+  }
   const requiredReading = String(args["required-reading"] || "apps/web/docs/guides/component-paradigm.md").trim();
 
   const outDoc = {

@@ -60,6 +60,23 @@ function findSessionByTitleSlug(titleSlug) {
   return sessions.find((name) => name.includes(titleSlug)) || "";
 }
 
+function firstTaskSlug(session) {
+  const sessionDir = path.join(directivesRoot, session);
+  if (!fs.existsSync(sessionDir)) return "";
+  const task = fs.readdirSync(sessionDir).find((f) => f.endsWith(".task.json"));
+  if (!task) return "";
+  return task.replace(/\.task\.json$/u, "");
+}
+
+function firstRunnableSession() {
+  const sessions = listOpenSessions();
+  for (const session of sessions) {
+    const task = firstTaskSlug(session);
+    if (task) return { session, task };
+  }
+  return null;
+}
+
 test("directive scope helpers normalize allowed paths and block out-of-scope dirty files", (t) => {
   const tag = randomTag();
   const session = `itest-scope-${tag}`;
@@ -288,8 +305,8 @@ test("architect authoring lock blocks execution-oriented commands before task se
 });
 
 test("architect authoring lock allows launch handoff transition command", () => {
-  const sessions = listOpenSessions();
-  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const target = firstRunnableSession();
+  assert.ok(target, "Expected at least one non-archived directive session with a task");
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-authoring-lock-handoff-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-authoring-lock-handoff-bundle-${tag}`);
@@ -306,7 +323,9 @@ test("architect authoring lock allows launch handoff transition command", () => 
     "--profile",
     "itest_arch_lock_handoff",
     "--directive",
-    sessions[0],
+    target.session,
+    "--task",
+    target.task,
     "--codex-bin",
     "/bin/true",
     "--out",
@@ -318,7 +337,7 @@ test("architect authoring lock allows launch handoff transition command", () => 
   ], {
     env: {
       DC_ROLE: "architect",
-      DC_DIRECTIVE_SESSION: sessions[0],
+      DC_DIRECTIVE_SESSION: target.session,
       DC_TASK_SLUG: "",
     },
   });
@@ -326,8 +345,8 @@ test("architect authoring lock allows launch handoff transition command", () => 
 });
 
 test("launch handoff is allowed in agent namespace", () => {
-  const sessions = listOpenSessions();
-  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const target = firstRunnableSession();
+  assert.ok(target, "Expected at least one non-archived directive session with a task");
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-agent-ns-handoff-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-agent-ns-handoff-bundle-${tag}`);
@@ -344,7 +363,9 @@ test("launch handoff is allowed in agent namespace", () => {
     "--profile",
     "itest_agent_ns_handoff",
     "--directive",
-    sessions[0],
+    target.session,
+    "--task",
+    target.task,
     "--codex-bin",
     "/bin/true",
     "--out",
@@ -764,6 +785,8 @@ test("newhandoff dry-run emits json handoff path", () => {
     "test objective",
     "--blocking-rule",
     "test rule",
+    "--task-file",
+    "example.task.json",
   ]);
   assert.match(output, /\.handoff\.json/);
 });
@@ -794,6 +817,17 @@ test("newhandoff can resolve directive/roles from startup context defaults", (t)
   ]);
 
   const resolvedSession = findSessionByTitleSlug(titleSlug) || sessionName;
+  run(path.join(directivesBinRoot, "newtask"), [
+    "--session",
+    resolvedSession,
+    "--title",
+    "defaults task",
+    "--summary",
+    "defaults task summary",
+    "--slug",
+    "defaults-task",
+    "--no-prompt",
+  ]);
   fs.mkdirSync(startupDir, { recursive: true });
   fs.writeFileSync(startupPath, `${JSON.stringify({
     kind: "dc_startup_context",
@@ -804,7 +838,7 @@ test("newhandoff can resolve directive/roles from startup context defaults", (t)
       title,
       status: "todo",
     },
-    task: null,
+    task: { slug: "defaults-task" },
   }, null, 2)}\n`);
 
   const output = run(path.join(directivesBinRoot, "newhandoff"), [
@@ -815,6 +849,7 @@ test("newhandoff can resolve directive/roles from startup context defaults", (t)
   assert.match(output, /"from_role": "architect"/);
   assert.match(output, /"to_role": "executor"/);
   assert.match(output, /"trigger": "architect_to_executor_handoff"/);
+  assert.match(output, /"task_file": "defaults-task.task.json"/);
 });
 
 test("directive view supports non-interactive directive+file selection", () => {
@@ -934,6 +969,8 @@ test("integration: create directive, create task, create handoff, update metadat
     "integration objective",
     "--blocking-rule",
     "integration rule",
+    "--task-file",
+    "integration-task.task.json",
     "--directive-branch",
     branch,
   ]);
@@ -1290,8 +1327,21 @@ test("cli launch handoff reuses existing handoff and launches configured binary"
     "Switch to executor for test flow.",
     "--blocking-rule",
     "Architect stops after handoff.",
+    "--task-file",
+    "test-launch-task.task.json",
     "--summary",
     "precreated handoff",
+    "--no-prompt",
+  ]);
+  run(path.join(directivesBinRoot, "newtask"), [
+    "--session",
+    resolvedSession,
+    "--title",
+    "test launch task",
+    "--summary",
+    "task for launch handoff test",
+    "--slug",
+    "test-launch-task",
     "--no-prompt",
   ]);
 
@@ -1366,6 +1416,19 @@ test("cli launch handoff auto-resolves role and directive from existing handoff 
     "auto reuse handoff",
     "--blocking-rule",
     "architect stops",
+    "--task-file",
+    "auto-reuse-task.task.json",
+    "--no-prompt",
+  ]);
+  run(path.join(directivesBinRoot, "newtask"), [
+    "--session",
+    resolvedSession,
+    "--title",
+    "auto reuse task",
+    "--summary",
+    "task for handoff auto reuse test",
+    "--slug",
+    "auto-reuse-task",
     "--no-prompt",
   ]);
 
@@ -1582,8 +1645,8 @@ test("launch codex rejects non-codex configured agent", (t) => {
 });
 
 test("launch handoff in non-interactive shell skips codex launch gracefully", () => {
-  const sessions = listOpenSessions();
-  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const target = firstRunnableSession();
+  assert.ok(target, "Expected at least one non-archived directive session with a task");
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-non-tty-handoff-home-${tag}`);
   const tmpBundleDir = path.join("/tmp", `dc-non-tty-handoff-bundle-${tag}`);
@@ -1599,7 +1662,9 @@ test("launch handoff in non-interactive shell skips codex launch gracefully", ()
     "--profile",
     "itest_non_tty_handoff",
     "--directive",
-    sessions[0],
+    target.session,
+    "--task",
+    target.task,
     "--codex-bin",
     "codex",
     "--out",

@@ -1589,6 +1589,12 @@ async function runHandoff(root, args) {
     },
     root,
   );
+  if (toRole === "executor" && !selectedTask) {
+    throw new Error(
+      `Handoff for directive '${selectedDirective.session}' does not select a task. ` +
+      "Create/update handoff with --task-file <task>.task.json or pass --task <slug> when launching handoff.",
+    );
+  }
   const fallbackProfile = sanitizeProfileName(path.basename(root));
   const profileName = args.profile && String(args.profile).trim()
     ? sanitizeProfileName(args.profile)
