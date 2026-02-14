@@ -5,7 +5,7 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, writeJson, toUtcIso } from "./_directive_helpers.mjs";
-import { log, runGit, ensureCleanWorkingTree, currentBranch, branchExistsLocal } from "./_git_helpers.mjs";
+import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 
 function parseArgs(argv) {
@@ -130,9 +130,12 @@ async function main() {
   const dryRun = Boolean(args["dry-run"]);
 
   const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);
+  const sessionDir = path.dirname(directiveMetaPath);
   const nextUpdated = toUtcIso();
   const branch = archiveBranchName(session);
   const commitMsg = `chore(directive): archive ${session}`;
+  const sessionRel = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
+  const directiveRel = path.relative(repoRoot, directiveMetaPath).replace(/\\/g, "/");
 
   log("DIR", `Directive archive: ${session}`);
   await confirmArchive(session, dryRun);
@@ -142,27 +145,33 @@ async function main() {
   }
 
   if (dryRun) {
-    log("GIT", `[dry-run] require clean working tree`);
-    log("GIT", `[dry-run] checkout dev`);
+    log("GIT", `[dry-run] require current branch dev`);
+    log("GIT", `[dry-run] allow dirty files only under ${sessionRel}/`);
     log("GIT", `[dry-run] checkout -b ${branch} dev`);
     log("DIR", `[dry-run] would set ${path.basename(directiveMetaPath)} meta.status=archived meta.bucket=archived meta.updated=${nextUpdated}`);
-    log("GIT", `[dry-run] git add ${path.relative(repoRoot, directiveMetaPath)}`);
+    log("GIT", `[dry-run] git add ${sessionRel}`);
     log("GIT", `[dry-run] git commit -m "${commitMsg}"`);
     log("GIT", `[dry-run] checkout dev`);
     log("GIT", `[dry-run] merge --no-ff ${branch}`);
-    log("GIT", `[dry-run] branch -d ${branch}`);
+    log("GIT", `[dry-run] branch -D ${branch}`);
+    log("GIT", `[dry-run] verify current branch is dev`);
     return;
   }
 
-  log("GIT", "Checking clean working tree");
-  ensureCleanWorkingTree(repoRoot);
-  if (branchExistsLocal(branch, repoRoot)) {
-    throw new Error(`Archive branch already exists: ${branch}`);
+  const startBranch = currentBranch(repoRoot);
+  if (startBranch !== "dev") {
+    throw new Error(`Archive flow must start on 'dev' (current: '${startBranch}').`);
   }
 
-  if (currentBranch(repoRoot) !== "dev") {
-    log("GIT", "Switching to dev");
-    runGit(["checkout", "dev"], repoRoot);
+  const dirty = changedFiles(repoRoot).map((p) => p.replace(/\\/g, "/"));
+  const unrelated = dirty.filter((p) => p !== directiveRel && !p.startsWith(`${sessionRel}/`));
+  if (unrelated.length > 0) {
+    throw new Error(
+      `Archive blocked: unrelated dirty files present:\n${unrelated.map((f) => `  - ${f}`).join("\n")}`,
+    );
+  }
+  if (branchExistsLocal(branch, repoRoot)) {
+    throw new Error(`Archive branch already exists: ${branch}`);
   }
 
   log("GIT", `Creating archive branch ${branch}`);
@@ -175,14 +184,17 @@ async function main() {
   writeJson(directiveMetaPath, directiveDoc);
   log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
 
-  const relMeta = path.relative(repoRoot, directiveMetaPath);
-  runGit(["add", relMeta], repoRoot);
+  runGit(["add", sessionRel], repoRoot);
   runGit(["commit", "-m", commitMsg], repoRoot);
 
   log("GIT", "Merging archive branch into dev");
   runGit(["checkout", "dev"], repoRoot);
   runGit(["merge", "--no-ff", branch, "-m", `merge: ${commitMsg}`], repoRoot);
-  runGit(["branch", "-d", branch], repoRoot);
+  runGit(["branch", "-D", branch], repoRoot);
+  const endingBranch = currentBranch(repoRoot);
+  if (endingBranch !== "dev") {
+    throw new Error(`Archive flow ended on '${endingBranch}' instead of 'dev'.`);
+  }
   log("DIR", `Directive archived and merged to dev: ${session}`);
 }
 
