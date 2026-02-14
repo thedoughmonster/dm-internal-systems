@@ -1,0 +1,38 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "3dcaed6a-2abc-480f-b626-5b7afebf102f",
+    "directive_slug": "clean-placeholder-copy-in-vendors-dashboard-error-card",
+    "status": "todo",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-14T10:46:40Z",
+    "updated": "2026-02-14T10:46:40Z",
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "Clean placeholder copy in vendors dashboard error card",
+    "summary": "Remove placeholder language from the vendors dashboard error-rate card and replace it with production-ready copy, with lint/typecheck verification.",
+    "goals": [
+      "Replace placeholder wording in the vendors dashboard error-rate card with production-ready copy.",
+      "Keep the displayed metric and impacted vendor names unchanged unless explicitly requested.",
+      "Confirm no “placeholder” text remains in apps/web/app/vendors/page.tsx.",
+      "Validate the change with npm --prefix apps/web run lint and npm --prefix apps/web run typecheck."
+    ],
+    "directive_branch": "chore/clean-placeholder-copy-in-vendors-dashboard-error-card",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

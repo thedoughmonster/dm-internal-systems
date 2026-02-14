@@ -2,11 +2,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, writeJson, toUtcIso } from "./_directive_helpers.mjs";
 import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -89,38 +89,34 @@ async function resolveSession(args) {
 
   const directives = listDirectiveSessions();
   if (directives.length === 0) throw new Error("No available non-archived directives found.");
-  process.stdout.write("Available directives:\n");
-  for (let i = 0; i < directives.length; i += 1) {
-    const d = directives[i];
-    process.stdout.write(`  ${i + 1}) ${d.session}  [${d.status}]  ${d.title}\n`);
-  }
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Select directive number (required): ")).trim();
-    if (!input) throw new Error("Missing required directive selection.");
-    if (/^\d+$/.test(input)) {
-      const idx = Number(input);
-      if (idx < 1 || idx > directives.length) throw new Error("Invalid directive selection.");
-      return directives[idx - 1].session;
-    }
-    const match = directives.find((d) => d.session === input);
-    if (!match) throw new Error("Invalid directive selection.");
-    return match.session;
-  } finally {
-    rl.close();
-  }
+  return await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select directive to archive:",
+    options: directives.map((d) => ({
+      label: `${d.session}  [${d.status}]  ${d.title}`,
+      value: d.session,
+    })),
+    defaultIndex: 0,
+  });
 }
 
 async function confirmArchive(session, dryRun) {
   const warning = colorizeRed(`WARNING: You are about to archive directive '${session}'.`);
   process.stdout.write(`${warning}\n`);
   if (dryRun || !stdin.isTTY) return;
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const input = (await rl.question("Type 'archive' to confirm: ")).trim().toLowerCase();
-    if (input !== "archive") throw new Error("Archive aborted by user.");
-  } finally {
-    rl.close();
+  const decision = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Archive confirmation:",
+    options: [
+      { label: "Archive now", value: "archive" },
+      { label: "Cancel", value: "cancel" },
+    ],
+    defaultIndex: 1,
+  });
+  if (decision !== "archive") {
+    throw new Error("Archive aborted by user.");
   }
 }
 
