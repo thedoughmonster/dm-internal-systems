@@ -6,6 +6,7 @@ const COLORS = {
   dir: "\x1b[34m",
   git: "\x1b[33m",
   test: "\x1b[32m",
+  warn: "\x1b[31m",
 };
 
 export function tag(kind) {

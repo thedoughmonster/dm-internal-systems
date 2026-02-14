@@ -94,7 +94,7 @@ export function listTaskFiles(sessionDir) {
     .sort();
 }
 
-function normalizeScopePath(rawPath) {
+export function normalizeScopePath(rawPath) {
   const raw = String(rawPath || "").trim();
   if (!raw) return "";
   let out = raw.replace(/`/g, "").trim();
@@ -154,4 +154,64 @@ export function assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, dirty
     `Out-of-scope dirty files detected for directive flow.\nDirty files:\n${show}${more}\n` +
     `Allowed scope prefixes:\n${allowed.map((p) => `  - ${p}`).join("\n")}`,
   );
+}
+
+function pathsIntersect(a, b) {
+  return a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
+}
+
+function linkedByDependency(a, b) {
+  const depsA = new Set(Array.isArray(a.depends_on) ? a.depends_on.map((v) => String(v)) : []);
+  const depsB = new Set(Array.isArray(b.depends_on) ? b.depends_on.map((v) => String(v)) : []);
+  const idA = String(a.id || "");
+  const idB = String(b.id || "");
+  return (idA && depsB.has(idA)) || (idB && depsA.has(idB));
+}
+
+export function findTaskAllowedFileIntersections(sessionDir) {
+  const entries = [];
+  for (const taskPath of listTaskFiles(sessionDir)) {
+    let taskDoc;
+    try {
+      taskDoc = readJson(taskPath);
+    } catch {
+      continue;
+    }
+    const meta = taskDoc && taskDoc.meta && typeof taskDoc.meta === "object" ? taskDoc.meta : {};
+    const allowedFiles = Array.isArray(taskDoc?.task?.allowed_files) ? taskDoc.task.allowed_files : [];
+    const prefixes = Array.from(new Set(
+      allowedFiles
+        .map((entry) => (entry && typeof entry === "object" ? normalizeScopePath(entry.path) : ""))
+        .filter(Boolean),
+    )).sort();
+    entries.push({
+      task_file: path.basename(taskPath),
+      task_slug: path.basename(taskPath, ".task.json"),
+      id: String(meta.id || ""),
+      depends_on: Array.isArray(meta.depends_on) ? meta.depends_on : [],
+      prefixes,
+    });
+  }
+
+  const conflicts = [];
+  for (let i = 0; i < entries.length; i += 1) {
+    for (let j = i + 1; j < entries.length; j += 1) {
+      const a = entries[i];
+      const b = entries[j];
+      const overlaps = [];
+      for (const pa of a.prefixes) {
+        for (const pb of b.prefixes) {
+          if (pathsIntersect(pa, pb)) overlaps.push({ left: pa, right: pb });
+        }
+      }
+      if (overlaps.length === 0) continue;
+      conflicts.push({
+        task_a: a.task_file,
+        task_b: b.task_file,
+        linked_by_dependency: linkedByDependency(a, b),
+        overlaps,
+      });
+    }
+  }
+  return conflicts;
 }

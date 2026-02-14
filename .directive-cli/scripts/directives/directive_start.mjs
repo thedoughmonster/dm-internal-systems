@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { resolveDirectiveContext, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
+import { resolveDirectiveContext, readDirectiveHandoffIfPresent, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
 import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
@@ -81,6 +81,19 @@ function main() {
 
   log("DIR", `Directive start: ${session}`);
   log("DIR", `Branch=${directiveBranch} Base=${baseBranch} Policy=${commitPolicy}`);
+  const intersections = findTaskAllowedFileIntersections(sessionDir);
+  if (intersections.length > 0) {
+    log("WARN", `Detected ${intersections.length} task allowlist intersection(s) in session.`);
+    for (const item of intersections.slice(0, 12)) {
+      const pair = `${item.task_a} <-> ${item.task_b}`;
+      const marker = item.linked_by_dependency ? "linked" : "unlinked";
+      const sample = item.overlaps[0] ? `${item.overlaps[0].left} :: ${item.overlaps[0].right}` : "overlap";
+      log("WARN", `[${marker}] ${pair} | ${sample}`);
+    }
+    if (intersections.length > 12) {
+      log("WARN", `... ${intersections.length - 12} additional intersection(s) not shown`);
+    }
+  }
 
   if (args["dry-run"]) {
     log("DIR", "Dry run only. No git or metadata changes applied.");

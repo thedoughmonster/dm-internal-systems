@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
-import { directiveScopePrefixes, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
+import { directiveScopePrefixes, assertDirtyFilesWithinDirectiveScope, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
 const directivesBinRoot = path.join(repoRoot, ".directive-cli", "scripts", "directives", "bin");
@@ -108,6 +108,36 @@ test("directive scope helpers normalize allowed paths and block out-of-scope dir
     () => assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, ["README.md"]),
     /Out-of-scope dirty files detected/,
   );
+});
+
+test("task allowed_files intersection helper detects overlaps", (t) => {
+  const tag = randomTag();
+  const session = `itest-intersections-${tag}`;
+  const sessionDir = path.join(directivesRoot, session);
+
+  t.after(() => {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(path.join(sessionDir, "scope-a.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "11111111-1111-4111-8111-111111111111", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app/vendors" }] },
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(sessionDir, "scope-b.task.json"), `${JSON.stringify({
+    kind: "directive_task",
+    schema_version: "1.0",
+    meta: { id: "22222222-2222-4222-8222-222222222222", depends_on: [] },
+    task: { allowed_files: [{ path: "apps/web/app" }] },
+  }, null, 2)}\n`);
+
+  const hits = findTaskAllowedFileIntersections(sessionDir);
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0].task_a, "scope-a.task.json");
+  assert.equal(hits[0].task_b, "scope-b.task.json");
+  assert.equal(hits[0].linked_by_dependency, false);
 });
 
 test("directives-cli help exposes expected command set", () => {
