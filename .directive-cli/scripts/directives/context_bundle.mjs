@@ -924,8 +924,73 @@ function startupInstructionsPathFromBundle(bundleOutPath) {
   return path.join(path.dirname(normalizeAbsolutePath(bundleOutPath)), "startup.md");
 }
 
-function writeStartupInstructionsFile(startupFilePath, startupContextPath, bundlePath, role, profileName) {
+function buildDcCommandReference() {
+  return {
+    kind: "dc_command_reference",
+    schema_version: "1.0",
+    generated_at: new Date().toISOString(),
+    policy: {
+      no_guessing: true,
+      help_on_ambiguity: [
+        "dc help",
+        "dc <category> --help",
+        "dc <category> <command> --help",
+      ],
+      scripted_actions_only: true,
+      require_operator_go_ahead_before_execution: true,
+    },
+    commands: {
+      directive: [
+        "dc directive new",
+        "dc directive task",
+        "dc directive handoff",
+        "dc directive view",
+        "dc directive start",
+        "dc directive finish",
+        "dc directive migrate",
+      ],
+      task: [
+        "dc task start",
+        "dc task finish",
+      ],
+      meta: [
+        "dc meta update",
+        "dc meta architect",
+        "dc meta executor",
+      ],
+      runbook: [
+        "dc runbook executor-task-cycle",
+        "dc runbook executor-directive-closeout",
+        "dc runbook architect-authoring",
+      ],
+      utility: [
+        "dc validate",
+        "dc test",
+        "dc policy validate",
+        "dc repo map",
+      ],
+      agent: [
+        "dc agent build",
+        "dc agent check",
+        "dc agent show",
+        "dc agent bootstrap",
+        "dc agent start",
+      ],
+    },
+  };
+}
+
+function writeDcCommandReference(root, args, role) {
+  const { outPath } = resolveRolePaths(root, args, role || undefined);
+  const refPath = path.join(path.dirname(outPath), "dc.commands.json");
+  fs.mkdirSync(path.dirname(refPath), { recursive: true });
+  fs.writeFileSync(refPath, `${JSON.stringify(buildDcCommandReference(), null, 2)}\n`, "utf8");
+  return refPath;
+}
+
+function writeStartupInstructionsFile(startupFilePath, startupContextPath, commandRefPath, bundlePath, role, profileName) {
   const startupJson = fs.readFileSync(startupContextPath, "utf8").trim();
+  const commandRefJson = fs.readFileSync(commandRefPath, "utf8").trim();
   const bundleContent = fs.readFileSync(bundlePath, "utf8").trimEnd();
   const content = [
     "# dc startup context",
@@ -947,6 +1012,12 @@ function writeStartupInstructionsFile(startupFilePath, startupContextPath, bundl
     startupJson,
     "```",
     "",
+    "## DC Command Reference",
+    "",
+    "```json",
+    commandRefJson,
+    "```",
+    "",
     "## Role Bundle",
     "",
     bundleContent,
@@ -962,14 +1033,17 @@ async function runBootstrap(root, args) {
   const role = await requireBundleRole(args);
   const profileName = await requireBootstrapProfile(args, configPath);
   const launchConfig = readDcConfig(root, args);
+  const commandRefPath = writeDcCommandReference(root, args, role);
+  const includePaths = Array.isArray(args.include) ? args.include.slice() : [];
+  includePaths.push(relative(root, commandRefPath));
 
-  const bundle = runBuild(root, { ...args, role, json: false });
+  const bundle = runBuild(root, { ...args, role, include: includePaths, json: false });
   let startupContextPath = String(args["__startup_context_path"] || "").trim();
   if (!startupContextPath) {
     startupContextPath = writeStartupContext(root, args, role, profileName, null, null, launchConfig);
   }
   const startupFilePath = startupInstructionsPathFromBundle(bundle.outPath);
-  writeStartupInstructionsFile(startupFilePath, startupContextPath, bundle.outPath, role, profileName);
+  writeStartupInstructionsFile(startupFilePath, startupContextPath, commandRefPath, bundle.outPath, role, profileName);
   const startupPath = startupFilePath.replace(/\\/g, "/");
 
   const profileBlock = [
@@ -991,13 +1065,15 @@ async function runBootstrap(root, args) {
     config_toml: configPath,
     startup_file: startupFilePath,
     startup_context_file: startupContextPath,
+    command_reference_file: commandRefPath,
     bundle_file: bundle.outPath,
     policy_bundle_file: bundle.policyOutPath,
   });
 }
 
-function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig) {
+function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role) {
   const env = { ...process.env };
+  if (role) env.DC_ROLE = String(role);
   if (launchConfig && launchConfig.agent) env.DC_AGENT = launchConfig.agent;
   if (launchConfig && launchConfig.model) env.DC_MODEL = launchConfig.model;
   if (selectedDirective) {
@@ -1045,8 +1121,10 @@ function buildInitialPrompt(selectedDirective, selectedTask) {
   } else if (selectedDirective) {
     lines.push("No task selected yet.");
   }
-  lines.push("First response must briefly confirm active role/directive/task context.");
+  lines.push("First response must briefly confirm active role/directive/task context and run a discovery check with operator.");
+  lines.push("Discovery check must include: intended outcome, constraints, definition of done, and whether execution should start now.");
   lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
+  lines.push("Do not execute any lifecycle command until operator confirms execution.");
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
   return lines.join("\n");
 }
@@ -1102,6 +1180,20 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       skip_manual_task_listing_when_task_selected: Boolean(selectedTask),
       task_selection_state: taskSelectionState,
       prefer_scripted_lifecycle_commands: true,
+      prohibit_command_guessing: true,
+      require_help_lookup_on_command_ambiguity: true,
+      require_operator_discovery_phase: true,
+      require_operator_go_ahead_before_execution: true,
+    },
+    operator_discovery: {
+      required: true,
+      checklist: [
+        "Confirm intended outcome in operator words.",
+        "Confirm hard constraints and excluded scope.",
+        "Confirm definition of done and validation evidence expected.",
+        "Ask whether to start execution now or refine plan first.",
+      ],
+      before_any_command: true,
     },
     next_actions: nextActions,
   };
@@ -1169,7 +1261,7 @@ async function runStart(root, args) {
   }
 
   if (args["dry-run"]) return;
-  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig);
+  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role);
 }
 
 function main() {
