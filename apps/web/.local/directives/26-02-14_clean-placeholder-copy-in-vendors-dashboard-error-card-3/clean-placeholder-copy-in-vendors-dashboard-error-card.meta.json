@@ -4,7 +4,7 @@
   "meta": {
     "id": "25de729f-b95d-4b85-8d21-cf017153dc91",
     "directive_slug": "clean-placeholder-copy-in-vendors-dashboard-error-card",
-    "status": "todo",
+    "status": "archived",
     "owner": "operator",
     "assignee": null,
     "priority": "medium",
@@ -14,8 +14,8 @@
       "needs-triage"
     ],
     "created": "2026-02-14T11:22:22Z",
-    "updated": "2026-02-14T11:22:22Z",
-    "bucket": "active",
+    "updated": "2026-02-14T17:35:58Z",
+    "bucket": "archived",
     "scope": "directives",
     "source": "architect",
     "effort": "medium",
