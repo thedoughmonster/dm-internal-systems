@@ -4,6 +4,7 @@ import path from "node:path";
 import { resolveDirectiveContext, listTaskFiles, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
 import { log, runGit, changedFiles } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
+import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
 
 function parseArgs(argv) {
@@ -39,6 +40,7 @@ function runDirectiveValidation(repoRoot, files) {
 }
 
 function main() {
+  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
   if (!session) {

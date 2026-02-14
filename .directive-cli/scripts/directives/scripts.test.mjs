@@ -8,17 +8,19 @@ const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "
 const directivesBinRoot = path.join(repoRoot, ".directive-cli", "scripts", "directives", "bin");
 const directivesRoot = path.join(repoRoot, "apps", "web", ".local", "directives");
 
-function run(scriptPath, args = []) {
+function run(scriptPath, args = [], options = {}) {
   return execFileSync(scriptPath, args, {
     cwd: repoRoot,
     encoding: "utf8",
+    env: options.env ? { ...process.env, ...options.env } : process.env,
   });
 }
 
-function runExpectFailure(scriptPath, args = []) {
+function runExpectFailure(scriptPath, args = [], options = {}) {
   const result = spawnSync(scriptPath, args, {
     cwd: repoRoot,
     encoding: "utf8",
+    env: options.env ? { ...process.env, ...options.env } : process.env,
   });
   assert.notEqual(result.status, 0, "Expected command to fail");
   return result;
@@ -162,6 +164,20 @@ test("runbook executor-task-cycle pre requires confirmation token in non-dry-run
   ]);
   const text = `${result.stdout}\n${result.stderr}`;
   assert.match(text, /requires --confirm executor-task-cycle-pre/);
+});
+
+test("directive start is blocked when DC_ROLE is architect", () => {
+  const sessions = listSessions();
+  assert.ok(sessions.length > 0, "Expected at least one existing directive session");
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "start",
+    "--session",
+    sessions[0],
+    "--dry-run",
+  ], { env: { DC_ROLE: "architect" } });
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Executor lifecycle command blocked in role 'architect'/);
 });
 
 test("dc init writes config with explicit agent/model", (t) => {
@@ -602,6 +618,8 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   const configText = fs.readFileSync(configPath, "utf8");
   assert.ok(configText.includes(startupInstructionsPath), "Expected profile block to reference startup.md");
   assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
+  const commandRefPath = path.join(tmpBundleDir, "dc.commands.json");
+  assert.ok(fs.existsSync(commandRefPath), "Expected dc command reference file to be created");
   assert.ok(fs.existsSync(outPath), "Expected context bundle file to be created");
   assert.ok(fs.existsSync(metaPath), "Expected context bundle metadata file to be created");
   const startupPath = path.join(tmpBundleDir, "architect.startup.json");
@@ -609,10 +627,15 @@ test("cli agent start bootstraps profile and launches configured binary", (t) =>
   const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
   assert.equal(startupDoc.kind, "dc_startup_context");
   assert.equal(startupDoc.role, "architect");
+  assert.equal(startupDoc.operator_discovery.required, true);
   const bundleMeta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
   assert.ok(
     Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("architect.startup.json")),
     "Expected startup context to be included in bundle sources",
+  );
+  assert.ok(
+    Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("dc.commands.json")),
+    "Expected dc command reference to be included in bundle sources",
   );
 });
 
@@ -708,6 +731,7 @@ test("context bootstrap writes managed profile block to codex config", (t) => {
   const startupInstructionsPath = path.join(path.dirname(outPath), "startup.md");
   assert.ok(configText.includes(startupInstructionsPath), "Expected profile block to reference startup instructions path");
   assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
+  assert.ok(fs.existsSync(path.join(path.dirname(outPath), "dc.commands.json")), "Expected command reference file to be created");
   assert.match(configText, /dc_role = "architect"/);
 });
 

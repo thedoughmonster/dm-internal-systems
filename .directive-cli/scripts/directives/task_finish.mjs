@@ -4,6 +4,7 @@ import path from "node:path";
 import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
 import { log, runShell, runGit, shortSha, currentBranch, changedFiles } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
+import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -39,6 +40,7 @@ function runValidationCommands(commands, cwd) {
 }
 
 function main() {
+  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
   const task = String(args.task || "").trim();

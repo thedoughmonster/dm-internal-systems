@@ -4,6 +4,7 @@ import path from "node:path";
 import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent } from "./_directive_helpers.mjs";
 import { ensureCleanWorkingTree, log, currentBranch } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
+import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
 
 function parseArgs(argv) {
@@ -40,6 +41,7 @@ function runTaskValidation(repoRoot, taskFile) {
 }
 
 function main() {
+  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
   const session = String(args.session || args.guid || "").trim();
   const task = String(args.task || "").trim();
