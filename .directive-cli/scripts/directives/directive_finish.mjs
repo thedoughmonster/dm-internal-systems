@@ -49,6 +49,7 @@ function main() {
   }
 
   const { repoRoot, directiveMetaPath, directiveDoc, sessionDir } = resolveDirectiveContext(session);
+  const sessionRel = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
   const corePolicy = loadCorePolicy();
   const lifecyclePolicy = loadExecutorLifecyclePolicy();
   const meta = directiveDoc.meta || {};
@@ -111,11 +112,12 @@ function main() {
   if (dirtyFiles.length > 0 && ["end_of_directive", "per_collection"].includes(commitPolicy)) {
     log("GIT", `Committing deferred changes (${commitPolicy})`);
     runGit(["add", "-A"], repoRoot);
+    runGit(["add", "-f", sessionRel], repoRoot);
     runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
     committed = true;
   } else if (commitPolicy === "per_task") {
     log("GIT", "Committing directive closeout metadata (per_task policy)");
-    runGit(["add", directiveMetaRel], repoRoot);
+    runGit(["add", "-f", directiveMetaRel], repoRoot);
     runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
     committed = true;
   } else {

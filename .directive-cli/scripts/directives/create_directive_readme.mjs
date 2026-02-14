@@ -270,7 +270,7 @@ async function main() {
     process.stdout.write(`Created ${metaPath}\n`);
 
     if (autoGit) {
-      runGit(["add", relSessionDir], repoRoot);
+      runGit(["add", "-f", relSessionDir], repoRoot);
       runGit(["commit", "-m", commitMsg], repoRoot);
       runGit(["checkout", "dev"], repoRoot);
       runGit(["merge", "--no-ff", flowBranch, "-m", `merge: ${commitMsg}`], repoRoot);

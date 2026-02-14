@@ -76,6 +76,7 @@ function main() {
   }
 
   const taskPath = resolveTaskFile(sessionDir, task);
+  const taskRel = path.relative(repoRoot, taskPath).replace(/\\/g, "/");
   const taskDoc = readJson(taskPath);
   if (!taskDoc || typeof taskDoc !== "object" || Array.isArray(taskDoc) || !taskDoc.meta) {
     throw new Error(`Invalid task file: ${taskPath}`);
@@ -137,6 +138,7 @@ function main() {
   if (commitPolicy === "per_task") {
     log("GIT", "Committing task changes (per_task policy)");
     runGit(["add", "-A"], repoRoot);
+    runGit(["add", "-f", taskRel], repoRoot);
     const commitMsg = `chore(executor): complete ${path.basename(taskPath, ".task.json")}`;
     runGit(["commit", "-m", commitMsg], repoRoot);
   } else {

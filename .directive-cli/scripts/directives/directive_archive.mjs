@@ -185,7 +185,7 @@ async function main() {
     writeJson(directiveMetaPath, directiveDoc);
     log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
 
-    runGit(["add", sessionRel], repoRoot);
+    runGit(["add", "-f", sessionRel], repoRoot);
     runGit(["commit", "-m", commitMsg], repoRoot);
 
     log("GIT", "Merging archive branch into dev");
