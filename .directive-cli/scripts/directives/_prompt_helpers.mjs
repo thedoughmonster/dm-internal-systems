@@ -34,14 +34,14 @@ function countRenderedLines(text, columns) {
     }, 0);
 }
 
-function clearMenu(lines) {
+function clearMenu(lines, output) {
   if (lines <= 0) return;
-  process.stdout.write("\x1b[0G");
+  output.write("\x1b[0G");
   for (let i = 0; i < lines; i += 1) {
-    process.stdout.write("\x1b[2K");
-    if (i < lines - 1) process.stdout.write("\x1b[1A");
+    output.write("\x1b[2K");
+    if (i < lines - 1) output.write("\x1b[1A");
   }
-  process.stdout.write("\x1b[0G");
+  output.write("\x1b[0G");
 }
 
 function truncateToColumns(input, maxCols) {
@@ -51,9 +51,9 @@ function truncateToColumns(input, maxCols) {
   return `${plain.slice(0, Math.max(0, limit - 1)).trimEnd()}…`;
 }
 
-function renderMenu(label, options, selected) {
+function renderMenu(label, options, selected, columns) {
   const out = [label];
-  const cols = Math.max(40, Number(process.stdout.columns || 80));
+  const cols = Math.max(40, Number(columns || 80));
   const labelMax = Math.max(10, cols - 10);
   for (let i = 0; i < options.length; i += 1) {
     const prefix = i === selected ? color("❯", "32") : " ";
@@ -68,9 +68,9 @@ function renderMenu(label, options, selected) {
   return out.join("\n");
 }
 
-function renderMultiMenu(label, options, selected, toggled) {
+function renderMultiMenu(label, options, selected, toggled, columns) {
   const out = [label, color("Space: toggle  Enter: apply  Esc/Ctrl+C: cancel", "2")];
-  const cols = Math.max(40, Number(process.stdout.columns || 80));
+  const cols = Math.max(40, Number(columns || 80));
   const labelMax = Math.max(10, cols - 14);
   for (let i = 0; i < options.length; i += 1) {
     const cursor = i === selected ? color("❯", "32") : " ";
@@ -109,14 +109,15 @@ export async function selectOption({ input, output, label, options, defaultIndex
 
   return await new Promise((resolve, reject) => {
     function redraw() {
-      clearMenu(lines);
-      const frame = renderMenu(label, options, selected);
+      clearMenu(lines, output);
+      const frame = renderMenu(label, options, selected, output.columns);
       output.write(`${frame}\n`);
-      lines = countRenderedLines(frame, output.columns);
+      // +1 for the trailing cursor line after printing '\n'
+      lines = countRenderedLines(frame, output.columns) + 1;
     }
     function cleanup() {
       input.removeListener("keypress", onKeypress);
-      clearMenu(lines);
+      clearMenu(lines, output);
       lines = 0;
       try {
         input.setRawMode(previousRawMode);
@@ -201,14 +202,15 @@ export async function selectMultiOption({ input, output, label, options, default
 
   return await new Promise((resolve, reject) => {
     function redraw() {
-      clearMenu(lines);
-      const frame = renderMultiMenu(label, options, cursor, toggled);
+      clearMenu(lines, output);
+      const frame = renderMultiMenu(label, options, cursor, toggled, output.columns);
       output.write(`${frame}\n`);
-      lines = countRenderedLines(frame, output.columns);
+      // +1 for the trailing cursor line after printing '\n'
+      lines = countRenderedLines(frame, output.columns) + 1;
     }
     function cleanup() {
       input.removeListener("keypress", onKeypress);
-      clearMenu(lines);
+      clearMenu(lines, output);
       lines = 0;
       try {
         input.setRawMode(previousRawMode);
