@@ -1111,7 +1111,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
     env.DC_TASK_SLUG = selectedTask.task_slug;
     env.DC_TASK_FILE = selectedTask.task_file;
   }
-  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition);
+  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role);
   const codexArgs = ["--profile", profileName];
   if (initialPrompt) codexArgs.push(initialPrompt);
   const result = spawnSync(codexBin, codexArgs, {
@@ -1131,7 +1131,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
   }
 }
 
-function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition) {
+function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role) {
   const lines = [
     "Startup context is preselected by dc launch codex (dc context start). Use it as authoritative.",
     "Do not ask for role selection.",
@@ -1156,6 +1156,17 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
   lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
   lines.push("Do not execute any lifecycle command until operator confirms execution.");
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
+  if (role === "architect" && selectedDirective && !selectedTask) {
+    lines.push("Architect authoring gate is active.");
+    lines.push("Operate in discovery-and-planning mode first; be interactive and inquisitive.");
+    lines.push("Ask at least 3 targeted clarifying questions before proposing tasks.");
+    lines.push("Summarize discovered facts and constraints back to the operator before task drafting.");
+    lines.push("Propose a concrete task plan and explicitly ask for operator approval.");
+    lines.push("Do not implement code changes or edit non-directive files in this phase.");
+    lines.push("First produce a proposed task breakdown and request operator approval before creating task files.");
+    lines.push("After creating task files, request operator confirmation that task contracts are correct.");
+    lines.push("Then create architect->executor handoff via dc directive handoff and stop for executor.");
+  }
   return lines.join("\n");
 }
 
@@ -1173,6 +1184,9 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
     nextActions.push(
       `Create initial tasks in selected directive with 'dc directive task --session ${selectedDirective.session} --title ... --summary ...'`,
       "Populate task contract fields (objective, constraints, allowed_files, steps, validation) before handoff.",
+      "Ask operator to approve proposed task breakdown before creating files.",
+      "Ask operator to approve task contracts after creation.",
+      `Create handoff with 'dc directive handoff --session ${selectedDirective.session} --from-role architect --to-role executor ...' and then stop.`,
     );
   }
   const doc = {
@@ -1217,6 +1231,13 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       require_operator_go_ahead_before_execution: true,
       require_model_gate: true,
       require_thinking_gate: true,
+      architect_authoring_no_code_edits_without_task_and_handoff: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      require_task_breakdown_approval_before_task_creation: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      require_task_contract_approval_before_handoff: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      require_handoff_before_executor_execution: role === "architect" && Boolean(selectedDirective),
+      architect_discovery_mode_required: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      architect_min_clarifying_questions: role === "architect" && Boolean(selectedDirective) && !selectedTask ? 3 : 0,
+      architect_must_echo_discovery_before_task_drafting: role === "architect" && Boolean(selectedDirective) && !selectedTask,
     },
     role_transition: roleTransition || "",
     operator_discovery: {
@@ -1237,6 +1258,18 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
         "Pause execution until operator confirms model/thinking state.",
       ],
     },
+    architect_discovery_protocol: role === "architect" && Boolean(selectedDirective) && !selectedTask
+      ? {
+        required: true,
+        min_clarifying_questions: 3,
+        checklist: [
+          "Ask targeted discovery questions before task drafting.",
+          "Reflect discovered facts/constraints back to operator for confirmation.",
+          "Present proposed task plan and wait for explicit approval.",
+          "Do not edit non-directive files before approved tasks + handoff.",
+        ],
+      }
+      : null,
     next_actions: nextActions,
   };
   fs.mkdirSync(path.dirname(startupPath), { recursive: true });

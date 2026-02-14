@@ -319,9 +319,68 @@ is_operator_only_command() {
   esac
 }
 
+is_architect_authoring_lock_active() {
+  [[ "${DC_ROLE:-}" == "architect" && -n "${DC_DIRECTIVE_SESSION:-}" && -z "${DC_TASK_SLUG:-}" ]]
+}
+
+is_allowed_under_architect_authoring_lock() {
+  local cmd="$1"
+  local sub="$2"
+  case "$cmd:$sub" in
+    help:|-h:|--help:)
+      return 0
+      ;;
+    ns:|namespace:)
+      return 0
+      ;;
+    repo:map)
+      return 0
+      ;;
+    context:show|context:check)
+      return 0
+      ;;
+    policy:validate)
+      return 0
+      ;;
+    validate:|test:)
+      return 0
+      ;;
+    directive:list|directive:view|directive:task|directive:handoff)
+      return 0
+      ;;
+    meta:architect|meta:update)
+      return 0
+      ;;
+    runbook:architect-authoring)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+enforce_architect_authoring_lock() {
+  local cmd="$1"
+  local sub="$2"
+  if ! is_architect_authoring_lock_active; then
+    return 0
+  fi
+  if is_allowed_under_architect_authoring_lock "$cmd" "$sub"; then
+    return 0
+  fi
+
+  printf "%s\n" "$(color "${C_RED}" "Blocked by architect authoring lock: '${cmd}${sub:+ ${sub}}' is not allowed before task approval + handoff.")" >&2
+  printf "%s\n" "$(color "${C_YELLOW}" "Active directive: ${DC_DIRECTIVE_SESSION}")" >&2
+  printf "%s\n" "Allowed now: directive list/view/task/handoff, meta architect, validate, context show/check, runbook architect-authoring." >&2
+  printf "%s\n" "Next steps: approve task plan -> create tasks -> approve contracts -> create handoff to executor." >&2
+  exit 1
+}
+
 enforce_namespace_policy() {
   local cmd="$1"
   local sub="$2"
+  enforce_architect_authoring_lock "$cmd" "$sub"
   if ! is_agent_namespace; then
     return 0
   fi

@@ -265,6 +265,26 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /launch codex/);
 });
 
+test("architect authoring lock blocks execution-oriented commands before task selection", () => {
+  const sessions = listOpenSessions();
+  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "archive",
+    "--session",
+    sessions[0],
+    "--dry-run",
+  ], {
+    env: {
+      DC_ROLE: "architect",
+      DC_DIRECTIVE_SESSION: sessions[0],
+      DC_TASK_SLUG: "",
+    },
+  });
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /architect authoring lock/i);
+});
+
 test("policy validate passes for required policy files", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["policy", "validate"]);
   assert.match(output, /Policy validation passed/);
@@ -1084,7 +1104,17 @@ test("cli launch codex marks selected directive with no tasks as none_available"
   assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
   const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
   assert.equal(startupDoc.startup_rules.task_selection_state, "none_available");
+  assert.equal(startupDoc.startup_rules.architect_authoring_no_code_edits_without_task_and_handoff, true);
+  assert.equal(startupDoc.startup_rules.require_task_breakdown_approval_before_task_creation, true);
+  assert.equal(startupDoc.startup_rules.require_task_contract_approval_before_handoff, true);
+  assert.equal(startupDoc.startup_rules.require_handoff_before_executor_execution, true);
+  assert.equal(startupDoc.startup_rules.architect_discovery_mode_required, true);
+  assert.equal(startupDoc.startup_rules.architect_min_clarifying_questions, 3);
+  assert.equal(startupDoc.startup_rules.architect_must_echo_discovery_before_task_drafting, true);
+  assert.equal(startupDoc.architect_discovery_protocol.required, true);
+  assert.equal(startupDoc.architect_discovery_protocol.min_clarifying_questions, 3);
   assert.ok(Array.isArray(startupDoc.next_actions) && startupDoc.next_actions.length > 0, "Expected next_actions guidance");
+  assert.ok(startupDoc.next_actions.some((n) => String(n).includes("handoff")), "Expected explicit handoff step");
 });
 
 test("context bootstrap writes managed profile block to codex config", (t) => {
