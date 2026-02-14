@@ -61,6 +61,8 @@ function findSessionByTitleSlug(titleSlug) {
 
 test("directives-cli help exposes expected command set", () => {
   const output = run(path.join(directivesBinRoot, "cli"), ["help"]);
+  assert.match(output, /Audience: Operator \+ Machine/);
+  assert.match(output, /Audience: Machine-only/);
   assert.match(output, /init/);
   assert.match(output, /directive/);
   assert.match(output, /meta/);
