@@ -9,6 +9,20 @@ function color(text, code) {
   return `\x1b[${code}m${text}\x1b[0m`;
 }
 
+function stripAnsi(input) {
+  return String(input || "").replace(/\x1B\[[0-9;]*m/g, "");
+}
+
+function countRenderedLines(text, columns) {
+  const cols = Math.max(20, Number(columns || 80));
+  return String(text || "")
+    .split("\n")
+    .reduce((sum, line) => {
+      const width = stripAnsi(line).length;
+      return sum + Math.max(1, Math.ceil(width / cols));
+    }, 0);
+}
+
 function clearMenu(lines) {
   if (lines <= 0) return;
   process.stdout.write("\x1b[0G");
@@ -59,7 +73,7 @@ export async function selectOption({ input, output, label, options, defaultIndex
       clearMenu(lines);
       const frame = renderMenu(label, options, selected);
       output.write(`${frame}\n`);
-      lines = frame.split("\n").length;
+      lines = countRenderedLines(frame, output.columns);
     }
     function cleanup() {
       input.removeListener("keypress", onKeypress);

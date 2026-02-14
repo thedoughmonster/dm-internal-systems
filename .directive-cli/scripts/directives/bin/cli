@@ -57,6 +57,7 @@ usage() {
   print_row "    " "directive new" "Create <directive_slug>.meta.json" "${C_GREEN}"
   print_row "    " "directive task" "Create <task_slug>.task.json" "${C_GREEN}"
   print_row "    " "directive handoff" "Create <directive_slug>.handoff.json" "${C_GREEN}"
+  print_row "    " "directive list" "List directives with selectable output detail" "${C_GREEN}"
   print_row "    " "directive view" "View directive JSON files (prompt or --directive/--file)" "${C_GREEN}"
   print_row "    " "directive start" "Executor directive startup flow (branch/validation gates)" "${C_GREEN}"
   print_row "    " "directive finish" "Executor directive closeout flow" "${C_GREEN}"
@@ -81,6 +82,7 @@ usage() {
   print_row "  " "dc agent start" "Select profile/role/directive and launch codex" "${C_GREEN}"
   printf "\n%s\n" "$(color "${C_CYAN}" "Audience: Operator + Machine")"
   print_row "  " "dc repo map" "Show current repo path map and directive roots" "${C_GREEN}"
+  print_row "  " "dc directive list" "List directives (compact/detailed/custom fields)" "${C_GREEN}"
   print_row "  " "dc directive view" "Inspect directive/task/handoff JSON" "${C_GREEN}"
   print_row "  " "dc directive archive" "Archive directive with scripted git flow" "${C_GREEN}"
   print_row "  " "dc directive migrate" "Migrate legacy directive files to JSON schema" "${C_GREEN}"
@@ -165,6 +167,9 @@ case "$cmd" in
         ;;
       handoff)
         exec "${SCRIPT_DIR}/newhandoff" "$@"
+        ;;
+      list)
+        exec "${SCRIPT_DIR}/listdirectives" "$@"
         ;;
       view)
         exec "${SCRIPT_DIR}/viewdirective" "$@"

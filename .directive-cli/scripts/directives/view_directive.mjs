@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
+import { listDirectiveSessions } from "./_directive_listing.mjs";
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -190,32 +191,12 @@ function isArchivedStatus(status) {
 
 function listAvailableDirectives(root) {
   const base = path.join(root, "apps", "web", ".local", "directives");
-  if (!fs.existsSync(base)) return [];
-
-  const sessions = fs
-    .readdirSync(base, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name)
-    .sort();
-
-  const directives = [];
-  for (const session of sessions) {
-    const sessionDir = path.join(base, session);
-    const files = fs.readdirSync(sessionDir);
-    const metaFile = files.find((f) => f.endsWith(".meta.json"));
-    if (!metaFile) continue;
-    const metaDoc = loadJson(path.join(sessionDir, metaFile));
-    const meta = metaDoc && metaDoc.meta ? metaDoc.meta : {};
-    if (isArchivedStatus(meta.status)) continue;
-    directives.push({
-      session,
-      session_dir: sessionDir,
-      title: String(meta.title || humanizeSlug(metaFile.replace(/\.meta\.json$/u, ""))),
-      status: String(meta.status || "open"),
-    });
-  }
-
-  return directives;
+  return listDirectiveSessions(base, { includeArchived: false }).map((d) => ({
+    session: d.session,
+    session_dir: d.session_dir,
+    title: d.title,
+    status: d.status,
+  }));
 }
 
 function listDirectiveFiles(directive) {
