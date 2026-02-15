@@ -208,6 +208,30 @@ print_command() {
   print_row "  " "${cmd}" "$(audience_tag "$audience") ${desc}" "${C_GREEN}"
 }
 
+log_cmd_line() {
+  local ts cmdline
+  ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  cmdline=""
+  for part in "$@"; do
+    if [[ -n "$cmdline" ]]; then cmdline+=" "; fi
+    cmdline+="$(printf '%q' "$part")"
+  done
+  printf "[%s] [CMD] %s\n" "$ts" "$cmdline"
+}
+
+run_logged() {
+  local log_file="${DC_SESSION_LOG:-}"
+  if [[ -n "$log_file" ]]; then
+    mkdir -p "$(dirname "$log_file")"
+    log_cmd_line "$@" >> "$log_file"
+    "$@" > >(tee -a "$log_file") 2> >(tee -a "$log_file" >&2)
+    local rc=$?
+    printf "[%s] [CMD_EXIT] %s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$rc" >> "$log_file"
+    return "$rc"
+  fi
+  "$@"
+}
+
 usage() {
   local mode="${1:-all}"
   local shown_mode="$mode"
@@ -596,7 +620,8 @@ fi
 case "$cmd" in
   init)
     enforce_namespace_policy "init" ""
-    exec "${SCRIPT_DIR}/init" "$@"
+    run_logged "${SCRIPT_DIR}/init" "$@"
+    exit $?
     ;;
   repo)
     sub="${1:-}"
@@ -608,7 +633,8 @@ case "$cmd" in
     enforce_namespace_policy "repo" "$sub"
     case "$sub" in
       map)
-        exec "${SCRIPT_DIR}/repomap" "$@"
+        run_logged "${SCRIPT_DIR}/repomap" "$@"
+        exit $?
         ;;
       *)
         echo "Unknown repo command: ${sub:-<none>}" >&2
@@ -627,7 +653,8 @@ case "$cmd" in
     enforce_namespace_policy "policy" "$sub"
     case "$sub" in
       validate)
-        exec "${SCRIPT_DIR}/validatepolicies" "$@"
+        run_logged "${SCRIPT_DIR}/validatepolicies" "$@"
+        exit $?
         ;;
       *)
         echo "Unknown policy command: ${sub:-<none>}" >&2
@@ -642,7 +669,8 @@ case "$cmd" in
       exit 0
     fi
     enforce_namespace_policy "runbook" ""
-    exec "${SCRIPT_DIR}/runbook" "$@"
+    run_logged "${SCRIPT_DIR}/runbook" "$@"
+    exit $?
     ;;
   context)
     sub="${1:-}"
@@ -652,7 +680,8 @@ case "$cmd" in
       exit 0
     fi
     enforce_namespace_policy "context" "$sub"
-    exec "${SCRIPT_DIR}/context" "$sub" "$@"
+    run_logged "${SCRIPT_DIR}/context" "$sub" "$@"
+    exit $?
     ;;
   launch)
     sub="${1:-}"
@@ -664,13 +693,16 @@ case "$cmd" in
     enforce_namespace_policy "launch" "$sub"
     case "$sub" in
       codex)
-        exec "${SCRIPT_DIR}/context" start "$@"
+        run_logged "${SCRIPT_DIR}/context" start "$@"
+        exit $?
         ;;
       switch)
-        exec "${SCRIPT_DIR}/context" switch "$@"
+        run_logged "${SCRIPT_DIR}/context" switch "$@"
+        exit $?
         ;;
       handoff)
-        exec "${SCRIPT_DIR}/context" handoff "$@"
+        run_logged "${SCRIPT_DIR}/context" handoff "$@"
+        exit $?
         ;;
       *)
         echo "Unknown launch command: ${sub:-<none>}" >&2
@@ -684,7 +716,8 @@ case "$cmd" in
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
     enforce_namespace_policy "context" "$sub"
-    exec "${SCRIPT_DIR}/context" "$sub" "$@"
+    run_logged "${SCRIPT_DIR}/context" "$sub" "$@"
+    exit $?
     ;;
   directive)
     sub="${1:-}"
@@ -696,35 +729,45 @@ case "$cmd" in
     enforce_namespace_policy "directive" "$sub"
     case "$sub" in
       new)
-        exec "${SCRIPT_DIR}/newdirective" "$@"
+        run_logged "${SCRIPT_DIR}/newdirective" "$@"
+        exit $?
         ;;
       task)
-        exec "${SCRIPT_DIR}/newtask" "$@"
+        run_logged "${SCRIPT_DIR}/newtask" "$@"
+        exit $?
         ;;
       handoff)
-        exec "${SCRIPT_DIR}/newhandoff" "$@"
+        run_logged "${SCRIPT_DIR}/newhandoff" "$@"
+        exit $?
         ;;
       list)
-        exec "${SCRIPT_DIR}/listdirectives" "$@"
+        run_logged "${SCRIPT_DIR}/listdirectives" "$@"
+        exit $?
         ;;
       view)
-        exec "${SCRIPT_DIR}/viewdirective" "$@"
+        run_logged "${SCRIPT_DIR}/viewdirective" "$@"
+        exit $?
         ;;
       start)
         auto_pin_agent_namespace "${DC_ROLE:-executor}"
-        exec "${SCRIPT_DIR}/directivestart" "$@"
+        run_logged "${SCRIPT_DIR}/directivestart" "$@"
+        exit $?
         ;;
       finish)
-        exec "${SCRIPT_DIR}/directivefinish" "$@"
+        run_logged "${SCRIPT_DIR}/directivefinish" "$@"
+        exit $?
         ;;
       archive)
-        exec "${SCRIPT_DIR}/directivearchive" "$@"
+        run_logged "${SCRIPT_DIR}/directivearchive" "$@"
+        exit $?
         ;;
       cleanup)
-        exec "${SCRIPT_DIR}/directivecleanup" "$@"
+        run_logged "${SCRIPT_DIR}/directivecleanup" "$@"
+        exit $?
         ;;
       migrate)
-        exec "${SCRIPT_DIR}/migratedirectives" "$@"
+        run_logged "${SCRIPT_DIR}/migratedirectives" "$@"
+        exit $?
         ;;
       *)
         echo "Unknown directive command: ${sub:-<none>}" >&2
@@ -743,10 +786,12 @@ case "$cmd" in
     enforce_namespace_policy "task" "$sub"
     case "$sub" in
       start)
-        exec "${SCRIPT_DIR}/taskstart" "$@"
+        run_logged "${SCRIPT_DIR}/taskstart" "$@"
+        exit $?
         ;;
       finish)
-        exec "${SCRIPT_DIR}/taskfinish" "$@"
+        run_logged "${SCRIPT_DIR}/taskfinish" "$@"
+        exit $?
         ;;
       *)
         echo "Unknown task command: ${sub:-<none>}" >&2
@@ -765,13 +810,16 @@ case "$cmd" in
     enforce_namespace_policy "meta" "$sub"
     case "$sub" in
       update)
-        exec "${SCRIPT_DIR}/updatemeta" "$@"
+        run_logged "${SCRIPT_DIR}/updatemeta" "$@"
+        exit $?
         ;;
       architect)
-        exec "${SCRIPT_DIR}/architect-updatemeta" "$@"
+        run_logged "${SCRIPT_DIR}/architect-updatemeta" "$@"
+        exit $?
         ;;
       executor)
-        exec "${SCRIPT_DIR}/executor-updatemeta" "$@"
+        run_logged "${SCRIPT_DIR}/executor-updatemeta" "$@"
+        exit $?
         ;;
       *)
         echo "Unknown meta command: ${sub:-<none>}" >&2
@@ -782,11 +830,13 @@ case "$cmd" in
     ;;
   validate)
     enforce_namespace_policy "validate" ""
-    exec "${SCRIPT_DIR}/validatedirectives" "$@"
+    run_logged "${SCRIPT_DIR}/validatedirectives" "$@"
+    exit $?
     ;;
   test)
     enforce_namespace_policy "test" ""
-    exec "${SCRIPT_DIR}/testdirectives" "$@"
+    run_logged "${SCRIPT_DIR}/testdirectives" "$@"
+    exit $?
     ;;
   ns|namespace)
     enforce_namespace_policy "ns" ""
