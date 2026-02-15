@@ -2,7 +2,7 @@
 
 ## Storage model
 
-- Session root: `apps/web/.local/directives/<session_dir>/`
+- Session root: `.directive-cli/directives/<session_dir>/`
 - Session intake content: `<directive_slug>.meta.json` (non executable)
 - Session intake metadata: `<directive_slug>.meta.json`
 - Executable task content: `<task_slug>.task.json`

@@ -8,7 +8,7 @@ Automatic handoff is valid only when sender writes a complete session-local hand
 
 Required artifact path:
 
-- `apps/web/.local/directives/<session_dir>/<directive_slug>.handoff.json`
+- `.directive-cli/directives/<session_dir>/<directive_slug>.handoff.json`
 
 Required `<directive_slug>.handoff.json` format:
 

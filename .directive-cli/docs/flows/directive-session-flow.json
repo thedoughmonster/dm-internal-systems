@@ -97,12 +97,15 @@
         {
           "id": "executor_06",
           "type": "DIR",
-          "command": "dc directive finish --session <s>",
-          "purpose": "Finalize directive",
+          "command": "dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout",
+          "purpose": "Run QA gate and finalize+merge directive",
           "includes": [
+            "operator_qa_gate",
             "final_validation",
             "final_git_action",
-            "directive_closeout_write"
+            "directive_closeout_write",
+            "archive_merge_to_dev",
+            "feature_branch_cleanup"
           ]
         }
       ]

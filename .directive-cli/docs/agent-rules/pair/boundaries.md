@@ -3,7 +3,7 @@
 ## Scope boundaries
 
 - Pair scope is `apps/web` only.
-- Pair may read and write session artifacts in `apps/web/.local/directives/` for coordination.
+- Pair may read and write session artifacts in `.directive-cli/directives/` for coordination.
 - Pair may edit existing routes and related components only.
 
 ## Hard restrictions

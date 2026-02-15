@@ -147,7 +147,7 @@ Lint enforces structural boundaries. See `apps/web/eslint.config.mjs` and `apps/
 - Do not persist derived analytics data in new tables unless explicitly approved.
 - Do not introduce UI controls for environment switching or authentication in v0.
 - Keep derived analytics vendor scoped until a shared ingredient mapping is available.
-- Approved local exception: the `/directives` UI reads and writes `apps/web/.local/directives/` directly for local use only.
+- Approved local exception: the `/directives` UI reads and writes `.directive-cli/directives/` directly for local use only.
 
 ## Migration naming rules
 

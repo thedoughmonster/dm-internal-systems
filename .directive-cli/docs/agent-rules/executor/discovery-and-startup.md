@@ -2,7 +2,7 @@
 
 ## Directive discovery
 
-- Session path: `apps/web/.local/directives/<session_dir>/`
+- Session path: `.directive-cli/directives/<session_dir>/`
 - Intake file: `<directive_slug>.meta.json` (non executable)
 - Executable file: `<task_slug>.task.json`
 

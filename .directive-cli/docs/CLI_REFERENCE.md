@@ -8,8 +8,13 @@ This is the canonical operator and agent reference for `dc`.
 
 - Commit: yes, based on `commit_policy` in directive meta.
 - Push: yes, on task/directive finish (policy controlled).
-- Merge to `dev`: not in `task finish`/`directive finish`.
-- Merge is handled by explicit closeout/archive flow (`dc directive archive`) or normal git/PR process.
+- Merge to `dev`: yes, when using runbook closeout.
+- Canonical final step is `dc runbook executor-directive-closeout`, which performs:
+  - QA gate prompt
+  - `dc directive finish`
+  - checkout `dev`
+  - `dc directive archive` (merge)
+  - `dc directive cleanup` (remove merged feature branch)
 
 Rationale:
 
@@ -36,8 +41,7 @@ Rationale:
 4. implement task
 5. `dc task finish --session <s> --task <t> --summary "..."`
 6. repeat tasks
-7. `dc directive finish --session <s>`
-8. optional closeout merge/archive: `dc directive archive`
+7. `dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout`
 
 ## Command catalog
 
@@ -67,6 +71,7 @@ Rationale:
 - `dc directive start --session <s>`
 - `dc directive finish --session <s>`
 - `dc directive archive`
+- `dc directive merge`
 - `dc directive cleanup`
 - `dc directive migrate`
 
@@ -84,7 +89,7 @@ Rationale:
 ### Runbook
 
 - `dc runbook executor-task-cycle --session <s> --task <t> --phase pre|post ...`
-- `dc runbook executor-directive-closeout --session <s> ...`
+- `dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout [--qa-command "..."] [--qa-status pass|fail|skip]`
 - `dc runbook executor-directive-cleanup --session <s> ...`
 - `dc runbook architect-authoring ...`
 
@@ -129,6 +134,15 @@ Fix:
 - complete/stage in-scope work or resolve out-of-scope changes.
 - generated context/log files are tolerated by lifecycle guard, but real out-of-scope edits are blocked.
 
+### Archived directive still has unmerged feature branch
+
+Fix:
+
+- merge branch via recovery command:
+  `dc directive merge --session <s>`
+- then cleanup merged branch:
+  `dc directive cleanup --session <s>`
+
 ## Human vs machine usage
 
 ### Operator-first commands
@@ -139,6 +153,7 @@ Fix:
 - `dc directive list`
 - `dc directive view`
 - `dc directive archive`
+- `dc directive merge`
 
 ### Agent/lifecycle commands
 
@@ -156,4 +171,3 @@ Before edits:
 2. run scoped implementation
 3. run lifecycle finish commands
 4. never bypass metadata/handoff contracts
-

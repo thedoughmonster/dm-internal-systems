@@ -10,7 +10,7 @@
 2. Otherwise confirm role assignment and required reading.
 3. If planned work includes governance rule edits (`.directive-cli/AGENTS.md`, `AGENTS.md`, `.directive-cli/docs/agent-rules/**`, `apps/web/docs/guides/agent-guidance.md`), immediately create and switch to a dedicated `chore/*` branch before any file edits.
 4. Governance-only rule edits are Architect-owned end to end; do not issue Architect -> Executor handoff for those edits.
-5. List non archived sessions from `apps/web/.local/directives/` with numbered, human readable metadata unless valid incoming `<directive_slug>.handoff.json` already provides session and objective context.
+5. List non archived sessions from `.directive-cli/directives/` with numbered, human readable metadata unless valid incoming `<directive_slug>.handoff.json` already provides session and objective context.
 6. If any session has `meta.auto_run: true`, set those sessions to `open`, normalize metadata, and remove placeholders.
 7. Select auto run target by highest priority, then earliest created timestamp.
 8. Set selected auto run session to `in_progress` and report changes made.

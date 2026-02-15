@@ -24,7 +24,10 @@
         "implement scoped changes",
         "dc task finish",
         "repeat remaining tasks",
+        "operator QA gate",
+        "dc runbook executor-directive-closeout",
         "dc directive finish",
+        "dc directive archive",
         "dc directive cleanup"
       ]
     }

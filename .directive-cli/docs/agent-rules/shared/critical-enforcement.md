@@ -35,7 +35,7 @@ These rules are non negotiable. Every role must enforce them exactly.
 - During directive sessions, state-changing git commands are Executor-owned by default.
 - Architect may run state-changing git commands only on `chore/*` branches, with explicit operator instruction or explicit directive task instruction.
 - Exception: Architect may create and switch to the directive branch only when it is a `chore/*` branch, as part of directive setup prior to Executor handoff.
-- Architect `chore/*` state-changing git is limited to governance and housekeeping assets only: `.directive-cli/**`, `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, and `apps/web/.local/directives/**`.
+- Architect `chore/*` state-changing git is limited to governance and housekeeping assets only: `.directive-cli/**`, `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, and `.directive-cli/directives/**`.
 - If planned or staged files include product code, Architect must stop and hand off to Executor before any state-changing git.
 - Architect state-changing commits on `chore/*` must use commit subject prefix `chore(architect):`.
 - Architect must not run state-changing git on `feat/*`, `fix/*`, `dev`, or `prod`.

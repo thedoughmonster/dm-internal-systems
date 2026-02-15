@@ -8,7 +8,7 @@
 - perform directive session discovery using `ls`, `find`, `rg`, and `cat`
 - run read-only git inspection commands: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git rev-parse`
 - run state-changing git only on `chore/*` branches, and only when explicitly instructed by operator or directive task
-- run state-changing git on `chore/*` only when touched files are governance or housekeeping assets under `.directive-cli/**`, `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, or `apps/web/.local/directives/**`
+- run state-changing git on `chore/*` only when touched files are governance or housekeeping assets under `.directive-cli/**`, `AGENTS.md`, `docs/**`, `changelog/**`, `apps/web/changelog/**`, or `.directive-cli/directives/**`
 - execute governance-only rule updates (`.directive-cli/AGENTS.md`, `AGENTS.md`, `.directive-cli/docs/agent-rules/**`, `apps/web/docs/guides/agent-guidance.md`) end to end without Executor handoff
 
 ## Documentation and contract edit exception

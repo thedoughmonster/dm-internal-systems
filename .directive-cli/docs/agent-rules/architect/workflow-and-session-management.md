@@ -51,7 +51,7 @@ Phase requirements:
 
 Architect responsibilities:
 
-- Manage session state under `apps/web/.local/directives/`.
+- Manage session state under `.directive-cli/directives/`.
 - Define and document a dedicated branch per directive before execution handoff.
 - Create the directive branch (or verify it already exists) before any Executor handoff.
 - Include `handoff.directive_branch` in every Architect -> Executor `<directive_slug>.handoff.json` artifact for directive execution.

@@ -46,6 +46,7 @@ Operational procedure is script-owned:
 - `dc runbook ...`
 - `dc directive start|finish ...`
 - `dc task start|finish ...`
+- Preferred directive finalization: `dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout`
 
 If markdown procedure text conflicts with runtime script behavior, script behavior wins.
 
@@ -62,7 +63,7 @@ Validate policies with:
 
 ## Directive model
 
-- Session root: `apps/web/.local/directives/<session_dir>/`
+- Session root: `.directive-cli/directives/<session_dir>/`
 - Session file: `<directive_slug>.meta.json`
 - Task file: `<task_slug>.task.json`
 - Handoff file: `<directive_slug>.handoff.json`
@@ -92,7 +93,7 @@ Executor may execute when context is provided by either:
 
 - UI reads and writes go through Edge Functions.
 - Do not call Supabase REST endpoints directly from UI code.
-- Local directives UI exception: local reads/writes in `apps/web/.local/directives/`.
+- Local directives UI exception: local reads/writes in `.directive-cli/directives/`.
 
 ## Secret handling (mandatory)
 

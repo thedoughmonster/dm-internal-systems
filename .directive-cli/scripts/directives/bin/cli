@@ -282,6 +282,7 @@ usage() {
   print_command "$shown_mode" "directive start" "agent" "Executor directive startup flow (auto-pins terminal)"
   print_command "$shown_mode" "directive finish" "agent" "Executor directive closeout flow"
   print_command "$shown_mode" "directive archive" "both" "Archive directive metadata and branch flow"
+  print_command "$shown_mode" "directive merge" "both" "Merge directive branch into base and mark merge_status"
   print_command "$shown_mode" "directive cleanup" "agent" "Cleanup merged directive branch"
   print_command "$shown_mode" "directive migrate" "both" "Migrate legacy directive files to JSON format"
 
@@ -313,11 +314,12 @@ category_usage() {
   printf "%s\n" "Usage:"
   case "$category" in
     directive)
-      printf "  %s\n" "$(color "${C_GREEN}" "dc directive <new|task|handoff|list|view|start|finish|archive|cleanup|migrate> [args...]")"
+      printf "  %s\n" "$(color "${C_GREEN}" "dc directive <new|task|handoff|list|view|start|finish|archive|merge|cleanup|migrate> [args...]")"
       printf "\nExamples:\n"
       printf "  dc directive list --detailed\n"
       printf "  dc directive view --directive <session> --file <name>.json\n"
       printf "  dc directive start --session <session>\n"
+      printf "  dc directive merge --session <session>\n"
       ;;
     task)
       printf "  %s\n" "$(color "${C_GREEN}" "dc task <start|finish> [args...]")"
@@ -342,6 +344,10 @@ category_usage() {
       ;;
     runbook)
       printf "  %s\n" "$(color "${C_GREEN}" "dc runbook <executor-task-cycle|executor-directive-closeout|executor-directive-cleanup|architect-authoring> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc runbook executor-task-cycle --session <session> --task <task> --phase pre --confirm executor-task-cycle-pre\n"
+      printf "  dc runbook executor-directive-closeout --session <session> --confirm executor-directive-closeout\n"
+      printf "  dc runbook executor-directive-closeout --session <session> --confirm executor-directive-closeout --qa-status pass\n"
       ;;
     repo)
       printf "  %s\n" "$(color "${C_GREEN}" "dc repo map")"
@@ -759,6 +765,10 @@ case "$cmd" in
         ;;
       archive)
         run_logged "${SCRIPT_DIR}/directivearchive" "$@"
+        exit $?
+        ;;
+      merge)
+        run_logged "${SCRIPT_DIR}/directivemerge" "$@"
         exit $?
         ;;
       cleanup)

@@ -4,8 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { stdin, stdout } from "node:process";
 import { loadRunbookFlowPolicy } from "./_policy_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
+import { selectOption } from "./_prompt_helpers.mjs";
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -35,7 +37,7 @@ function usage() {
     "  executor-task-cycle       Directive+task execution checkpoints",
     "    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]",
     "  executor-directive-closeout",
-    "    --session <id> [--confirm <token>] [--dry-run]",
+    "    --session <id> [--confirm <token>] [--qa-command <cmd>] [--qa-status <pass|fail|skip>] [--no-qa-gate] [--dry-run]",
     "  executor-directive-cleanup",
     "    --session <id> [--confirm <token>] [--dry-run]",
     "  architect-authoring",
@@ -73,6 +75,23 @@ function runBin(name, args, { dryRun = false } = {}) {
   if (result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
   if (result.status !== 0) throw new Error(`${name} failed`);
+}
+
+function runShell(command, args = [], { dryRun = false } = {}) {
+  if (dryRun) {
+    log(`[dry-run] ${command} ${args.join(" ")}`);
+    return;
+  }
+  log(`${command} ${args.join(" ")}`);
+  const result = spawnSync(command, args, {
+    cwd: path.resolve(scriptDir(), "../../.."),
+    encoding: "utf8",
+  });
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr);
+  if (result.status !== 0) {
+    throw new Error(`${command} ${args.join(" ")} failed`);
+  }
 }
 
 function requireConfirm(args, requiredToken, runbookName, dryRun) {
@@ -117,12 +136,66 @@ function runbookExecutorTaskCycle(args) {
   runBin("taskfinish", ["--session", session, "--task", task, "--summary", summary], { dryRun });
 }
 
-function runbookExecutorDirectiveCloseout(args) {
+function normalizeQaStatus(raw) {
+  const value = String(raw || "").trim().toLowerCase();
+  if (!value) return "";
+  if (["pass", "fail", "skip"].includes(value)) return value;
+  return "";
+}
+
+async function resolveQaStatus(args, session, dryRun) {
+  if (args["no-qa-gate"]) {
+    log("QA gate skipped (--no-qa-gate)");
+    return "skip";
+  }
+  const explicit = normalizeQaStatus(args["qa-status"]);
+  if (explicit) return explicit;
+  if (dryRun) {
+    log("[dry-run] QA gate would prompt for pass|fail|skip");
+    return "skip";
+  }
+  if (!(stdin.isTTY && stdout.isTTY)) {
+    throw new Error("executor-directive-closeout requires --qa-status <pass|fail|skip> in non-interactive mode (or use --no-qa-gate).");
+  }
+
+  const qaCommand = String(args["qa-command"] || "npm --prefix apps/web run dev").trim();
+  const selection = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: [
+      `QA gate for directive '${session}'`,
+      `Run this in another terminal: ${qaCommand}`,
+      "Then choose QA result:",
+    ].join("\n"),
+    options: [
+      { label: "pass - QA complete, continue closeout", value: "pass", color: "green" },
+      { label: "fail - bugs found, stop closeout", value: "fail", color: "red" },
+      { label: "skip - continue without QA", value: "skip", color: "yellow" },
+      { label: "cancel", value: "cancel", color: "red" },
+    ],
+    defaultIndex: 0,
+  });
+  if (selection === "cancel") {
+    throw new Error("Closeout cancelled at QA gate.");
+  }
+  return selection;
+}
+
+async function runbookExecutorDirectiveCloseout(args) {
   const session = String(args.session || args.guid || "").trim();
   if (!session) throw new Error("executor-directive-closeout requires --session");
   const dryRun = Boolean(args["dry-run"]);
   requireConfirm(args, "executor-directive-closeout", "executor-directive-closeout", dryRun);
+  const qaStatus = await resolveQaStatus(args, session, dryRun);
+  if (qaStatus === "fail") {
+    throw new Error("Closeout stopped: QA gate returned fail.");
+  }
+
   runBin("directivefinish", ["--session", session], { dryRun });
+  runShell("git", ["checkout", "dev"], { dryRun });
+  runBin("directivearchive", ["--session", session], { dryRun });
+  runBin("directivecleanup", ["--session", session], { dryRun });
+  log(`executor-directive-closeout complete: session=${session} qa=${qaStatus}`);
 }
 
 function runbookExecutorDirectiveCleanup(args) {
@@ -162,7 +235,7 @@ function runbookArchitectAuthoring(args) {
   }
 }
 
-function main() {
+async function main() {
   loadRunbookFlowPolicy();
   const args = parseArgs(process.argv.slice(2));
   const name = String(args._[0] || "").trim();
@@ -180,7 +253,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
 } catch (error) {
   process.stderr.write(`${error.message}\n`);
   process.exit(1);

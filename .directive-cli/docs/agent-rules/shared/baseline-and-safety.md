@@ -13,7 +13,7 @@ All roles follow baseline policy defined in `.directive-cli/AGENTS.md`.
 
 - All UI reads and writes go through Edge Functions.
 - Direct Supabase REST calls from UI code are forbidden.
-- Approved local exception: `/directives` UI may read and write `apps/web/.local/directives/` directly for local use.
+- Approved local exception: `/directives` UI may read and write `.directive-cli/directives/` directly for local use.
 
 ## Migration naming policy
 

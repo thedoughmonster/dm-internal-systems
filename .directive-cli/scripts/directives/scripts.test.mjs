@@ -269,6 +269,7 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /directive start/);
   assert.match(output, /directive finish/);
   assert.match(output, /directive archive/);
+  assert.match(output, /directive merge/);
   assert.match(output, /directive cleanup/);
   assert.match(output, /task start/);
   assert.match(output, /task finish/);
@@ -489,6 +490,21 @@ test("runbook executor-task-cycle pre requires confirmation token in non-dry-run
   assert.match(text, /requires --confirm executor-task-cycle-pre/);
 });
 
+test("runbook executor-directive-closeout requires qa-status in non-interactive mode", () => {
+  const sessions = listSessions();
+  assert.ok(sessions.length > 0, "Expected at least one existing directive session");
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "runbook",
+    "executor-directive-closeout",
+    "--session",
+    sessions[0],
+    "--confirm",
+    "executor-directive-closeout",
+  ]);
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /requires --qa-status <pass\|fail\|skip> in non-interactive mode/);
+});
+
 test("directive start is blocked when DC_ROLE is architect", () => {
   const sessions = listSessions();
   assert.ok(sessions.length > 0, "Expected at least one existing directive session");
@@ -597,6 +613,44 @@ test("directive archive supports multiple sessions via comma list in dry-run", (
   ]);
   assert.match(output, new RegExp(`Directive archive: ${sessions[0]}`));
   assert.match(output, new RegExp(`Directive archive: ${sessions[1]}`));
+});
+
+test("directive merge dry-run executes for a merge-candidate session when available", () => {
+  const sessions = listSessions();
+  let selectedSession = "";
+  for (const session of sessions) {
+    const sessionDir = path.join(directivesRoot, session);
+    const metaFile = fs.readdirSync(sessionDir).find((f) => f.endsWith(".meta.json"));
+    if (!metaFile) continue;
+    const doc = JSON.parse(fs.readFileSync(path.join(sessionDir, metaFile), "utf8"));
+    const meta = doc.meta || {};
+    const branch = String(meta.directive_branch || "").trim();
+    const base = String(meta.directive_base_branch || "dev").trim() || "dev";
+    if (!branch || branch === base) continue;
+
+    const hasLocal = spawnSync("git", ["show-ref", "--verify", `refs/heads/${branch}`], { cwd: repoRoot, encoding: "utf8" }).status === 0;
+    const hasRemote = spawnSync("git", ["show-ref", "--verify", `refs/remotes/origin/${branch}`], { cwd: repoRoot, encoding: "utf8" }).status === 0;
+    const sourceRef = hasLocal ? branch : (hasRemote ? `origin/${branch}` : "");
+    if (!sourceRef) continue;
+    const merged = spawnSync("git", ["merge-base", "--is-ancestor", sourceRef, base], { cwd: repoRoot, encoding: "utf8" }).status === 0;
+    if (merged) continue;
+
+    selectedSession = session;
+    break;
+  }
+
+  if (!selectedSession) {
+    return;
+  }
+
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "merge",
+    "--session",
+    selectedSession,
+    "--dry-run",
+  ]);
+  assert.match(output, /Directive merge:/);
 });
 
 test("dc init writes config with explicit agent/model", (t) => {
