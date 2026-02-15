@@ -280,6 +280,56 @@ usage() {
   print_row "  " "--all" "Show complete command list" "${C_GREEN}"
   print_row "  " "--op" "Show operator-visible commands" "${C_GREEN}"
   print_row "  " "--agents" "Show agent-visible commands" "${C_GREEN}"
+  printf "\n%s\n" "$(color "${C_CYAN}" "Reference")"
+  print_row "  " "full docs" ".directive-cli/docs/CLI_REFERENCE.md" "${C_GREEN}"
+}
+
+category_usage() {
+  local category="$1"
+  printf "%s\n" "Usage:"
+  case "$category" in
+    directive)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc directive <new|task|handoff|list|view|start|finish|archive|cleanup|migrate> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc directive list --detailed\n"
+      printf "  dc directive view --directive <session> --file <name>.json\n"
+      printf "  dc directive start --session <session>\n"
+      ;;
+    task)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc task <start|finish> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc task start --session <session> --task <task-slug>\n"
+      printf "  dc task finish --session <session> --task <task-slug> --summary \"...\"\n"
+      ;;
+    meta)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc meta <update|architect|executor> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc meta architect --session <session> --directive-meta --set status=ready\n"
+      printf "  dc meta executor --session <session> --task <task-slug> --set status=done\n"
+      ;;
+    launch)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc launch <codex|switch|handoff> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc launch codex\n"
+      printf "  dc launch handoff --directive <session> --task <task-slug>\n"
+      ;;
+    context)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc context <build|check|show|bootstrap|start|switch|handoff> [args...]")"
+      ;;
+    runbook)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc runbook <executor-task-cycle|executor-directive-closeout|executor-directive-cleanup|architect-authoring> [args...]")"
+      ;;
+    repo)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc repo map")"
+      ;;
+    policy)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc policy validate")"
+      ;;
+    *)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc help")"
+      ;;
+  esac
+  printf "\n%s\n" "$(color "${C_CYAN}" "Reference: .directive-cli/docs/CLI_REFERENCE.md")"
 }
 
 is_agent_namespace() {
@@ -551,6 +601,10 @@ case "$cmd" in
   repo)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "repo"
+      exit 0
+    fi
     enforce_namespace_policy "repo" "$sub"
     case "$sub" in
       map)
@@ -566,6 +620,10 @@ case "$cmd" in
   policy)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "policy"
+      exit 0
+    fi
     enforce_namespace_policy "policy" "$sub"
     case "$sub" in
       validate)
@@ -579,18 +637,30 @@ case "$cmd" in
     esac
     ;;
   runbook)
+    if [[ "${1:-}" == "help" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+      category_usage "runbook"
+      exit 0
+    fi
     enforce_namespace_policy "runbook" ""
     exec "${SCRIPT_DIR}/runbook" "$@"
     ;;
   context)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "context"
+      exit 0
+    fi
     enforce_namespace_policy "context" "$sub"
     exec "${SCRIPT_DIR}/context" "$sub" "$@"
     ;;
   launch)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "launch"
+      exit 0
+    fi
     enforce_namespace_policy "launch" "$sub"
     case "$sub" in
       codex)
@@ -619,6 +689,10 @@ case "$cmd" in
   directive)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "directive"
+      exit 0
+    fi
     enforce_namespace_policy "directive" "$sub"
     case "$sub" in
       new)
@@ -662,6 +736,10 @@ case "$cmd" in
   task)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "task"
+      exit 0
+    fi
     enforce_namespace_policy "task" "$sub"
     case "$sub" in
       start)
@@ -680,6 +758,10 @@ case "$cmd" in
   meta)
     sub="${1:-}"
     if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "meta"
+      exit 0
+    fi
     enforce_namespace_policy "meta" "$sub"
     case "$sub" in
       update)

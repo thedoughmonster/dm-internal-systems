@@ -1,0 +1,159 @@
+# Directive CLI Reference
+
+This is the canonical operator and agent reference for `dc`.
+
+## Core answers
+
+### Does executor commit and merge back to `dev` automatically?
+
+- Commit: yes, based on `commit_policy` in directive meta.
+- Push: yes, on task/directive finish (policy controlled).
+- Merge to `dev`: not in `task finish`/`directive finish`.
+- Merge is handled by explicit closeout/archive flow (`dc directive archive`) or normal git/PR process.
+
+Rationale:
+
+- Keep execution deterministic per task.
+- Avoid silent cross-branch merges during active execution.
+- Keep merge/closeout as explicit lifecycle intent.
+
+## Lifecycle map
+
+### Architect flow
+
+1. `dc directive new`
+2. `dc directive task` (repeat per task)
+3. `dc meta architect ...` (set directive/task metadata)
+4. `dc validate --strict`
+5. `dc directive handoff --session <s> --task-file <task>.task.json ...`
+6. `dc launch handoff` (operator runs from TTY)
+
+### Executor flow
+
+1. `dc launch handoff` (task-bound handoff required)
+2. `dc directive start --session <s>`
+3. `dc task start --session <s> --task <t>`
+4. implement task
+5. `dc task finish --session <s> --task <t> --summary "..."`
+6. repeat tasks
+7. `dc directive finish --session <s>`
+8. optional closeout merge/archive: `dc directive archive`
+
+## Command catalog
+
+### Top level
+
+- `dc help [--all|--op|--agents]`
+- `dc test`
+- `dc validate [--strict] [--verbose] [--file ...]`
+- `dc repo map`
+- `dc policy validate`
+- `dc ns show|env|enter|clear`
+
+### Launch/context
+
+- `dc launch codex`
+- `dc launch switch`
+- `dc launch handoff [--directive <s>] [--task <t>]`
+- `dc context build|check|show|bootstrap|start|switch|handoff`
+
+### Directive
+
+- `dc directive new`
+- `dc directive task`
+- `dc directive handoff`
+- `dc directive list`
+- `dc directive view`
+- `dc directive start --session <s>`
+- `dc directive finish --session <s>`
+- `dc directive archive`
+- `dc directive cleanup`
+- `dc directive migrate`
+
+### Task
+
+- `dc task start --session <s> --task <t>`
+- `dc task finish --session <s> --task <t> --summary "..."`
+
+### Metadata
+
+- `dc meta update ...`
+- `dc meta architect ...`
+- `dc meta executor ...`
+
+### Runbook
+
+- `dc runbook executor-task-cycle --session <s> --task <t> --phase pre|post ...`
+- `dc runbook executor-directive-closeout --session <s> ...`
+- `dc runbook executor-directive-cleanup --session <s> ...`
+- `dc runbook architect-authoring ...`
+
+## Required invariants
+
+### Handoff invariants
+
+- Each directive has its own `<directive_slug>.handoff.json`.
+- Executor handoff must include a concrete `task_file` (not `null`).
+- `directive_branch` in handoff must match directive meta.
+
+### Execution invariants
+
+- Use lifecycle scripts, not ad-hoc shell flow.
+- Respect clean-tree/scope gates.
+- Use directive/task metadata as source of truth.
+
+## Common failures and exact fixes
+
+### `Handoff ... does not select a task`
+
+Fix:
+
+- regenerate handoff with task:
+  `dc directive handoff --session <s> --task-file <task>.task.json ...`
+- or launch with explicit task:
+  `dc launch handoff --directive <s> --task <task-slug>`
+
+### `Missing --session` / `Missing --task` on lifecycle commands
+
+Fix:
+
+- always pass explicit identifiers:
+  - `dc directive start --session <s>`
+  - `dc task start --session <s> --task <t>`
+  - `dc task finish --session <s> --task <t> --summary "..."`
+
+### Dirty-tree scope gate blocks finish/start
+
+Fix:
+
+- complete/stage in-scope work or resolve out-of-scope changes.
+- generated context/log files are tolerated by lifecycle guard, but real out-of-scope edits are blocked.
+
+## Human vs machine usage
+
+### Operator-first commands
+
+- `dc launch codex`
+- `dc launch switch`
+- `dc directive new`
+- `dc directive list`
+- `dc directive view`
+- `dc directive archive`
+
+### Agent/lifecycle commands
+
+- `dc directive start|finish|cleanup`
+- `dc task start|finish`
+- `dc meta architect|executor`
+- `dc runbook ...`
+- `dc validate`
+
+## Practical rule for agents
+
+Before edits:
+
+1. run lifecycle start commands
+2. run scoped implementation
+3. run lifecycle finish commands
+4. never bypass metadata/handoff contracts
+
