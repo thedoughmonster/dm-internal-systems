@@ -847,22 +847,40 @@ async function requireStartDirective(args, root) {
   }
 
   if (!stdin.isTTY) return null;
-  if (directives.length === 0) throw new Error("No available directives found.");
+  let available = directives;
+  if (available.length === 0) {
+    args["__create_directive_chat"] = true;
+    process.stdout.write(`${colorize("cyan", "No available directives. Starting architect directive-creation chat flow.")}\n`);
+    return null;
+  }
 
-  const selected = await selectOption({
-    input: stdin,
-    output: stdout,
-    label: "Select directive:",
-    options: directives.map((d) => ({
-      label: `${statusTag(d.status)} ${d.title}`,
-      color: statusColor(d.status),
-      value: d.session,
-    })),
-    defaultIndex: 0,
-  });
-  const matched = directives.find((d) => d.session === selected);
-  if (!matched) throw new Error("Invalid directive selection.");
-  return matched;
+  while (true) {
+    const selected = await selectOption({
+      input: stdin,
+      output: stdout,
+      label: "Select directive:",
+      options: [
+        ...available.map((d) => ({
+          label: `${statusTag(d.status)} ${d.title}`,
+          color: statusColor(d.status),
+          value: d.session,
+        })),
+        {
+          label: "create new directive",
+          color: "green",
+          value: "__create_new__",
+        },
+      ],
+      defaultIndex: 0,
+    });
+    if (selected === "__create_new__") {
+      args["__create_directive_chat"] = true;
+      return null;
+    }
+    const matched = available.find((d) => d.session === selected);
+    if (!matched) throw new Error("Invalid directive selection.");
+    return matched;
+  }
 }
 
 function upsertProfileBlock(configPath, profileName, block, dryRun) {
@@ -1289,6 +1307,12 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("After handoff is written, stop and instruct operator to exit this Codex session.");
     lines.push("Operator must run dc launch handoff from a real terminal to enter executor context.");
   }
+  if (role === "architect" && !selectedDirective) {
+    lines.push("No directive is currently selected.");
+    lines.push("Start with conversational directive-definition discovery (intent, constraints, definition of done, goals).");
+    lines.push("Do not run 'dc directive new' until operator explicitly approves title, summary, and goals.");
+    lines.push("After approval, run 'dc directive new' and continue architect authoring flow.");
+  }
   return lines.join("\n");
 }
 
@@ -1312,6 +1336,14 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       "Ask operator to approve task contracts after creation.",
       `Create handoff with 'dc directive handoff --session ${selectedDirective.session} --from-role architect --to-role executor ...' and then stop.`,
       `Manual transition: ask operator to exit this Codex session, then run 'dc launch handoff --role executor --from-role architect --profile ${profileName} --directive ${selectedDirective.session}' from a real terminal.`,
+    );
+  }
+  if (role === "architect" && !selectedDirective) {
+    nextActions.push(
+      "Run directive-definition discovery conversation with operator first.",
+      "Confirm intended outcome, constraints, definition of done, and explicit goals.",
+      "Request explicit approval of title, summary, and goals before creating artifacts.",
+      "After approval, run 'dc directive new' to create the directive session.",
     );
   }
   const doc = {
@@ -1365,6 +1397,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       architect_discovery_mode_required: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       architect_min_clarifying_questions: role === "architect" && Boolean(selectedDirective) && !selectedTask ? 3 : 0,
       architect_must_echo_discovery_before_task_drafting: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      architect_create_directive_chat_mode: role === "architect" && !selectedDirective && Boolean(args["__create_directive_chat"]),
     },
     role_transition: roleTransition || "",
     operator_discovery: {
