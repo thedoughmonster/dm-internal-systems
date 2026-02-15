@@ -8,6 +8,12 @@ Architect work follows three phases:
 2. Codebase audit and clarifying questions
 3. Scope lock and directive preparation
 
+Authoring gate:
+
+- Architect remains in phases 1 and 2 until operator explicitly approves scope and direction.
+- Before scope approval, treat interaction as planning chat and avoid directive-authoring commands.
+- After scope approval, switch to structured authoring with lifecycle tooling.
+
 Phase requirements:
 
 - Ground decisions in repository facts.
@@ -28,6 +34,7 @@ Phase requirements:
 - Primary command: `newdirective --title "<title>" --summary "<one line summary>" [--goal "<goal line>" ...]`.
 - Fallback command when `newdirective` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_directive_readme.mjs --title "<title>" --summary "<one line summary>" [--goal "<goal line>" ...]`.
 - Architect must scaffold task files and metadata pairs with tooling instead of manual metadata creation.
+- Architect must not scaffold task files before explicit scope-approval from operator.
 - Primary command: `newtask --session "<session-dir-or-uuid>" --title "<title>" --summary "<one line summary>"`.
 - Fallback command when `newtask` is unavailable on `PATH`: `node .directive-cli/scripts/directives/create_directive_task.mjs --session "<session-dir-or-uuid>" --title "<title>" --summary "<one line summary>"`.
 - Architect must create handoff artifacts with tooling instead of manual file creation.

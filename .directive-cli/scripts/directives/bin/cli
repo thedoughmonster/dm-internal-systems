@@ -262,6 +262,7 @@ usage() {
   printf "\n%s\n" "$(color "${C_CYAN}" "Commands (single list)")"
 
   print_command "$shown_mode" "init" "op" "Initialize companion config (agent/model defaults)"
+  print_command "$shown_mode" "codex usage" "both" "Report codex token usage from ~/.codex logs"
   print_command "$shown_mode" "repo map" "both" "Show high-signal repo paths and execution zones"
   print_command "$shown_mode" "policy validate" "agent" "Validate required policy JSON files"
   print_command "$shown_mode" "runbook <name>" "agent" "Run scripted multi-step lifecycle checkpoints"
@@ -351,6 +352,12 @@ category_usage() {
       ;;
     repo)
       printf "  %s\n" "$(color "${C_GREEN}" "dc repo map")"
+      ;;
+    codex)
+      printf "  %s\n" "$(color "${C_GREEN}" "dc codex <usage> [args...]")"
+      printf "\nExamples:\n"
+      printf "  dc codex usage --hours 24\n"
+      printf "  dc codex usage --since 2026-02-14T00:00:00Z --until 2026-02-15T00:00:00Z --json\n"
       ;;
     policy)
       printf "  %s\n" "$(color "${C_GREEN}" "dc policy validate")"
@@ -644,6 +651,26 @@ case "$cmd" in
         ;;
       *)
         echo "Unknown repo command: ${sub:-<none>}" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  codex)
+    sub="${1:-}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    if [[ -z "$sub" || "$sub" == "help" || "$sub" == "--help" || "$sub" == "-h" ]]; then
+      category_usage "codex"
+      exit 0
+    fi
+    enforce_namespace_policy "codex" "$sub"
+    case "$sub" in
+      usage)
+        run_logged "${SCRIPT_DIR}/codexusage" "$@"
+        exit $?
+        ;;
+      *)
+        echo "Unknown codex command: ${sub:-<none>}" >&2
         usage >&2
         exit 1
         ;;

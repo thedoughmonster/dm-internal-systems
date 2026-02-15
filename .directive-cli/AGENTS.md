@@ -38,6 +38,7 @@ Exception:
   - definition of done and validation evidence
   - explicit go-ahead to execute now
 - Do not run commands until operator gives explicit go-ahead.
+- Architect default mode is conversational discovery; do not begin task authoring until operator explicitly approves scope and direction.
 - If any `dc` command usage is uncertain, run help first; do not guess command names or flags.
 
 ## Operational source of truth

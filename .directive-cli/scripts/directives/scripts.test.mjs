@@ -278,11 +278,47 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /policy validate/);
   assert.match(output, /runbook/);
   assert.match(output, /meta update/);
+  assert.match(output, /codex usage/);
   assert.match(output, /validate/);
   assert.match(output, /context/);
   assert.match(output, /launch codex/);
   assert.match(output, /launch switch/);
   assert.match(output, /launch handoff/);
+});
+
+test("codex usage summarizes token deltas from log file window", (t) => {
+  const tag = randomTag();
+  const fakeLog = path.join("/tmp", `codex-usage-${tag}.log`);
+  t.after(() => {
+    if (fs.existsSync(fakeLog)) fs.rmSync(fakeLog, { force: true });
+  });
+
+  const sample = [
+    "2026-02-15T00:00:00.000000Z  INFO session_loop{thread_id=thread-a}: codex_core::codex: post sampling token usage turn_id=1 total_usage_tokens=100 estimated_token_count=Some(80) auto_compact_limit=244800 token_limit_reached=false needs_follow_up=false",
+    "2026-02-15T00:30:00.000000Z  INFO session_loop{thread_id=thread-a}: codex_core::codex: post sampling token usage turn_id=2 total_usage_tokens=160 estimated_token_count=Some(120) auto_compact_limit=244800 token_limit_reached=false needs_follow_up=false",
+    "2026-02-15T01:00:00.000000Z  INFO session_loop{thread_id=thread-b}: codex_core::codex: post sampling token usage turn_id=1 total_usage_tokens=40 estimated_token_count=Some(30) auto_compact_limit=244800 token_limit_reached=false needs_follow_up=false",
+    "2026-02-15T01:30:00.000000Z  INFO session_loop{thread_id=thread-b}: codex_core::codex: post sampling token usage turn_id=2 total_usage_tokens=90 estimated_token_count=Some(70) auto_compact_limit=244800 token_limit_reached=false needs_follow_up=false",
+  ].join("\n");
+  fs.writeFileSync(fakeLog, `${sample}\n`, "utf8");
+
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "codex",
+    "usage",
+    "--log-file",
+    fakeLog,
+    "--since",
+    "2026-02-15T00:00:00Z",
+    "--until",
+    "2026-02-15T02:00:00Z",
+    "--json",
+  ]);
+  const doc = JSON.parse(output);
+  assert.equal(doc.kind, "codex_usage_window");
+  assert.equal(doc.session_count, 2);
+  assert.equal(doc.total_usage_tokens, 110);
+  assert.ok(Array.isArray(doc.top));
+  assert.ok(doc.top.some((s) => s.thread_id === "thread-a" && s.usage_tokens === 60));
+  assert.ok(doc.top.some((s) => s.thread_id === "thread-b" && s.usage_tokens === 50));
 });
 
 test("architect authoring lock blocks execution-oriented commands before task selection", () => {
@@ -315,6 +351,7 @@ test("architect authoring lock allows launch handoff transition command", () => 
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "handoff",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -355,6 +392,7 @@ test("launch handoff is allowed in agent namespace", () => {
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "handoff",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -676,6 +714,36 @@ test("dc init writes config with explicit agent/model", (t) => {
   const doc = JSON.parse(fs.readFileSync(configPath, "utf8"));
   assert.equal(doc.agent.name, "codex");
   assert.equal(doc.model.name, "gpt-5.2");
+});
+
+test("dc init writes optional role homes mapping", (t) => {
+  const tag = randomTag();
+  const configPath = path.join("/tmp", `dc-init-homes-${tag}.json`);
+
+  t.after(() => {
+    if (fs.existsSync(configPath)) fs.rmSync(configPath, { force: true });
+  });
+
+  run(path.join(directivesBinRoot, "cli"), [
+    "init",
+    "--agent",
+    "codex",
+    "--model",
+    "gpt-5.3-codex",
+    "--home-default",
+    "/tmp/.codex-default",
+    "--home-architect",
+    "/tmp/.codex-architect",
+    "--home-executor",
+    "/tmp/.codex-executor",
+    "--config",
+    configPath,
+    "--no-prompt",
+  ]);
+  const doc = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert.equal(doc.homes.default, "/tmp/.codex-default");
+  assert.equal(doc.homes.architect, "/tmp/.codex-architect");
+  assert.equal(doc.homes.executor, "/tmp/.codex-executor");
 });
 
 test("newdirective dry-run emits json session metadata path", () => {
@@ -1247,6 +1315,7 @@ test("cli launch codex bootstraps profile and launches configured binary", (t) =
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "codex",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -1295,6 +1364,55 @@ test("cli launch codex bootstraps profile and launches configured binary", (t) =
   assert.ok(logFiles.length >= 1, "Expected at least one session log file");
 });
 
+test("cli launch codex resolves codex home from config role mapping", (t) => {
+  const tag = randomTag();
+  const mappedHome = path.join("/tmp", `dc-role-home-architect-${tag}`);
+  const tmpBundleDir = path.join("/tmp", `dc-role-home-bundle-${tag}`);
+  const configPath = path.join("/tmp", `dc-role-home-config-${tag}.json`);
+  const outPath = path.join(tmpBundleDir, "compiled.md");
+  const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
+
+  t.after(() => {
+    if (fs.existsSync(mappedHome)) fs.rmSync(mappedHome, { recursive: true, force: true });
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(configPath)) fs.rmSync(configPath, { force: true });
+  });
+
+  fs.writeFileSync(
+    configPath,
+    `${JSON.stringify({
+      schema_version: "1.0",
+      updated_at: new Date().toISOString(),
+      agent: { name: "codex" },
+      model: { name: "gpt-5.3-codex" },
+      homes: { architect: mappedHome },
+    }, null, 2)}\n`,
+    "utf8",
+  );
+
+  run(path.join(directivesBinRoot, "cli"), [
+    "launch",
+    "codex",
+    "--bootstrap",
+    "--config",
+    configPath,
+    "--role",
+    "architect",
+    "--profile",
+    "itest_role_home_architect",
+    "--codex-bin",
+    "codex",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+    "--no-prompt",
+  ]);
+
+  const configToml = path.join(mappedHome, "config.toml");
+  assert.ok(fs.existsSync(configToml), "Expected mapped codex home to receive config.toml");
+});
+
 test("cli launch switch bootstraps profile and launches configured binary", (t) => {
   const tag = randomTag();
   const tmpCodex = path.join("/tmp", `dc-codex-switch-home-${tag}`);
@@ -1312,6 +1430,7 @@ test("cli launch switch bootstraps profile and launches configured binary", (t) 
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "switch",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -1402,6 +1521,7 @@ test("cli launch handoff reuses existing handoff and launches configured binary"
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "handoff",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--profile",
@@ -1427,6 +1547,104 @@ test("cli launch handoff reuses existing handoff and launches configured binary"
   const sessionDir = path.join(directivesRoot, resolvedSession);
   const handoffPath = path.join(sessionDir, `${titleSlug}.handoff.json`);
   assert.ok(fs.existsSync(handoffPath), "Expected handoff file to be created");
+});
+
+test("cli launch handoff resolves target role codex home from config mapping", (t) => {
+  const tag = randomTag();
+  const sessionName = `itest-handoff-role-home-${tag}`;
+  const title = `handoff-role-home-${tag}`;
+  const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const mappedExecutorHome = path.join("/tmp", `dc-role-home-executor-${tag}`);
+  const tmpBundleDir = path.join("/tmp", `dc-role-home-handoff-bundle-${tag}`);
+  const configPath = path.join("/tmp", `dc-role-home-handoff-config-${tag}.json`);
+  const outPath = path.join(tmpBundleDir, "compiled.md");
+  const metaPath = path.join(tmpBundleDir, "compiled.meta.json");
+
+  t.after(() => {
+    const sessionDir = path.join(directivesRoot, sessionName);
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+    if (fs.existsSync(mappedExecutorHome)) fs.rmSync(mappedExecutorHome, { recursive: true, force: true });
+    if (fs.existsSync(tmpBundleDir)) fs.rmSync(tmpBundleDir, { recursive: true, force: true });
+    if (fs.existsSync(configPath)) fs.rmSync(configPath, { force: true });
+  });
+
+  run(path.join(directivesBinRoot, "newdirective"), [
+    "--session",
+    sessionName,
+    "--title",
+    title,
+    "--summary",
+    "role home handoff summary",
+    "--no-git",
+    "--no-prompt",
+  ]);
+  const resolvedSession = findSessionByTitleSlug(titleSlug) || sessionName;
+  run(path.join(directivesBinRoot, "newtask"), [
+    "--session",
+    resolvedSession,
+    "--title",
+    "role-home-task",
+    "--summary",
+    "task for role home handoff test",
+    "--slug",
+    "role-home-task",
+    "--no-prompt",
+  ]);
+  run(path.join(directivesBinRoot, "newhandoff"), [
+    "--session",
+    resolvedSession,
+    "--from-role",
+    "architect",
+    "--to-role",
+    "executor",
+    "--trigger",
+    "role_home_handoff",
+    "--objective",
+    "role home handoff",
+    "--blocking-rule",
+    "architect stops",
+    "--task-file",
+    "role-home-task.task.json",
+    "--no-prompt",
+  ]);
+
+  fs.writeFileSync(
+    configPath,
+    `${JSON.stringify({
+      schema_version: "1.0",
+      updated_at: new Date().toISOString(),
+      agent: { name: "codex" },
+      model: { name: "gpt-5.3-codex" },
+      homes: { executor: mappedExecutorHome },
+    }, null, 2)}\n`,
+    "utf8",
+  );
+
+  run(path.join(directivesBinRoot, "cli"), [
+    "launch",
+    "handoff",
+    "--bootstrap",
+    "--config",
+    configPath,
+    "--profile",
+    "itest_role_home_handoff",
+    "--directive",
+    resolvedSession,
+    "--task",
+    "role-home-task",
+    "--role",
+    "executor",
+    "--codex-bin",
+    "codex",
+    "--out",
+    outPath,
+    "--meta",
+    metaPath,
+    "--no-prompt",
+  ]);
+
+  const configToml = path.join(mappedExecutorHome, "config.toml");
+  assert.ok(fs.existsSync(configToml), "Expected executor mapped codex home to receive config.toml");
 });
 
 test("cli launch handoff auto-resolves role and directive from existing handoff context", (t) => {
@@ -1489,6 +1707,7 @@ test("cli launch handoff auto-resolves role and directive from existing handoff 
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "handoff",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--profile",
@@ -1546,6 +1765,7 @@ test("cli launch codex marks selected directive with no tasks as none_available"
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "codex",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",
@@ -1707,6 +1927,7 @@ test("launch handoff in non-interactive shell skips codex launch gracefully", ()
   const output = run(path.join(directivesBinRoot, "cli"), [
     "launch",
     "handoff",
+    "--bootstrap",
     "--codex-home",
     tmpCodex,
     "--role",

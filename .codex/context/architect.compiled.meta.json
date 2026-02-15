@@ -1,0 +1,39 @@
+{
+  "bundle_kind": "codex_context_bundle",
+  "schema_version": "1.0",
+  "generated_at": "2026-02-15T17:37:29.429Z",
+  "role": "architect",
+  "repo_root": "/root/src/dm-internal-systems",
+  "out_file": "/root/src/dm-internal-systems/.codex/context/architect.compiled.md",
+  "hash": "70e73fcf96356677a23370e8183fcee14d9f4c024d119065fee1027471642043",
+  "sources": [
+    ".directive-cli/AGENTS.md",
+    "apps/web/docs/guides/component-paradigm.md",
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json",
+    ".directive-cli/docs/agent-rules/shared/README.md",
+    ".directive-cli/docs/agent-rules/shared/baseline-and-safety.md",
+    ".directive-cli/docs/agent-rules/shared/critical-enforcement.md",
+    ".directive-cli/docs/agent-rules/shared/directives-model.md",
+    ".directive-cli/docs/agent-rules/shared/role-handoff-automation.md",
+    ".directive-cli/docs/agent-rules/architect/README.md",
+    ".directive-cli/docs/agent-rules/architect/boundaries-and-escalation.md",
+    ".directive-cli/docs/agent-rules/architect/directive-standards.md",
+    ".directive-cli/docs/agent-rules/architect/purpose-and-baseline.md",
+    ".directive-cli/docs/agent-rules/architect/startup-and-initialization.md",
+    ".directive-cli/docs/agent-rules/architect/workflow-and-session-management.md",
+    ".codex/context/dc.commands.json"
+  ],
+  "policy_file": "/root/src/dm-internal-systems/.codex/context/architect.policy.compiled.json",
+  "policy_hash": "fb0cbfbdd90dcc37bc5e0079163fad43f9ce6e745008e20483d0789029f2f346",
+  "policy_sources": [
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json"
+  ]
+}

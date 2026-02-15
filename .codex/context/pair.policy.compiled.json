@@ -1,9 +1,9 @@
 {
   "kind": "directive_cli_policy_bundle",
   "schema_version": "1.0",
-  "generated_at": "2026-02-13T22:45:42.838Z",
+  "generated_at": "2026-02-15T17:37:29.553Z",
   "role": "pair",
-  "hash": "8e35667a35426467c4238c6be368c2922b3a32a05db5c62701d046791a1209d5",
+  "hash": "fb0cbfbdd90dcc37bc5e0079163fad43f9ce6e745008e20483d0789029f2f346",
   "sources": [
     ".directive-cli/policies/architect.authoring.policy.json",
     ".directive-cli/policies/core.policy.json",
@@ -72,7 +72,10 @@
         "summary": "Executor lifecycle policy enforced by directive/task scripts.",
         "lifecycle": {
           "branch_source": "directive_meta",
-          "branch_bootstrap_mode": "create_from_base_if_missing_local",
+          "branch_bootstrap_mode": "create_from_local_base_if_missing_local",
+          "remote_sync_mode": "none",
+          "push_on_task_finish": true,
+          "push_on_directive_finish": true,
           "require_clean_tree_on": [
             "directive_start",
             "task_start"
@@ -196,6 +199,7 @@
           "architect": {
             "phase": "authoring",
             "steps": [
+              "operator confirmation gate",
               "dc directive new",
               "dc meta architect",
               "dc directive task",
@@ -206,12 +210,17 @@
           "executor": {
             "phase": "execution",
             "steps": [
+              "operator confirmation gate",
               "dc directive start",
               "dc task start",
               "implement scoped changes",
               "dc task finish",
               "repeat remaining tasks",
-              "dc directive finish"
+              "operator QA gate",
+              "dc runbook executor-directive-closeout",
+              "dc directive finish",
+              "dc directive archive",
+              "dc directive cleanup"
             ]
           }
         }

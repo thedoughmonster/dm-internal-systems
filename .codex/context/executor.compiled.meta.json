@@ -1,0 +1,39 @@
+{
+  "bundle_kind": "codex_context_bundle",
+  "schema_version": "1.0",
+  "generated_at": "2026-02-15T17:37:29.495Z",
+  "role": "executor",
+  "repo_root": "/root/src/dm-internal-systems",
+  "out_file": "/root/src/dm-internal-systems/.codex/context/executor.compiled.md",
+  "hash": "abfe05e9d844e44978ef4a73d877b1b03d7d5200e9cfbe415794c2e5fc276b6e",
+  "sources": [
+    ".directive-cli/AGENTS.md",
+    "apps/web/docs/guides/component-paradigm.md",
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json",
+    ".directive-cli/docs/agent-rules/shared/README.md",
+    ".directive-cli/docs/agent-rules/shared/baseline-and-safety.md",
+    ".directive-cli/docs/agent-rules/shared/critical-enforcement.md",
+    ".directive-cli/docs/agent-rules/shared/directives-model.md",
+    ".directive-cli/docs/agent-rules/shared/role-handoff-automation.md",
+    ".directive-cli/docs/agent-rules/executor/README.md",
+    ".directive-cli/docs/agent-rules/executor/discovery-and-startup.md",
+    ".directive-cli/docs/agent-rules/executor/execution-and-compliance.md",
+    ".directive-cli/docs/agent-rules/executor/purpose-and-baseline.md",
+    ".directive-cli/docs/agent-rules/executor/stop-and-reporting.md",
+    ".directive-cli/docs/agent-rules/executor/validation-and-deviation.md",
+    ".codex/context/dc.commands.json"
+  ],
+  "policy_file": "/root/src/dm-internal-systems/.codex/context/executor.policy.compiled.json",
+  "policy_hash": "fb0cbfbdd90dcc37bc5e0079163fad43f9ce6e745008e20483d0789029f2f346",
+  "policy_sources": [
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json"
+  ]
+}

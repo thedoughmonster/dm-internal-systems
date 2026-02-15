@@ -1,0 +1,37 @@
+{
+  "bundle_kind": "codex_context_bundle",
+  "schema_version": "1.0",
+  "generated_at": "2026-02-15T17:37:29.553Z",
+  "role": "pair",
+  "repo_root": "/root/src/dm-internal-systems",
+  "out_file": "/root/src/dm-internal-systems/.codex/context/pair.compiled.md",
+  "hash": "be098e4657a54d7dd268f38c4714e9becd5119bb331f9e63947615b7f9d3dc2d",
+  "sources": [
+    ".directive-cli/AGENTS.md",
+    "apps/web/docs/guides/component-paradigm.md",
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json",
+    ".directive-cli/docs/agent-rules/shared/README.md",
+    ".directive-cli/docs/agent-rules/shared/baseline-and-safety.md",
+    ".directive-cli/docs/agent-rules/shared/critical-enforcement.md",
+    ".directive-cli/docs/agent-rules/shared/directives-model.md",
+    ".directive-cli/docs/agent-rules/shared/role-handoff-automation.md",
+    ".directive-cli/docs/agent-rules/pair/README.md",
+    ".directive-cli/docs/agent-rules/pair/boundaries.md",
+    ".directive-cli/docs/agent-rules/pair/scope-and-guardrails.md",
+    ".directive-cli/docs/agent-rules/pair/startup-and-verification.md",
+    ".codex/context/dc.commands.json"
+  ],
+  "policy_file": "/root/src/dm-internal-systems/.codex/context/pair.policy.compiled.json",
+  "policy_hash": "fb0cbfbdd90dcc37bc5e0079163fad43f9ce6e745008e20483d0789029f2f346",
+  "policy_sources": [
+    ".directive-cli/policies/architect.authoring.policy.json",
+    ".directive-cli/policies/core.policy.json",
+    ".directive-cli/policies/executor.lifecycle.policy.json",
+    ".directive-cli/policies/handoff.schema.json",
+    ".directive-cli/policies/runbook.flow.json"
+  ]
+}

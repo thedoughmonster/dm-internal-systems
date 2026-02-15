@@ -8,6 +8,7 @@ import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
 
 const KNOWN_AGENTS = ["codex", "claude-code", "aider", "custom"];
+const ROLES = ["architect", "executor", "pair", "auditor"];
 
 function repoRoot() {
   const scriptFile = fileURLToPath(import.meta.url);
@@ -44,6 +45,11 @@ function usage() {
     "Options:",
     "  --agent <name>         Agent runtime (codex|claude-code|aider|custom)",
     "  --model <name>         Default model name",
+    "  --home-default <path>  Default codex home for all roles (optional)",
+    "  --home-architect <p>   Role-specific codex home override (optional)",
+    "  --home-executor <p>    Role-specific codex home override (optional)",
+    "  --home-pair <p>        Role-specific codex home override (optional)",
+    "  --home-auditor <p>     Role-specific codex home override (optional)",
     "  --config <path>        Config file path (default: .codex/dc.config.json)",
     "  --no-prompt            Fail instead of prompting for missing values",
     "  --json                 Emit JSON output",
@@ -99,6 +105,18 @@ function resolveConfigPath(root, args) {
   return path.resolve(root, String(args.config || ".codex/dc.config.json"));
 }
 
+function collectRoleHomes(args) {
+  const homes = {};
+  const defaultHome = String(args["home-default"] || "").trim();
+  if (defaultHome) homes.default = defaultHome;
+  for (const role of ROLES) {
+    const key = `home-${role}`;
+    const value = String(args[key] || "").trim();
+    if (value) homes[role] = value;
+  }
+  return homes;
+}
+
 function main() {
   return Promise.resolve().then(async () => {
     const args = parseArgs(process.argv.slice(2));
@@ -122,6 +140,10 @@ function main() {
         name: model,
       },
     };
+    const homes = collectRoleHomes(args);
+    if (Object.keys(homes).length > 0) {
+      config.homes = homes;
+    }
 
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
@@ -131,6 +153,7 @@ function main() {
       config_file: configPath,
       agent,
       model,
+      homes: Object.keys(homes).length > 0 ? homes : null,
     });
   });
 }

@@ -1,9 +1,9 @@
 {
   "kind": "directive_cli_policy_bundle",
   "schema_version": "1.0",
-  "generated_at": "2026-02-14T23:17:31.493Z",
+  "generated_at": "2026-02-15T17:37:29.429Z",
   "role": "architect",
-  "hash": "3d2a4dabae66deadfc348e9fab4b99e9a51523bf98e3bc96e2da7b112f4e9ade",
+  "hash": "fb0cbfbdd90dcc37bc5e0079163fad43f9ce6e745008e20483d0789029f2f346",
   "sources": [
     ".directive-cli/policies/architect.authoring.policy.json",
     ".directive-cli/policies/core.policy.json",
@@ -216,7 +216,10 @@
               "implement scoped changes",
               "dc task finish",
               "repeat remaining tasks",
+              "operator QA gate",
+              "dc runbook executor-directive-closeout",
               "dc directive finish",
+              "dc directive archive",
               "dc directive cleanup"
             ]
           }

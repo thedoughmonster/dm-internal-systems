@@ -80,6 +80,7 @@ function usage() {
     "",
     "Bootstrap options:",
     "  --codex-home <path>     Codex home (default: ~/.codex)",
+    "                         If omitted, resolves from .codex/dc.config.json homes.<role> then ~/.codex.",
     "  --profile <name>        Profile name (required; prompts with options in TTY if omitted)",
     "  --role <name>           Role for bundle/profile: architect|executor|pair|auditor",
     "  --directive <name>      Optional directive session for start/show selection",
@@ -97,7 +98,9 @@ function usage() {
     "  --handoff-required-reading <p> Required reading for handoff receiver",
     "  --handoff-worktree-mode <m> clean_required|known_dirty_allowlist",
     "  --handoff-allowlist-path <p> Repeatable allowlist path when worktree mode uses allowlist",
-    "  --no-bootstrap          With start, skip bootstrap/update before launch",
+    "  --bootstrap             With start/switch/handoff, write/update profile wiring before launch (default: off)",
+    "  --write-profile         Alias for --bootstrap",
+    "  --no-bootstrap          Compatibility alias; bootstrap is already off by default",
     "  --dry-run               Preview config changes without writing",
     "",
     "General:",
@@ -628,11 +631,35 @@ function loadJson(filePath) {
 function readDcConfig(root, args) {
   const configPath = path.resolve(root, String(args.config || ".codex/dc.config.json"));
   const doc = loadJson(configPath);
-  if (!doc) return { configPath, agent: "", model: "" };
+  if (!doc) return { configPath, agent: "", model: "", roleHomes: {} };
 
   const agent = sanitizeRoleName(doc.agent && doc.agent.name ? doc.agent.name : "");
   const model = String(doc.model && doc.model.name ? doc.model.name : "").trim();
-  return { configPath, agent, model };
+  const roleHomes = {};
+  const homesDoc = (doc.homes && typeof doc.homes === "object" && !Array.isArray(doc.homes))
+    ? doc.homes
+    : ((doc.role_homes && typeof doc.role_homes === "object" && !Array.isArray(doc.role_homes))
+      ? doc.role_homes
+      : {});
+  for (const role of ROLES) {
+    const value = String(homesDoc[role] || "").trim();
+    if (value) roleHomes[role] = value;
+  }
+  const defaultHome = String(homesDoc.default || homesDoc.all || "").trim();
+  if (defaultHome) roleHomes.default = defaultHome;
+  return { configPath, agent, model, roleHomes };
+}
+
+function resolveCodexHome(args, launchConfig, role) {
+  const explicit = String(args["codex-home"] || "").trim();
+  if (explicit) return resolveHomePath(explicit, path.join(os.homedir(), ".codex"));
+  const roleKey = sanitizeRoleName(role || "");
+  const roleHomes = launchConfig && launchConfig.roleHomes && typeof launchConfig.roleHomes === "object"
+    ? launchConfig.roleHomes
+    : {};
+  const mapped = String((roleKey && roleHomes[roleKey]) || roleHomes.default || "").trim();
+  if (mapped) return resolveHomePath(mapped, path.join(os.homedir(), ".codex"));
+  return resolveHomePath("", path.join(os.homedir(), ".codex"));
 }
 
 function listAvailableDirectiveTasks(root) {
@@ -864,6 +891,15 @@ function upsertProfileBlock(configPath, profileName, block, dryRun) {
   }
 }
 
+function hasProfileBlock(configPath, profileName) {
+  if (!existsFile(configPath)) return false;
+  const text = fs.readFileSync(configPath, "utf8");
+  const begin = `# BEGIN dc-context profile ${profileName}`;
+  if (text.includes(begin)) return true;
+  const escaped = profileName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^\\[profiles\\.${escaped}\\]$`, "m").test(text);
+}
+
 function normalizeAbsolutePath(filePath) {
   return path.resolve(String(filePath || ""));
 }
@@ -996,6 +1032,7 @@ function buildDcCommandReference() {
         "dc launch switch",
       ],
       operator_and_machine: [
+        "dc codex usage",
         "dc repo map",
         "dc directive view",
         "dc directive archive",
@@ -1057,6 +1094,7 @@ function buildDcCommandReference() {
         "dc runbook architect-authoring",
       ],
       utility: [
+        "dc codex usage",
         "dc validate",
         "dc test",
         "dc policy validate",
@@ -1125,11 +1163,11 @@ function writeStartupInstructionsFile(startupFilePath, startupContextPath, comma
 }
 
 async function runBootstrap(root, args) {
-  const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
-  const configPath = path.join(codexHome, "config.toml");
   const role = await requireBundleRole(args);
-  const profileName = await requireBootstrapProfile(args, configPath);
   const launchConfig = readDcConfig(root, args);
+  const codexHome = resolveCodexHome(args, launchConfig, role);
+  const configPath = path.join(codexHome, "config.toml");
+  const profileName = await requireBootstrapProfile(args, configPath);
   const commandRefPath = writeDcCommandReference(root, args, role);
   const includePaths = Array.isArray(args.include) ? args.include.slice() : [];
   includePaths.push(relative(root, commandRefPath));
@@ -1239,14 +1277,15 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
   if (role === "architect" && selectedDirective && !selectedTask) {
     lines.push("Architect authoring gate is active.");
-    lines.push("Operate in discovery-and-planning mode first; be interactive and inquisitive.");
-    lines.push("Ask at least 3 targeted clarifying questions before proposing tasks.");
-    lines.push("Summarize discovered facts and constraints back to the operator before task drafting.");
-    lines.push("Propose a concrete task plan and explicitly ask for operator approval.");
-    lines.push("Do not implement code changes or edit non-directive files in this phase.");
-    lines.push("First produce a proposed task breakdown and request operator approval before creating task files.");
-    lines.push("After creating task files, request operator confirmation that task contracts are correct.");
-    lines.push("Then create architect->executor handoff via dc directive handoff.");
+    lines.push("Operate in conversational discovery mode by default; do not rush to task authoring.");
+    lines.push("Act like planning chat until operator explicitly confirms scope and direction are locked.");
+    lines.push("Ask targeted clarifying questions and summarize findings/constraints frequently.");
+    lines.push("Do not run directive task/meta/handoff authoring commands until operator gives explicit scope-approval.");
+    lines.push("Required scope-approval gate phrase: operator must explicitly confirm equivalent of 'scope approved, begin authoring'.");
+    lines.push("After scope approval, enter structured authoring mode and use dc commands to capture decisions carefully.");
+    lines.push("In authoring mode: draft tasks, request operator review, then refine task contracts before handoff.");
+    lines.push("Do not implement code changes or edit non-directive files in architect mode.");
+    lines.push("After approved task contracts are complete, create architect->executor handoff via dc directive handoff.");
     lines.push("After handoff is written, stop and instruct operator to exit this Codex session.");
     lines.push("Operator must run dc launch handoff from a real terminal to enter executor context.");
   }
@@ -1266,9 +1305,10 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
   const autoExecuteExecutorTask = role === "executor" && Boolean(selectedDirective) && Boolean(selectedTask);
   if (role === "architect" && selectedDirective && taskSelectionState === "none_available") {
     nextActions.push(
-      `Create initial tasks in selected directive with 'dc directive task --session ${selectedDirective.session} --title ... --summary ...'`,
-      "Populate task contract fields (objective, constraints, allowed_files, steps, validation) before handoff.",
-      "Ask operator to approve proposed task breakdown before creating files.",
+      "Remain in discovery conversation until operator explicitly approves scope and direction.",
+      "Ask operator for explicit scope-approval before any authoring command.",
+      `After scope approval, create initial tasks with 'dc directive task --session ${selectedDirective.session} --title ... --summary ...'`,
+      "Populate task contract fields (objective, constraints, allowed_files, steps, validation) after task skeleton creation.",
       "Ask operator to approve task contracts after creation.",
       `Create handoff with 'dc directive handoff --session ${selectedDirective.session} --from-role architect --to-role executor ...' and then stop.`,
       `Manual transition: ask operator to exit this Codex session, then run 'dc launch handoff --role executor --from-role architect --profile ${profileName} --directive ${selectedDirective.session}' from a real terminal.`,
@@ -1316,6 +1356,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       require_operator_go_ahead_before_execution: !autoExecuteExecutorTask,
       require_model_gate: !autoExecuteExecutorTask,
       require_thinking_gate: !autoExecuteExecutorTask,
+      require_scope_approval_before_architect_authoring: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       executor_task_bound_handoff_auto_execute: autoExecuteExecutorTask,
       architect_authoring_no_code_edits_without_task_and_handoff: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       require_task_breakdown_approval_before_task_creation: role === "architect" && Boolean(selectedDirective) && !selectedTask,
@@ -1333,6 +1374,8 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
         "Confirm hard constraints and excluded scope.",
         "Confirm definition of done and validation evidence expected.",
         "Ask whether to start execution now or refine plan first.",
+        "For architect sessions, ask whether to stay in discovery mode or enter authoring mode.",
+        "Do not enter authoring mode until operator explicitly approves scope and direction.",
       ],
       before_any_command: !autoExecuteExecutorTask,
     },
@@ -1364,11 +1407,11 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
 }
 
 async function runStart(root, args) {
-  const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
+  const launchConfig = readDcConfig(root, args);
+  const role = await requireBundleRole(args);
+  const codexHome = resolveCodexHome(args, launchConfig, role);
   const configPath = path.join(codexHome, "config.toml");
   const profileName = await requireBootstrapProfile(args, configPath);
-  const role = await requireBundleRole(args);
-  const launchConfig = readDcConfig(root, args);
   if (launchConfig.agent && launchConfig.agent !== "codex") {
     throw new Error(`Configured agent '${launchConfig.agent}' is not supported by 'dc launch codex'. Run 'dc init --agent codex' or use an agent-specific start command.`);
   }
@@ -1401,7 +1444,8 @@ async function runStart(root, args) {
     sessionLogPath,
   );
 
-  if (!args["no-bootstrap"]) {
+  const shouldBootstrap = args["no-bootstrap"] ? false : Boolean(args.bootstrap || args["write-profile"]);
+  if (shouldBootstrap) {
     const includes = Array.isArray(args.include) ? args.include.slice() : [];
     includes.push(relative(root, startupContextPath));
     await runBootstrap(root, {
@@ -1412,6 +1456,10 @@ async function runStart(root, args) {
       "__startup_context_path": startupContextPath,
       json: false,
     });
+  } else if (!hasProfileBlock(configPath, profileName)) {
+    throw new Error(
+      `Profile '${profileName}' is not configured in ${configPath}. Run launch once with --bootstrap to write profile wiring.`,
+    );
   }
 
   output(args, {
@@ -1541,7 +1589,9 @@ function createRoleSwitchHandoff(root, args, selectedDirective, selectedTask, fr
 }
 
 async function runHandoff(root, args) {
-  const codexHome = resolveHomePath(args["codex-home"], path.join(os.homedir(), ".codex"));
+  const launchConfig = readDcConfig(root, args);
+  const fallbackHome = resolveCodexHome(args, launchConfig, "");
+  const codexHome = fallbackHome;
   const previousRole = readLastRole(codexHome);
   const requestedDirective = String(args.directive || args.session || process.env.DC_DIRECTIVE_SESSION || "").trim();
   const startupCtx = readLatestStartupContext(root, requestedDirective);
@@ -1582,6 +1632,7 @@ async function runHandoff(root, args) {
     || "",
   ).trim().toLowerCase();
   const toRole = toRoleRaw ? (() => { assertValidRole(toRoleRaw); return toRoleRaw; })() : await requireBundleRole(args);
+  const targetCodexHome = resolveCodexHome(args, launchConfig, toRole);
   const fromRole = String(
     args["from-role"]
     || (existingHandoff && existingHandoff.handoffDoc && existingHandoff.handoffDoc.handoff ? existingHandoff.handoffDoc.handoff.from_role : "")
@@ -1654,6 +1705,7 @@ async function runHandoff(root, args) {
 
   return runStart(root, {
     ...args,
+    "codex-home": targetCodexHome,
     profile: profileName,
     role: toRole,
     directive: selectedDirective.session,

@@ -1,0 +1,105 @@
+{
+  "kind": "dc_command_reference",
+  "schema_version": "1.0",
+  "generated_at": "2026-02-15T17:37:29.604Z",
+  "policy": {
+    "no_guessing": true,
+    "help_on_ambiguity": [
+      "dc help",
+      "dc <category> --help",
+      "dc <category> <command> --help"
+    ],
+    "scripted_actions_only": true,
+    "require_operator_go_ahead_before_execution": true
+  },
+  "audiences": {
+    "operator_only": [
+      "dc init",
+      "dc directive new",
+      "dc context build",
+      "dc context bootstrap",
+      "dc launch codex",
+      "dc launch switch"
+    ],
+    "operator_and_machine": [
+      "dc codex usage",
+      "dc repo map",
+      "dc directive view",
+      "dc directive archive",
+      "dc directive merge",
+      "dc directive migrate",
+      "dc validate",
+      "dc test",
+      "dc help",
+      "dc context check",
+      "dc context show",
+      "dc launch handoff"
+    ],
+    "machine_only": [
+      "dc policy validate",
+      "dc runbook executor-task-cycle",
+      "dc runbook executor-directive-closeout",
+      "dc runbook executor-directive-cleanup",
+      "dc runbook architect-authoring",
+      "dc directive task",
+      "dc directive handoff",
+      "dc directive start",
+      "dc task start",
+      "dc task finish",
+      "dc directive finish",
+      "dc directive archive",
+      "dc directive merge",
+      "dc directive cleanup",
+      "dc meta update",
+      "dc meta architect",
+      "dc meta executor"
+    ]
+  },
+  "commands": {
+    "directive": [
+      "dc directive new",
+      "dc directive task",
+      "dc directive handoff",
+      "dc directive view",
+      "dc directive archive",
+      "dc directive merge",
+      "dc directive start",
+      "dc directive finish",
+      "dc directive cleanup",
+      "dc directive migrate"
+    ],
+    "task": [
+      "dc task start",
+      "dc task finish"
+    ],
+    "meta": [
+      "dc meta update",
+      "dc meta architect",
+      "dc meta executor"
+    ],
+    "runbook": [
+      "dc runbook executor-task-cycle",
+      "dc runbook executor-directive-closeout",
+      "dc runbook executor-directive-cleanup",
+      "dc runbook architect-authoring"
+    ],
+    "utility": [
+      "dc codex usage",
+      "dc validate",
+      "dc test",
+      "dc policy validate",
+      "dc repo map"
+    ],
+    "context": [
+      "dc context build",
+      "dc context check",
+      "dc context show",
+      "dc context bootstrap"
+    ],
+    "launch": [
+      "dc launch codex",
+      "dc launch switch",
+      "dc launch handoff"
+    ]
+  }
+}

@@ -48,10 +48,12 @@ Rationale:
 ### Top level
 
 - `dc help [--all|--op|--agents]`
+- `dc codex usage [--hours <n>|--since <iso>|--until <iso>] [--json]`
 - `dc test`
 - `dc validate [--strict] [--verbose] [--file ...]`
 - `dc repo map`
 - `dc policy validate`
+  - Also validates role-home `.rules` behavior (executor: raw `git` => `forbidden`, required lifecycle command shapes => `allow`).
 - `dc ns show|env|enter|clear`
 
 ### Launch/context
@@ -60,6 +62,21 @@ Rationale:
 - `dc launch switch`
 - `dc launch handoff [--directive <s>] [--task <t>]`
 - `dc context build|check|show|bootstrap|start|switch|handoff`
+
+Launch profile wiring:
+
+- Launch commands do not rewrite profile config by default.
+- Use `--bootstrap` when you want launch to write/refresh role profile wiring.
+
+Role-home mapping:
+
+- `dc` can resolve codex home per role from `.codex/dc.config.json`:
+  - `homes.architect`
+  - `homes.executor`
+  - `homes.pair`
+  - `homes.auditor`
+  - optional `homes.default`
+- `--codex-home` still overrides config mapping.
 
 ### Directive
 
@@ -133,6 +150,18 @@ Fix:
 
 - complete/stage in-scope work or resolve out-of-scope changes.
 - generated context/log files are tolerated by lifecycle guard, but real out-of-scope edits are blocked.
+
+### Need token usage by time window
+
+Use:
+
+- `dc codex usage --hours 24`
+- `dc codex usage --since 2026-02-14T00:00:00Z --until 2026-02-15T00:00:00Z --json`
+
+Notes:
+
+- Data source is `~/.codex/log/codex-tui.log`.
+- Values are derived from observed `total_usage_tokens` deltas per `thread_id` in the selected window.
 
 ### Archived directive still has unmerged feature branch
 
