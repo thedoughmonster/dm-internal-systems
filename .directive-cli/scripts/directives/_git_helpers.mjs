@@ -123,9 +123,18 @@ export function changedFiles(cwd) {
   const result = runGit(["status", "--porcelain"], cwd);
   return String(result.stdout || "")
     .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => l.slice(3).trim())
+    .map((line) => String(line || ""))
+    .filter((line) => line.trim().length > 0)
+    .map((line) => {
+      // Porcelain format is: XY<space>PATH
+      const pathPart = line.length >= 4 ? line.slice(3).trim() : "";
+      if (!pathPart) return "";
+      // Renames are reported as "old -> new"; use destination path for scope checks.
+      const resolved = pathPart.includes(" -> ")
+        ? String(pathPart.split(" -> ").pop() || "").trim()
+        : pathPart;
+      return resolved.replace(/^"+|"+$/g, "");
+    })
     .filter(Boolean);
 }
 
