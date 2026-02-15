@@ -1206,6 +1206,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
 }
 
 function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role) {
+  const autoExecuteExecutorTask = role === "executor" && Boolean(selectedDirective) && Boolean(selectedTask);
   const lines = [
     "Startup context is preselected by dc launch codex (dc context start). Use it as authoritative.",
     "Do not ask for role selection.",
@@ -1223,12 +1224,18 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
   } else if (selectedDirective) {
     lines.push("No task selected yet.");
   }
-  lines.push("First response must briefly confirm active role/directive/task context and run a discovery check with operator.");
-  lines.push("Discovery check must include: intended outcome, constraints, definition of done, and whether execution should start now.");
-  lines.push("Model gate: ask operator whether to keep current model or switch via /model before execution.");
-  lines.push("Thinking gate: ask operator to confirm desired thinking depth before execution.");
-  lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
-  lines.push("Do not execute any lifecycle command until operator confirms execution.");
+  if (autoExecuteExecutorTask) {
+    lines.push("Executor handoff is task-bound and pre-approved.");
+    lines.push("Do not run discovery/model/thinking/go-ahead questions again.");
+    lines.push("Start lifecycle immediately: dc directive start --session <selected> then dc task start --session <selected> --task <selected>.");
+  } else {
+    lines.push("First response must briefly confirm active role/directive/task context and run a discovery check with operator.");
+    lines.push("Discovery check must include: intended outcome, constraints, definition of done, and whether execution should start now.");
+    lines.push("Model gate: ask operator whether to keep current model or switch via /model before execution.");
+    lines.push("Thinking gate: ask operator to confirm desired thinking depth before execution.");
+    lines.push("Before running commands or editing files, ask the operator for explicit go-ahead and wait for approval.");
+    lines.push("Do not execute any lifecycle command until operator confirms execution.");
+  }
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
   if (role === "architect" && selectedDirective && !selectedTask) {
     lines.push("Architect authoring gate is active.");
@@ -1256,6 +1263,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       ? (directiveTasks.length === 0 ? "none_available" : "available_unselected")
       : "not_requested";
   const nextActions = [];
+  const autoExecuteExecutorTask = role === "executor" && Boolean(selectedDirective) && Boolean(selectedTask);
   if (role === "architect" && selectedDirective && taskSelectionState === "none_available") {
     nextActions.push(
       `Create initial tasks in selected directive with 'dc directive task --session ${selectedDirective.session} --title ... --summary ...'`,
@@ -1304,10 +1312,11 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       prefer_scripted_lifecycle_commands: true,
       prohibit_command_guessing: true,
       require_help_lookup_on_command_ambiguity: true,
-      require_operator_discovery_phase: true,
-      require_operator_go_ahead_before_execution: true,
-      require_model_gate: true,
-      require_thinking_gate: true,
+      require_operator_discovery_phase: !autoExecuteExecutorTask,
+      require_operator_go_ahead_before_execution: !autoExecuteExecutorTask,
+      require_model_gate: !autoExecuteExecutorTask,
+      require_thinking_gate: !autoExecuteExecutorTask,
+      executor_task_bound_handoff_auto_execute: autoExecuteExecutorTask,
       architect_authoring_no_code_edits_without_task_and_handoff: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       require_task_breakdown_approval_before_task_creation: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       require_task_contract_approval_before_handoff: role === "architect" && Boolean(selectedDirective) && !selectedTask,
@@ -1318,17 +1327,17 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
     },
     role_transition: roleTransition || "",
     operator_discovery: {
-      required: true,
+      required: !autoExecuteExecutorTask,
       checklist: [
         "Confirm intended outcome in operator words.",
         "Confirm hard constraints and excluded scope.",
         "Confirm definition of done and validation evidence expected.",
         "Ask whether to start execution now or refine plan first.",
       ],
-      before_any_command: true,
+      before_any_command: !autoExecuteExecutorTask,
     },
     model_thinking_gate: {
-      required: true,
+      required: !autoExecuteExecutorTask,
       checklist: [
         "Ask operator whether to keep or switch model.",
         "Ask operator to set/confirm thinking depth.",

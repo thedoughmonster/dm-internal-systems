@@ -31,7 +31,7 @@
     ],
     "directive_branch": "feature/update-and-style-nextjs-landing-page",
     "directive_base_branch": "dev",
-    "directive_merge_status": "open",
+    "directive_merge_status": "merged",
     "commit_policy": "end_of_directive"
   }
 }

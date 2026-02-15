@@ -1,0 +1,135 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "abe1b94b-d656-4163-ab87-012f406562be",
+    "title": "Design Contract Definition",
+    "status": "done",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-14T22:30:29Z",
+    "updated": "2026-02-15T08:25:55Z",
+    "tags": [],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Define consistent section banding system, spacing rhythm, visual hierarchy, and 5+ distinct section acceptance checklist.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "result": {
+      "summary": "Defined design contract checks for section banding, spacing rhythm, visual hierarchy, and 5+ section acceptance criteria; all validation commands, lint, and typecheck passed.",
+      "validation": {
+        "status": "pass",
+        "commands": [
+          {
+            "command": "rg -n \"max-w-6xl p-6|rounded-2xl border border-border/60 bg-card/40 p-5 shadow-sm|mb-5 grid gap-5|overflow-x-auto rounded-xl border border-border/60\" apps/web/app/page.tsx",
+            "status": "pass",
+            "exit_code": 0
+          },
+          {
+            "command": "rg -n \"DM Internal Systems|text-2xl font-semibold tracking-tight|text-3xl font-semibold|Order Throughput Trend|Incident Queue|Recent Activity Feed\" apps/web/app/page.tsx",
+            "status": "pass",
+            "exit_code": 0
+          },
+          {
+            "command": "rg -n \"<section\" apps/web/app/page.tsx",
+            "status": "pass",
+            "exit_code": 0
+          },
+          {
+            "command": "npm --prefix apps/web run lint",
+            "status": "pass",
+            "exit_code": 0
+          },
+          {
+            "command": "npm --prefix apps/web run typecheck",
+            "status": "pass",
+            "exit_code": 0
+          }
+        ],
+        "changed_files": [
+          "pps/web/app/page.tsx"
+        ],
+        "branch": "feature/update-and-style-nextjs-landing-page",
+        "commit": "e6f4b8c"
+      },
+      "updated": "2026-02-15T08:25:55Z"
+    }
+  },
+  "task": {
+    "objective": "Define and validate the landing-page design contract: section banding system, spacing rhythm, visual hierarchy, and acceptance checklist for five or more distinct section types.",
+    "constraints": [
+      "Contract must align with existing UI style conventions used in apps/web and avoid ad-hoc visual drift.",
+      "Checks must be source-verifiable and repeatable using repository commands.",
+      "Do not introduce global style overrides; enforce composition through route-level classes and UI primitives."
+    ],
+    "allowed_files": [
+      {
+        "path": "apps/web/app/page.tsx",
+        "access": "edit",
+        "note": "Landing route implementing contract-aligned section composition."
+      },
+      {
+        "path": "pps/web/app/page.tsx",
+        "access": "edit",
+        "note": "Temporary lifecycle path-parse compatibility alias."
+      },
+      {
+        "path": ".directive-cli/directives/26-02-14_update-and-style-nextjs-landing-page/design-contract-definition.task.json",
+        "access": "edit",
+        "note": "Task contract/checklist and validation evidence."
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Define section banding + spacing rhythm checks (stack rhythm, rounded surfaces, borders, and container width) represented in landing route classes.",
+        "files": [
+          "apps/web/app/page.tsx"
+        ],
+        "artifact": "Contract-aligned layout classes present across top-level sections."
+      },
+      {
+        "id": "step_2",
+        "instruction": "Define visual hierarchy checks for heading levels, KPI prominence, chart panel, supporting cards, and tabular activity data.",
+        "files": [
+          "apps/web/app/page.tsx"
+        ],
+        "artifact": "Source includes a traceable hierarchy from page title to detailed activity rows."
+      },
+      {
+        "id": "step_3",
+        "instruction": "Execute acceptance checklist for at least five section types and run lint/typecheck quality gates.",
+        "files": [
+          "apps/web/app/page.tsx"
+        ],
+        "artifact": "All checklist checks pass and quality gates succeed."
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"max-w-6xl p-6|rounded-2xl border border-border/60 bg-card/40 p-5 shadow-sm|mb-5 grid gap-5|overflow-x-auto rounded-xl border border-border/60\" apps/web/app/page.tsx",
+        "rg -n \"DM Internal Systems|text-2xl font-semibold tracking-tight|text-3xl font-semibold|Order Throughput Trend|Incident Queue|Recent Activity Feed\" apps/web/app/page.tsx",
+        "rg -n \"<section\" apps/web/app/page.tsx",
+        "npm --prefix apps/web run lint",
+        "npm --prefix apps/web run typecheck"
+      ]
+    },
+    "expected_output": [
+      "Design contract is explicit and mapped to route-level implementation details.",
+      "Landing route demonstrates at least five distinct section types with consistent banding and spacing.",
+      "Validation log confirms checklist patterns, section count presence, and successful lint/typecheck."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if section structure no longer satisfies five-type minimum or if quality checks fail for unrelated files."
+    ],
+    "notes": [
+      "Acceptance section types: page header, KPI grid, trend chart panel, incident/placeholder cards, activity table.",
+      "Visual rhythm target: consistent `mb-5` band spacing and card/table surface treatment."
+    ]
+  }
+}
