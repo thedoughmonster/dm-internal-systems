@@ -136,6 +136,8 @@ test("lifecycle global dirty allowlist includes Next.js dev artifacts", () => {
   const allow = lifecycleAlwaysAllowedDirtyPrefixes();
   assert.ok(allow.includes("apps/web/tsconfig.json"));
   assert.ok(allow.includes("apps/web/.next/dev"));
+  assert.ok(allow.includes(".directive-cli/state"));
+  assert.ok(allow.includes("directive-cli/state"));
 
   const session = listOpenSessions()[0];
   assert.ok(session, "Expected at least one non-archived session");
@@ -145,6 +147,7 @@ test("lifecycle global dirty allowlist includes Next.js dev artifacts", () => {
     assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, [
       "apps/web/tsconfig.json",
       "apps/web/.next/dev/types/routes.d.ts",
+      ".directive-cli/state/pending-directive-new-example.json",
     ]),
   );
 });

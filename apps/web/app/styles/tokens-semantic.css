@@ -35,6 +35,14 @@
     --border: var(--dm-color-border-default);
     --input: var(--dm-color-border-default);
     --ring: var(--dm-color-brand-primary);
+    --sidebar-background: var(--dm-color-neutral-925);
+    --sidebar-foreground: var(--dm-color-text-primary);
+    --sidebar-primary: var(--dm-color-brand-primary);
+    --sidebar-primary-foreground: var(--dm-color-text-inverse);
+    --sidebar-accent: var(--dm-color-neutral-900);
+    --sidebar-accent-foreground: var(--dm-color-text-primary);
+    --sidebar-border: var(--dm-color-border-default);
+    --sidebar-ring: var(--dm-color-brand-primary);
 
     --radius: var(--dm-radius-lg);
 
