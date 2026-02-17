@@ -1,0 +1,32 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "68521b90-5f0e-42ca-809e-ac40a02ff6ec",
+    "directive_slug": "fix-dc-help-usage-label",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-13T23:12:30Z",
+    "updated": "2026-02-17T17:18:59Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "Fix dc help usage label",
+    "summary": "Align CLI usage text with actual dc command name",
+    "directive_branch": "chore/dc-flow-demo-help-usage-fix",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}
