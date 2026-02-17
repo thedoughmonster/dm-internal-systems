@@ -1,43 +1,55 @@
 {
   "kind": "dc_startup_context",
   "schema_version": "1.0",
-  "generated_at": "2026-02-15T17:37:29.497Z",
+  "generated_at": "2026-02-17T17:36:25.709Z",
   "profile": "dm-internal-systems",
   "role": "executor",
-  "directive": null,
-  "task": null,
+  "directive": {
+    "session": "26-02-17_unify-sidebar-with-app-shell-in-apps-web",
+    "slug": "unify-sidebar-with-app-shell-in-apps-web",
+    "title": "Unify Sidebar With App Shell in apps/web",
+    "status": "open"
+  },
+  "task": {
+    "session": "26-02-17_unify-sidebar-with-app-shell-in-apps-web",
+    "slug": "01-integrated-sidebar-shell",
+    "title": "Implement integrated sidebar rail and shared app shell",
+    "status": "todo",
+    "file": "/root/src/dm-internal-systems/.directive-cli/directives/26-02-17_unify-sidebar-with-app-shell-in-apps-web/01-integrated-sidebar-shell.task.json"
+  },
   "runtime": {
     "agent": "codex",
     "model": "gpt-5.3-codex",
-    "session_log_file": null
+    "session_log_file": "/root/src/dm-internal-systems/.directive-cli/session-logs/20260217T173625Z_dm-internal-systems_executor_26-02-17_unify-sidebar-with-app-shell-in-apps-web_01-integrated-sidebar-shell.log"
   },
   "startup_rules": {
     "role_assignment_already_satisfied": true,
     "required_reading_already_in_bundle": true,
     "skip_manual_role_prompt": true,
-    "skip_manual_directive_listing_when_directive_selected": false,
-    "skip_manual_task_listing_when_task_selected": false,
-    "task_selection_state": "not_requested",
+    "skip_manual_directive_listing_when_directive_selected": true,
+    "skip_manual_task_listing_when_task_selected": true,
+    "task_selection_state": "selected",
     "prefer_scripted_lifecycle_commands": true,
     "prohibit_command_guessing": true,
     "require_help_lookup_on_command_ambiguity": true,
-    "require_operator_discovery_phase": true,
-    "require_operator_go_ahead_before_execution": true,
-    "require_model_gate": true,
-    "require_thinking_gate": true,
+    "require_operator_discovery_phase": false,
+    "require_operator_go_ahead_before_execution": false,
+    "require_model_gate": false,
+    "require_thinking_gate": false,
     "require_scope_approval_before_architect_authoring": false,
-    "executor_task_bound_handoff_auto_execute": false,
+    "executor_task_bound_handoff_auto_execute": true,
     "architect_authoring_no_code_edits_without_task_and_handoff": false,
     "require_task_breakdown_approval_before_task_creation": false,
     "require_task_contract_approval_before_handoff": false,
     "require_handoff_before_executor_execution": false,
     "architect_discovery_mode_required": false,
     "architect_min_clarifying_questions": 0,
-    "architect_must_echo_discovery_before_task_drafting": false
+    "architect_must_echo_discovery_before_task_drafting": false,
+    "architect_create_directive_chat_mode": false
   },
-  "role_transition": "",
+  "role_transition": "none -> executor",
   "operator_discovery": {
-    "required": true,
+    "required": false,
     "checklist": [
       "Confirm intended outcome in operator words.",
       "Confirm hard constraints and excluded scope.",
@@ -46,10 +58,10 @@
       "For architect sessions, ask whether to stay in discovery mode or enter authoring mode.",
       "Do not enter authoring mode until operator explicitly approves scope and direction."
     ],
-    "before_any_command": true
+    "before_any_command": false
   },
   "model_thinking_gate": {
-    "required": true,
+    "required": false,
     "checklist": [
       "Ask operator whether to keep or switch model.",
       "Ask operator to set/confirm thinking depth.",

@@ -36,7 +36,7 @@ export default function GlobalSidebarShell({
   children,
   toggleable = true,
 }: GlobalSidebarShellProps) {
-  const shellId = "global-sidebar";
+  const shellId = "global-sidebar"
   const pathname = usePathname()
   const [slot, setSlot] = React.useState<GlobalSidebarSlotValue>({})
   const activeTopNav = React.useMemo(() => {
@@ -52,9 +52,9 @@ export default function GlobalSidebarShell({
     slot.header ? (
       <slot.header />
     ) : (
-      <div className="flex h-12 items-center gap-2 border-b border-border/60 px-4">
+      <div className="flex h-12 items-center gap-2 border-b border-sidebar-border/80 bg-sidebar/35 px-4">
         <SidebarTrigger id={`${shellId}-trigger`} />
-        <div className="text-sm font-medium">
+        <div className="dm-machine-mono text-[0.7rem] font-medium uppercase tracking-[0.14em] text-sidebar-foreground/80">
           {activeTopNav?.title ?? "Sidebar"}
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function GlobalSidebarShell({
           variant="sidebar"
           value={openSection}
           onValueChange={setOpenSection}
-          className="px-2"
+          className="px-1"
         >
           {activeTopNav.sidebarSections.map((section) => (
             <AccordionItem
@@ -91,7 +91,7 @@ export default function GlobalSidebarShell({
               <AccordionContent id={`${shellId}-section-${section.id}-content`}>
                 <SidebarMenu
                   id={`${shellId}-section-${section.id}-menu`}
-                  className="pb-2"
+                  className="pb-3 pt-1"
                 >
                   {section.items.map((item) => (
                     <SidebarMenuItem
@@ -130,22 +130,27 @@ export default function GlobalSidebarShell({
     <GlobalSidebarContext.Provider value={{ slot, setSlot }}>
       <SidebarProvider
         id={`${shellId}-provider`}
-        className="min-h-[calc(100svh-3.5rem)]"
+        className="mx-auto min-h-[calc(100svh-3.5rem)] w-full max-w-6xl px-4 pb-6 pt-4 md:pt-5"
       >
         <Sidebar
           id={`${shellId}-sidebar`}
-          className="top-14 h-[calc(100svh-3.5rem)]"
+          className="h-full md:pr-2"
           collapsible={toggleable ? "offcanvas" : "none"}
           variant="inset"
         >
-          <SidebarContent id={`${shellId}-content`}>
+          <SidebarContent id={`${shellId}-content`} className="px-2 pb-3 pt-3">
             {slot.content ? <slot.content /> : defaultSidebarContent}
           </SidebarContent>
           <SidebarRail id={`${shellId}-rail`} />
         </Sidebar>
-        <SidebarInset id={`${shellId}-inset`}>
+        <SidebarInset
+          id={`${shellId}-inset`}
+          className="min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-8.5rem)]"
+        >
           {headerNode}
-          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </GlobalSidebarContext.Provider>

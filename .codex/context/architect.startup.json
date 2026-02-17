@@ -1,7 +1,7 @@
 {
   "kind": "dc_startup_context",
   "schema_version": "1.0",
-  "generated_at": "2026-02-15T17:37:29.430Z",
+  "generated_at": "2026-02-17T17:24:56.344Z",
   "profile": "dm-internal-systems",
   "role": "architect",
   "directive": null,
@@ -9,7 +9,7 @@
   "runtime": {
     "agent": "codex",
     "model": "gpt-5.3-codex",
-    "session_log_file": null
+    "session_log_file": "/root/src/dm-internal-systems/.directive-cli/session-logs/20260217T172456Z_dm-internal-systems_architect_no-directive_no-task.log"
   },
   "startup_rules": {
     "role_assignment_already_satisfied": true,
@@ -33,9 +33,10 @@
     "require_handoff_before_executor_execution": false,
     "architect_discovery_mode_required": false,
     "architect_min_clarifying_questions": 0,
-    "architect_must_echo_discovery_before_task_drafting": false
+    "architect_must_echo_discovery_before_task_drafting": false,
+    "architect_create_directive_chat_mode": true
   },
-  "role_transition": "",
+  "role_transition": "architect (unchanged)",
   "operator_discovery": {
     "required": true,
     "checklist": [
@@ -57,5 +58,10 @@
     ]
   },
   "architect_discovery_protocol": null,
-  "next_actions": []
+  "next_actions": [
+    "Run directive-definition discovery conversation with operator first.",
+    "Confirm intended outcome, constraints, definition of done, and explicit goals.",
+    "Request explicit approval of title, summary, and goals before creating artifacts.",
+    "After approval, run 'dc directive new' to create the directive session."
+  ]
 }
