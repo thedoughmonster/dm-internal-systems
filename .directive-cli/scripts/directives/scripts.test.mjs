@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
-import { directiveScopePrefixes, assertDirtyFilesWithinDirectiveScope, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
+import {
+  directiveScopePrefixes,
+  assertDirtyFilesWithinDirectiveScope,
+  findTaskAllowedFileIntersections,
+  lifecycleAlwaysAllowedDirtyPrefixes,
+} from "./_directive_helpers.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
 const directivesBinRoot = path.join(repoRoot, ".directive-cli", "scripts", "directives", "bin");
@@ -124,6 +129,23 @@ test("directive scope helpers normalize allowed paths and block out-of-scope dir
   assert.throws(
     () => assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, ["README.md"]),
     /Out-of-scope dirty files detected/,
+  );
+});
+
+test("lifecycle global dirty allowlist includes Next.js dev artifacts", () => {
+  const allow = lifecycleAlwaysAllowedDirtyPrefixes();
+  assert.ok(allow.includes("apps/web/tsconfig.json"));
+  assert.ok(allow.includes("apps/web/.next/dev"));
+
+  const session = listOpenSessions()[0];
+  assert.ok(session, "Expected at least one non-archived session");
+  const sessionDir = path.join(directivesRoot, session);
+
+  assert.doesNotThrow(() =>
+    assertDirtyFilesWithinDirectiveScope(repoRoot, sessionDir, [
+      "apps/web/tsconfig.json",
+      "apps/web/.next/dev/types/routes.d.ts",
+    ]),
   );
 });
 

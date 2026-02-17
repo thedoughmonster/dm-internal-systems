@@ -6,6 +6,8 @@ const LIFECYCLE_ALWAYS_ALLOWED_DIRTY_PREFIXES = [
   "codex/context",
   ".directive-cli/session-logs",
   "directive-cli/session-logs",
+  "apps/web/tsconfig.json",
+  "apps/web/.next/dev",
 ];
 
 const COLORS = {
