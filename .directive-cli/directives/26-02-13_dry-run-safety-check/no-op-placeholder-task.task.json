@@ -1,0 +1,59 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "4cd68a1c-85db-48e9-a6a6-ab843188ad7f",
+    "title": "No-op placeholder task",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-13T22:17:20Z",
+    "updated": "2026-02-13T22:17:20Z",
+    "tags": [],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Validate task lifecycle without touching product code",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Define the concrete outcome this task must produce.",
+    "constraints": [
+      "Keep scope deterministic and drift resistant."
+    ],
+    "allowed_files": [
+      {
+        "path": "apps/web/...",
+        "access": "edit",
+        "note": "Replace with exact allowed paths before execution."
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Define exact file-level actions with completion artifacts.",
+        "files": [
+          "apps/web/..."
+        ],
+        "artifact": "Concrete output produced and verifiable."
+      }
+    ],
+    "validation": {
+      "commands": [
+        "# Add exact validation commands here"
+      ]
+    },
+    "expected_output": [
+      "State measurable completion evidence."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator when blocked by missing scope or failing unrelated validations."
+    ],
+    "notes": []
+  }
+}

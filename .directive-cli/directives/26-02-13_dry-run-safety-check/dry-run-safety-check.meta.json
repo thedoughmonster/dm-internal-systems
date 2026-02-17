@@ -1,0 +1,32 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "c3deb30e-0668-4ab0-9c27-797e41f65272",
+    "directive_slug": "dry-run-safety-check",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-13T22:17:14Z",
+    "updated": "2026-02-17T17:18:59Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "Dry Run Safety Check",
+    "summary": "Disposable directive to verify runbook lifecycle scripts",
+    "directive_branch": "dev",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "not_started",
+    "commit_policy": "per_task"
+  }
+}
