@@ -112,6 +112,55 @@ function resolveSourceRef(repoRoot, branch) {
   return "";
 }
 
+function listLocalBranches(repoRoot) {
+  const result = runGit(["for-each-ref", "--format=%(refname:short)", "refs/heads"], repoRoot);
+  return String(result.stdout || "")
+    .split("\n")
+    .map((v) => String(v || "").trim())
+    .filter(Boolean);
+}
+
+function readSessionMetaFromBranch(repoRoot, branch, session) {
+  const sessionPath = `.directive-cli/directives/${session}`;
+  const list = runGit(["ls-tree", "--name-only", `${branch}:${sessionPath}`], repoRoot, { allowFail: true });
+  if (list.status !== 0) return null;
+  const metaFile = String(list.stdout || "")
+    .split("\n")
+    .map((v) => String(v || "").trim())
+    .find((name) => /\.meta\.json$/.test(name));
+  if (!metaFile) return null;
+  const show = runGit(["show", `${branch}:${sessionPath}/${metaFile}`], repoRoot, { allowFail: true });
+  if (show.status !== 0) return null;
+  try {
+    const doc = JSON.parse(String(show.stdout || ""));
+    const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+    return { metaFile, meta };
+  } catch {
+    return null;
+  }
+}
+
+function resolveDirectiveContextForMerge(repoRoot, session) {
+  try {
+    const ctx = resolveDirectiveContext(session);
+    return { ...ctx, fallbackBranch: "" };
+  } catch {
+    const branches = listLocalBranches(repoRoot);
+    for (const branch of branches) {
+      const found = readSessionMetaFromBranch(repoRoot, branch, session);
+      if (!found) continue;
+      const directiveMetaPath = path.join(getDirectivesRoot(), session, found.metaFile);
+      return {
+        repoRoot,
+        directiveMetaPath,
+        directiveDoc: { meta: found.meta },
+        fallbackBranch: branch,
+      };
+    }
+  }
+  throw new Error(`Session not found in current branch or local branches: ${session}`);
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -120,7 +169,8 @@ function main() {
   }
   const dryRun = Boolean(args["dry-run"]);
   return resolveSession(args).then((session) => {
-    const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);
+    const repoRoot = path.resolve(getDirectivesRoot(), "..", "..");
+    const { directiveMetaPath, directiveDoc, fallbackBranch } = resolveDirectiveContextForMerge(repoRoot, session);
     const meta = directiveDoc.meta || {};
     const branch = String(meta.directive_branch || "").trim();
     const base = String(meta.directive_base_branch || "dev").trim() || "dev";
@@ -130,6 +180,9 @@ function main() {
 
     const sourceRef = resolveSourceRef(repoRoot, branch);
     if (!sourceRef) throw new Error(`Cannot find directive branch '${branch}' locally or on origin.`);
+    if (fallbackBranch) {
+      log("DIR", `Resolved session metadata from branch '${fallbackBranch}' because session was absent on current branch.`);
+    }
 
     const nowBranch = currentBranch(repoRoot);
     if (nowBranch !== base) throw new Error(`Merge flow must start on '${base}' (current: '${nowBranch}').`);
