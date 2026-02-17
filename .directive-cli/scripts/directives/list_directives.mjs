@@ -5,6 +5,7 @@ import { stdin, stdout } from "node:process";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { listDirectiveSessions, directiveDisplayRecord } from "./_directive_listing.mjs";
 import { selectOption, selectMultiOption } from "./_prompt_helpers.mjs";
+import { directiveListLabel, formatNumberedListRow } from "./_list_view_component.mjs";
 
 function parseArgs(argv) {
   const args = { field: [] };
@@ -124,15 +125,15 @@ function printTable(rows, mode) {
     process.stdout.write("No directives found.\n");
     return;
   }
-  const keys = Object.keys(rows[0]);
-  process.stdout.write(`mode=${mode}\n`);
-  for (const row of rows) {
-    const parts = [];
-    for (const k of keys) {
-      if (k === "session") continue;
-      parts.push(`${k}=${row[k]}`);
+  const keys = Object.keys(rows[0]).filter((k) => !["session", "status", "title"].includes(k));
+  const showExtras = keys.length > 0;
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
+    if (!showExtras) {
+      process.stdout.write(`${i + 1}) ${directiveListLabel(row)}\n`);
+      continue;
     }
-    process.stdout.write(`${parts.join(" | ")}\n`);
+    process.stdout.write(`${formatNumberedListRow(row, i, keys)}\n`);
   }
 }
 

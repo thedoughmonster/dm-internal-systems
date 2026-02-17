@@ -7,6 +7,7 @@ import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
 import { listDirectiveSessions } from "./_directive_listing.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
+import { directiveListLabel, statusColor, statusTag } from "./_list_view_component.mjs";
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -278,22 +279,6 @@ function humanizeSlug(value) {
     .trim();
 }
 
-function statusColor(status) {
-  const s = lower(status);
-  if (s === "todo") return "yellow";
-  if (s === "open") return "cyan";
-  if (s === "ready") return "blue";
-  if (s === "in_progress") return "magenta";
-  if (s === "blocked") return "red";
-  if (s === "done" || s === "completed") return "green";
-  if (s === "archived" || s === "cancelled") return "dim";
-  return "magenta";
-}
-
-function statusTag(status) {
-  return `[${String(status || "open")}]`;
-}
-
 function isArchivedStatus(status) {
   return ["archived", "done", "completed", "cancelled"].includes(lower(status));
 }
@@ -344,7 +329,7 @@ async function requireDirective(root, args) {
     output: stdout,
     label: "Select directive:",
     options: directives.map((d) => ({
-      label: `${statusTag(d.status)} ${d.title}`,
+      label: directiveListLabel(d),
       color: statusColor(d.status),
       value: d.session,
     })),

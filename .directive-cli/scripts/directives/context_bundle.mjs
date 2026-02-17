@@ -11,6 +11,7 @@ import { stdin, stdout } from "node:process";
 import { selectOption } from "./_prompt_helpers.mjs";
 import { listDirectiveSessions } from "./_directive_listing.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
+import { directiveListLabel, statusColor, taskListLabel } from "./_list_view_component.mjs";
 
 const ROLES = ["architect", "executor", "pair", "auditor"];
 const COLORS = {
@@ -597,24 +598,6 @@ function humanizeSlug(value) {
     .trim();
 }
 
-function statusColor(status) {
-  const s = lower(status);
-  if (s === "todo") return "yellow";
-  if (s === "open") return "cyan";
-  if (s === "ready") return "blue";
-  if (s === "in_progress") return "magenta";
-  if (s === "blocked") return "red";
-  if (s === "done") return "green";
-  if (s === "completed") return "green";
-  if (s === "archived") return "dim";
-  if (s === "cancelled") return "dim";
-  return "magenta";
-}
-
-function statusTag(status) {
-  return `[${String(status || "open")}]`;
-}
-
 function isArchivedStatus(status) {
   return ["archived", "done", "completed", "cancelled"].includes(lower(status));
 }
@@ -824,10 +807,10 @@ async function requireStartTask(args, root) {
     input: stdin,
     output: stdout,
     label: "Select task (optional):",
-    options: [
-      { label: "skip task selection", value: "__skip__" },
-      ...scoped.map((t) => ({
-        label: `${t.task_slug}  [${t.task_status}]  ${t.task_title}`,
+      options: [
+        { label: "skip task selection", value: "__skip__" },
+        ...scoped.map((t) => ({
+        label: taskListLabel(t),
         value: t.task_slug,
       })),
     ],
@@ -861,7 +844,7 @@ async function requireStartDirective(args, root) {
       label: "Select directive:",
       options: [
         ...available.map((d) => ({
-          label: `${statusTag(d.status)} ${d.title}`,
+          label: directiveListLabel(d),
           color: statusColor(d.status),
           value: d.session,
         })),
@@ -1642,7 +1625,7 @@ async function runHandoff(root, args) {
       output: stdout,
       label: "Select directive (handoff ready):",
       options: handoffReady.map((d) => ({
-        label: `${statusTag(d.status)} ${d.title}`,
+        label: directiveListLabel(d),
         color: statusColor(d.status),
         value: d.session,
       })),

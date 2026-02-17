@@ -7,6 +7,7 @@ import { resolveDirectiveContext, toUtcIso, writeJson } from "./_directive_helpe
 import { alert, branchExistsLocal, branchExistsRemote, changedFiles, currentBranch, log, runGit } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption } from "./_prompt_helpers.mjs";
+import { directiveListLabel, statusColor } from "./_list_view_component.mjs";
 
 function parseArgs(argv) {
   const args = { session: [] };
@@ -97,7 +98,8 @@ async function resolveSession(args) {
     output: stdout,
     label: "Select directive to merge:",
     options: candidates.map((c) => ({
-      label: `[${c.status}] ${c.title}  (${c.session})  ${c.branch} -> ${c.base}`,
+      label: directiveListLabel(c),
+      color: statusColor(c.status),
       value: c.session,
     })),
     defaultIndex: 0,

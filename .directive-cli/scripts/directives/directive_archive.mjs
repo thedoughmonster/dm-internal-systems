@@ -7,6 +7,7 @@ import { resolveDirectiveContext, writeJson, toUtcIso } from "./_directive_helpe
 import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption, selectMultiOption } from "./_prompt_helpers.mjs";
+import { directiveListLabel, statusColor } from "./_list_view_component.mjs";
 
 function parseArgs(argv) {
   const args = { session: [] };
@@ -138,7 +139,8 @@ async function resolveSessions(args) {
       output: stdout,
       label: "Select directive(s) to archive:",
       options: directives.map((d) => ({
-        label: `${d.session}  [${d.status}]  ${d.title}`,
+        label: directiveListLabel(d),
+        color: statusColor(d.status),
         value: d.session,
       })),
       defaultSelectedValues: [],
@@ -152,7 +154,8 @@ async function resolveSessions(args) {
     output: stdout,
     label: "Select directive to archive:",
     options: directives.map((d) => ({
-      label: `${d.session}  [${d.status}]  ${d.title}`,
+      label: directiveListLabel(d),
+      color: statusColor(d.status),
       value: d.session,
     })),
     defaultIndex: 0,
