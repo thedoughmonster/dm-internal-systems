@@ -1,0 +1,33 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "213aa32a-3973-46c3-a583-3e14b132c8f7",
+    "directive_slug": "itest-live-handoff-live-2643-20260214t211614z",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-14T21:16:14Z",
+    "updated": "2026-02-17T17:18:59Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "itest live handoff live-2643-20260214T211614Z",
+    "summary": "Live handoff+switch smoke test",
+    "goals": [],
+    "directive_branch": "feature/itest-live-handoff-live-2643-20260214t211614z",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}
