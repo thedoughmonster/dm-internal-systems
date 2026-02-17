@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, toUtcIso, writeJson } from "./_directive_helpers.mjs";
-import { alert, branchExistsLocal, branchExistsRemote, changedFiles, currentBranch, log, runGit } from "./_git_helpers.mjs";
+import { alert, branchExistsLocal, branchExistsRemote, currentBranch, ensureCleanWorkingTree, log, runGit } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption } from "./_prompt_helpers.mjs";
 import { directiveListLabel, statusColor } from "./_list_view_component.mjs";
@@ -134,14 +134,7 @@ function main() {
     const nowBranch = currentBranch(repoRoot);
     if (nowBranch !== base) throw new Error(`Merge flow must start on '${base}' (current: '${nowBranch}').`);
 
-    if (!dryRun) {
-      const dirty = changedFiles(repoRoot);
-      if (dirty.length > 0) {
-        throw new Error(
-          `Merge flow requires a clean working tree.\nDirty files:\n${dirty.map((f) => `  - ${f}`).join("\n")}`,
-        );
-      }
-    }
+    if (!dryRun) ensureCleanWorkingTree(repoRoot);
 
     if (isMergedInto(base, sourceRef, repoRoot)) {
       log("GIT", `No-op: '${sourceRef}' is already merged into '${base}'.`);

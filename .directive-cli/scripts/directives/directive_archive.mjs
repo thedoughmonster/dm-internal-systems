@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { stdin, stdout } from "node:process";
-import { resolveDirectiveContext, writeJson, toUtcIso } from "./_directive_helpers.mjs";
+import { resolveDirectiveContext, writeJson, toUtcIso, lifecycleAlwaysAllowedDirtyPrefixes } from "./_directive_helpers.mjs";
 import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption, selectMultiOption } from "./_prompt_helpers.mjs";
@@ -223,7 +223,11 @@ async function archiveOne(session, { dryRun }) {
   }
 
   const dirty = changedFiles(repoRoot).map((p) => p.replace(/\\/g, "/"));
-  const unrelated = dirty.filter((p) => p !== directiveRel && !p.startsWith(`${sessionRel}/`));
+  const globalAllow = lifecycleAlwaysAllowedDirtyPrefixes();
+  const unrelated = dirty.filter((p) => {
+    if (p === directiveRel || p.startsWith(`${sessionRel}/`)) return false;
+    return !globalAllow.some((prefix) => p === prefix || p.startsWith(`${prefix}/`));
+  });
   if (unrelated.length > 0) {
     const lines = ["Archive blocked: unrelated dirty files present:", ...unrelated.map((f) => `- ${f}`)];
     process.stderr.write(`${badge("blocked", lines, "red")}\n`);
