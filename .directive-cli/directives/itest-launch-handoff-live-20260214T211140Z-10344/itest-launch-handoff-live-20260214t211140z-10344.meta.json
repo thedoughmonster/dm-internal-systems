@@ -1,0 +1,33 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "a3efa333-3ba7-438e-ab1c-7199891d2f3e",
+    "directive_slug": "itest-launch-handoff-live-20260214t211140z-10344",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-14T21:11:40Z",
+    "updated": "2026-02-17T17:18:59Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "itest launch handoff live 20260214T211140Z-10344",
+    "summary": "Temporary directive for launch handoff script test",
+    "goals": [],
+    "directive_branch": "feature/itest-launch-handoff-live-20260214t211140z-10344",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}
