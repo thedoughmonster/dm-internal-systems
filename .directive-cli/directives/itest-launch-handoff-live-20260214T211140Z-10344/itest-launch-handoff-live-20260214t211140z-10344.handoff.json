@@ -1,0 +1,15 @@
+{
+  "handoff": {
+    "from_role": "architect",
+    "to_role": "executor",
+    "trigger": "role_switch_handoff",
+    "session_id": "a3efa333-3ba7-438e-ab1c-7199891d2f3e",
+    "task_file": null,
+    "directive_branch": "feature/itest-launch-handoff-live-20260214t211140z-10344",
+    "required_reading": "apps/web/docs/guides/component-paradigm.md",
+    "objective": "Execute approved directive tasks strictly via dc lifecycle/runbook scripts.",
+    "blocking_rule": "Architect must stop implementation and transfer control to executor.",
+    "worktree_mode": "clean_required",
+    "worktree_allowlist_paths": []
+  }
+}
