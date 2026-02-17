@@ -34,7 +34,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/directive_merge.mjs --session <id> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/directive_merge.mjs --session <id> [--dry-run] [--help]";
 }
 
 function parseSessionList(values, guid) {
@@ -114,6 +114,10 @@ function resolveSourceRef(repoRoot, branch) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(0);
+  }
   const dryRun = Boolean(args["dry-run"]);
   return resolveSession(args).then((session) => {
     const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);

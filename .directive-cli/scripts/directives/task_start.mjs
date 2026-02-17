@@ -24,7 +24,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/task_start.mjs --session <id> --task <slug|file> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/task_start.mjs --session <id> --task <slug|file> [--dry-run] [--help]";
 }
 
 function runTaskValidation(repoRoot, taskFile) {
@@ -41,8 +41,12 @@ function runTaskValidation(repoRoot, taskFile) {
 }
 
 function main() {
-  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(0);
+  }
+  assertExecutorRoleForLifecycle();
   const session = String(args.session || args.guid || "").trim();
   const task = String(args.task || "").trim();
   if (!session || !task) {

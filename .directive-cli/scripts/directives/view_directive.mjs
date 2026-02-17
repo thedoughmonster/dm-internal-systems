@@ -52,6 +52,10 @@ function parseArgs(argv) {
   return args;
 }
 
+function usage() {
+  return "Usage: node .directive-cli/scripts/directives/view_directive.mjs --directive <session> --file <name.json> [--raw|--json] [--help]";
+}
+
 function loadJson(filePath) {
   try {
     const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -369,6 +373,10 @@ async function requireFile(directive, args) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    return;
+  }
   const root = repoRoot();
   const directive = await requireDirective(root, args);
   const file = await requireFile(directive, args);

@@ -34,7 +34,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/directive_archive.mjs --session <id[,id2,...]> [--session <id> ...] [--multi] [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/directive_archive.mjs --session <id[,id2,...]> [--session <id> ...] [--multi] [--dry-run] [--help]";
 }
 
 function slugify(input) {
@@ -273,6 +273,10 @@ async function archiveOne(session, { dryRun }) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(0);
+  }
   const sessions = await resolveSessions(args);
   const dryRun = Boolean(args["dry-run"]);
   await confirmArchive(sessions, dryRun);

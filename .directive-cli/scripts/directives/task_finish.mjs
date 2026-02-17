@@ -23,7 +23,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/task_finish.mjs --session <id> --task <slug|file> --summary <text> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/task_finish.mjs --session <id> --task <slug|file> --summary <text> [--dry-run] [--help]";
 }
 
 function runValidationCommands(commands, cwd) {
@@ -40,8 +40,12 @@ function runValidationCommands(commands, cwd) {
 }
 
 function main() {
-  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(0);
+  }
+  assertExecutorRoleForLifecycle();
   const session = String(args.session || args.guid || "").trim();
   const task = String(args.task || "").trim();
   const summary = String(args.summary || "").trim();

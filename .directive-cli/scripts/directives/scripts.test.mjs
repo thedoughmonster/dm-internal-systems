@@ -286,6 +286,49 @@ test("directives-cli help exposes expected command set", () => {
   assert.match(output, /launch handoff/);
 });
 
+test("dc subcommands support --help", () => {
+  const helpCommands = [
+    ["directive", "new", "--help"],
+    ["directive", "task", "--help"],
+    ["directive", "handoff", "--help"],
+    ["directive", "list", "--help"],
+    ["directive", "view", "--help"],
+    ["directive", "start", "--help"],
+    ["directive", "finish", "--help"],
+    ["directive", "archive", "--help"],
+    ["directive", "merge", "--help"],
+    ["directive", "cleanup", "--help"],
+    ["directive", "migrate", "--help"],
+    ["task", "start", "--help"],
+    ["task", "finish", "--help"],
+    ["meta", "update", "--help"],
+    ["meta", "architect", "--help"],
+    ["meta", "executor", "--help"],
+    ["runbook", "--help"],
+    ["context", "build", "--help"],
+    ["context", "check", "--help"],
+    ["context", "show", "--help"],
+    ["context", "bootstrap", "--help"],
+    ["context", "start", "--help"],
+    ["context", "switch", "--help"],
+    ["context", "handoff", "--help"],
+    ["codex", "usage", "--help"],
+    ["policy", "validate", "--help"],
+    ["repo", "map", "--help"],
+    ["validate", "--help"],
+    ["test", "--help"],
+  ];
+
+  for (const args of helpCommands) {
+    const output = run(path.join(directivesBinRoot, "cli"), args);
+    if (args[0] === "repo" && args[1] === "map") {
+      assert.match(output, /Repo root/, `Expected repo map output for: dc ${args.join(" ")}`);
+      continue;
+    }
+    assert.match(output, /Usage:/, `Expected Usage output for: dc ${args.join(" ")}`);
+  }
+});
+
 test("codex usage summarizes token deltas from log file window", (t) => {
   const tag = randomTag();
   const fakeLog = path.join("/tmp", `codex-usage-${tag}.log`);

@@ -24,7 +24,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return "Usage: node .directive-cli/scripts/directives/directive_finish.mjs --session <id> [--dry-run]";
+  return "Usage: node .directive-cli/scripts/directives/directive_finish.mjs --session <id> [--dry-run] [--help]";
 }
 
 function runDirectiveValidation(repoRoot, files) {
@@ -40,8 +40,12 @@ function runDirectiveValidation(repoRoot, files) {
 }
 
 function main() {
-  assertExecutorRoleForLifecycle();
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(0);
+  }
+  assertExecutorRoleForLifecycle();
   const session = String(args.session || args.guid || "").trim();
   if (!session) {
     alert("error", ["Missing required --session", usage()], { color: "red" });
