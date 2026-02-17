@@ -14,7 +14,7 @@
       "needs-triage"
     ],
     "created": "2026-02-17T17:29:28Z",
-    "updated": "2026-02-17T18:18:30Z",
+    "updated": "2026-02-17T18:20:32Z",
     "bucket": "active",
     "scope": "directives",
     "source": "architect",
@@ -33,7 +33,7 @@
     ],
     "directive_branch": "feature/unify-sidebar-with-app-shell-in-apps-web",
     "directive_base_branch": "dev",
-    "directive_merge_status": "open",
+    "directive_merge_status": "merged",
     "commit_policy": "end_of_directive"
   }
 }
