@@ -43,37 +43,37 @@ function main() {
   const { repoRoot, directiveDoc } = resolveDirectiveContext(session);
   const branch = String((directiveDoc.meta || {}).directive_branch || "").trim();
   if (!branch) throw new Error("Directive metadata missing directive_branch");
-  if (branch === "dev") throw new Error("Refusing to cleanup directive branch 'dev'.");
+  if (branch === "dev") throw new Error("Refusing cleanup for branch 'dev'.");
 
   log("DIR", `Directive cleanup: ${session}`);
   log("DIR", `Target branch=${branch}`);
 
   if (args["dry-run"]) {
     log("DIR", "Dry run only. No branch changes applied.");
+    log("GIT", `[dry-run] manual: git checkout dev && git branch -d ${branch}`);
     return;
   }
 
-  log("GIT", "Checking clean working tree");
   ensureCleanWorkingTree(repoRoot);
+  const current = currentBranch(repoRoot);
+  if (current !== "dev") {
+    throw new Error(`Current branch '${current}' is not 'dev'. Manual git required: git checkout dev`);
+  }
 
   if (!branchExistsLocal(branch, repoRoot)) {
-    log("GIT", `Local branch '${branch}' does not exist. Nothing to delete.`);
+    log("GIT", `Local branch '${branch}' does not exist. Nothing to cleanup.`);
     return;
   }
 
   if (!isMergedIntoDev(branch, repoRoot)) {
-    throw new Error(`Branch '${branch}' is not merged into 'dev'. Cleanup blocked.`);
+    throw new Error(
+      `Branch '${branch}' is not merged into 'dev'.\n` +
+      `Manual git required before cleanup: git merge --no-ff ${branch}`,
+    );
   }
 
-  const current = currentBranch(repoRoot);
-  if (current !== "dev") {
-    log("GIT", "Switching to dev");
-    runGit(["checkout", "dev"], repoRoot);
-  }
-
-  log("GIT", `Deleting merged branch '${branch}'`);
-  runGit(["branch", "-d", branch], repoRoot);
-  log("DIR", "Directive cleanup complete");
+  log("GIT", `Branch '${branch}' is merge-safe.`);
+  log("GIT", `No git actions executed by dc. Operator should run: git branch -d ${branch}`);
 }
 
 try {

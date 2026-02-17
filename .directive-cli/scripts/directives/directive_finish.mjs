@@ -2,7 +2,7 @@
 
 import path from "node:path";
 import { resolveDirectiveContext, listTaskFiles, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
-import { log, runGit, changedFiles, currentBranch, alert } from "./_git_helpers.mjs";
+import { log, changedFiles, currentBranch, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -93,7 +93,8 @@ function main() {
   runDirectiveValidation(repoRoot, [directiveMetaPath, ...taskFiles]);
 
   if (args["dry-run"]) {
-    log("DIR", `[dry-run] would mark directive done and apply commit policy ${commitPolicy}`);
+    log("DIR", `[dry-run] would mark directive done (commit_policy=${commitPolicy})`);
+    log("GIT", "[dry-run] manual git required: commit/push/merge handled by operator");
     return;
   }
 
@@ -110,34 +111,13 @@ function main() {
   directiveDoc.meta.updated = toUtcIso();
   writeJson(directiveMetaPath, directiveDoc);
 
-  const directiveMetaRel = path.relative(repoRoot, directiveMetaPath).replace(/\\/g, "/");
-  let committed = false;
   const dirtyFiles = changedFiles(repoRoot);
-  if (dirtyFiles.length > 0 && ["end_of_directive", "per_collection"].includes(commitPolicy)) {
-    log("GIT", `Committing deferred changes (${commitPolicy})`);
-    runGit(["add", "-A"], repoRoot);
-    runGit(["add", "-f", sessionRel], repoRoot);
-    runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
-    committed = true;
-  } else if (commitPolicy === "per_task") {
-    log("GIT", "Committing directive closeout metadata (per_task policy)");
-    runGit(["add", "-f", directiveMetaRel], repoRoot);
-    runGit(["commit", "-m", `chore(executor): finalize directive ${session}`], repoRoot);
-    committed = true;
+  if (dirtyFiles.length > 0) {
+    log("GIT", `Directive closeout recorded. Manual git required for ${dirtyFiles.length} changed file(s).`);
   } else {
-    log("GIT", `No finalize commit needed for policy: ${commitPolicy}`);
+    log("GIT", "Directive closeout recorded. No file changes pending.");
   }
-
-  const pushOnDirectiveFinish = lifecyclePolicy.lifecycle?.push_on_directive_finish !== false;
-  if (pushOnDirectiveFinish && committed) {
-    log("GIT", `Pushing branch '${branch}' to origin`);
-    const hasUpstream = runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoRoot, { allowFail: true }).status === 0;
-    if (hasUpstream) {
-      runGit(["push"], repoRoot);
-    } else {
-      runGit(["push", "-u", "origin", branch], repoRoot);
-    }
-  }
+  log("GIT", "Run manual git flow: commit -> push -> merge to base branch.");
 
   log("DIR", "Directive finish complete");
 }

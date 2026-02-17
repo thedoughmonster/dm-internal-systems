@@ -6,21 +6,19 @@ This is the canonical operator and agent reference for `dc`.
 
 ### Does executor commit and merge back to `dev` automatically?
 
-- Commit: yes, based on `commit_policy` in directive meta.
-- Push: yes, on task/directive finish (policy controlled).
-- Merge to `dev`: yes, when using runbook closeout.
+- Commit: no (manual git).
+- Push: no (manual git).
+- Merge to `dev`: no (manual git).
 - Canonical final step is `dc runbook executor-directive-closeout`, which performs:
   - QA gate prompt
-  - `dc directive finish`
-  - checkout `dev`
-  - `dc directive archive` (merge)
-  - `dc directive cleanup` (remove merged feature branch)
+  - `dc directive finish` (metadata + validation closeout)
+  - manual git checklist output for operator execution
 
 Rationale:
 
-- Keep execution deterministic per task.
-- Avoid silent cross-branch merges during active execution.
-- Keep merge/closeout as explicit lifecycle intent.
+- Keep `dc` deterministic and metadata-first.
+- Avoid hidden git side effects.
+- Force explicit operator control for branch/merge operations.
 
 ## Lifecycle map
 
@@ -42,6 +40,7 @@ Rationale:
 5. `dc task finish --session <s> --task <t> --summary "..."`
 6. repeat tasks
 7. `dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout`
+8. operator runs manual git checklist (commit/push/merge/archive cleanup)
 
 ## Command catalog
 
@@ -151,6 +150,13 @@ Fix:
 - complete/stage in-scope work or resolve out-of-scope changes.
 - generated context/log files are tolerated by lifecycle guard, but real out-of-scope edits are blocked.
 
+### Where are git mutations performed now?
+
+Answer:
+
+- `dc` no longer executes git mutations (no checkout/commit/push/merge/branch delete).
+- runbook and lifecycle commands print explicit manual git steps for the operator.
+
 ### Need token usage by time window
 
 Use:
@@ -167,10 +173,12 @@ Notes:
 
 Fix:
 
-- merge branch via recovery command:
+- merge branch manually:
+  `git checkout dev && git merge --no-ff <directive_branch> && git push origin dev`
+- then mark metadata:
   `dc directive merge --session <s>`
-- then cleanup merged branch:
-  `dc directive cleanup --session <s>`
+- then delete merged branch manually:
+  `git branch -d <directive_branch>`
 
 ## Human vs machine usage
 

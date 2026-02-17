@@ -77,21 +77,18 @@ function runBin(name, args, { dryRun = false } = {}) {
   if (result.status !== 0) throw new Error(`${name} failed`);
 }
 
-function runShell(command, args = [], { dryRun = false } = {}) {
-  if (dryRun) {
-    log(`[dry-run] ${command} ${args.join(" ")}`);
-    return;
-  }
-  log(`${command} ${args.join(" ")}`);
-  const result = spawnSync(command, args, {
-    cwd: path.resolve(scriptDir(), "../../.."),
-    encoding: "utf8",
-  });
-  if (result.stdout) process.stdout.write(result.stdout);
-  if (result.stderr) process.stderr.write(result.stderr);
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(" ")} failed`);
-  }
+function printManualGitChecklist(session) {
+  const lines = [
+    "Manual git checklist (operator):",
+    "  1) Review changes: git status --short",
+    "  2) Commit branch work: git add -A && git commit -m \"chore(executor): finalize directive work\"",
+    "  3) Push branch: git push",
+    "  4) Merge to dev: git checkout dev && git merge --no-ff <directive_branch>",
+    "  5) Push dev: git push origin dev",
+    `  6) Archive metadata (optional): dc directive archive --session ${session}`,
+    "  7) Delete merged branch (manual): git branch -d <directive_branch>",
+  ];
+  for (const line of lines) log(line);
 }
 
 function requireConfirm(args, requiredToken, runbookName, dryRun) {
@@ -192,9 +189,11 @@ async function runbookExecutorDirectiveCloseout(args) {
   }
 
   runBin("directivefinish", ["--session", session], { dryRun });
-  runShell("git", ["checkout", "dev"], { dryRun });
-  runBin("directivearchive", ["--session", session], { dryRun });
-  runBin("directivecleanup", ["--session", session], { dryRun });
+  if (dryRun) {
+    log("[dry-run] would print manual git checklist");
+  } else {
+    printManualGitChecklist(session);
+  }
   log(`executor-directive-closeout complete: session=${session} qa=${qaStatus}`);
 }
 
@@ -203,7 +202,11 @@ function runbookExecutorDirectiveCleanup(args) {
   if (!session) throw new Error("executor-directive-cleanup requires --session");
   const dryRun = Boolean(args["dry-run"]);
   requireConfirm(args, "executor-directive-cleanup", "executor-directive-cleanup", dryRun);
-  runBin("directivecleanup", ["--session", session], { dryRun });
+  if (dryRun) {
+    log("[dry-run] would print manual cleanup guidance");
+    return;
+  }
+  printManualGitChecklist(session);
 }
 
 function runbookArchitectAuthoring(args) {

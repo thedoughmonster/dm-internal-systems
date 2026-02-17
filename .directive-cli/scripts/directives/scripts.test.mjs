@@ -756,7 +756,7 @@ test("directive merge dry-run executes for a merge-candidate session when availa
     selectedSession,
     "--dry-run",
   ]);
-  assert.match(output, /Directive merge:/);
+  assert.match(output, /directive_merge_status=merged/);
 });
 
 test("dc init writes config with explicit agent/model", (t) => {
@@ -910,7 +910,7 @@ test("newdirective fails when title already exists", (t) => {
   assert.match(text, /Directive title already exists/);
 });
 
-test("newdirective with auto-git pauses and writes pending state when tree is dirty", (t) => {
+test("newdirective prints manual git guidance and does not write pending auto-git state", (t) => {
   const tag = randomTag();
   const sessionName = `itest-pending-autogit-${tag}`;
   const title = `pending autogit ${tag}`;
@@ -939,8 +939,8 @@ test("newdirective with auto-git pauses and writes pending state when tree is di
     "pending autogit summary",
     "--no-prompt",
   ]);
-  assert.match(output, /AUTO-GIT PAUSED/);
-  assert.ok(fs.existsSync(pendingPath), "Expected pending auto-git state file");
+  assert.match(output, /Git is manual for directive creation/);
+  assert.ok(!fs.existsSync(pendingPath), "Expected no pending auto-git state file");
 });
 
 test("newtask dry-run emits json task path in existing session", () => {

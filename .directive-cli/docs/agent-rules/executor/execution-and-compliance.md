@@ -18,11 +18,9 @@ If any step lacks exact path scope, concrete action, or completion criteria:
 
 ## Commit checkpoint handling
 
-- Read and enforce session `commit_policy` before executing commit checkpoints.
-- `per_task`: complete required checkpoint commit for each completed task when specified by directive steps.
-- `per_collection`: complete one labeled checkpoint commit when all tasks in a collection are complete, using `collection_commit_label`.
-- `end_of_directive`: do not infer intermediate commit checkpoints.
-- Do not infer commits from task status changes alone.
+- Read and enforce session `commit_policy` for reporting and lifecycle sequencing.
+- `dc` does not execute git commits; agent must surface manual git checklist prompts to operator at required checkpoints.
+- Do not infer commit completion from task status changes alone.
 - If `commit_policy` is missing, invalid, or conflicts with task steps, stop and request clarification.
 
 ## Session metadata boundary

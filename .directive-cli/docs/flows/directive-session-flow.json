@@ -60,7 +60,7 @@
           "purpose": "Initialize execution context from directive metadata",
           "includes": [
             "dirty_tree_guard",
-            "branch_bootstrap",
+            "branch_match_guard",
             "startup_validation"
           ]
         },
@@ -83,8 +83,7 @@
           "purpose": "Complete task and write results",
           "includes": [
             "task_validation",
-            "result_write",
-            "policy_git_action"
+            "result_write"
           ]
         },
         {
@@ -98,22 +97,21 @@
           "id": "executor_06",
           "type": "DIR",
           "command": "dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout",
-          "purpose": "Run QA gate and finalize+merge directive",
+          "purpose": "Run QA gate and finalize directive metadata, then print manual git checklist",
           "includes": [
             "operator_qa_gate",
             "final_validation",
-            "final_git_action",
             "directive_closeout_write",
-            "archive_merge_to_dev",
-            "feature_branch_cleanup"
+            "manual_git_checklist"
           ]
         }
       ]
     }
   },
   "global_rules": {
-    "git_is_script_owned": true,
-    "raw_git_by_agent_default": false,
+    "git_is_script_owned": false,
+    "raw_git_by_agent_default": "prompt_operator",
+    "dc_git_mutations_enabled": false,
     "dirty_tree_required_clean_on_start_finish": true,
     "metadata_is_source_of_truth_for_branch_and_policy": true,
     "no_color_fallback": true

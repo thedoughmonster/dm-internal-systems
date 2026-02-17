@@ -281,14 +281,14 @@ usage() {
   print_command "$shown_mode" "directive list" "both" "List directives with selectable output detail"
   print_command "$shown_mode" "directive view" "both" "Human-readable directive/task/handoff viewer"
   print_command "$shown_mode" "directive start" "agent" "Executor directive startup flow (auto-pins terminal)"
-  print_command "$shown_mode" "directive finish" "agent" "Executor directive closeout flow"
-  print_command "$shown_mode" "directive archive" "both" "Archive directive metadata and branch flow"
-  print_command "$shown_mode" "directive merge" "both" "Merge directive branch into base and mark merge_status"
-  print_command "$shown_mode" "directive cleanup" "agent" "Cleanup merged directive branch"
+  print_command "$shown_mode" "directive finish" "agent" "Executor directive closeout metadata + validation"
+  print_command "$shown_mode" "directive archive" "both" "Archive directive metadata (git is manual)"
+  print_command "$shown_mode" "directive merge" "both" "Mark merge_status after operator merges branch"
+  print_command "$shown_mode" "directive cleanup" "agent" "Show manual merged-branch cleanup guidance"
   print_command "$shown_mode" "directive migrate" "both" "Migrate legacy directive files to JSON format"
 
   print_command "$shown_mode" "task start" "agent" "Start task with guards"
-  print_command "$shown_mode" "task finish" "agent" "Finish task with validation+git policy"
+  print_command "$shown_mode" "task finish" "agent" "Finish task with validation + metadata updates"
 
   print_command "$shown_mode" "meta update" "agent" "Update metadata"
   print_command "$shown_mode" "meta architect" "agent" "Architect-guarded metadata updates"
@@ -320,7 +320,7 @@ category_usage() {
       printf "  dc directive list --detailed\n"
       printf "  dc directive view --directive <session> --file <name>.json\n"
       printf "  dc directive start --session <session>\n"
-      printf "  dc directive merge --session <session>\n"
+      printf "  dc directive merge --session <session>  # metadata mark only (no merge execution)\n"
       ;;
     task)
       printf "  %s\n" "$(color "${C_GREEN}" "dc task <start|finish> [args...]")"
@@ -349,6 +349,7 @@ category_usage() {
       printf "  dc runbook executor-task-cycle --session <session> --task <task> --phase pre --confirm executor-task-cycle-pre\n"
       printf "  dc runbook executor-directive-closeout --session <session> --confirm executor-directive-closeout\n"
       printf "  dc runbook executor-directive-closeout --session <session> --confirm executor-directive-closeout --qa-status pass\n"
+      printf "  # Note: runbook closeout prints manual git checklist; dc does not execute git merge/cleanup.\n"
       ;;
     repo)
       printf "  %s\n" "$(color "${C_GREEN}" "dc repo map")"

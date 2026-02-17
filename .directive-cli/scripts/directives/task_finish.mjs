@@ -2,7 +2,7 @@
 
 import path from "node:path";
 import { resolveDirectiveContext, resolveTaskFile, readJson, writeJson, toUtcIso, readDirectiveHandoffIfPresent, assertDirtyFilesWithinDirectiveScope } from "./_directive_helpers.mjs";
-import { log, runShell, runGit, shortSha, currentBranch, changedFiles, alert } from "./_git_helpers.mjs";
+import { log, runShell, currentBranch, changedFiles, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 
@@ -80,7 +80,6 @@ function main() {
   }
 
   const taskPath = resolveTaskFile(sessionDir, task);
-  const taskRel = path.relative(repoRoot, taskPath).replace(/\\/g, "/");
   const taskDoc = readJson(taskPath);
   if (!taskDoc || typeof taskDoc !== "object" || Array.isArray(taskDoc) || !taskDoc.meta) {
     throw new Error(`Invalid task file: ${taskPath}`);
@@ -125,7 +124,7 @@ function main() {
 
   if (args["dry-run"]) {
     log("DIR", `[dry-run] would update ${path.basename(taskPath)} result and status=${taskDoc.meta.status}`);
-    log("GIT", `[dry-run] commit policy: ${commitPolicy}`);
+    log("GIT", `[dry-run] manual git required (policy=${commitPolicy})`);
     if (hasFailures) {
       throw new Error("Validation failed during dry-run simulation.");
     }
@@ -139,29 +138,9 @@ function main() {
     throw new Error("Validation failed. Task result recorded with status=fail.");
   }
 
-  if (commitPolicy === "per_task") {
-    log("GIT", "Committing task changes (per_task policy)");
-    runGit(["add", "-A"], repoRoot);
-    runGit(["add", "-f", taskRel], repoRoot);
-    const commitMsg = `chore(executor): complete ${path.basename(taskPath, ".task.json")}`;
-    runGit(["commit", "-m", commitMsg], repoRoot);
-  } else {
-    log("GIT", `Commit deferred by policy: ${commitPolicy}`);
-  }
-
-  const pushOnTaskFinish = lifecyclePolicy.lifecycle?.push_on_task_finish !== false;
-  if (pushOnTaskFinish) {
-    log("GIT", `Pushing branch '${branch}' to origin`);
-    const hasUpstream = runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoRoot, { allowFail: true }).status === 0;
-    if (hasUpstream) {
-      runGit(["push"], repoRoot);
-    } else {
-      runGit(["push", "-u", "origin", branch], repoRoot);
-    }
-  }
-
-  const sha = shortSha(repoRoot);
-  taskDoc.meta.result.validation.commit = sha;
+  log("GIT", `No git mutation executed by dc (policy=${commitPolicy}).`);
+  log("GIT", "Operator must run manual git for commit/push when ready.");
+  taskDoc.meta.result.validation.commit = null;
   writeJson(taskPath, taskDoc);
 
   log("DIR", "Task finish complete");

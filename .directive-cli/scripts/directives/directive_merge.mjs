@@ -71,14 +71,13 @@ function listMergeCandidates() {
       const remote = branchExistsRemote(branch, repoRoot);
       const sourceRef = local ? branch : (remote ? `origin/${branch}` : "");
       if (!sourceRef) continue;
-      const merged = isMergedInto(base, sourceRef, repoRoot);
-      if (merged) continue;
       rows.push({
         session,
         title: String(meta.title || path.basename(directiveMetaPath)),
         status: String(meta.status || "todo"),
         branch,
         base,
+        merged: isMergedInto(base, sourceRef, repoRoot),
       });
     } catch {
       // skip invalid entries
@@ -96,7 +95,7 @@ async function resolveSession(args) {
   return await selectOption({
     input: stdin,
     output: stdout,
-    label: "Select directive to merge:",
+    label: "Select directive to check/mark merged:",
     options: candidates.map((c) => ({
       label: directiveListLabel(c),
       color: statusColor(c.status),
@@ -112,120 +111,62 @@ function resolveSourceRef(repoRoot, branch) {
   return "";
 }
 
-function listLocalBranches(repoRoot) {
-  const result = runGit(["for-each-ref", "--format=%(refname:short)", "refs/heads"], repoRoot);
-  return String(result.stdout || "")
-    .split("\n")
-    .map((v) => String(v || "").trim())
-    .filter(Boolean);
-}
-
-function readSessionMetaFromBranch(repoRoot, branch, session) {
-  const sessionPath = `.directive-cli/directives/${session}`;
-  const list = runGit(["ls-tree", "--name-only", `${branch}:${sessionPath}`], repoRoot, { allowFail: true });
-  if (list.status !== 0) return null;
-  const metaFile = String(list.stdout || "")
-    .split("\n")
-    .map((v) => String(v || "").trim())
-    .find((name) => /\.meta\.json$/.test(name));
-  if (!metaFile) return null;
-  const show = runGit(["show", `${branch}:${sessionPath}/${metaFile}`], repoRoot, { allowFail: true });
-  if (show.status !== 0) return null;
-  try {
-    const doc = JSON.parse(String(show.stdout || ""));
-    const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
-    return { metaFile, meta };
-  } catch {
-    return null;
-  }
-}
-
-function resolveDirectiveContextForMerge(repoRoot, session) {
-  try {
-    const ctx = resolveDirectiveContext(session);
-    return { ...ctx, fallbackBranch: "" };
-  } catch {
-    const branches = listLocalBranches(repoRoot);
-    for (const branch of branches) {
-      const found = readSessionMetaFromBranch(repoRoot, branch, session);
-      if (!found) continue;
-      const directiveMetaPath = path.join(getDirectivesRoot(), session, found.metaFile);
-      return {
-        repoRoot,
-        directiveMetaPath,
-        directiveDoc: { meta: found.meta },
-        fallbackBranch: branch,
-      };
-    }
-  }
-  throw new Error(`Session not found in current branch or local branches: ${session}`);
-}
-
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
     process.stdout.write(`${usage()}\n`);
     process.exit(0);
   }
+
+  const session = await resolveSession(args);
   const dryRun = Boolean(args["dry-run"]);
-  return resolveSession(args).then((session) => {
-    const repoRoot = path.resolve(getDirectivesRoot(), "..", "..");
-    const { directiveMetaPath, directiveDoc, fallbackBranch } = resolveDirectiveContextForMerge(repoRoot, session);
-    const meta = directiveDoc.meta || {};
-    const branch = String(meta.directive_branch || "").trim();
-    const base = String(meta.directive_base_branch || "dev").trim() || "dev";
-    if (!branch) throw new Error("Directive metadata missing directive_branch.");
-    if (!base) throw new Error("Directive metadata missing directive_base_branch.");
-    if (branch === base) throw new Error(`directive_branch '${branch}' cannot equal base '${base}'.`);
+  const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);
+  const meta = directiveDoc.meta || {};
+  const branch = String(meta.directive_branch || "").trim();
+  const base = String(meta.directive_base_branch || "dev").trim() || "dev";
+  if (!branch) throw new Error("Directive metadata missing directive_branch.");
 
-    const sourceRef = resolveSourceRef(repoRoot, branch);
-    if (!sourceRef) throw new Error(`Cannot find directive branch '${branch}' locally or on origin.`);
-    if (fallbackBranch) {
-      log("DIR", `Resolved session metadata from branch '${fallbackBranch}' because session was absent on current branch.`);
-    }
+  const sourceRef = resolveSourceRef(repoRoot, branch);
+  if (!sourceRef) throw new Error(`Cannot find directive branch '${branch}' locally or on origin.`);
 
-    const nowBranch = currentBranch(repoRoot);
-    if (nowBranch !== base) throw new Error(`Merge flow must start on '${base}' (current: '${nowBranch}').`);
+  if (!dryRun) ensureCleanWorkingTree(repoRoot);
 
-    if (!dryRun) ensureCleanWorkingTree(repoRoot);
+  const nowBranch = currentBranch(repoRoot);
+  if (nowBranch !== base) {
+    throw new Error(
+      `Current branch '${nowBranch}' does not match base '${base}'.\n` +
+      `Manual git required before retry:\n  git checkout ${base}`,
+    );
+  }
 
-    if (isMergedInto(base, sourceRef, repoRoot)) {
-      log("GIT", `No-op: '${sourceRef}' is already merged into '${base}'.`);
-      if (!dryRun) {
-        const prevStatus = String(directiveDoc.meta.directive_merge_status || "").trim().toLowerCase();
-        if (prevStatus !== "merged") {
-          directiveDoc.meta.directive_merge_status = "merged";
-          directiveDoc.meta.updated = toUtcIso();
-          writeJson(directiveMetaPath, directiveDoc);
-          runGit(["add", directiveMetaPath], repoRoot);
-          runGit(["commit", "-m", `chore(directive): mark merge status merged for ${session}`], repoRoot);
-          log("DIR", `Updated directive_merge_status=merged for ${session}`);
-        }
-      }
-      return;
-    }
+  const merged = isMergedInto(base, sourceRef, repoRoot);
+  if (!merged) {
+    throw new Error(
+      `Directive branch '${sourceRef}' is not merged into '${base}'.\n` +
+      "Manual git required:\n" +
+      `  git merge --no-ff ${sourceRef}\n` +
+      `  git push origin ${base}\n` +
+      `Then rerun: dc directive merge --session ${session}`,
+    );
+  }
 
-    const mergeMsg = `merge(directive): ${session}`;
-    const metaCommitMsg = `chore(directive): mark merge status merged for ${session}`;
+  if (dryRun) {
+    log("DIR", `[dry-run] would set directive_merge_status=merged in ${path.basename(directiveMetaPath)}`);
+    log("GIT", "[dry-run] no git actions (manual git required)");
+    return;
+  }
 
-    if (dryRun) {
-      log("DIR", `Directive merge: ${session}`);
-      log("GIT", `[dry-run] merge --no-ff ${sourceRef} -m "${mergeMsg}"`);
-      log("DIR", `[dry-run] set directive_merge_status=merged in ${path.basename(directiveMetaPath)}`);
-      log("GIT", `[dry-run] commit metadata -m "${metaCommitMsg}"`);
-      return;
-    }
+  const prevStatus = String(directiveDoc.meta.directive_merge_status || "").trim().toLowerCase();
+  if (prevStatus === "merged") {
+    log("DIR", `directive_merge_status already merged: ${session}`);
+    return;
+  }
 
-    log("DIR", `Directive merge: ${session}`);
-    runGit(["merge", "--no-ff", sourceRef, "-m", mergeMsg], repoRoot);
-
-    directiveDoc.meta.directive_merge_status = "merged";
-    directiveDoc.meta.updated = toUtcIso();
-    writeJson(directiveMetaPath, directiveDoc);
-    runGit(["add", directiveMetaPath], repoRoot);
-    runGit(["commit", "-m", metaCommitMsg], repoRoot);
-    log("DIR", `Directive merged and marked merged: ${session}`);
-  });
+  directiveDoc.meta.directive_merge_status = "merged";
+  directiveDoc.meta.updated = toUtcIso();
+  writeJson(directiveMetaPath, directiveDoc);
+  log("DIR", `Updated directive_merge_status=merged for ${session}`);
+  log("GIT", "No git actions executed by dc. Operator must commit metadata manually.");
 }
 
 try {

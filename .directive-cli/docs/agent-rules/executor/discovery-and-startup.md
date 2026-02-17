@@ -29,8 +29,8 @@ Before any edits:
 
 - Require `handoff.directive_branch` from `<directive_slug>.handoff.json`.
 - Require `directive_branch` to be non empty.
-- Verify current git branch matches `directive_branch`; if not, switch to `directive_branch`.
-- If `directive_branch` does not exist locally, `dc directive start` may create it from `directive_base_branch` according to directive metadata.
+- Verify current git branch matches `directive_branch`; if not, stop and require operator to run manual git branch checkout.
+- `dc directive start` does not create/switch branches; it only validates and reports required manual git steps.
 - Require explicit worktree mode from handoff context:
   - `clean_required`
   - `known_dirty_allowlist` with explicit `worktree_allowlist_paths`

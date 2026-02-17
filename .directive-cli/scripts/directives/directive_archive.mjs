@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, writeJson, toUtcIso, lifecycleAlwaysAllowedDirtyPrefixes } from "./_directive_helpers.mjs";
-import { log, runGit, currentBranch, branchExistsLocal, changedFiles } from "./_git_helpers.mjs";
+import { log, ensureCleanWorkingTree } from "./_git_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption, selectMultiOption } from "./_prompt_helpers.mjs";
 import { directiveListLabel, statusColor } from "./_list_view_component.mjs";
@@ -37,25 +37,11 @@ function usage() {
   return "Usage: node .directive-cli/scripts/directives/directive_archive.mjs --session <id[,id2,...]> [--session <id> ...] [--multi] [--dry-run] [--help]";
 }
 
-function slugify(input) {
-  return String(input || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function archiveBranchName(session) {
-  const slug = slugify(session) || "directive";
-  return `chore/archive-${slug}`;
-}
-
 function colorize(color, text) {
   if (!stdout.isTTY || process.env.NO_COLOR) return text;
   const map = {
     red: "\x1b[31m",
     yellow: "\x1b[33m",
-    cyan: "\x1b[36m",
     reset: "\x1b[0m",
   };
   const code = map[color] || "";
@@ -170,7 +156,7 @@ async function confirmArchive(sessions, dryRun) {
     : `You are about to archive ${list.length} directives`;
   const lines = [headline, ...list.slice(0, 8).map((s) => `- ${s}`)];
   if (list.length > 8) lines.push(`- ... ${list.length - 8} more`);
-  lines.push("This will set status=bucket=archived and run auto-git merge flow.");
+  lines.push("This updates metadata only. Git operations are manual.");
   process.stdout.write(`${badge("warning", lines, "yellow")}\n`);
   if (dryRun || !stdin.isTTY) return;
   const decision = await selectOption({
@@ -190,12 +176,7 @@ async function confirmArchive(sessions, dryRun) {
 
 async function archiveOne(session, { dryRun }) {
   const { repoRoot, directiveMetaPath, directiveDoc } = resolveDirectiveContext(session);
-  const sessionDir = path.dirname(directiveMetaPath);
   const nextUpdated = toUtcIso();
-  const branch = archiveBranchName(session);
-  const commitMsg = `chore(directive): archive ${session}`;
-  const sessionRel = path.relative(repoRoot, sessionDir).replace(/\\/g, "/");
-  const directiveRel = path.relative(repoRoot, directiveMetaPath).replace(/\\/g, "/");
 
   log("DIR", `Directive archive: ${session}`);
 
@@ -204,75 +185,19 @@ async function archiveOne(session, { dryRun }) {
   }
 
   if (dryRun) {
-    log("GIT", `[dry-run] require current branch dev`);
-    log("GIT", `[dry-run] allow dirty files only under ${sessionRel}/`);
-    log("GIT", `[dry-run] checkout -b ${branch} dev`);
     log("DIR", `[dry-run] would set ${path.basename(directiveMetaPath)} meta.status=archived meta.bucket=archived meta.updated=${nextUpdated}`);
-    log("GIT", `[dry-run] git add ${sessionRel}`);
-    log("GIT", `[dry-run] git commit -m "${commitMsg}"`);
-    log("GIT", `[dry-run] checkout dev`);
-    log("GIT", `[dry-run] merge --no-ff ${branch}`);
-    log("GIT", `[dry-run] branch -D ${branch}`);
-    log("GIT", `[dry-run] verify current branch is dev`);
+    log("GIT", "[dry-run] no git actions (manual git required)");
     return;
   }
 
-  const startBranch = currentBranch(repoRoot);
-  if (startBranch !== "dev") {
-    throw new Error(`Archive flow must start on 'dev' (current: '${startBranch}').`);
-  }
-
-  const dirty = changedFiles(repoRoot).map((p) => p.replace(/\\/g, "/"));
-  const globalAllow = lifecycleAlwaysAllowedDirtyPrefixes();
-  const unrelated = dirty.filter((p) => {
-    if (p === directiveRel || p.startsWith(`${sessionRel}/`)) return false;
-    return !globalAllow.some((prefix) => p === prefix || p.startsWith(`${prefix}/`));
-  });
-  if (unrelated.length > 0) {
-    const lines = ["Archive blocked: unrelated dirty files present:", ...unrelated.map((f) => `- ${f}`)];
-    process.stderr.write(`${badge("blocked", lines, "red")}\n`);
-    throw new Error("Archive blocked due to unrelated dirty files.");
-  }
-  if (branchExistsLocal(branch, repoRoot)) {
-    throw new Error(`Archive branch already exists: ${branch}`);
-  }
-
-  try {
-    log("GIT", `Creating archive branch ${branch}`);
-    runGit(["checkout", "-b", branch, "dev"], repoRoot);
-
-    directiveDoc.meta = directiveDoc.meta || {};
-    directiveDoc.meta.status = "archived";
-    directiveDoc.meta.bucket = "archived";
-    directiveDoc.meta.updated = nextUpdated;
-    writeJson(directiveMetaPath, directiveDoc);
-    log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
-
-    runGit(["add", "-f", sessionRel], repoRoot);
-    runGit(["commit", "-m", commitMsg], repoRoot);
-
-    log("GIT", "Merging archive branch into dev");
-    runGit(["checkout", "dev"], repoRoot);
-    runGit(["merge", "--no-ff", branch, "-m", `merge: ${commitMsg}`], repoRoot);
-    runGit(["branch", "-D", branch], repoRoot);
-    const endingBranch = currentBranch(repoRoot);
-    if (endingBranch !== "dev") {
-      throw new Error(`Archive flow ended on '${endingBranch}' instead of 'dev'.`);
-    }
-    log("DIR", `Directive archived and merged to dev: ${session}`);
-  } catch (error) {
-    const current = currentBranch(repoRoot);
-    const recovery = [
-      `Archive flow failed for '${session}'.`,
-      `Current branch: ${current}`,
-      `Recovery steps:`,
-      `  git status --short`,
-      current === "dev" ? "" : `  git checkout dev`,
-      `  git branch -D ${branch}   # only if branch is unneeded`,
-      `  # Directive files remain at: ${sessionRel}`,
-    ].filter(Boolean).join("\n");
-    throw new Error(`${error.message}\n${recovery}`);
-  }
+  ensureCleanWorkingTree(repoRoot, { allow: lifecycleAlwaysAllowedDirtyPrefixes() });
+  directiveDoc.meta = directiveDoc.meta || {};
+  directiveDoc.meta.status = "archived";
+  directiveDoc.meta.bucket = "archived";
+  directiveDoc.meta.updated = nextUpdated;
+  writeJson(directiveMetaPath, directiveDoc);
+  log("DIR", `Archived metadata in ${path.basename(directiveMetaPath)}`);
+  log("GIT", "No git actions executed by dc. Operator must commit/push/merge manually.");
 }
 
 async function main() {

@@ -3,7 +3,7 @@
 import path from "node:path";
 import { stdin, stdout } from "node:process";
 import { resolveDirectiveContext, readDirectiveHandoffIfPresent, findTaskAllowedFileIntersections } from "./_directive_helpers.mjs";
-import { ensureCleanWorkingTree, log, currentBranch, runGit, branchExistsLocal, alert } from "./_git_helpers.mjs";
+import { ensureCleanWorkingTree, log, currentBranch, alert } from "./_git_helpers.mjs";
 import { loadCorePolicy, loadExecutorLifecyclePolicy } from "./_policy_helpers.mjs";
 import { assertExecutorRoleForLifecycle } from "./_role_guard.mjs";
 import { spawnSync } from "node:child_process";
@@ -134,6 +134,8 @@ async function main() {
 
   if (args["dry-run"]) {
     log("DIR", "Dry run only. No git or metadata changes applied.");
+    log("GIT", `[dry-run] expected branch: ${directiveBranch}`);
+    log("GIT", "[dry-run] manual git only: checkout/rebase handled by operator");
     return;
   }
 
@@ -142,20 +144,12 @@ async function main() {
 
   const current = currentBranch(repoRoot);
   if (current !== directiveBranch) {
-    log("GIT", `Switching branch to ${directiveBranch}`);
-    if (branchExistsLocal(directiveBranch, repoRoot)) {
-      runGit(["checkout", directiveBranch], repoRoot);
-    } else {
-      const bootstrapMode = String(lifecyclePolicy.lifecycle?.branch_bootstrap_mode || "").trim();
-      if (bootstrapMode === "create_from_local_base_if_missing_local") {
-        if (!branchExistsLocal(baseBranch, repoRoot)) {
-          throw new Error(`Local base branch '${baseBranch}' not found. Create/switch it locally before directive start.`);
-        }
-        runGit(["checkout", "-b", directiveBranch, baseBranch], repoRoot);
-      } else {
-        throw new Error(`Branch '${directiveBranch}' missing locally/remotely and policy '${bootstrapMode}' does not allow bootstrap.`);
-      }
-    }
+    throw new Error(
+      `Current branch '${current}' does not match directive_branch '${directiveBranch}'.\n` +
+      "Manual git required before retry:\n" +
+      `  git checkout ${directiveBranch}\n` +
+      `  git rebase ${baseBranch}   # optional; keep branch current`,
+    );
   }
 
   log("TEST", "Running directive metadata validation");

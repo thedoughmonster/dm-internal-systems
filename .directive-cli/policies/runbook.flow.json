@@ -27,8 +27,7 @@
         "operator QA gate",
         "dc runbook executor-directive-closeout",
         "dc directive finish",
-        "dc directive archive",
-        "dc directive cleanup"
+        "manual git checklist (operator)"
       ]
     }
   }

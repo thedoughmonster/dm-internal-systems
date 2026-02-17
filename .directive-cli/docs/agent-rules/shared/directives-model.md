@@ -114,8 +114,8 @@ Lifecycle rules:
 - Architect defines branch lifecycle requirements in the directive.
 - Architect must ensure `directive_branch` exists before handing off execution.
 - `<directive_slug>.handoff.json` for directive execution must include `handoff.directive_branch`.
-- Executor must verify it is on `directive_branch` before any edits; `dc directive start` may create missing local branch from `directive_base_branch` according to directive metadata.
-- State-changing branch operations are executed by Executor by default, with Architect `chore/*` exception governed by `.directive-cli/AGENTS.md`.
+- Executor must verify it is on `directive_branch` before any edits; `dc directive start` enforces match and fails with manual git instructions on mismatch.
+- Git branch creation/switching/merge/push/delete are operator-managed; `dc` does not execute git mutations.
 - Completed directives with unmerged branches must be surfaced during Architect startup and resolved or explicitly blocked.
 - Open branches are allowed for active blocked or in-progress directives when tracked in session metadata. Untracked stale directive branches are forbidden.
 

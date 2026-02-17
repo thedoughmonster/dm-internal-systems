@@ -1015,6 +1015,7 @@ function buildDcCommandReference() {
     generated_at: new Date().toISOString(),
     policy: {
       no_guessing: true,
+      git_execution_mode: "manual_operator_only",
       help_on_ambiguity: [
         "dc help",
         "dc <category> --help",
