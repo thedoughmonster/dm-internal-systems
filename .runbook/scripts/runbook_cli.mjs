@@ -262,7 +262,24 @@ function runbookLogTargets(root, directiveContext) {
   const sessionLogDir = path.join(root, ".runbook", "session-logs");
   const codexLogDir = path.join(root, ".runbook", "codex-logs", directiveKey);
   const transcriptPath = path.join(sessionLogDir, `${directiveKey}.log`);
-  return { directiveKey, sessionLogDir, codexLogDir, transcriptPath };
+  const eventPath = path.join(sessionLogDir, `${directiveKey}.events.log`);
+  return { directiveKey, sessionLogDir, codexLogDir, transcriptPath, eventPath };
+}
+
+function appendEventLog(root, {
+  directiveSession = "",
+  event = "",
+  payload = {},
+} = {}) {
+  const targets = runbookLogTargets(root, directiveSession ? { session: directiveSession } : null);
+  ensureDir(targets.sessionLogDir);
+  const entry = {
+    ts: nowIso(),
+    directive: targets.directiveKey,
+    event: String(event || "event"),
+    payload: payload && typeof payload === "object" ? payload : { value: String(payload) },
+  };
+  fs.appendFileSync(targets.eventPath, `${JSON.stringify(entry)}\n`, "utf8");
 }
 
 function writeJson(filePath, payload, dryRun = false) {
@@ -509,11 +526,17 @@ function loadPhasePrompt(root, phaseId, { subphase = "active", directiveContext 
 function launchCodexForPhase(root, phase, { dryRun = false, subphase = "active", directiveContext = null } = {}) {
   const prompt = loadPhasePrompt(root, phase, { subphase, directiveContext });
   const logs = runbookLogTargets(root, directiveContext);
+  const directiveSession = directiveContext?.session || "";
   if (dryRun) {
     const withDirective = directiveContext ? ` directive=${directiveContext.session}` : "";
     stdout.write(
       `[RUNBOOK] dry-run launch: codex <${phase}/${subphase} prompt>${withDirective} log=${logs.transcriptPath}\n`,
     );
+    appendEventLog(root, {
+      directiveSession,
+      event: "phase_launch_dry_run",
+      payload: { phase, subphase, transcript: logs.transcriptPath, codex_log_dir: logs.codexLogDir },
+    });
     return true;
   }
   if (!(stdin.isTTY && stdout.isTTY)) {
@@ -522,6 +545,18 @@ function launchCodexForPhase(root, phase, { dryRun = false, subphase = "active",
   ensureDir(logs.sessionLogDir);
   ensureDir(logs.codexLogDir);
   stdout.write(`[RUNBOOK] Observe live session log: tail -f ${logs.transcriptPath}\n`);
+  stdout.write(`[RUNBOOK] Observe clean events log: tail -f ${logs.eventPath}\n`);
+  appendEventLog(root, {
+    directiveSession,
+    event: "phase_launch_start",
+    payload: {
+      phase,
+      subphase,
+      transcript: logs.transcriptPath,
+      events: logs.eventPath,
+      codex_log_dir: logs.codexLogDir,
+    },
+  });
 
   const codexCmd = `codex --no-alt-screen -c ${shQuote(`log_dir=${JSON.stringify(logs.codexLogDir)}`)} ${shQuote(prompt)}`;
 
@@ -531,11 +566,21 @@ function launchCodexForPhase(root, phase, { dryRun = false, subphase = "active",
   });
   if (result.error && String(result.error.message || "").toLowerCase().includes("enoent")) {
     stdout.write("[RUNBOOK] 'script' command not found; falling back to direct codex launch.\n");
+    appendEventLog(root, {
+      directiveSession,
+      event: "phase_launch_fallback",
+      payload: { reason: "script_not_found" },
+    });
     result = spawnSync("codex", ["--no-alt-screen", "-c", `log_dir=${logs.codexLogDir}`, prompt], {
       stdio: "inherit",
       env: process.env,
     });
   }
+  appendEventLog(root, {
+    directiveSession,
+    event: "phase_launch_end",
+    payload: { exit_status: typeof result.status === "number" ? result.status : null },
+  });
   if (result.error) throw result.error;
   if (typeof result.status === "number" && result.status !== 0) process.exit(result.status);
   return true;
@@ -884,14 +929,40 @@ function cmdValidate(root, args) {
 
 function dispatchCommand(root, args) {
   const [group, action] = args._;
-  if (group === "directive" && action === "create") return cmdDirectiveCreate(root, args);
-  if (group === "directive" && action === "set-goals") return cmdDirectiveSetGoals(root, args);
-  if (group === "task" && action === "create") return cmdTaskCreate(root, args);
-  if (group === "task" && action === "set-contract") return cmdTaskSetContract(root, args);
-  if (group === "handoff" && action === "create") return cmdHandoffCreate(root, args);
-  if (group === "meta" && action === "set") return cmdMetaSet(root, args);
-  if (group === "validate") return cmdValidate(root, args);
-  throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}`);
+  const session = String(args.session || "").trim();
+  appendEventLog(root, {
+    directiveSession: session,
+    event: "command_start",
+    payload: { command: [group, action].filter(Boolean).join(" "), session: session || null },
+  });
+  try {
+    let result;
+    if (group === "directive" && action === "create") result = cmdDirectiveCreate(root, args);
+    else if (group === "directive" && action === "set-goals") result = cmdDirectiveSetGoals(root, args);
+    else if (group === "task" && action === "create") result = cmdTaskCreate(root, args);
+    else if (group === "task" && action === "set-contract") result = cmdTaskSetContract(root, args);
+    else if (group === "handoff" && action === "create") result = cmdHandoffCreate(root, args);
+    else if (group === "meta" && action === "set") result = cmdMetaSet(root, args);
+    else if (group === "validate") result = cmdValidate(root, args);
+    else throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}`);
+    appendEventLog(root, {
+      directiveSession: session,
+      event: "command_end",
+      payload: { command: [group, action].filter(Boolean).join(" "), ok: true },
+    });
+    return result;
+  } catch (error) {
+    appendEventLog(root, {
+      directiveSession: session,
+      event: "command_end",
+      payload: {
+        command: [group, action].filter(Boolean).join(" "),
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
+    throw error;
+  }
 }
 
 function isCommandMode(args) {
