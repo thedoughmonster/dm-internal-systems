@@ -526,6 +526,69 @@ test("runbook phase guard allows in-phase commands", () => {
   assert.ok(Array.isArray(doc.rows) || Array.isArray(doc.directives));
 });
 
+test("runbook phase guard allows directive new in architect-discovery", () => {
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "new",
+    "--title",
+    "itest phase discovery new",
+    "--summary",
+    "itest summary",
+    "--dry-run",
+    "--no-prompt",
+  ], {
+    env: {
+      DC_NAMESPACE: "agent",
+      DC_ROLE: "architect",
+      DC_RUNBOOK_PHASE: "architect-discovery",
+    },
+  });
+  assert.match(output, /Created|Would create|Session:/i);
+});
+
+test("architect authoring phase enforces directive branch alignment", (t) => {
+  const tag = randomTag();
+  const session = `itest-arch-branch-${tag}`;
+  const sessionDir = path.join(directivesRoot, session);
+  const slug = "itest-arch-branch";
+  const metaPath = path.join(sessionDir, `${slug}.meta.json`);
+
+  t.after(() => {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+  });
+
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(metaPath, `${JSON.stringify({
+    kind: "directive_session_meta",
+    schema_version: "1.0",
+    meta: {
+      id: "99999999-9999-4999-8999-999999999999",
+      directive_slug: slug,
+      directive_branch: "feature/itest-architect-branch-guard",
+      directive_base_branch: "dev",
+      commit_policy: "end_of_directive",
+      title: "itest architect branch guard",
+      summary: "itest architect branch guard",
+      status: "todo",
+    },
+  }, null, 2)}\n`);
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "list",
+    "--json",
+  ], {
+    env: {
+      DC_NAMESPACE: "agent",
+      DC_ROLE: "architect",
+      DC_RUNBOOK_PHASE: "architect-authoring",
+      DC_DIRECTIVE_SESSION: session,
+    },
+  });
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /architect authoring branch guard/i);
+});
+
 test("launch handoff is allowed in agent namespace", () => {
   const target = firstRunnableSession();
   assert.ok(target, "Expected at least one non-archived directive session with a task");

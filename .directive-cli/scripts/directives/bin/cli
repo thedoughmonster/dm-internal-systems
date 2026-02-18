@@ -394,7 +394,8 @@ phase_allowed_commands() {
     architect-discovery)
       printf "%s\n" \
         "help" "repo map" "context show" "context check" \
-        "directive list" "directive view" "validate" "policy validate" "runbook"
+        "directive list" "directive view" "directive new" \
+        "validate" "policy validate" "runbook"
       ;;
     architect-authoring)
       printf "%s\n" \
@@ -424,6 +425,53 @@ phase_allowed_commands() {
     *)
       ;;
   esac
+}
+
+resolve_directive_branch_for_session() {
+  local session="$1"
+  if [[ -z "$session" ]]; then
+    return 0
+  fi
+  node -e '
+    const fs=require("fs");
+    const path=require("path");
+    const root=process.argv[1];
+    const session=process.argv[2];
+    const dir=path.join(root,".directive-cli","directives",session);
+    if(!fs.existsSync(dir)){process.exit(0);}
+    const files=fs.readdirSync(dir).filter((f)=>f.endsWith(".meta.json")).sort();
+    if(files.length===0){process.exit(0);}
+    const doc=JSON.parse(fs.readFileSync(path.join(dir,files[0]),"utf8"));
+    const meta=doc&&doc.meta&&typeof doc.meta==="object"?doc.meta:{};
+    const branch=String(meta.directive_branch||"").trim();
+    process.stdout.write(branch);
+  ' "${ROOT_DIR}" "$session"
+}
+
+enforce_architect_authoring_branch_scope() {
+  if ! is_agent_namespace; then
+    return 0
+  fi
+  local phase role_now
+  phase="$(current_phase)"
+  role_now="$(effective_role)"
+  [[ "$phase" == "architect-authoring" && "$role_now" == "architect" ]] || return 0
+
+  local session current branch_required
+  session="${DC_DIRECTIVE_SESSION:-}"
+  current="$(git -C "${ROOT_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  branch_required="$(resolve_directive_branch_for_session "$session")"
+  if [[ -z "$session" || -z "$branch_required" ]]; then
+    return 0
+  fi
+  if [[ "$current" == "$branch_required" ]]; then
+    return 0
+  fi
+
+  printf "%s\n" "$(color "${C_RED}" "Blocked by architect authoring branch guard.")" >&2
+  printf "%s\n" "Current branch '${current:-unknown}' does not match directive branch '${branch_required}' for session '${session}'." >&2
+  printf "%s\n" "Switch to the directive branch before running authoring commands." >&2
+  exit 1
 }
 
 enforce_phase_scope() {
@@ -603,6 +651,18 @@ is_operator_only_command() {
   esac
 }
 
+is_phase_override_for_operator_only() {
+  local cmd="$1"
+  local sub="$2"
+  local phase role_now
+  phase="$(current_phase)"
+  role_now="$(effective_role)"
+  if [[ "$cmd:$sub" == "directive:new" && "$phase" == "architect-discovery" && "$role_now" == "architect" ]]; then
+    return 0
+  fi
+  return 1
+}
+
 is_architect_authoring_lock_active() {
   [[ "${DC_ROLE:-}" == "architect" && -n "${DC_DIRECTIVE_SESSION:-}" && -z "${DC_TASK_SLUG:-}" ]]
 }
@@ -670,7 +730,11 @@ enforce_namespace_policy() {
   enforce_architect_authoring_lock "$cmd" "$sub"
   architect_write_scope_guard "$cmd" "$sub"
   enforce_phase_scope "$cmd" "$sub"
+  enforce_architect_authoring_branch_scope
   if ! is_agent_namespace; then
+    return 0
+  fi
+  if is_phase_override_for_operator_only "$cmd" "$sub"; then
     return 0
   fi
   if is_operator_only_command "$cmd" "$sub"; then
