@@ -1,0 +1,37 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "open",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "deployment",
+      "environments",
+      "vercel",
+      "supabase",
+      "guardrails"
+    ],
+    "created": "2026-02-11T08:13:44.875Z",
+    "updated": "2026-02-12T10:43:51.922Z",
+    "bucket": "open",
+    "scope": "directives",
+    "source": "user",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "b63bedfe-e60a-42aa-bf09-4c72ea1ab255",
+    "title": "deployment model",
+    "directive": "74a901b2-c7e9-4f6d-a262-3deef8301ce5",
+    "summary": "Establish deployment model and infrastructure through front-loaded branch controls, then environment and release guardrails.",
+    "directive_branch": "feat/deployment-model",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "directive_slug": "deployment-model"
+  }
+}

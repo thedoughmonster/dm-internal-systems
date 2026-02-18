@@ -1,0 +1,150 @@
+# dc session log
+generated_at: 2026-02-18T10:05:57.739Z
+profile: dm-internal-systems
+role: architect
+directive: 
+task: 
+[2026-02-18T10:12:10Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newdirective
+Choose directive input mode:
+  1) Prompt fields
+  2) Open editor template
+file:///root/src/dm-internal-systems/.directive-cli/scripts/directives/_prompt_helpers.mjs:109
+      if (!Number.isInteger(idx) || idx < 0 || idx >= options.length) throw new Error("Invalid selection.");
+                                                                            ^
+
+Error: Invalid selection.
+    at selectOption (file:///root/src/dm-internal-systems/.directive-cli/scripts/directives/_prompt_helpers.mjs:109:77)
+    at async resolvePromptedValue (file:///root/src/dm-internal-systems/.directive-cli/scripts/directives/create_directive_readme.mjs:179:22)
+    at async main (file:///root/src/dm-internal-systems/.directive-cli/scripts/directives/create_directive_readme.mjs:250:20)
+
+Node.js v22.22.0
+[2026-02-18T10:12:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newdirective --help
+Usage:
+  node .directive-cli/scripts/directives/create_directive_readme.mjs [options]
+
+Options:
+  --session <name>                 Explicit session directory name
+  --id <uuid>                      Stable directive UUID (meta.id)
+  --guid <uuid>                    Legacy alias for --id
+  --directive-slug <slug>          Filename slug for <directive_slug>.meta.json
+  --title <text>                   Directive title (default: prompted)
+  --summary <text>                 One-line summary (default: prompted)
+  --goal <text>                    Goal line (repeatable; prompts when interactive)
+  --branch-type <type>             feature|chore|hotfix|fix|release (default: prompted/feature)
+  --directive-branch <name>        Branch name (default: <branch-type>/<directive-slug>)
+  --directive-base-branch <name>   Base branch (default: dev)
+  --owner <name>                   Owner metadata (default: operator)
+  --assignee <name>                Assignee metadata (default: null)
+  --priority <level>               urgent|high|medium|low (default: medium)
+  --session-priority <level>       urgent|high|medium|low (default: medium)
+  --effort <size>                  small|medium|large (default: medium)
+  --commit-policy <policy>         per_task|per_collection|end_of_directive (default: end_of_directive)
+  --source <role>                  Metadata source (default: architect)
+  --scope <name>                   Metadata scope (default: directives)
+  --editor                         Open terminal editor template for directive input
+  --no-prompt                      Disable prompts for missing title/summary
+  --dry-run                        Print output path and content only
+  --help                           Show this help
+
+Default session naming:
+  YY-MM-DD_<slug> in UTC (auto-suffixed with -2, -3, ... when needed)
+[2026-02-18T10:12:14Z] [CMD_EXIT] 0
+[2026-02-18T10:12:22Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newdirective --title Canonical\ Global\ Sidebar\ Across\ Apps/Web\ Layout --summary Canonify\ sidebar\ behavior\ into\ a\ single\ shared\ layout-owned\ sidebar\ component\ used\ by\ all\ views\ on\ desktop\ and\ mobile\,\ with\ centralized\ nav\ config\,\ unique\ per-item\ icons\,\ icon-mode\ overflow\ fixes\,\ and\ nav-only\ scrolling. --directive-branch architect/canonical-global-sidebar --goal Unique\ icon\ per\ nav\ item\ globally --goal No\ sidebar\ overflow\ in\ icon\ mode --goal Header/footer\ fixed\ with\ only\ nav\ region\ scrollable --goal Same\ canonical\ behavior\ across\ desktop\ sidebar\ and\ mobile\ drawer --goal Storybook\ sidebar\ story\ consumes\ canonical\ config\ and\ behavior --no-prompt
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-18_canonical-global-sidebar-across-apps-web-layout/canonical-global-sidebar-across-apps-web-layout.meta.json
+Git is manual for directive creation. Suggested next steps:
+  git checkout -b architect/canonical-global-sidebar dev
+  git add .directive-cli/directives/26-02-18_canonical-global-sidebar-across-apps-web-layout
+  git commit -m "chore(directive): create 26-02-18_canonical-global-sidebar-across-apps-web-layout"
+  git push -u origin architect/canonical-global-sidebar
+[2026-02-18T10:12:22Z] [CMD_EXIT] 0
+[2026-02-18T10:12:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/runbook
+Usage:
+  node .directive-cli/scripts/directives/runbook.mjs <name> [options]
+
+Runbooks:
+  executor-task-cycle       Directive+task execution checkpoints
+    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]
+  executor-directive-closeout
+    --session <id> [--confirm <token>] [--qa-command <cmd>] [--qa-status <pass|fail|skip>] [--no-qa-gate] [--dry-run]
+  executor-directive-cleanup
+    --session <id> [--confirm <token>] [--dry-run]
+  architect-authoring
+    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--confirm <token>] [--dry-run]
+
+Safety gates:
+  Non-dry-run runbooks require --confirm with an exact token:
+    architect-authoring         --confirm architect-authoring
+    executor-task-cycle pre     --confirm executor-task-cycle-pre
+    executor-task-cycle post    --confirm executor-task-cycle-post
+    executor-directive-closeout --confirm executor-directive-closeout
+    executor-directive-cleanup  --confirm executor-directive-cleanup
+[2026-02-18T10:12:31Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/runbook architect-authoring --session 26-02-18_canonical-global-sidebar-across-apps-web-layout --title Canonical\ Global\ Sidebar\ Across\ Apps/Web\ Layout --summary Canonify\ sidebar\ behavior\ into\ a\ single\ shared\ layout-owned\ sidebar\ component\ used\ by\ all\ views\ on\ desktop\ and\ mobile\,\ with\ centralized\ nav\ config\,\ unique\ per-item\ icons\,\ icon-mode\ overflow\ fixes\,\ and\ nav-only\ scrolling. --confirm architect-authoring
+[RUNBOOK] newdirective --session 26-02-18_canonical-global-sidebar-across-apps-web-layout --title Canonical Global Sidebar Across Apps/Web Layout --summary Canonify sidebar behavior into a single shared layout-owned sidebar component used by all views on desktop and mobile, with centralized nav config, unique per-item icons, icon-mode overflow fixes, and nav-only scrolling. --no-prompt
+Directive title already exists: "Canonical Global Sidebar Across Apps/Web Layout" (session: 26-02-18_canonical-global-sidebar-across-apps-web-layout)
+newdirective failed
+[2026-02-18T10:12:37Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/runbook architect-authoring --help
+Usage:
+  node .directive-cli/scripts/directives/runbook.mjs <name> [options]
+
+Runbooks:
+  executor-task-cycle       Directive+task execution checkpoints
+    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]
+  executor-directive-closeout
+    --session <id> [--confirm <token>] [--qa-command <cmd>] [--qa-status <pass|fail|skip>] [--no-qa-gate] [--dry-run]
+  executor-directive-cleanup
+    --session <id> [--confirm <token>] [--dry-run]
+  architect-authoring
+    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--confirm <token>] [--dry-run]
+
+Safety gates:
+  Non-dry-run runbooks require --confirm with an exact token:
+    architect-authoring         --confirm architect-authoring
+    executor-task-cycle pre     --confirm executor-task-cycle-pre
+    executor-task-cycle post    --confirm executor-task-cycle-post
+    executor-directive-closeout --confirm executor-directive-closeout
+    executor-directive-cleanup  --confirm executor-directive-cleanup
+[2026-02-18T10:12:37Z] [CMD_EXIT] 0
+[2026-02-18T10:12:46Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/runbook architect-authoring --session 26-02-18_canonical-global-sidebar-across-apps-web-layout --title Canonical\ Global\ Sidebar\ Across\ Apps/Web\ Layout --summary Canonify\ sidebar\ behavior\ into\ a\ single\ shared\ layout-owned\ sidebar\ component\ used\ by\ all\ views\ on\ desktop\ and\ mobile\,\ with\ centralized\ nav\ config\,\ unique\ per-item\ icons\,\ icon-mode\ overflow\ fixes\,\ and\ nav-only\ scrolling. --confirm architect-authoring --dry-run
+[RUNBOOK] newdirective --session 26-02-18_canonical-global-sidebar-across-apps-web-layout --title Canonical Global Sidebar Across Apps/Web Layout --summary Canonify sidebar behavior into a single shared layout-owned sidebar component used by all views on desktop and mobile, with centralized nav config, unique per-item icons, icon-mode overflow fixes, and nav-only scrolling. --no-prompt --dry-run
+Directive title already exists: "Canonical Global Sidebar Across Apps/Web Layout" (session: 26-02-18_canonical-global-sidebar-across-apps-web-layout)
+newdirective failed
+[2026-02-18T10:13:39Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/context show
+{
+  "message": "Context bundle: /root/src/dm-internal-systems/.codex/context/compiled.md",
+  "role": "all",
+  "out_file": "/root/src/dm-internal-systems/.codex/context/compiled.md",
+  "meta_file": "/root/src/dm-internal-systems/.codex/context/compiled.meta.json",
+  "policy_file": "/root/src/dm-internal-systems/.codex/context/policy.compiled.json",
+  "hash": "6b316f9d17af6e312bdbbd96a8dbe42287d4739c67ceb559826366f2771d7021",
+  "source_count": 27
+}
+[2026-02-18T10:13:39Z] [CMD_EXIT] 0
+[2026-02-18T10:13:41Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/context check
+Context bundle is missing or metadata invalid
+[2026-02-18T10:14:18Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives
+1) [open] deployment model
+2) [open] app-wide css tokenization and component-scoped module migration
+3) [open] directives css token architecture and jsx class extraction
+4) [todo] Canonical Global Sidebar Across Apps/Web Layout
+[2026-02-18T10:14:18Z] [CMD_EXIT] 0
+[2026-02-18T10:14:22Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --help
+Usage: node .directive-cli/scripts/directives/view_directive.mjs --directive <session> --file <name.json> [--raw|--json] [--help]
+[2026-02-18T10:14:22Z] [CMD_EXIT] 0
+[2026-02-18T10:14:24Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --help
+Usage:
+  node .directive-cli/scripts/directives/list_directives.mjs [--compact|--detailed|--detailed-ultra] [--field <meta_key> ...] [--include-archived] [--json] [--interactive]
+[2026-02-18T10:14:24Z] [CMD_EXIT] 0
+[2026-02-18T10:14:27Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --detailed
+command=dc directive list --detailed
+1) [open] deployment model | created=2026-02-11T08:13:44.875Z | updated=2026-02-12T10:43:51.922Z
+2) [open] app-wide css tokenization and component-scoped module migration | created=2026-02-12T23:35:00.000Z | updated=2026-02-12T23:35:00.000Z
+3) [open] directives css token architecture and jsx class extraction | created=2026-02-12T21:24:04.000Z | updated=2026-02-12T22:28:12.625Z
+4) [todo] Canonical Global Sidebar Across Apps/Web Layout | created=2026-02-18T10:12:22Z | updated=2026-02-18T10:12:22Z
+[2026-02-18T10:14:27Z] [CMD_EXIT] 0
+[2026-02-18T10:14:30Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --detailed-ultra
+command=dc directive list --detailed-ultra
+1) [open] deployment model | created=2026-02-11T08:13:44.875Z | updated=2026-02-12T10:43:51.922Z | priority=medium | session_priority=medium | owner=operator | assignee=- | bucket=open | directive_branch=feat/deployment-model | directive_base_branch=dev | commit_policy=end_of_directive
+2) [open] app-wide css tokenization and component-scoped module migration | created=2026-02-12T23:35:00.000Z | updated=2026-02-12T23:35:00.000Z | priority=high | session_priority=high | owner=operator | assignee=architect | bucket=open | directive_branch=feat/app-wide-css-scope-modules | directive_base_branch=dev | commit_policy=end_of_directive
+3) [open] directives css token architecture and jsx class extraction | created=2026-02-12T21:24:04.000Z | updated=2026-02-12T22:28:12.625Z | priority=high | session_priority=high | owner=operator | assignee=- | bucket=open | directive_branch=feat/directives-css-scope-class-extraction | directive_base_branch=dev | commit_policy=end_of_directive
+4) [todo] Canonical Global Sidebar Across Apps/Web Layout | created=2026-02-18T10:12:22Z | updated=2026-02-18T10:12:22Z | priority=medium | session_priority=medium | owner=operator | assignee=- | bucket=active | directive_branch=architect/canonical-global-sidebar | directive_base_branch=dev | commit_policy=end_of_directive
+[2026-02-18T10:14:30Z] [CMD_EXIT] 0

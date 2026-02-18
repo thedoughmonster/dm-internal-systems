@@ -1,0 +1,93 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "DM module normalization",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T15:05:41.000Z",
+    "updated": "2026-02-12T15:05:41.000Z",
+    "tags": [
+      "storybook",
+      "ui",
+      "dm",
+      "normalization"
+    ],
+    "effort": "small",
+    "depends_on": [
+      "TASK_07-custom-module-normalization.md"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Normalize DM story modules to shared baseline plus one non-default state.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "collection_id": "sb-normalization-20260212",
+    "collection_title": "Storybook normalization full run",
+    "collection_order": 9,
+    "collection_commit_label": "storybook-normalization-full-run",
+    "collection_merge_ready": false,
+    "id": "dc92196f-fe28-4d94-a109-ed40ca055583"
+  },
+  "task": {
+    "objective": "Normalize DM module stories to match the canonical baseline shape.",
+    "constraints": [
+      "Edit only listed story files.",
+      "Keep DM component behavior unchanged."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/components/ui/dm/file-picker.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/dm/multi-file-picker.stories.tsx`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Ensure each DM story file includes:",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Ensure `VisibleBaseline` is concrete args/render and not `ModulePlayground`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Ensure deterministic `sb-` IDs on story args where IDs are specified.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "for f in \\",
+        "apps/web/components/ui/dm/file-picker.stories.tsx \\",
+        "apps/web/components/ui/dm/multi-file-picker.stories.tsx; do",
+        "rg -q 'export const Overview' \"$f\" || { echo \"missing Overview in $f\"; exit 1; }",
+        "rg -q 'export const Disabled' \"$f\" || { echo \"missing Disabled in $f\"; exit 1; }",
+        "rg -q 'export const VisibleBaseline' \"$f\" || { echo \"missing VisibleBaseline in $f\"; exit 1; }",
+        "rg --pcre2 -U -q 'export const VisibleBaseline: Story = \\{[\\s\\S]{0,900}ModulePlayground' \"$f\" && { echo \"VisibleBaseline uses ModulePlayground in $f\"; exit 1; } || true",
+        "rg -n 'id:\\s*\"sb-' \"$f\"",
+        "done"
+      ]
+    },
+    "expected_output": [
+      "DM stories align with baseline contract and retain explicit disabled-state coverage."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if DM stories require app-only context to demonstrate meaningful behavior."
+    ],
+    "notes": []
+  }
+}

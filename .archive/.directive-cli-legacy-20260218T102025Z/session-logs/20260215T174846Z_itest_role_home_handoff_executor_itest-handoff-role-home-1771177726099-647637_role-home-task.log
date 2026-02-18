@@ -1,0 +1,6 @@
+# dc session log
+generated_at: 2026-02-15T17:48:46.288Z
+profile: itest_role_home_handoff
+role: executor
+directive: itest-handoff-role-home-1771177726099-647637
+task: role-home-task

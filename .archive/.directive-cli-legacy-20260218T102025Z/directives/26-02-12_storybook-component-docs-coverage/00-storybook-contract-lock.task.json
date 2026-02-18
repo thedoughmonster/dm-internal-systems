@@ -1,0 +1,87 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Storybook contract lock before batch normalization",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T15:05:41.000Z",
+    "updated": "2026-02-12T15:05:41.000Z",
+    "tags": [
+      "storybook",
+      "docs",
+      "contract",
+      "normalization"
+    ],
+    "effort": "small",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Resolve naming contract drift so normalization tasks target one canonical story shape.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "collection_id": "sb-normalization-20260212",
+    "collection_title": "Storybook normalization full run",
+    "collection_order": 1,
+    "collection_commit_label": "storybook-normalization-full-run",
+    "collection_merge_ready": false,
+    "id": "343f1c1d-0159-4a1b-8525-1700fadd85fb"
+  },
+  "task": {
+    "objective": "Lock a single canonical story contract for this run so all subsequent batch edits are deterministic.",
+    "constraints": [
+      "Documentation-only changes in this task.",
+      "Do not edit component story files in this task."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/docs/guides/storybook-normalization-standard.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/docs/guides/storybook-setup.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Update `apps/web/docs/guides/storybook-normalization-standard.md` so required baseline stories match directive execution contract:",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Ensure `apps/web/docs/guides/storybook-setup.md` references the locked contract with the same canonical naming.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Keep exports table requirement unchanged.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"A `Playground` story that exposes args/controls\" apps/web/docs/guides/storybook-normalization-standard.md && exit 1 || true",
+        "rg -n \"`Overview`\" apps/web/docs/guides/storybook-normalization-standard.md",
+        "rg -n \"`VisibleBaseline`\" apps/web/docs/guides/storybook-normalization-standard.md",
+        "rg -n \"must not use `ModulePlayground`\" apps/web/docs/guides/storybook-normalization-standard.md",
+        "rg -n \"storybook-normalization-standard.md\" apps/web/docs/guides/storybook-setup.md"
+      ]
+    },
+    "expected_output": [
+      "Story naming and baseline rules are unambiguous across setup and normalization guides."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if docs policy must retain `Playground` as required canonical story name."
+    ],
+    "notes": []
+  }
+}

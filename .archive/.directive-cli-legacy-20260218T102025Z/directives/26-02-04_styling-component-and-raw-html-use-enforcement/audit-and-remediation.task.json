@@ -1,0 +1,150 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "audit and remediation",
+    "status": "archived",
+    "priority": "high",
+    "owner": "operator",
+    "assignee": null,
+    "created": "2026-02-04T16:01:40.000Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "summary": "Audit raw HTML usage and remediate violations using approved components.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium",
+    "tags": [],
+    "effort": "large",
+    "session_priority": "high",
+    "bucket": "archived",
+    "depends_on": [
+      "TASK_lint-and-guardrails.md"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "id": "7ad1bb5f-fd1a-454d-b723-9f3b8b1bdf3e"
+  },
+  "task": {
+    "objective": "Audit `apps/web` for violations of the raw HTML policy and remediate them using the approved component approach.",
+    "constraints": [
+      "Follow the approved policy and lint behavior.",
+      "Prefer using existing UI components before creating new ones.",
+      "If a new component is required, place it under `apps/web/components/ui/dm/*`.",
+      "No em dash characters in generated writing."
+    ],
+    "allowed_files": [
+      {
+        "path": "Read: `apps/web/app/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Read: `apps/web/components/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Read: `apps/web/lib/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Write: `apps/web/app/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Write: `apps/web/components/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Write: `apps/web/lib/**/*`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Pause and confirm you are running `gpt-5.2-codex` (agentic) at medium reasoning. If not, stop and ask the operator to switch models before starting remediation.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Run lint to identify violations and record the file list before changes.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Replace raw interactive and form elements outside `apps/web/components/ui/*` with UI components from `apps/web/components/ui/*` or `apps/web/components/ui/dm/*`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Replace raw `<a>` tags outside `apps/web/components/ui/*` with `DmLink` from `@/components/ui/dm/link`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Replace direct `next/link` usage in app code with `DmLink` from `@/components/ui/dm/link`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "When `DmLink` is used with `Button` `asChild`, set the same `id` on both components to satisfy `RequireId`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "For each replacement, ensure the UI component receives a stable `id` prop that is unique within the view. Use the naming format: `<route-or-feature>-<context>-<element>` and suffix with `-input`, `-button`, `-select`, or `-textarea` as appropriate.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_8",
+        "instruction": "Leave raw layout elements as is unless there is a clear reuse need and the change does not add new components.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_9",
+        "instruction": "Allow `input type=\"hidden\"` outside `apps/web/components/ui/*` without wrapping.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_10",
+        "instruction": "If a required UI component is missing, create it under `apps/web/components/ui/dm/*` and keep it reusable and domain neutral.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_11",
+        "instruction": "Re run lint and typecheck, then fix any new issues introduced by remediation.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_12",
+        "instruction": "Add a short remediation summary in the task result notes with the list of files touched and the count of violations resolved.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "- `npm --prefix apps/web run lint`",
+        "- `npm --prefix apps/web run typecheck`"
+      ]
+    },
+    "expected_output": [
+      "No lint violations related to raw HTML usage.",
+      "Remediated UI code uses components for interactive and form elements.",
+      "Added ids are consistent and follow existing naming patterns."
+    ],
+    "stop_conditions": [
+      "Stop if remediation requires new design decisions beyond the approved policy."
+    ],
+    "notes": []
+  }
+}

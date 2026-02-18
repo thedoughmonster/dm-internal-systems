@@ -1,0 +1,39 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [
+      "rules",
+      "html",
+      "css",
+      "typechecking",
+      "lint",
+      "structure"
+    ],
+    "created": "2026-02-04T15:49:07.833Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "user",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "e6616911-3208-45b4-a372-15ab95bc8791",
+    "title": "styling, component, and raw HTML use enforcement",
+    "directive": "ab2f290b-e2a3-4d31-8467-49252c2ce9cc",
+    "summary": "create rules, lints, and typechecks to enforce proper implementation of code, aesthetics, and clean code across the entire apps/web app. through the creation of these rules, AI agents will be guided to write the proper code in standard, style the pages consistently to avoid aesthetic drift, and ensure that there isn't any arbitrarily missing data throughout the display system.",
+    "branch": "feat/agent-guardrails-20260204",
+    "directive_slug": "styling-component-and-raw-html-use-enforcement",
+    "directive_branch": "feat/styling-component-and-raw-html-use-enforcement",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

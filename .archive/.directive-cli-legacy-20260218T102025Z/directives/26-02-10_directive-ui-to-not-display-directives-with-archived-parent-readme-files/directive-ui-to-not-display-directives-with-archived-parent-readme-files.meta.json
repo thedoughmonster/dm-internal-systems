@@ -1,0 +1,31 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [],
+    "created": "2026-02-10T21:56:50.143Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "user",
+    "effort": "small",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "92aeff40-7701-4b35-861e-c7ef35923090",
+    "title": "directive UI to not display directives with archived parent README files.",
+    "directive": "80f93be5-4b35-4684-b397-32b1ad2c68bc",
+    "summary": "set the ui to only display directives with readme set to archived if the archived filter is set to display. readme archived status overrides task status.",
+    "directive_slug": "directive-ui-to-not-display-directives-with-archived-parent-readme-files",
+    "directive_branch": "feat/directive-ui-to-not-display-directives-with-archived-parent-readme-files",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

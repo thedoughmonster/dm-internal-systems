@@ -1,0 +1,99 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "9a0e6d57-40d9-4f2e-8df4-a62920861103",
+    "title": "Configure dev branch defaults and protections",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T08:53:05.000Z",
+    "tags": [
+      "github",
+      "dev",
+      "branch-protection"
+    ],
+    "effort": "small",
+    "depends_on": [
+      "7b9f8d4b-31d2-4a0f-8f87-a8f56e9b1102"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Set dev as default branch and enforce minimum protections so all feature work routes through PRs.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Set `dev` as default branch and enforce PR-based integration into `dev`.",
+    "constraints": [
+      "Keep protections lighter than `prod` but still PR-gated.",
+      "Do not bypass existing required checks."
+    ],
+    "allowed_files": [
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_EVIDENCE.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Open repository branch settings and set the default branch to `dev`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Add branch protection for `dev` requiring pull requests before merge.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Enable conversation resolution requirement for merges into `dev`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Configure current required status checks for `dev` merges; if `lint` and `typecheck` checks do not yet exist, record deferred enforcement for completion after `TASK_09` and `TASK_11`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Capture non-secret verification output showing `dev` as default branch and associated protections, and record in `docs/DEPLOYMENT_INFRA_EVIDENCE.md`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_03` as completed and record the applied settings and UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"TASK_03|default branch|dev|completed\" docs/DEPLOYMENT_INFRA_STATUS.md",
+        "rg -n \"TASK_03|default branch|dev|pull request\" docs/DEPLOYMENT_INFRA_EVIDENCE.md"
+      ]
+    },
+    "expected_output": [
+      "`dev` is default branch.",
+      "`dev` is PR-gated."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if default branch change is blocked by organization policy."
+    ],
+    "notes": []
+  }
+}

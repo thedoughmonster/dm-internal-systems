@@ -1,0 +1,31 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [],
+    "created": "2026-02-11T10:21:02.199Z",
+    "updated": "2026-02-12T10:43:46.678Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "user",
+    "effort": "small",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "06d50342-6b00-405f-9a53-30dcc34cb6ae",
+    "title": "architect and executor git instructions agent files updates",
+    "directive": "db02f199-1d73-4ac1-9777-226e4b8c7733",
+    "summary": "Normalize directive governance for collections, branch lifecycle, commit policy, and merge safety. Architect defines branch lifecycle while Executor performs state-changing git by default. Commit checkpoints follow explicit `commit_policy` (`per_task`, `per_collection`, or `end_of_directive`) with no implicit per-task default. Collection completion uses `collection_commit_label` when commit policy requires collection checkpoints. Architect startup detects completed unmerged directives and issues Executor merge instruction only after merge-safety evidence is present. Active blocked or in-progress directive branches may remain open when tracked in metadata, while untracked stale branches are forbidden. Collection completion requires explicit non-breaking merge-to-`dev` evidence and fail-closed enforcement in agent rules.",
+    "directive_slug": "architect-and-executor-git-instructions-agent-files-updates",
+    "directive_branch": "feat/architect-and-executor-git-instructions-agent-files-updates",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

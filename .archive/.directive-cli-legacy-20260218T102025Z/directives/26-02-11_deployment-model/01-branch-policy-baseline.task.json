@@ -1,0 +1,110 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "2eb2f53f-7d8a-4b5b-b79c-c8d1f45a1101",
+    "title": "Establish dev and prod branch policy baseline",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T08:53:05.000Z",
+    "tags": [
+      "branching",
+      "governance",
+      "docs"
+    ],
+    "effort": "small",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Document the two-branch model and create an infra status tracker used by all later tasks.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Create baseline policy docs for `dev` and `prod` and create a status tracker for infrastructure rollout.",
+    "constraints": [
+      "Keep policy aligned with operator decisions from this session.",
+      "Do not add deployment automation in this task.",
+      "No secrets in docs."
+    ],
+    "allowed_files": [
+      {
+        "path": "`docs/BRANCH_POLICY.md` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_EVIDENCE.md` (create)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `docs/BRANCH_POLICY.md` with sections for scope, branch types, branch naming, and release flow.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In `docs/BRANCH_POLICY.md`, state that long lived branches are only `dev` and `prod`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In `docs/BRANCH_POLICY.md`, define allowed working branch patterns `feat/*`, `fix/*`, and `chore/*`, and require branching from `dev`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In `docs/BRANCH_POLICY.md`, define release path as PR from `dev` to `prod` and state that direct push to `prod` is forbidden.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Create `docs/DEPLOYMENT_INFRA_STATUS.md` with one checklist row per task from `TASK_01` through `TASK_12`, including float tasks (`TASK_02.1`, `TASK_07.1`, `TASK_07.2`, `TASK_07.3`, `TASK_11.1`).",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, add columns for task id, owner, status, completion timestamp, and notes.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "Create `docs/DEPLOYMENT_INFRA_EVIDENCE.md` with section headers for GitHub, Supabase, and Vercel evidence logs.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -s docs/BRANCH_POLICY.md",
+        "test -s docs/DEPLOYMENT_INFRA_STATUS.md",
+        "test -s docs/DEPLOYMENT_INFRA_EVIDENCE.md",
+        "rg -n \"dev|prod|feat/\\\\*|fix/\\\\*|chore/\\\\*\" docs/BRANCH_POLICY.md"
+      ]
+    },
+    "expected_output": [
+      "Branch policy doc exists and reflects approved model.",
+      "Infra status tracker exists for follow-on tasks."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if existing repo policy conflicts with `dev` and `prod`."
+    ],
+    "notes": []
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "d68fbe6c-3176-4740-a4bf-80e1d3f0d051",
+    "title": "Migrate directives input controls to CSS modules",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T21:24:04.000Z",
+    "updated": "2026-02-12T22:22:53.000Z",
+    "tags": [
+      "css",
+      "directives",
+      "ui",
+      "migration"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "b5584650-9011-407b-a72b-82b238f53259"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Move freeform directives input control class strings into co-located CSS modules using semantic tokens.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Migrated TagsInput and TaskListInput to co-located CSS modules and removed raw className string literals from both TSX files.",
+      "validation": "pass: ! rg -n \"className\\s*=\\s*\\\"|className\\s*=\\s*'|className\\s*=\\s*\\{\\s*\\\"|className\\s*=\\s*\\{\\s*'\" apps/web/app/directives/composites/TagsInput.tsx apps/web/app/directives/composites/TaskListInput.tsx\npass: npm --prefix apps/web run typecheck\npass-with-warnings: npm --prefix apps/web run lint\nlint warnings (pre-existing in this task scope):\n- apps/web/app/directives/composites/TagsInput.tsx:126 react-hooks/exhaustive-deps (2 warnings)\nmanual visual checklist:\n- tags input interactions: not run (no browser-driven manual verification performed in this session)\n- task list input interactions: not run (no browser-driven manual verification performed in this session)\n",
+      "updated": "20260212T225506Z"
+    }
+  },
+  "task": {
+    "objective": "Convert freeform directives input controls to CSS modules and eliminate raw class literals from JSX.",
+    "constraints": [
+      "Keep input behavior and event handling unchanged.",
+      "Use semantic tokens for color/spacing/radius/shadow values.",
+      "Do not use raw utility class strings in JSX.",
+      "Manual visual checklist evidence is required."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/app/directives/composites/TagsInput.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/TagsInput.module.css` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/TaskListInput.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/TaskListInput.module.css` (create)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `TagsInput.module.css` and move visual class logic from `TagsInput.tsx` into module selectors.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Update `TagsInput.tsx` to import the module and remove raw class literals.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Create `TaskListInput.module.css` and move visual class logic from `TaskListInput.tsx` into module selectors.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Update `TaskListInput.tsx` to import the module and remove raw class literals.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Ensure module CSS values for color/spacing/radius/shadow use semantic tokens.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Validate that no raw `className` string literals remain in listed TSX files.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "Record manual visual checklist evidence for directives input interactions.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "! rg -n \"className\\s*=\\s*\\\"|className\\s*=\\s*'|className\\s*=\\s*\\{\\s*\\\"|className\\s*=\\s*\\{\\s*'\" apps/web/app/directives/composites/TagsInput.tsx apps/web/app/directives/composites/TaskListInput.tsx",
+        "npm --prefix apps/web run typecheck",
+        "npm --prefix apps/web run lint"
+      ]
+    },
+    "expected_output": [
+      "`TagsInput` and `TaskListInput` use co-located CSS modules.",
+      "Listed TSX files contain no raw `className` string literals."
+    ],
+    "stop_conditions": [
+      "Stop and request direction if extracting styles causes input interaction regressions not fixable within allowed files."
+    ],
+    "notes": []
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "1bf5dc5e-0801-4a71-a653-20ba25789621",
+    "title": "Define directive collection metadata model",
+    "status": "archived",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "archived",
+    "created": "2026-02-11T13:36:38.000Z",
+    "updated": "2026-02-11T16:33:04.000Z",
+    "tags": [
+      "directives",
+      "metadata",
+      "collections",
+      "architecture"
+    ],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [
+      "92e5f800-7b62-45cc-b43d-c1249ab483a2",
+      "7a0cee1d-3e4d-4608-bef3-b1dd84549560",
+      "e174edff-b9f1-400e-82cf-3a6b12e5c068"
+    ],
+    "summary": "Add explicit collection metadata schema to directive rules so tasks can be grouped and ordered as merge-safe collections.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "result": "Completed. Collection metadata fields and semantics were added to shared directives model and architect standards, and AGENTS policy now requires collection metadata for multi-task directives."
+  },
+  "task": {
+    "objective": "Define and document collection metadata fields for directive sessions and task files.",
+    "constraints": [
+      "Keep metadata deterministic and machine-readable.",
+      "Preserve existing status and priority semantics.",
+      "Do not introduce ambiguous field names."
+    ],
+    "allowed_files": [
+      {
+        "path": "\\'AGENTS.md\\' (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "\\'docs/agent-rules/shared/directives-model.md\\' (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "\\'docs/agent-rules/architect/directive-standards.md\\' (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "In \\'docs/agent-rules/shared/directives-model.md\\', add a \\'collection\\' metadata section defining exact fields and allowed values.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In \\'docs/agent-rules/shared/directives-model.md\\', add required task-level collection fields and ordering semantics.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In \\'docs/agent-rules/architect/directive-standards.md\\', require every new task to include collection metadata and merge-safety completion criteria.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In \\'AGENTS.md\\', add short policy language that collection metadata is mandatory for multi-task directives.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Ensure examples use exact field names and do not conflict with existing meta keys.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"collection_id|collection_title|collection_order|collection_commit_label|collection_merge_ready\" docs/agent-rules/shared/directives-model.md docs/agent-rules/architect/directive-standards.md AGENTS.md"
+      ]
+    },
+    "expected_output": [
+      "Directive model docs explicitly define collection metadata and usage rules."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if required collection fields conflict with any existing directive parser or UI assumptions."
+    ],
+    "notes": []
+  }
+}

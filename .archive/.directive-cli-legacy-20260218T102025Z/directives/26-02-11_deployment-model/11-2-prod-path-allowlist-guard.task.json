@@ -1,0 +1,105 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "df9c2636-4837-4eae-bcd1-0fc7a1eb62db",
+    "title": "11-2-prod-path-allowlist-guard",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "summary": "",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Prevent non-production files from entering `prod` by enforcing a fail-closed changed-file allowlist on pull requests targeting `prod`.",
+    "constraints": [
+      "Guard must run only on PRs targeting `prod`.",
+      "Guard must fail closed when policy file is missing or unreadable.",
+      "Use `ops_tooling/scripts/**` for checker logic; do not add root `scripts/` files.",
+      "Do not print secret values."
+    ],
+    "allowed_files": [
+      {
+        "path": "`ops_tooling/scripts/ci/check-prod-path-allowlist.sh` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`.github/policies/prod-allowed-paths.txt` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`.github/workflows/prod-path-guard.yml` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/policies/branch-policy.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/operations/deployment/infra-status.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `.github/policies/prod-allowed-paths.txt` with one glob per line for files allowed in PRs targeting `prod`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Create `ops_tooling/scripts/ci/check-prod-path-allowlist.sh` that reads changed files from git diff and fails if any changed path is not matched by the allowlist.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In the checker script, require policy-file presence and emit a clear blocked-path list before exit non-zero.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Create `.github/workflows/prod-path-guard.yml` triggered on `pull_request` to `prod` that runs the checker script.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Set the workflow job name to a stable required-check string: `prod-path-guard`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Update `docs/policies/branch-policy.md` with the prod-path allowlist requirement and required-check name.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "Update `docs/operations/deployment/infra-status.md` marking `TASK_11.2` complete with UTC timestamp and short evidence note.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -x ops_tooling/scripts/ci/check-prod-path-allowlist.sh",
+        "test -s .github/policies/prod-allowed-paths.txt",
+        "test -s .github/workflows/prod-path-guard.yml",
+        "rg -n \"name:\\s*prod-path-guard|check-prod-path-allowlist\" .github/workflows/prod-path-guard.yml"
+      ]
+    },
+    "expected_output": [
+      "PRs into `prod` fail when they include blocked paths.",
+      "Branch protection can require `prod-path-guard` to enforce release-path scope."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if allowlist scope conflicts with required production release artifacts."
+    ],
+    "notes": []
+  }
+}

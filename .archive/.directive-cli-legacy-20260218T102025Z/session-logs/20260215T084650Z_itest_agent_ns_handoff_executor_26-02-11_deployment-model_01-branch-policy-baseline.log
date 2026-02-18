@@ -1,0 +1,6 @@
+# dc session log
+generated_at: 2026-02-15T08:46:50.518Z
+profile: itest_agent_ns_handoff
+role: executor
+directive: 26-02-11_deployment-model
+task: 01-branch-policy-baseline

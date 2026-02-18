@@ -1,0 +1,6 @@
+# dc session log
+generated_at: 2026-02-15T18:54:59.571Z
+profile: itest_handoff_auto
+role: executor
+directive: itest-launch-handoff-auto-1771181699414-25651
+task: auto-reuse-task

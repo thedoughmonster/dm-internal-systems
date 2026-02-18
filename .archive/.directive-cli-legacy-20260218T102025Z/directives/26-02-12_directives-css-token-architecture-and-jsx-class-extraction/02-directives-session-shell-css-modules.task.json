@@ -1,0 +1,132 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "4aeaa528-b4ba-4f6d-a459-3139542d2c1c",
+    "title": "Migrate directives session shell components to CSS modules",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T21:24:04.000Z",
+    "updated": "2026-02-12T22:22:53.000Z",
+    "tags": [
+      "css",
+      "directives",
+      "ui",
+      "migration"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "3fe6d422-141b-4fe5-b38f-eb6f146b673f"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Move directives session shell class strings into co-located CSS modules using semantic tokens.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Migrated directives session shell and route wrapper components to CSS modules and removed raw className string literals from listed TSX files.",
+      "validation": "pass: ! rg -n \"className\\s*=\\s*\\\"|className\\s*=\\s*'|className\\s*=\\s*\\{\\s*\\\"|className\\s*=\\s*\\{\\s*'\" apps/web/app/directives/composites/SessionCard.tsx apps/web/app/directives/composites/SessionAutoRunToggle.tsx apps/web/app/directives/page.tsx apps/web/app/directives/session/[sessionId]/page.tsx\npass: npm --prefix apps/web run typecheck\npass-with-warnings: npm --prefix apps/web run lint\nlint warnings (pre-existing in this task scope):\n- apps/web/app/directives/composites/TagsInput.tsx:124 react-hooks/exhaustive-deps (2 warnings)\nmanual visual checklist:\n- directives session list wrapper: not run (no browser-driven manual verification performed in this session)\n- directives session detail wrapper: not run (no browser-driven manual verification performed in this session)\nsnapshot evidence:\n- not captured (no layout drift inspection performed via browser/snapshot tooling in this session)\n",
+      "updated": "20260212T224517Z"
+    }
+  },
+  "task": {
+    "objective": "Convert directives session shell and page wrapper components to CSS modules with no raw JSX class literals.",
+    "constraints": [
+      "Preserve current route behavior and navigation behavior.",
+      "Use semantic tokens for color/spacing/radius/shadow values.",
+      "Do not use raw utility class strings in JSX.",
+      "Manual visual checklist evidence is required; snapshot evidence is required if layout drift is detected."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/app/directives/composites/SessionCard.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/SessionCard.module.css` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/SessionAutoRunToggle.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/composites/SessionAutoRunToggle.module.css` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/page.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/page.module.css` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/session/[sessionId]/page.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/directives/session/[sessionId]/page.module.css` (create)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create module CSS files for the listed session-shell components and migrate visual styles from JSX class strings into module selectors.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Update listed TSX files to import co-located modules and replace raw class literals with style token references.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Ensure module CSS values for color/spacing/radius/shadow use semantic tokens.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Validate that no raw `className` string literals remain in listed TSX files.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Record manual visual checklist evidence for directives session list and session detail wrappers.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Capture snapshot evidence if layout drift or visual uncertainty is observed.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "! rg -n \"className\\s*=\\s*\\\"|className\\s*=\\s*'|className\\s*=\\s*\\{\\s*\\\"|className\\s*=\\s*\\{\\s*'\" apps/web/app/directives/composites/SessionCard.tsx apps/web/app/directives/composites/SessionAutoRunToggle.tsx apps/web/app/directives/page.tsx apps/web/app/directives/session/[sessionId]/page.tsx",
+        "npm --prefix apps/web run typecheck",
+        "npm --prefix apps/web run lint"
+      ]
+    },
+    "expected_output": [
+      "Session shell and route wrapper components use co-located CSS modules.",
+      "Listed TSX files contain no raw `className` string literals."
+    ],
+    "stop_conditions": [
+      "Stop and ask for direction if route-level layout regressions require architectural changes outside allowed files."
+    ],
+    "notes": []
+  }
+}

@@ -1,0 +1,917 @@
+# dc session log
+generated_at: 2026-02-15T18:23:53.423Z
+profile: dm-internal-systems
+role: architect
+directive: 
+task: 
+[2026-02-15T18:33:52Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newdirective --help
+Usage:
+  node .directive-cli/scripts/directives/create_directive_readme.mjs [options]
+
+Options:
+  --session <name>                 Explicit session directory name
+  --id <uuid>                      Stable directive UUID (meta.id)
+  --guid <uuid>                    Legacy alias for --id
+  --directive-slug <slug>          Filename slug for <directive_slug>.meta.json
+  --title <text>                   Directive title (default: prompted)
+  --summary <text>                 One-line summary (default: prompted)
+  --goal <text>                    Goal line (repeatable; prompts when interactive)
+  --branch-type <type>             feature|chore|hotfix|fix|release (default: prompted/feature)
+  --directive-branch <name>        Branch name (default: <branch-type>/<directive-slug>)
+  --directive-base-branch <name>   Base branch (default: dev)
+  --owner <name>                   Owner metadata (default: operator)
+  --assignee <name>                Assignee metadata (default: null)
+  --priority <level>               urgent|high|medium|low (default: medium)
+  --session-priority <level>       urgent|high|medium|low (default: medium)
+  --effort <size>                  small|medium|large (default: medium)
+  --commit-policy <policy>         per_task|per_collection|end_of_directive (default: end_of_directive)
+  --source <role>                  Metadata source (default: architect)
+  --scope <name>                   Metadata scope (default: directives)
+  --no-git                         Disable auto branch/commit/merge workflow
+  --resume-auto-git                Resume pending auto-git finalize for an existing session
+  --editor                         Open terminal editor template for directive input
+  --no-prompt                      Disable prompts for missing title/summary
+  --dry-run                        Print output path and content only
+  --help                           Show this help
+
+Default session naming:
+  YY-MM-DD_<slug> in UTC (auto-suffixed with -2, -3, ... when needed)
+[2026-02-15T18:33:52Z] [CMD_EXIT] 0
+[2026-02-15T18:34:03Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newdirective --no-prompt --title Align\ and\ Restyle\ Sidebar\ Within\ Main\ Interactive\ Surface --summary Reposition\ the\ Next.js\ sidebar\ to\ the\ interactive\ surface\ edge\ inside\ the\ main\ container\,\ restyle\ the\ component\,\ and\ update\ Storybook\ coverage\ without\ functional\ regressions. --goal Align\ sidebar\ left\ edge\ with\ the\ interactive\ surface\ left\ edge\ at\ desktop\ breakpoints\ \(0px\ delta\). --goal Preserve\ existing\ sidebar\ navigation\ behavior\,\ collapse/expand\ state\,\ and\ route\ interactions. --goal Implement\ updated\ sidebar\ visuals\ using\ design\ tokens/theme\ variables\ \(no\ one-off\ magic\ values\). --goal Maintain\ responsive\ layout\ correctness\ across\ mobile\,\ tablet\,\ and\ desktop. --goal Update\ Storybook\ stories\ for\ default\,\ collapsed\,\ active-item\,\ long-navigation\,\ and\ viewport\ variants. --goal Meet\ accessibility\ baseline:\ keyboard\ navigation\,\ visible\ focus\ indicators\,\ contrast\,\ and\ screen-reader\ labeling. --goal Treat\ navigation\ information\ architecture\ changes\ as\ out\ of\ scope\ for\ this\ directive. --goal Pass\ directive\ lifecycle\ validation\ checks\ before\ handoff.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/align-and-restyle-sidebar-within-main-interactive-surface.meta.json
++==============================================================================================================+
+|  AUTO-GIT PAUSED
++--------------------------------------------------------------------------------------------------------------+
+|  Directive metadata has been created and pending state saved: /root/src/dm-internal-systems/.directive-cli/state/pending-directive-new-26-02-15_align-and-restyle-sidebar-within-main-interactive-surface.json
+|  Auto-git is paused because working tree is dirty:
+|    - codex/context/architect.startup.json
+|  After cleanup, resume with: ./.directive-cli/dc directive new --resume-auto-git --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
++==============================================================================================================+
+[2026-02-15T18:34:03Z] [CMD_EXIT] 0
+[2026-02-15T18:34:08Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --help
+Usage:
+  node .directive-cli/scripts/directives/create_directive_task.mjs --session <session-dir-or-uuid> [options]
+
+Required:
+  --session <id>                  Session directory name or session UUID (meta.id)
+  --guid <id>                     Legacy alias for --session
+
+Options:
+  --slug <slug>                   Task slug used in filename <slug>.task.json
+  --title <text>                  Task title (default: prompted)
+  --summary <text>                One-line summary (default: prompted)
+  --priority <level>              urgent|high|medium|low (default: medium)
+  --session-priority <level>      urgent|high|medium|low (default: medium)
+  --owner <name>                  Metadata owner (default: operator)
+  --assignee <name>               Metadata assignee (default: executor)
+  --effort <size>                 small|medium|large (default: medium)
+  --execution-model <name>        Metadata execution_model (default: gpt-5.2-codex)
+  --thinking-level <level>        Metadata thinking_level (default: high)
+  --no-prompt                     Disable interactive prompts for missing values
+  --dry-run                       Print target path and JSON only
+  --help                          Show this help
+[2026-02-15T18:34:08Z] [CMD_EXIT] 0
+[2026-02-15T18:34:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --no-prompt --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --slug sidebar-layout-alignment --title Align\ Sidebar\ to\ Interactive\ Surface\ Container --summary Refactor\ Next.js\ layout/container\ structure\ so\ the\ sidebar\ aligns\ to\ the\ interactive\ surface\ edge\ instead\ of\ the\ viewport\ edge\ across\ desktop\ breakpoints.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-layout-alignment.task.json
+[2026-02-15T18:34:25Z] [CMD_EXIT] 0
+[2026-02-15T18:34:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --no-prompt --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --slug sidebar-component-restyle --title Restyle\ Sidebar\ Component --summary Apply\ updated\ sidebar\ visual\ styling\ using\ existing\ design\ tokens/theme\ variables\ while\ preserving\ current\ behavior\ and\ state\ handling.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-component-restyle.task.json
+[2026-02-15T18:34:25Z] [CMD_EXIT] 0
+[2026-02-15T18:34:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --no-prompt --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --slug sidebar-storybook-updates --title Update\ Sidebar\ Storybook\ Coverage --summary Refresh\ Storybook\ stories\ and\ controls\ to\ reflect\ new\ sidebar\ alignment\ and\ styling\,\ including\ key\ state\ and\ viewport\ variants.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-storybook-updates.task.json
+[2026-02-15T18:34:25Z] [CMD_EXIT] 0
+[2026-02-15T18:34:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --no-prompt --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --slug sidebar-accessibility-regression --title Validate\ Accessibility\ and\ Regression\ Safety --summary Verify\ keyboard\ navigation\,\ focus\ treatment\,\ contrast\,\ and\ interaction\ regressions\ for\ sidebar\ behavior\ across\ responsive\ breakpoints.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-accessibility-regression.task.json
+[2026-02-15T18:34:25Z] [CMD_EXIT] 0
+[2026-02-15T18:34:25Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newtask --no-prompt --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --slug sidebar-lifecycle-validation --title Run\ Lifecycle\ Validation\ and\ Prepare\ Handoff --summary Execute\ directive\ validation\,\ capture\ outcomes\,\ and\ prepare\ clean\ handoff\ notes\ for\ executor\ implementation.
+Created /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-lifecycle-validation.task.json
+[2026-02-15T18:34:25Z] [CMD_EXIT] 0
+[2026-02-15T18:34:31Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives
+[2026-02-15T18:34:31Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+mode=compact
+status=open | title=deployment model
+status=open | title=app-wide css tokenization and component-scoped module migration
+status=open | title=directives css token architecture and jsx class extraction
+status=ready | title=Dry Run Safety Check
+status=todo | title=Live Runbook Observer Test
+status=todo | title=Remove directives web UI
+status=todo | title=Clean placeholder copy in vendors dashboard error card
+status=todo | title=Align and Restyle Sidebar Within Main Interactive Surface
+status=todo | title=itest launch handoff live 20260214T211140Z-10344
+status=todo | title=itest live handoff live-2643-20260214T211614Z
+[2026-02-15T18:34:31Z] [CMD_EXIT] 0
+Missing required --file in non-interactive mode.
+[2026-02-15T18:34:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --help
+Missing required --directive in non-interactive mode.
+[2026-02-15T18:34:37Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive align-and-restyle-sidebar-within-main-interactive-surface
+Directive not found or archived: align-and-restyle-sidebar-within-main-interactive-surface
+[2026-02-15T18:34:40Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --help
+Usage:
+  node .directive-cli/scripts/directives/list_directives.mjs [--compact|--detailed|--detailed-ultra] [--field <meta_key> ...] [--include-archived] [--json] [--interactive]
+[2026-02-15T18:34:40Z] [CMD_EXIT] 0
+[2026-02-15T18:34:42Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --detailed
+command=dc directive list --detailed
+mode=detailed
+status=open | title=deployment model | created=2026-02-11T08:13:44.875Z | updated=2026-02-12T10:43:51.922Z
+status=open | title=app-wide css tokenization and component-scoped module migration | created=2026-02-12T23:35:00.000Z | updated=2026-02-12T23:35:00.000Z
+status=open | title=directives css token architecture and jsx class extraction | created=2026-02-12T21:24:04.000Z | updated=2026-02-12T22:28:12.625Z
+status=ready | title=Dry Run Safety Check | created=2026-02-13T22:17:14Z | updated=2026-02-13T22:17:14Z
+status=todo | title=Live Runbook Observer Test | created=2026-02-13T22:48:53Z | updated=2026-02-13T22:48:53Z
+status=todo | title=Remove directives web UI | created=2026-02-13T22:54:33Z | updated=2026-02-13T22:54:33Z
+status=todo | title=Clean placeholder copy in vendors dashboard error card | created=2026-02-14T10:34:04Z | updated=2026-02-14T10:34:04Z
+status=todo | title=Align and Restyle Sidebar Within Main Interactive Surface | created=2026-02-15T18:34:03Z | updated=2026-02-15T18:34:03Z
+status=todo | title=itest launch handoff live 20260214T211140Z-10344 | created=2026-02-14T21:11:40Z | updated=2026-02-14T21:11:40Z
+status=todo | title=itest live handoff live-2643-20260214T211614Z | created=2026-02-14T21:16:14Z | updated=2026-02-14T21:16:14Z
+[2026-02-15T18:34:42Z] [CMD_EXIT] 0
+[2026-02-15T18:34:46Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --file .directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Missing required --directive in non-interactive mode.
+[2026-02-15T18:35:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/validatedirectives
+[2026-02-15T18:35:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Description: Reposition the Next.js sidebar to the interactive surface edge inside the main container, restyle the component, and update Storybook coverage without functional regressions.
+created: 2026-02-15T18:34:03Z
+---
+Kind: directive_session_meta
+Title: Align and Restyle Sidebar Within Main Interactive Surface
+Status: todo
+Priority: medium / session medium
+Owner: operator
+Assignee: 
+Effort: medium
+Created: 2026-02-15T18:34:03Z
+Updated: 2026-02-15T18:34:03Z
+Summary: Reposition the Next.js sidebar to the interactive surface edge inside the main container, restyle the component, and update Storybook coverage without functional regressions.
+
+Goals
+  - Align sidebar left edge with the interactive surface left edge at desktop breakpoints (0px delta).
+  - Preserve existing sidebar navigation behavior, collapse/expand state, and route interactions.
+  - Implement updated sidebar visuals using design tokens/theme variables (no one-off magic values).
+  - Maintain responsive layout correctness across mobile, tablet, and desktop.
+  - Update Storybook stories for default, collapsed, active-item, long-navigation, and viewport variants.
+  - Meet accessibility baseline: keyboard navigation, visible focus indicators, contrast, and screen-reader labeling.
+  - Treat navigation information architecture changes as out of scope for this directive.
+  - Pass directive lifecycle validation checks before handoff.
+
+Tags
+  - needs-triage
+
+Git Routing
+  - directive_branch: feature/align-and-restyle-sidebar-within-main-interactive-surface
+  - base_branch: dev
+  - merge_status: open
+  - commit_policy: end_of_directive
+
+Session
+  - slug: align-and-restyle-sidebar-within-main-interactive-surface
+  - bucket: active
+  - scope: directives
+  - source: architect
+  - auto_run: false
+Validation passed: 27 session(s)
+[2026-02-15T18:35:06Z] [CMD_EXIT] 0
+[2026-02-15T18:35:06Z] [CMD_EXIT] 0
+[2026-02-15T18:35:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-layout-alignment.task.json
+[2026-02-15T18:35:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-component-restyle.task.json
+[2026-02-15T18:35:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-storybook-updates.task.json
+[2026-02-15T18:35:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-lifecycle-validation.task.json
+[2026-02-15T18:35:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-accessibility-regression.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-layout-alignment.task.json
+Description: Refactor Next.js layout/container structure so the sidebar aligns to the interactive surface edge instead of the viewport edge across desktop breakpoints.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Align Sidebar to Interactive Surface Container
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:34:25Z
+Summary: Refactor Next.js layout/container structure so the sidebar aligns to the interactive surface edge instead of the viewport edge across desktop breakpoints.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-accessibility-regression.task.json
+Description: Verify keyboard navigation, focus treatment, contrast, and interaction regressions for sidebar behavior across responsive breakpoints.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Validate Accessibility and Regression Safety
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:34:25Z
+Summary: Verify keyboard navigation, focus treatment, contrast, and interaction regressions for sidebar behavior across responsive breakpoints.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-lifecycle-validation.task.json
+Description: Execute directive validation, capture outcomes, and prepare clean handoff notes for executor implementation.
+created: 2026-02-15T18:34:25Z
+---
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+Kind: directive_task
+Title: Run Lifecycle Validation and Prepare Handoff
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:34:25Z
+Summary: Execute directive validation, capture outcomes, and prepare clean handoff notes for executor implementation.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+File: sidebar-component-restyle.task.json
+Description: Apply updated sidebar visual styling using existing design tokens/theme variables while preserving current behavior and state handling.
+created: 2026-02-15T18:34:25Z
+---
+[2026-02-15T18:35:14Z] [CMD_EXIT] 0
+Kind: directive_task
+Title: Restyle Sidebar Component
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:34:25Z
+Summary: Apply updated sidebar visual styling using existing design tokens/theme variables while preserving current behavior and state handling.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-storybook-updates.task.json
+Description: Refresh Storybook stories and controls to reflect new sidebar alignment and styling, including key state and viewport variants.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Update Sidebar Storybook Coverage
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:34:25Z
+Summary: Refresh Storybook stories and controls to reflect new sidebar alignment and styling, including key state and viewport variants.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T18:35:14Z] [CMD_EXIT] 0
+[2026-02-15T18:35:14Z] [CMD_EXIT] 0
+[2026-02-15T18:35:14Z] [CMD_EXIT] 0
+[2026-02-15T18:35:14Z] [CMD_EXIT] 0
+[2026-02-15T18:35:21Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --help
+Usage:
+  node .directive-cli/scripts/directives/update_directive_metadata.mjs --session <session-dir-or-uuid> --set <key=value> [--set <key=value> ...] [options]
+
+Required:
+  --session <id>                  Session directory name or session UUID (meta.id)
+  --guid <id>                     Legacy alias for --session
+  --set <key=value>               Update a top-level meta key (repeatable)
+
+Target options (choose one):
+  --directive-meta                Target <directive_slug>.meta.json (default)
+  --readme                        Legacy alias for --directive-meta
+  --task <task-slug|file>         Target <task_slug>.task.json
+
+Behavior options:
+  --role <architect|executor|operator>  Enforce role-specific metadata guards (default: architect)
+  --dry-run                       Print planned updates without writing
+  --no-prompt                     Disable interactive prompts for missing inputs
+  --help                          Show this help
+[2026-02-15T18:35:21Z] [CMD_EXIT] 0
+[2026-02-15T18:35:30Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/runbook architect-authoring --help
+Usage:
+  node .directive-cli/scripts/directives/runbook.mjs <name> [options]
+
+Runbooks:
+  executor-task-cycle       Directive+task execution checkpoints
+    --session <id> --task <slug|file> --phase <pre|post> [--summary <text>] [--confirm <token>] [--dry-run]
+  executor-directive-closeout
+    --session <id> [--confirm <token>] [--qa-command <cmd>] [--qa-status <pass|fail|skip>] [--no-qa-gate] [--dry-run]
+  executor-directive-cleanup
+    --session <id> [--confirm <token>] [--dry-run]
+  architect-authoring
+    --session <id> --title <text> --summary <text> [--task-title <text> --task-summary <text> --task-slug <slug>] [--confirm <token>] [--dry-run]
+
+Safety gates:
+  Non-dry-run runbooks require --confirm with an exact token:
+    architect-authoring         --confirm architect-authoring
+    executor-task-cycle pre     --confirm executor-task-cycle-pre
+    executor-task-cycle post    --confirm executor-task-cycle-post
+    executor-directive-closeout --confirm executor-directive-closeout
+    executor-directive-cleanup  --confirm executor-directive-cleanup
+[2026-02-15T18:35:30Z] [CMD_EXIT] 0
+[2026-02-15T18:36:42Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/newhandoff --help
+Usage:
+  node .directive-cli/scripts/directives/create_handoff.mjs --session <session-dir-or-uuid> --from-role <role> --to-role <role> --trigger <id> --objective <text> --blocking-rule <text> [options]
+
+Required (if startup context defaults are unavailable):
+  --session <id>                    Session directory name or session UUID (meta.id)
+  --guid <id>                       Legacy alias for --session
+  --from-role <role>                architect|executor|pair|auditor
+  --to-role <role>                  architect|executor|pair|auditor
+  --trigger <id>                    Deterministic handoff trigger id
+  --objective <text>                One-line objective
+  --blocking-rule <text>            Rule that blocks sender continuation
+
+Options:
+  --task-file <path|null>           Task file path or null (default: null)
+  --directive-branch <name>         Defaults to <directive_slug>.meta.json meta.directive_branch
+  --worktree-mode <mode>            clean_required|known_dirty_allowlist (default: clean_required)
+  --allowlist-path <path>           Repeatable; required when known_dirty_allowlist
+  --required-reading <path>         Default: apps/web/docs/guides/component-paradigm.md
+  --dry-run                         Print target and JSON only
+  --no-prompt                       Disable prompts for missing values
+  --help                            Show this help
+[2026-02-15T18:36:42Z] [CMD_EXIT] 0
+[2026-02-15T18:38:12Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --directive-meta --no-prompt --set updated=2026-02-15T18:37:55Z --set priority=high
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Role guard: architect
+- updated updated
+- updated priority
+[2026-02-15T18:38:12Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-layout-alignment --no-prompt --set execution_model=gpt-5.3-codex --set priority=high --set updated=2026-02-15T18:37:55Z
+[2026-02-15T18:38:12Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-component-restyle --no-prompt --set execution_model=gpt-5.3-codex --set priority=high --set updated=2026-02-15T18:37:55Z
+[2026-02-15T18:38:12Z] [CMD_EXIT] 0
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-layout-alignment.task.json
+Role guard: architect
+- updated execution_model
+- updated priority
+- updated updated
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-component-restyle.task.json
+Role guard: architect
+- updated execution_model
+- updated priority
+- updated updated
+[2026-02-15T18:38:13Z] [CMD_EXIT] 0
+[2026-02-15T18:38:13Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-accessibility-regression --no-prompt --set execution_model=gpt-5.3-codex --set priority=high --set updated=2026-02-15T18:37:55Z
+[2026-02-15T18:38:13Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-storybook-updates --no-prompt --set execution_model=gpt-5.3-codex --set priority=medium --set updated=2026-02-15T18:37:55Z
+[2026-02-15T18:38:13Z] [CMD_EXIT] 0
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-storybook-updates.task.json
+Role guard: architect
+- updated execution_model
+- updated priority
+- updated updated
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-accessibility-regression.task.json
+Role guard: architect
+- updated execution_model
+- updated priority
+- updated updated
+[2026-02-15T18:38:13Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-lifecycle-validation --no-prompt --set execution_model=gpt-5.3-codex --set priority=medium --set updated=2026-02-15T18:37:55Z
+[2026-02-15T18:38:13Z] [CMD_EXIT] 0
+[2026-02-15T18:38:13Z] [CMD_EXIT] 0
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-lifecycle-validation.task.json
+Role guard: architect
+- updated execution_model
+- updated priority
+- updated updated
+[2026-02-15T18:38:13Z] [CMD_EXIT] 0
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --directive-meta --no-prompt --set summary=Align and restyle the Next.js sidebar so it anchors to the interactive surface container edge\, with Storybook and accessibility updates while keeping navigation IA out of scope.
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-component-restyle --no-prompt --set summary=Restyle sidebar primitives with tokenized spacing\, border\, surface\, and state styles while preserving navigation and collapse interactions.
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-layout-alignment --no-prompt --set summary=Move global sidebar anchoring from viewport edge to the main interactive container edge while preserving desktop collapse and offcanvas behavior.
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Role guard: architect
+- updated summary
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-component-restyle.task.json
+Role guard: architect
+- updated summary
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-layout-alignment.task.json
+Role guard: architect
+- updated summary
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-storybook-updates --no-prompt --set summary=Update sidebar Storybook coverage for alignment and restyle scenarios across default\, collapsed\, active-route\, long-menu\, and viewport variants.
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-accessibility-regression --no-prompt --set summary=Validate keyboard navigation\, focus visibility\, contrast\, and screen-reader behavior for sidebar app routes and stories\, then resolve regressions.
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-storybook-updates.task.json
+Role guard: architect
+- updated summary
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-accessibility-regression.task.json
+Role guard: architect
+- updated summary
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+[2026-02-15T18:38:34Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-lifecycle-validation --no-prompt --set summary=Run directive validation\, verify metadata consistency\, and prepare architect-to-executor handoff artifacts for implementation.
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-lifecycle-validation.task.json
+Role guard: architect
+- updated summary
+[2026-02-15T18:38:34Z] [CMD_EXIT] 0
+[2026-02-15T18:38:40Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/validatedirectives --strict
+Validation passed: 27 session(s)
+[2026-02-15T18:38:40Z] [CMD_EXIT] 0
+[2026-02-15T18:38:52Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-layout-alignment.task.json
+[2026-02-15T18:38:52Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-layout-alignment.task.json
+Description: Move
+created: 2026-02-15T18:34:25Z
+---
+File: align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Description: Align
+created: 2026-02-15T18:34:03Z
+---
+Kind: directive_task
+Title: Align Sidebar to Interactive Surface Container
+Status: todo
+Priority: high / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Move
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+Kind: directive_session_meta
+Title: Align and Restyle Sidebar Within Main Interactive Surface
+Status: todo
+Priority: high / session medium
+Owner: operator
+Assignee: 
+Effort: medium
+Created: 2026-02-15T18:34:03Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Align
+
+Goals
+  - Align sidebar left edge with the interactive surface left edge at desktop breakpoints (0px delta).
+  - Preserve existing sidebar navigation behavior, collapse/expand state, and route interactions.
+  - Implement updated sidebar visuals using design tokens/theme variables (no one-off magic values).
+  - Maintain responsive layout correctness across mobile, tablet, and desktop.
+  - Update Storybook stories for default, collapsed, active-item, long-navigation, and viewport variants.
+  - Meet accessibility baseline: keyboard navigation, visible focus indicators, contrast, and screen-reader labeling.
+  - Treat navigation information architecture changes as out of scope for this directive.
+  - Pass directive lifecycle validation checks before handoff.
+
+Tags
+  - needs-triage
+
+Git Routing
+  - directive_branch: feature/align-and-restyle-sidebar-within-main-interactive-surface
+  - base_branch: dev
+  - merge_status: open
+  - commit_policy: end_of_directive
+
+Session
+  - slug: align-and-restyle-sidebar-within-main-interactive-surface
+  - bucket: active
+  - scope: directives
+  - source: architect
+  - auto_run: false
+[2026-02-15T18:38:52Z] [CMD_EXIT] 0
+[2026-02-15T18:38:52Z] [CMD_EXIT] 0
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --directive-meta --no-prompt --set summary=Align\ and\ restyle\ the\ Next.js\ sidebar\ so\ it\ anchors\ to\ the\ interactive\ surface\ container\ edge\,\ with\ Storybook\ and\ accessibility\ updates\ while\ keeping\ navigation\ IA\ out\ of\ scope.
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-layout-alignment --no-prompt --set summary=Move\ global\ sidebar\ anchoring\ from\ viewport\ edge\ to\ the\ main\ interactive\ container\ edge\ while\ preserving\ desktop\ collapse\ and\ offcanvas\ behavior.
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-component-restyle --no-prompt --set summary=Restyle\ sidebar\ primitives\ with\ tokenized\ spacing\,\ border\,\ surface\,\ and\ state\ styles\ while\ preserving\ navigation\ and\ collapse\ interactions.
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-storybook-updates --no-prompt --set summary=Update\ sidebar\ Storybook\ coverage\ for\ alignment\ and\ restyle\ scenarios\ across\ default\,\ collapsed\,\ active-route\,\ long-menu\,\ and\ viewport\ variants.
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-layout-alignment.task.json
+Role guard: architect
+- updated summary
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-component-restyle.task.json
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Role guard: architect
+- updated summary
+Role guard: architect
+- updated summary
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-lifecycle-validation --no-prompt --set summary=Run\ directive\ validation\,\ verify\ metadata\ consistency\,\ and\ prepare\ architect-to-executor\ handoff\ artifacts\ for\ implementation.
+[2026-02-15T18:39:06Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --session 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --task sidebar-accessibility-regression --no-prompt --set summary=Validate\ keyboard\ navigation\,\ focus\ visibility\,\ contrast\,\ and\ screen-reader\ behavior\ for\ sidebar\ app\ routes\ and\ stories\,\ then\ resolve\ regressions.
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-storybook-updates.task.json
+Role guard: architect
+- updated summary
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-lifecycle-validation.task.json
+Updated /root/src/dm-internal-systems/.directive-cli/directives/26-02-15_align-and-restyle-sidebar-within-main-interactive-surface/sidebar-accessibility-regression.task.json
+Role guard: architect
+- updated summary
+Role guard: architect
+- updated summary
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+[2026-02-15T18:39:06Z] [CMD_EXIT] 0
+[2026-02-15T18:39:11Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+[2026-02-15T18:39:11Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-storybook-updates.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-storybook-updates.task.json
+Description: Update sidebar Storybook coverage for alignment and restyle scenarios across default, collapsed, active-route, long-menu, and viewport variants.
+created: 2026-02-15T18:34:25Z
+---
+File: align-and-restyle-sidebar-within-main-interactive-surface.meta.json
+Description: Align and restyle the Next.js sidebar so it anchors to the interactive surface container edge, with Storybook and accessibility updates while keeping navigation IA out of scope.
+created: 2026-02-15T18:34:03Z
+---
+Kind: directive_task
+Title: Update Sidebar Storybook Coverage
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Update sidebar Storybook coverage for alignment and restyle scenarios across default, collapsed, active-route, long-menu, and viewport variants.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+Kind: directive_session_meta
+Title: Align and Restyle Sidebar Within Main Interactive Surface
+Status: todo
+Priority: high / session medium
+Owner: operator
+Assignee: 
+Effort: medium
+Created: 2026-02-15T18:34:03Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Align and restyle the Next.js sidebar so it anchors to the interactive surface container edge, with Storybook and accessibility updates while keeping navigation IA out of scope.
+
+Goals
+  - Align sidebar left edge with the interactive surface left edge at desktop breakpoints (0px delta).
+  - Preserve existing sidebar navigation behavior, collapse/expand state, and route interactions.
+  - Implement updated sidebar visuals using design tokens/theme variables (no one-off magic values).
+  - Maintain responsive layout correctness across mobile, tablet, and desktop.
+  - Update Storybook stories for default, collapsed, active-item, long-navigation, and viewport variants.
+  - Meet accessibility baseline: keyboard navigation, visible focus indicators, contrast, and screen-reader labeling.
+  - Treat navigation information architecture changes as out of scope for this directive.
+  - Pass directive lifecycle validation checks before handoff.
+
+Tags
+  - needs-triage
+
+Git Routing
+  - directive_branch: feature/align-and-restyle-sidebar-within-main-interactive-surface
+  - base_branch: dev
+  - merge_status: open
+  - commit_policy: end_of_directive
+
+Session
+  - slug: align-and-restyle-sidebar-within-main-interactive-surface
+  - bucket: active
+  - scope: directives
+  - source: architect
+  - auto_run: false
+[2026-02-15T18:39:11Z] [CMD_EXIT] 0
+[2026-02-15T18:39:11Z] [CMD_EXIT] 0
+[2026-02-15T18:39:13Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/validatedirectives --strict
+Validation passed: 27 session(s)
+[2026-02-15T18:39:13Z] [CMD_EXIT] 0
+[2026-02-15T18:40:12Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/architect-updatemeta --help
+[2026-02-15T18:40:12Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/updatemeta --help
+Usage:
+  node .directive-cli/scripts/directives/update_directive_metadata.mjs --session <session-dir-or-uuid> --set <key=value> [--set <key=value> ...] [options]
+
+Required:
+  --session <id>                  Session directory name or session UUID (meta.id)
+  --guid <id>                     Legacy alias for --session
+  --set <key=value>               Update a top-level meta key (repeatable)
+
+Target options (choose one):
+  --directive-meta                Target <directive_slug>.meta.json (default)
+  --readme                        Legacy alias for --directive-meta
+  --task <task-slug|file>         Target <task_slug>.task.json
+
+Behavior options:
+  --role <architect|executor|operator>  Enforce role-specific metadata guards (default: architect)
+  --dry-run                       Print planned updates without writing
+  --no-prompt                     Disable interactive prompts for missing inputs
+  --help                          Show this help
+Usage:
+  node .directive-cli/scripts/directives/update_directive_metadata.mjs --session <session-dir-or-uuid> --set <key=value> [--set <key=value> ...] [options]
+
+Required:
+  --session <id>                  Session directory name or session UUID (meta.id)
+  --guid <id>                     Legacy alias for --session
+  --set <key=value>               Update a top-level meta key (repeatable)
+
+Target options (choose one):
+  --directive-meta                Target <directive_slug>.meta.json (default)
+  --readme                        Legacy alias for --directive-meta
+  --task <task-slug|file>         Target <task_slug>.task.json
+
+Behavior options:
+  --role <architect|executor|operator>  Enforce role-specific metadata guards (default: architect)
+  --dry-run                       Print planned updates without writing
+  --no-prompt                     Disable interactive prompts for missing inputs
+  --help                          Show this help
+[2026-02-15T18:40:12Z] [CMD_EXIT] 0
+[2026-02-15T18:40:12Z] [CMD_EXIT] 0
+[2026-02-15T19:14:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/listdirectives --detailed
+[2026-02-15T19:14:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-layout-alignment.task.json
+command=dc directive list --detailed
+mode=detailed
+status=open | title=deployment model | created=2026-02-11T08:13:44.875Z | updated=2026-02-12T10:43:51.922Z
+status=open | title=app-wide css tokenization and component-scoped module migration | created=2026-02-12T23:35:00.000Z | updated=2026-02-12T23:35:00.000Z
+status=open | title=directives css token architecture and jsx class extraction | created=2026-02-12T21:24:04.000Z | updated=2026-02-12T22:28:12.625Z
+status=ready | title=Dry Run Safety Check | created=2026-02-13T22:17:14Z | updated=2026-02-13T22:17:14Z
+status=todo | title=Live Runbook Observer Test | created=2026-02-13T22:48:53Z | updated=2026-02-13T22:48:53Z
+status=todo | title=Remove directives web UI | created=2026-02-13T22:54:33Z | updated=2026-02-13T22:54:33Z
+status=todo | title=Clean placeholder copy in vendors dashboard error card | created=2026-02-14T10:34:04Z | updated=2026-02-14T10:34:04Z
+status=todo | title=Align and Restyle Sidebar Within Main Interactive Surface | created=2026-02-15T18:34:03Z | updated=2026-02-15T18:37:55Z
+status=todo | title=itest launch handoff live 20260214T211140Z-10344 | created=2026-02-14T21:11:40Z | updated=2026-02-14T21:11:40Z
+status=todo | title=itest live handoff live-2643-20260214T211614Z | created=2026-02-14T21:16:14Z | updated=2026-02-14T21:16:14Z
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-layout-alignment.task.json
+Description: Move global sidebar anchoring from viewport edge to the main interactive container edge while preserving desktop collapse and offcanvas behavior.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Align Sidebar to Interactive Surface Container
+Status: todo
+Priority: high / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Move global sidebar anchoring from viewport edge to the main interactive container edge while preserving desktop collapse and offcanvas behavior.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T19:14:14Z] [CMD_EXIT] 0
+[2026-02-15T19:14:14Z] [CMD_EXIT] 0
+[2026-02-15T19:14:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-component-restyle.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-component-restyle.task.json
+Description: Restyle sidebar primitives with tokenized spacing, border, surface, and state styles while preserving navigation and collapse interactions.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Restyle Sidebar Component
+Status: todo
+Priority: high / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Restyle sidebar primitives with tokenized spacing, border, surface, and state styles while preserving navigation and collapse interactions.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T19:14:14Z] [CMD_EXIT] 0
+[2026-02-15T19:14:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-storybook-updates.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-storybook-updates.task.json
+Description: Update sidebar Storybook coverage for alignment and restyle scenarios across default, collapsed, active-route, long-menu, and viewport variants.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Update Sidebar Storybook Coverage
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Update sidebar Storybook coverage for alignment and restyle scenarios across default, collapsed, active-route, long-menu, and viewport variants.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T19:14:14Z] [CMD_EXIT] 0
+[2026-02-15T19:14:14Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-accessibility-regression.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-accessibility-regression.task.json
+Description: Validate keyboard navigation, focus visibility, contrast, and screen-reader behavior for sidebar app routes and stories, then resolve regressions.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Validate Accessibility and Regression Safety
+Status: todo
+Priority: high / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Validate keyboard navigation, focus visibility, contrast, and screen-reader behavior for sidebar app routes and stories, then resolve regressions.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T19:14:14Z] [CMD_EXIT] 0
+[2026-02-15T19:14:15Z] [CMD] /root/src/dm-internal-systems/.directive-cli/scripts/directives/bin/viewdirective --directive 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface --file sidebar-lifecycle-validation.task.json
+Directive: 26-02-15_align-and-restyle-sidebar-within-main-interactive-surface
+File: sidebar-lifecycle-validation.task.json
+Description: Run directive validation, verify metadata consistency, and prepare architect-to-executor handoff artifacts for implementation.
+created: 2026-02-15T18:34:25Z
+---
+Kind: directive_task
+Title: Run Lifecycle Validation and Prepare Handoff
+Status: todo
+Priority: medium / session medium
+Assignee: executor
+Created: 2026-02-15T18:34:25Z
+Updated: 2026-02-15T18:37:55Z
+Summary: Run directive validation, verify metadata consistency, and prepare architect-to-executor handoff artifacts for implementation.
+
+Objective
+  - Define the concrete outcome this task must produce.
+
+Constraints
+  - Keep scope deterministic and drift resistant.
+
+Allowed Files
+  - apps/web/... (edit)
+
+Steps
+  1. [step_1] Define exact file-level actions with completion artifacts.
+
+Validation Commands
+  - # Add exact validation commands here
+
+Expected Output
+  - State measurable completion evidence.
+
+Stop Conditions
+  - Stop and ask operator when blocked by missing scope or failing unrelated validations.
+[2026-02-15T19:14:15Z] [CMD_EXIT] 0

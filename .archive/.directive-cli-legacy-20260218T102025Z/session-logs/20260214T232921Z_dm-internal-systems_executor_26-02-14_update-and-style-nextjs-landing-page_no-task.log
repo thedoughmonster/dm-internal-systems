@@ -1,0 +1,25 @@
+# dc session log
+generated_at: 2026-02-14T23:29:21.106Z
+profile: dm-internal-systems
+role: executor
+directive: 26-02-14_update-and-style-nextjs-landing-page
+task: 
+[2026-02-14T23:30:53.775Z] [DIR] Directive start: 26-02-14_update-and-style-nextjs-landing-page
+[2026-02-14T23:30:53.775Z] [DIR] Branch=feature/update-and-style-nextjs-landing-page Base=dev Policy=end_of_directive
+[2026-02-14T23:30:53.775Z] [DIR] Task start: implementation-spec-for-executor.task.json
+[2026-02-14T23:30:53.776Z] [GIT] Skipping clean-tree gate for commit_policy=end_of_directive (deferred commits expected)
+[2026-02-14T23:30:53.776Z] [WARN] Detected 15 task allowlist intersection(s) in session.
+[2026-02-14T23:30:53.776Z] [WARN] [unlinked] content-and-section-blueprint.task.json <-> context-and-baseline-audit.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.776Z] [WARN] [unlinked] content-and-section-blueprint.task.json <-> design-contract-definition.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.776Z] [WARN] [unlinked] content-and-section-blueprint.task.json <-> handoff-package.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.776Z] [WARN] [unlinked] content-and-section-blueprint.task.json <-> implementation-spec-for-executor.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.776Z] [WARN] [unlinked] content-and-section-blueprint.task.json <-> validation-contract.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] context-and-baseline-audit.task.json <-> design-contract-definition.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] context-and-baseline-audit.task.json <-> handoff-package.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] context-and-baseline-audit.task.json <-> implementation-spec-for-executor.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] context-and-baseline-audit.task.json <-> validation-contract.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] design-contract-definition.task.json <-> handoff-package.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] design-contract-definition.task.json <-> implementation-spec-for-executor.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] [unlinked] design-contract-definition.task.json <-> validation-contract.task.json | apps/web :: apps/web
+[2026-02-14T23:30:53.777Z] [WARN] ... 3 additional intersection(s) not shown
+[2026-02-14T23:30:53.777Z] [GIT] Checking clean working tree

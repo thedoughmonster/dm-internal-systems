@@ -1,0 +1,39 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "4f3e24ee-a4c4-47de-8908-3ff5ab5bf24c",
+    "directive_slug": "canonical-global-sidebar-across-apps-web-layout",
+    "status": "todo",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-18T10:12:22Z",
+    "updated": "2026-02-18T10:12:22Z",
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "Canonical Global Sidebar Across Apps/Web Layout",
+    "summary": "Canonify sidebar behavior into a single shared layout-owned sidebar component used by all views on desktop and mobile, with centralized nav config, unique per-item icons, icon-mode overflow fixes, and nav-only scrolling.",
+    "goals": [
+      "Unique icon per nav item globally",
+      "No sidebar overflow in icon mode",
+      "Header/footer fixed with only nav region scrollable",
+      "Same canonical behavior across desktop sidebar and mobile drawer",
+      "Storybook sidebar story consumes canonical config and behavior"
+    ],
+    "directive_branch": "architect/canonical-global-sidebar",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

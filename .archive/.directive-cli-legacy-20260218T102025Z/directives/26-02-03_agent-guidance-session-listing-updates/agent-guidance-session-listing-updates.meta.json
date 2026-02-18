@@ -1,0 +1,34 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "52171421-62be-45df-920a-5bf686bf3101",
+    "title": "agent guidance session listing updates",
+    "directive": "9046cd12-fa2f-4589-8402-a22d0852927b",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "agent-guidance"
+    ],
+    "created": "2026-02-03T18:29:10.196Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "summary": "Record of QOL updates to agent guidance for session listing and allowed commands.",
+    "result": "recorded",
+    "source": "architect",
+    "effort": "small",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "directive_slug": "agent-guidance-session-listing-updates",
+    "directive_branch": "feat/agent-guidance-session-listing-updates",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

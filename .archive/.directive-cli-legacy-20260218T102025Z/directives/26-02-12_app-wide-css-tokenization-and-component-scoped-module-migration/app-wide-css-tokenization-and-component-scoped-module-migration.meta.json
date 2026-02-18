@@ -1,0 +1,37 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "open",
+    "owner": "operator",
+    "assignee": "architect",
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [
+      "css",
+      "styling",
+      "tokens",
+      "modules",
+      "app-wide"
+    ],
+    "created": "2026-02-12T23:35:00.000Z",
+    "updated": "2026-02-12T23:35:00.000Z",
+    "bucket": "open",
+    "scope": "directives",
+    "source": "user",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "af594136-3b32-4689-94f9-ef92115ca30a",
+    "title": "app-wide css tokenization and component-scoped module migration",
+    "directive": "87b4790e-135f-43ff-a2f5-717f789a28ad",
+    "summary": "Draft session to extend directives CSS/token/module standards across the full apps/web surface with per-component CSS scoping.",
+    "directive_branch": "feat/app-wide-css-scope-modules",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "directive_slug": "app-wide-css-tokenization-and-component-scoped-module-migration"
+  }
+}

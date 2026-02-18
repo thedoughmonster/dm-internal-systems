@@ -1,0 +1,6 @@
+# dc session log
+generated_at: 2026-02-15T16:58:09.317Z
+profile: itest_arch_lock_handoff
+role: executor
+directive: 26-02-11_deployment-model
+task: 01-branch-policy-baseline

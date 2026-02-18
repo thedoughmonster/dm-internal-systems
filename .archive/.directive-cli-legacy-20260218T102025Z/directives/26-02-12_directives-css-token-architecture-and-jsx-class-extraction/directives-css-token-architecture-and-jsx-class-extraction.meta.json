@@ -1,0 +1,38 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "open",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": true,
+    "tags": [
+      "css",
+      "styling",
+      "components",
+      "directives",
+      "ui",
+      "tokens"
+    ],
+    "created": "2026-02-12T21:24:04.000Z",
+    "updated": "2026-02-12T22:28:12.625Z",
+    "bucket": "open",
+    "scope": "directives",
+    "source": "user",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "20b4046a-5c75-492d-8c28-3753b5cb72cf",
+    "title": "directives css token architecture and jsx class extraction",
+    "directive": "c8bd9970-453b-4e3e-a9d1-6b9546cd132f",
+    "summary": "Split global CSS into token-oriented layers, migrate directives UI to CSS Modules, and enforce deterministic no-raw-class and no-literal-style guardrails.",
+    "directive_branch": "feat/directives-css-scope-class-extraction",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "directive_slug": "directives-css-token-architecture-and-jsx-class-extraction"
+  }
+}

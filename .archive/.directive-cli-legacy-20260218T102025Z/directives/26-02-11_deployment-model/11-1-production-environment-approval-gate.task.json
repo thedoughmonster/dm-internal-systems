@@ -1,0 +1,87 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "8cf65164-2a40-4cd9-a47b-e3db808b8707",
+    "title": "11-1-production-environment-approval-gate",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "summary": "",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Enforce human release authority by requiring explicit approval for production environment jobs.",
+    "constraints": [
+      "Configure approval rules without exposing secrets.",
+      "Keep approval ownership aligned to operator controlled reviewer list."
+    ],
+    "allowed_files": [
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_EVIDENCE.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/RELEASE_RUNBOOK.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "In GitHub repository environments, create `production` environment if missing.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Configure required reviewers for `production` to operator or operator-managed team.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Configure deployment protection rules so production jobs require approval before execution.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Record non-secret evidence of environment protection settings in `docs/DEPLOYMENT_INFRA_EVIDENCE.md`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Update `docs/RELEASE_RUNBOOK.md` with the approval checkpoint and responsible reviewer.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Mark `TASK_11.1` complete in `docs/DEPLOYMENT_INFRA_STATUS.md` with UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"TASK_11\\\\.1|production environment|required reviewer|approval\" docs/DEPLOYMENT_INFRA_EVIDENCE.md",
+        "rg -n \"approval|required reviewer|production environment\" docs/RELEASE_RUNBOOK.md",
+        "rg -n \"TASK_11\\\\.1|completed\" docs/DEPLOYMENT_INFRA_STATUS.md"
+      ]
+    },
+    "expected_output": [
+      "Production deployments are gated by explicit human approval."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if environment protection features are unavailable on current GitHub plan."
+    ],
+    "notes": []
+  }
+}

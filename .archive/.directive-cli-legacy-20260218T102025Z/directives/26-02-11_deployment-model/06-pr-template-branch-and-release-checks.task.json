@@ -1,0 +1,98 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "10f343f7-5f9f-4b4d-9ba2-36afafe01106",
+    "title": "Add PR template with branch and release checklist",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T08:53:05.000Z",
+    "tags": [
+      "github",
+      "pr",
+      "checklist"
+    ],
+    "effort": "small",
+    "depends_on": [
+      "9a0e6d57-40d9-4f2e-8df4-a62920861103"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Add a pull request template that reinforces branch model and release path.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "low"
+  },
+  "task": {
+    "objective": "Create a PR template that requires explicit confirmation of branch path, preview validation, and test environment usage.",
+    "constraints": [
+      "Keep checklist short and actionable.",
+      "Do not include secrets or env values."
+    ],
+    "allowed_files": [
+      {
+        "path": "`.github/pull_request_template.md` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `.github/pull_request_template.md` if it does not exist, or edit it if it exists.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Add a checklist item confirming source and target branch match the policy in `docs/BRANCH_POLICY.md`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Add a checklist item confirming Preview validation completed for non-release PRs.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Add a checklist item confirming no prod credentials were used in non-prod work.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Add a release-specific checklist section for PRs from `dev` to `prod`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_06` as completed and record UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -s .github/pull_request_template.md",
+        "rg -n \"dev|prod|preview|test|credentials\" .github/pull_request_template.md"
+      ]
+    },
+    "expected_output": [
+      "PR template exists and reflects branch and release guardrails."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if template format should align with an existing org standard."
+    ],
+    "notes": []
+  }
+}

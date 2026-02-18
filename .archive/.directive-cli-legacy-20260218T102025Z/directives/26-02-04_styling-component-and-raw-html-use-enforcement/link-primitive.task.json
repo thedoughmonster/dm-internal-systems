@@ -1,0 +1,106 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "dm link primitive",
+    "status": "archived",
+    "priority": "high",
+    "owner": "operator",
+    "assignee": null,
+    "created": "2026-02-04T20:59:35.000Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "summary": "Add a reusable DmLink component so links stay inside UI components.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium",
+    "tags": [
+      "links",
+      "ui"
+    ],
+    "effort": "small",
+    "session_priority": "high",
+    "bucket": "archived",
+    "depends_on": [
+      "TASK_rules-and-policy.md"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "id": "4e8ea327-c9d8-457f-a602-2b9d9b55ca8b"
+  },
+  "task": {
+    "objective": "Add `DmLink` under `apps/web/components/ui/dm/*` as the only approved link primitive for app code.",
+    "constraints": [
+      "Do not add `\\\"use client\\\"` to the component. It must be usable from server components such as `apps/web/app/layout.tsx`.",
+      "`DmLink` must accept an `id` prop and apply it to the underlying anchor element.",
+      "External links must open in a new tab by default and must set `rel` to prevent reverse tabnabbing.",
+      "When `DmLink` is used with `Button` `asChild`, expect to pass the same `id` to both components to satisfy `RequireId`.",
+      "No em dash characters in generated writing."
+    ],
+    "allowed_files": [
+      {
+        "path": "Read: `apps/web/app/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Read: `apps/web/components/**/*`",
+        "access": "edit"
+      },
+      {
+        "path": "Write: `apps/web/components/ui/dm/link.tsx`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Pause and confirm you are running `gpt-5.2-codex` (agentic) at high reasoning. If not, stop and ask the operator to switch models before implementing `DmLink`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Create `apps/web/components/ui/dm/link.tsx` exporting `DmLink`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Implement `DmLink` using Next.js `Link` for internal links and a raw `<a>` for external links.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Treat a link as external when `href` is a string starting with `http://` or `https://`. For external links, default `target` to `_blank` and default `rel` to `noopener noreferrer`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Ensure `className`, `aria-*`, and `data-*` props can be passed through so `DmLink` can be used with `Button` `asChild` patterns.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Ensure the underlying clickable element receives the `id` attribute and document in the task result notes that `Button` `asChild` usage must pass the same `id` to both `Button` and `DmLink`.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "- `npm --prefix apps/web run typecheck`"
+      ]
+    },
+    "expected_output": [
+      "`DmLink` exists at `apps/web/components/ui/dm/link.tsx`.",
+      "External links open in a new tab by default and have safe `rel` defaults.",
+      "The component is usable from server and client components."
+    ],
+    "stop_conditions": [
+      "Stop if Next.js `Link` cannot be used from server components in this app setup.",
+      "Stop if there is already an established DM link component that should be reused instead."
+    ],
+    "notes": []
+  }
+}
