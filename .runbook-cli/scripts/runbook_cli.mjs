@@ -21,16 +21,23 @@ const COLORS = {
 
 const SECTIONS = [
   {
-    id: "architect-session",
-    label: "architect session (discovery + authoring)",
+    id: "architect-discovery",
+    label: "architect discovery",
     color: "cyan",
     needsTask: false,
     phase: "architect-discovery",
   },
   {
+    id: "architect-authoring",
+    label: "architect authoring",
+    color: "blue",
+    needsTask: false,
+    phase: "architect-authoring",
+  },
+  {
     id: "architect-handoff",
     label: "architect handoff to executor",
-    color: "blue",
+    color: "magenta",
     needsTask: true,
     phase: "architect-authoring",
   },
@@ -141,6 +148,43 @@ function listTasksForDirective(root, session) {
   });
 }
 
+function loadDirectiveMeta(root, session) {
+  const sessionDir = path.join(directivesRoot(root), session);
+  const metaFile = fs
+    .readdirSync(sessionDir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.endsWith(".meta.json"))
+    .map((d) => d.name)
+    .sort()[0];
+  if (!metaFile) return null;
+  const doc = JSON.parse(fs.readFileSync(path.join(sessionDir, metaFile), "utf8"));
+  const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+  return { doc, meta, metaFile };
+}
+
+function runbookHandoffPath(root, session) {
+  const loaded = loadDirectiveMeta(root, session);
+  if (!loaded) throw new Error(`Missing directive meta for session '${session}'.`);
+  const slug = String(loaded.meta.directive_slug || "").trim();
+  if (!slug) throw new Error(`Directive slug missing in session '${session}'.`);
+  return path.join(directivesRoot(root), session, `${slug}.runbook.handoff.json`);
+}
+
+function readRunbookHandoff(root, session) {
+  const filePath = runbookHandoffPath(root, session);
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function writeRunbookHandoff(root, session, payload) {
+  const filePath = runbookHandoffPath(root, session);
+  fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  return filePath;
+}
+
 async function promptText(question, required = false) {
   const rl = createInterface({ input: stdin, output: stdout });
   try {
@@ -245,8 +289,10 @@ async function main() {
 
   const sectionId = String(args.section || (await selectSectionInteractive())).trim();
   const section = requireSection(sectionId);
-  const includeCreateNew = section.id === "architect-session";
-  const directive = String(args.directive || (await selectDirectiveInteractive(root, { includeCreateNew }))).trim();
+  let directive = "";
+  if (section.id !== "architect-discovery") {
+    directive = String(args.directive || (await selectDirectiveInteractive(root))).trim();
+  }
   const task = section.needsTask
     ? String(args.task || (await selectTaskInteractive(root, directive))).trim()
     : String(args.task || "").trim();
@@ -255,10 +301,34 @@ async function main() {
   process.stdout.write(`${colorize("cyan", `[RUNBOOK] section=${section.id} phase=${section.phase}`)}\n`);
   process.stdout.write(`${colorize("yellow", `[RUNBOOK] directive=${directive}${task ? ` task=${task}` : ""}`)}\n`);
 
-  if (section.id === "architect-session") {
+  if (section.id === "architect-discovery") {
     const cmd = ["launch", "codex", "--role", "architect"];
-    if (directive && directive !== "__create_new_directive__") cmd.push("--directive", directive);
-    if (directive === "__create_new_directive__") cmd.push("--create-directive-chat");
+    cmd.push("--create-directive-chat");
+    if (profile) cmd.push("--profile", profile);
+    runDc(root, cmd, section.phase);
+    return;
+  }
+
+  if (section.id === "architect-authoring") {
+    if (!directive || directive === "__create_new_directive__") {
+      throw new Error("architect-authoring requires an existing directive selection.");
+    }
+    const existing = readRunbookHandoff(root, directive);
+    if (!existing || String(existing.to_phase || "") !== "architect-authoring") {
+      const summary = await promptText("Discovery handoff summary for authoring transition: ", true);
+      const handoff = {
+        kind: "runbook_phase_handoff",
+        schema_version: "1.0",
+        generated_at: new Date().toISOString(),
+        session: directive,
+        from_phase: "architect-discovery",
+        to_phase: "architect-authoring",
+        summary,
+      };
+      const written = writeRunbookHandoff(root, directive, handoff);
+      process.stdout.write(`${colorize("green", `[RUNBOOK] wrote handoff: ${written}`)}\n`);
+    }
+    const cmd = ["launch", "codex", "--role", "architect", "--directive", directive];
     if (profile) cmd.push("--profile", profile);
     runDc(root, cmd, section.phase);
     return;

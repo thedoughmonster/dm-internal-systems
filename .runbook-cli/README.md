@@ -9,7 +9,8 @@ Operator-first control plane for directive lifecycle sessions.
 
 ## Sections
 
-- `architect-session`: launch architect codex session for selected directive.
+- `architect-discovery`: launch architect discovery chat (new directive implied).
+- `architect-authoring`: continue with structured authoring for a selected directive.
 - `architect-handoff`: perform architect -> executor handoff for selected directive/task.
 - `executor-task-pre`: run executor task-cycle pre phase.
 - `executor-task-post`: run executor task-cycle post phase.

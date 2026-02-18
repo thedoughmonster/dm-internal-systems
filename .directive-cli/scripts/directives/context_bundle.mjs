@@ -1268,6 +1268,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
 
 function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role, runbookPhase) {
   const autoExecuteExecutorTask = role === "executor" && Boolean(selectedDirective) && Boolean(selectedTask);
+  const architectDiscoveryChat = role === "architect" && runbookPhase === "architect-discovery";
   const lines = [
     "Startup context is preselected by dc launch codex (dc context start). Use it as authoritative.",
     "Do not ask for role selection.",
@@ -1290,6 +1291,11 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("Executor handoff is task-bound and pre-approved.");
     lines.push("Do not run discovery/model/thinking/go-ahead questions again.");
     lines.push("Start lifecycle immediately: dc directive start --session <selected> then dc task start --session <selected> --task <selected>.");
+  } else if (architectDiscoveryChat) {
+    lines.push("Architect discovery mode: keep this as a normal conversational planning chat.");
+    lines.push("Do not present a rigid checklist unless operator asks for one.");
+    lines.push("Ask clarifying questions naturally and iteratively to refine intent.");
+    lines.push("Do not run commands or edit files until operator explicitly asks to transition to authoring.");
   } else {
     lines.push("First response must briefly confirm active role/directive/task context and run a discovery check with operator.");
     lines.push("Discovery check must include: intended outcome, constraints, definition of done, and whether execution should start now.");
@@ -1323,7 +1329,8 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("No directive is currently selected.");
     lines.push("Start with conversational directive-definition discovery (intent, constraints, definition of done, goals).");
     lines.push("Do not run 'dc directive new' until operator explicitly approves title, summary, and goals.");
-    lines.push("After approval, run 'dc directive new' and continue architect authoring flow.");
+    lines.push("After approval, run 'dc directive new'.");
+    lines.push("Then transition to architect authoring phase via runbook to continue with structured task authoring.");
   }
   return lines.join("\n");
 }
