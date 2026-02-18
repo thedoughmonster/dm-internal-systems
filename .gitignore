@@ -27,6 +27,7 @@ apps/web/.local/
 # Runbook live logs (preserved locally, not versioned)
 .runbook/session-logs/
 .runbook/codex-logs/
+.runbook/exports/
 
 # Local editor settings
 .vscode/

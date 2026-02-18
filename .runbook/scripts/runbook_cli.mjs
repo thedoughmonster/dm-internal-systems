@@ -37,7 +37,7 @@ function usage() {
     "  runbook handoff create --session <id> [--kind authoring|executor] --objective <text> [--from-role <role> --to-role <role> --task-file <name|null>] [--dry-run]",
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
     "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
-    "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--dry-run]",
+    "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
     "",
     "  runbook validate [--session <id>]",
     "  runbook --help",
@@ -86,13 +86,13 @@ function commandUsage(group = "", action = "") {
     return "Usage:\n  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]";
   }
   if (g === "git" && a === "closeout") {
-    return "Usage:\n  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--dry-run]";
+    return "Usage:\n  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]";
   }
   if (g === "git") {
     return [
       "Usage:",
       "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
-      "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--dry-run]",
+      "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
     ].join("\n");
   }
   if (g === "validate") {
@@ -320,6 +320,67 @@ function runbookLogTargets(root, directiveContext) {
   const transcriptPath = path.join(sessionLogDir, `${directiveKey}.log`);
   const eventPath = path.join(sessionLogDir, `${directiveKey}.events.log`);
   return { directiveKey, sessionLogDir, codexLogDir, transcriptPath, eventPath };
+}
+
+function timestampCompact(date = new Date()) {
+  const yyyy = String(date.getUTCFullYear());
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  const hh = String(date.getUTCHours()).padStart(2, "0");
+  const mi = String(date.getUTCMinutes()).padStart(2, "0");
+  const ss = String(date.getUTCSeconds()).padStart(2, "0");
+  return `${yyyy}${mm}${dd}T${hh}${mi}${ss}Z`;
+}
+
+function copyIfExists(from, to) {
+  if (!fs.existsSync(from)) return false;
+  ensureDir(path.dirname(to));
+  fs.copyFileSync(from, to);
+  return true;
+}
+
+function exportRunbookLogs(root, session) {
+  const targets = runbookLogTargets(root, { session });
+  const exportRoot = path.join(root, ".runbook", "exports", safeName(session), timestampCompact());
+  const sessionDir = path.join(exportRoot, "session-logs");
+  const codexDir = path.join(exportRoot, "codex-logs");
+  ensureDir(sessionDir);
+  ensureDir(codexDir);
+
+  const copied = [];
+  const sessionRel = path.relative(root, targets.sessionLogDir);
+  const codexRel = path.relative(root, targets.codexLogDir);
+
+  if (copyIfExists(targets.transcriptPath, path.join(sessionDir, path.basename(targets.transcriptPath)))) {
+    copied.push(path.join(sessionRel, path.basename(targets.transcriptPath)));
+  }
+  if (copyIfExists(targets.eventPath, path.join(sessionDir, path.basename(targets.eventPath)))) {
+    copied.push(path.join(sessionRel, path.basename(targets.eventPath)));
+  }
+
+  if (fs.existsSync(targets.codexLogDir)) {
+    for (const entry of fs.readdirSync(targets.codexLogDir, { withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+      const src = path.join(targets.codexLogDir, entry.name);
+      const dst = path.join(codexDir, entry.name);
+      if (copyIfExists(src, dst)) copied.push(path.join(codexRel, entry.name));
+    }
+  }
+
+  const manifest = {
+    kind: "runbook_log_export",
+    exported_at: nowIso(),
+    session,
+    source: {
+      transcript: path.relative(root, targets.transcriptPath),
+      events: path.relative(root, targets.eventPath),
+      codex_log_dir: path.relative(root, targets.codexLogDir),
+    },
+    destination: path.relative(root, exportRoot),
+    copied_files: copied,
+  };
+  writeJson(path.join(exportRoot, "manifest.json"), manifest, false);
+  return manifest;
 }
 
 function appendEventLog(root, {
@@ -1084,6 +1145,7 @@ function cmdGitCloseout(root, args) {
   const deleteBranch = Boolean(args["delete-branch"]);
   const deleteRemote = Boolean(args["delete-remote"]);
   const doFetch = Boolean(args.fetch);
+  const exportLogs = !Boolean(args["no-log-export"]);
   const session = String(args.session || "").trim();
   const { sessionDir, doc } = requireMetaDoc(root, session);
   if (!fs.existsSync(sessionDir)) throw new Error(`Session not found: ${session}`);
@@ -1159,6 +1221,27 @@ function cmdGitCloseout(root, args) {
     }
   } else {
     actions.push({ step: "delete_branch_local", skipped: true, reason: directiveExists ? "disabled" : "branch_not_found" });
+  }
+
+  if (!exportLogs) {
+    actions.push({ step: "export_logs", skipped: true, reason: "disabled" });
+  } else if (dryRun) {
+    actions.push({ step: "export_logs", skipped: true, reason: "dry_run" });
+  } else {
+    try {
+      const manifest = exportRunbookLogs(root, session);
+      actions.push({
+        step: "export_logs",
+        destination: manifest.destination,
+        copied_files: manifest.copied_files.length,
+      });
+    } catch (error) {
+      actions.push({
+        step: "export_logs",
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   const payload = {
