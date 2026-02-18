@@ -24,5 +24,9 @@ apps/web/.local/
 .directive-cli/directives/
 .directive-cli/session-logs/
 
+# Runbook live logs (preserved locally, not versioned)
+.runbook/session-logs/
+.runbook/codex-logs/
+
 # Local editor settings
 .vscode/
