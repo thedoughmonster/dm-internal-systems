@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec node "$ROOT_DIR/.runbook/scripts/runbook_cli.mjs" "$@"
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+ROOT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+ENTRYPOINT="$ROOT_DIR/.runbook/scripts/runbook_cli.mjs"
+
+if [[ -f "$ENTRYPOINT" ]]; then
+  exec node "$ENTRYPOINT" "$@"
+fi
+
+SEARCH_DIR="$PWD"
+while [[ "$SEARCH_DIR" != "/" ]]; do
+  CANDIDATE="$SEARCH_DIR/.runbook/scripts/runbook_cli.mjs"
+  if [[ -f "$CANDIDATE" ]]; then
+    exec node "$CANDIDATE" "$@"
+  fi
+  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+done
+
+echo "runbook: unable to locate .runbook/scripts/runbook_cli.mjs from script or current directory tree." >&2
+exit 1

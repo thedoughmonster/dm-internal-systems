@@ -3,8 +3,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
+import { printList, selectFromList, toPhaseOptions } from "./_list_component.mjs";
 
 function repoRoot() {
   const file = fileURLToPath(import.meta.url);
@@ -64,23 +64,21 @@ function loadPhases(root) {
 }
 
 async function selectPhaseInteractive(phases) {
-  const lines = ["Select runbook phase:"];
-  for (let i = 0; i < phases.length; i += 1) {
-    const phase = phases[i];
-    const sub = phase.subphases.length ? ` [${phase.subphases.join(", ")}]` : "";
-    lines.push(`  ${i + 1}) ${phase.id}${sub}`);
-  }
-  stdout.write(`${lines.join("\n")}\n`);
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    while (true) {
-      const raw = String(await rl.question("Select phase number: ")).trim();
-      const n = Number(raw);
-      if (Number.isInteger(n) && n >= 1 && n <= phases.length) return phases[n - 1].id;
-    }
-  } finally {
-    rl.close();
-  }
+  return selectFromList({
+    input: stdin,
+    output: stdout,
+    title: "Select runbook phase:",
+    options: toPhaseOptions(phases),
+    defaultIndex: 0,
+  });
+}
+
+function printPhaseList(phases) {
+  printList({
+    title: "Runbook phases:",
+    options: toPhaseOptions(phases),
+    output: stdout,
+  });
 }
 
 async function main() {
@@ -94,9 +92,8 @@ async function main() {
   const phases = loadPhases(root);
   let selected = String(args.phase || "").trim();
   if (!selected) {
-    if (!(stdin.isTTY && stdout.isTTY)) {
-      throw new Error("Non-interactive mode requires --phase <phase-id>.");
-    }
+    printPhaseList(phases);
+    if (!(stdin.isTTY && stdout.isTTY)) return;
     selected = await selectPhaseInteractive(phases);
   }
 
