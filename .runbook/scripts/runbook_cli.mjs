@@ -36,6 +36,7 @@ function usage() {
     "",
     "  runbook handoff create --session <id> [--kind authoring|executor] --objective <text> [--from-role <role> --to-role <role> --task-file <name|null>] [--dry-run]",
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
+    "  runbook git prepare --session <id> [--no-rebase] [--dry-run]",
     "",
     "  runbook validate [--session <id>]",
     "  runbook --help",
@@ -819,6 +820,115 @@ function cmdMetaSet(root, args) {
   }
 }
 
+function gitRun(root, argv, { allowNonZero = false } = {}) {
+  const res = spawnSync("git", argv, { cwd: root, encoding: "utf8" });
+  if (res.error) throw res.error;
+  const code = typeof res.status === "number" ? res.status : 1;
+  if (!allowNonZero && code !== 0) {
+    const err = String(res.stderr || res.stdout || `git ${argv.join(" ")} failed`).trim();
+    throw new Error(err);
+  }
+  return {
+    code,
+    stdout: String(res.stdout || "").trim(),
+    stderr: String(res.stderr || "").trim(),
+  };
+}
+
+function gitRefExists(root, ref) {
+  const r = gitRun(root, ["rev-parse", "--verify", "--quiet", ref], { allowNonZero: true });
+  return r.code === 0;
+}
+
+function cmdGitPrepare(root, args) {
+  const dryRun = Boolean(args["dry-run"]);
+  const noRebase = Boolean(args["no-rebase"]);
+  const session = String(args.session || "").trim();
+  const { sessionDir, doc } = requireMetaDoc(root, session);
+  if (!fs.existsSync(sessionDir)) throw new Error(`Session not found: ${session}`);
+  const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+  const directiveBranch = String(meta.directive_branch || "").trim();
+  const baseBranch = String(meta.directive_base_branch || "dev").trim();
+  if (!directiveBranch) throw new Error(`Directive '${session}' is missing meta.directive_branch`);
+
+  const actions = [];
+  const guidanceCandidates = [
+    path.join(root, ".directive-cli", "AGENTS.md"),
+    path.join(root, "AGENTS.md"),
+    path.join(root, ".runbook", "instructions", "executor-start.active.md"),
+  ];
+  const presentGuidance = guidanceCandidates.filter((f) => fs.existsSync(f));
+  actions.push({ step: "guidance_check", ok: presentGuidance.length > 0, files: guidanceCandidates, present: presentGuidance });
+
+  if (!gitRefExists(root, baseBranch)) {
+    throw new Error(`Base branch '${baseBranch}' not found locally.`);
+  }
+
+  const currentBranch = gitRun(root, ["rev-parse", "--abbrev-ref", "HEAD"]).stdout;
+  if (currentBranch !== directiveBranch) {
+    if (gitRefExists(root, directiveBranch)) {
+      actions.push({ step: "checkout_branch", branch: directiveBranch });
+      if (!dryRun) gitRun(root, ["checkout", directiveBranch]);
+    } else {
+      actions.push({ step: "create_branch", branch: directiveBranch, from: baseBranch });
+      if (!dryRun) gitRun(root, ["checkout", "-b", directiveBranch, baseBranch]);
+    }
+  } else {
+    actions.push({ step: "checkout_branch", branch: directiveBranch, skipped: true });
+  }
+
+  const marker = `runbook: start directive ${session}`;
+  const markerCheck = gitRun(root, ["log", "--oneline", "--grep", marker, "-n", "1"], { allowNonZero: true });
+  if (!markerCheck.stdout) {
+    actions.push({ step: "initial_commit", message: marker });
+    if (!dryRun) gitRun(root, ["commit", "--allow-empty", "-m", marker]);
+  } else {
+    actions.push({ step: "initial_commit", skipped: true, reason: "already_exists" });
+  }
+
+  const branchNow = directiveBranch;
+  const branchExistsNow = gitRefExists(root, branchNow);
+  if (branchExistsNow) {
+    const divergence = gitRun(root, ["rev-list", "--left-right", "--count", `${baseBranch}...${branchNow}`]).stdout;
+    const [behindRaw, aheadRaw] = divergence.split(/\s+/);
+    const behind = Number(behindRaw || 0);
+    const ahead = Number(aheadRaw || 0);
+    actions.push({ step: "rebase_check", base: baseBranch, branch: branchNow, behind, ahead });
+
+    if (!noRebase && behind > 0) {
+      const dirty = gitRun(root, ["status", "--porcelain"]).stdout;
+      if (dirty) {
+        actions.push({ step: "rebase", skipped: true, reason: "dirty_worktree" });
+      } else {
+        actions.push({ step: "rebase", onto: baseBranch });
+        if (!dryRun) gitRun(root, ["rebase", baseBranch]);
+      }
+    } else {
+      actions.push({ step: "rebase", skipped: true, reason: noRebase ? "disabled" : "not_needed" });
+    }
+  } else {
+    actions.push({
+      step: "rebase_check",
+      base: baseBranch,
+      branch: branchNow,
+      skipped: true,
+      reason: dryRun ? "dry_run_branch_not_created" : "branch_not_found",
+    });
+    actions.push({ step: "rebase", skipped: true, reason: "branch_not_found" });
+  }
+
+  const payload = {
+    kind: "runbook_git_prepare",
+    ok: true,
+    session,
+    directive_branch: directiveBranch,
+    directive_base_branch: baseBranch,
+    dry_run: dryRun,
+    actions,
+  };
+  stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+}
+
 function validateDirectiveSession(sessionDir) {
   const errors = [];
   const metaFile = findMetaFile(sessionDir);
@@ -943,6 +1053,7 @@ function dispatchCommand(root, args) {
     else if (group === "task" && action === "set-contract") result = cmdTaskSetContract(root, args);
     else if (group === "handoff" && action === "create") result = cmdHandoffCreate(root, args);
     else if (group === "meta" && action === "set") result = cmdMetaSet(root, args);
+    else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
     else throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}`);
     appendEventLog(root, {
@@ -967,7 +1078,7 @@ function dispatchCommand(root, args) {
 
 function isCommandMode(args) {
   const first = String(args._[0] || "").trim();
-  return ["directive", "task", "handoff", "meta", "validate"].includes(first);
+  return ["directive", "task", "handoff", "meta", "git", "validate"].includes(first);
 }
 
 async function main() {
