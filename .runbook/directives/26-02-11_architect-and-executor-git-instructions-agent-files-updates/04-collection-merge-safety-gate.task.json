@@ -1,0 +1,104 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "e174edff-b9f1-400e-82cf-3a6b12e5c068",
+    "title": "Add collection merge-safety gate rules",
+    "status": "archived",
+    "priority": "medium",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "archived",
+    "created": "2026-02-11T13:36:38.000Z",
+    "updated": "2026-02-11T16:33:04.000Z",
+    "tags": [
+      "collections",
+      "merge-safety",
+      "validation",
+      "directives"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "1bf5dc5e-0801-4a71-a653-20ba25789621",
+      "92e5f800-7b62-45cc-b43d-c1249ab483a2",
+      "7a0cee1d-3e4d-4608-bef3-b1dd84549560"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Add explicit rule language that a completed collection must be merge-safe and non-breaking when merged to dev.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "result": "Completed. Collection merge-safety gate now requires minimum verification evidence, explicit non-breaking merge-to-dev criteria, and stop behavior when merge-safety risk remains unresolved."
+  },
+  "task": {
+    "objective": "Require merge-safety validation before collection-level completion and merge-back.",
+    "constraints": [
+      "Rules must define minimum validation evidence.",
+      "Validation requirements must be compatible with existing lint/typecheck gates.",
+      "Keep scope to policy docs and directive standards."
+    ],
+    "allowed_files": [
+      {
+        "path": "\\'AGENTS.md\\' (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "\\'docs/agent-rules/shared/directives-model.md\\' (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "\\'docs/agent-rules/architect/directive-standards.md\\' (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "\\'docs/agent-rules/executor/validation-and-deviation.md\\' (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "In \\'docs/agent-rules/shared/directives-model.md\\', define \\'collection_merge_ready\\' semantics and minimum verification evidence.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In \\'docs/agent-rules/architect/directive-standards.md\\', require each collection to specify merge-safety validation in task steps.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In \\'docs/agent-rules/executor/validation-and-deviation.md\\', require executor to validate merge-safe state before marking collection complete.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In \\'AGENTS.md\\', add policy language that completed collections must not break \\'dev\\' when merged.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Add explicit stop condition language for unresolved merge-safety risk.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"collection_merge_ready|merge-safe|must not break dev|minimum verification evidence\" AGENTS.md docs/agent-rules/shared/directives-model.md docs/agent-rules/architect/directive-standards.md docs/agent-rules/executor/validation-and-deviation.md"
+      ]
+    },
+    "expected_output": [
+      "Collection completion requires clear merge-safety validation and evidence."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if merge-safety criteria must include additional environment-specific checks beyond existing policy."
+    ],
+    "notes": []
+  }
+}

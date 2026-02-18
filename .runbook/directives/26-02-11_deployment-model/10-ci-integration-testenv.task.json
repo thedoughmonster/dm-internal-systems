@@ -1,0 +1,97 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "d02843d9-18ac-4054-bd85-c24428a41110",
+    "title": "Add CI integration tests against test environment only",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T09:46:52.000Z",
+    "tags": [
+      "ci",
+      "integration",
+      "supabase-test"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "325d66d4-b1fb-4281-a3dc-95436f671109"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Add integration CI checks that target dm_brain_test and never prod.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Add integration test CI job with explicit test environment targeting and prod safety guard.",
+    "constraints": [
+      "Integration tests must never target prod project.",
+      "Do not expose secrets in workflow logs."
+    ],
+    "allowed_files": [
+      {
+        "path": "`.github/workflows/ci-baseline.yml` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`scripts/ci/check-test-env.sh` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `scripts/ci/check-test-env.sh` that fails when environment points to prod infrastructure.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Edit `.github/workflows/ci-baseline.yml` and add a job named `integration-test-testenv`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In the new integration job, run `scripts/ci/check-test-env.sh` before running integration tests.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Configure integration test job to run only on pull requests and to consume test-scoped environment variables.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_10` as completed and record UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -s scripts/ci/check-test-env.sh",
+        "rg -n \"test|prod|fail\" scripts/ci/check-test-env.sh",
+        "rg -n \"integration|check-test-env\" .github/workflows/ci-baseline.yml"
+      ]
+    },
+    "expected_output": [
+      "Integration tests are CI-gated and test-only."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if integration test command is not yet defined."
+    ],
+    "notes": []
+  }
+}

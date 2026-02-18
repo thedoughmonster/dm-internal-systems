@@ -1,0 +1,116 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "6e0843fb-4da3-40e3-8e2d-ad5c4a2b1108",
+    "title": "Configure Vercel project and environment variable scoping",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T08:53:05.000Z",
+    "tags": [
+      "vercel",
+      "environments",
+      "configuration"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "04cb1ae2-50f9-4f2d-af53-d80f70eb7103"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Configure Vercel project and apply scoped values using the local env source and sync workflow.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Configure Vercel so Preview uses test infrastructure and Production uses prod infrastructure.",
+    "constraints": [
+      "Do not write secrets into repository files.",
+      "Do not allow Preview or local environments to target prod Supabase."
+    ],
+    "allowed_files": [
+      {
+        "path": "`docs/ENVIRONMENT_SETUP.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_EVIDENCE.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create or connect the repository to a Vercel project intended for this app.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Run `scripts/env/check-local-secret-files.sh` and stop if it fails.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Run `scripts/env/sync-vercel-env.sh` for `preview` using `.env.test.local`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Run `scripts/env/sync-vercel-env.sh` for `development` using `.env.test.local`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Run `scripts/env/sync-vercel-env.sh` for `production` using `.env.prod.local`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Edit `docs/ENVIRONMENT_SETUP.md` and record that preview and development use test values while production uses prod values.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "Capture non-secret Vercel evidence (environment names and key names only) in `docs/DEPLOYMENT_INFRA_EVIDENCE.md`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_8",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_08` as completed and record UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"Preview|Production|NEXT_PUBLIC_SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY\" docs/ENVIRONMENT_SETUP.md",
+        "rg -n \"TASK_08|completed\" docs/DEPLOYMENT_INFRA_STATUS.md",
+        "rg -n \"TASK_08|preview|development|production\" docs/DEPLOYMENT_INFRA_EVIDENCE.md"
+      ]
+    },
+    "expected_output": [
+      "Vercel environments are configured with correct test/prod separation.",
+      "Setup documentation is updated without exposing secrets."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if Vercel project access is unavailable."
+    ],
+    "notes": []
+  }
+}

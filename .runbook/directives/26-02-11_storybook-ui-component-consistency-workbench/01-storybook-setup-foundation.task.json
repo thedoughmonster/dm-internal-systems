@@ -1,0 +1,111 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "59037f27-22e4-46c1-aef2-3e4e04a88f39",
+    "title": "Initialize Storybook foundation for apps/web",
+    "status": "archived",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "archived",
+    "created": "2026-02-11T15:31:20.000Z",
+    "updated": "2026-02-11T16:33:04.000Z",
+    "tags": [
+      "storybook",
+      "setup",
+      "ui",
+      "components"
+    ],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [
+      "1ed3e58b-2417-41a4-9b37-cefebd9fe9de",
+      "fc7e7c3d-7f67-4f50-9510-134feb649248",
+      "1fe2bd05-cf23-4bc6-84b5-e05b8213ee99"
+    ],
+    "summary": "Add Storybook dependencies, scripts, and base configuration for component-driven UI development.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "collection_id": "ui_component_workbench",
+    "collection_title": "UI Component Workbench",
+    "collection_order": 1,
+    "collection_commit_label": "storybook-foundation",
+    "collection_merge_ready": true,
+    "result": "Executed successfully. Added Storybook scripts and devDependencies (`storybook`, `@storybook/nextjs`, `@storybook/addon-a11y`) and created `.storybook/main.ts`, `.storybook/preview.ts`, and `.storybook/tsconfig.json`. Validation commands passed: `npm --prefix apps/web run typecheck`, `npm --prefix apps/web run storybook -- --ci --smoke-test`, and `npm --prefix apps/web run storybook:build`. Storybook emitted non-blocking warning about `/root/.storybook/settings.json` write permission."
+  },
+  "task": {
+    "objective": "Create a working Storybook baseline in `apps/web` that runs locally and can build in CI.",
+    "constraints": [
+      "Do not change product route behavior.",
+      "Keep configuration inside `apps/web`.",
+      "Use non-interactive, deterministic setup steps."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/package.json` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/.storybook/main.ts` (create/edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/.storybook/preview.ts` (create/edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/.storybook/tsconfig.json` (create/edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "In `apps/web/package.json`, add Storybook scripts: `storybook` and `storybook:build`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In `apps/web/package.json`, add required Storybook dependencies for Next.js and React in `devDependencies`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Create `apps/web/.storybook/main.ts` with stories globs covering `app/**` and `components/**`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Create `apps/web/.storybook/preview.ts` with global CSS import and default controls matchers.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Create `apps/web/.storybook/tsconfig.json` and ensure Storybook config is type-safe.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "npm --prefix apps/web run typecheck",
+        "npm --prefix apps/web run storybook -- --ci --smoke-test",
+        "npm --prefix apps/web run storybook:build"
+      ]
+    },
+    "expected_output": [
+      "Storybook starts and builds successfully for `apps/web`."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if Storybook dependency versions conflict with current Next.js or React versions."
+    ],
+    "notes": []
+  }
+}

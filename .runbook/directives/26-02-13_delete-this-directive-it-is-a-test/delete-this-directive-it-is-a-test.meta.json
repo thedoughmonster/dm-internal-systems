@@ -1,0 +1,32 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-13T10:11:59.000Z",
+    "updated": "2026-02-14T09:31:14Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "delete this directive, it is a test.",
+    "summary": "delete this file.",
+    "directive_branch": "feat/delete-this-directive-it-is-a-test",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "id": "d39abc31-ee41-4ffc-a1af-66bf0e58ed3e",
+    "directive_slug": "delete-this-directive-it-is-a-test"
+  }
+}

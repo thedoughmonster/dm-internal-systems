@@ -1,0 +1,35 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "dcd266fc-62ad-4469-bbc3-3e0a4cfe7f68",
+    "directive_slug": "delete-this-directive",
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "created": "2026-02-14T09:34:12Z",
+    "updated": "2026-02-14T18:33:28Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "delete this directive",
+    "summary": "delete this archive.",
+    "goals": [
+      "goal is to delete this archive."
+    ],
+    "directive_branch": "feat/delete-this-directive",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive"
+  }
+}

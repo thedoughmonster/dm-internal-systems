@@ -1,0 +1,40 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [
+      "ui",
+      "components",
+      "storybook",
+      "docs",
+      "consistency"
+    ],
+    "created": "2026-02-12T08:18:11.000Z",
+    "updated": "2026-02-12T22:28:12.625Z",
+    "bucket": "archived",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "title": "storybook component docs coverage",
+    "summary": "Execute a full Storybook normalization run with contract lock, deterministic batch edits, and merge-safety evidence.",
+    "directive_branch": "feat/storybook-component-docs-coverage",
+    "directive_base_branch": "dev",
+    "directive_merge_status": "merged",
+    "commit_policy": "end_of_directive",
+    "collection_id": "sb-normalization-20260212",
+    "collection_title": "Storybook normalization full run",
+    "collection_commit_label": "storybook-normalization-full-run",
+    "collection_merge_ready": true,
+    "id": "b1ccd8f0-acee-41e3-a363-3f051d54ecbd",
+    "directive_slug": "storybook-component-docs-coverage"
+  }
+}

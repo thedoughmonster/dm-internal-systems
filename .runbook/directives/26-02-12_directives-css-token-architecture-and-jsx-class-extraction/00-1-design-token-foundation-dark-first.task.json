@@ -1,0 +1,107 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "b168228b-fe4e-41de-b928-378b6293ed09",
+    "title": "00-1-design-token-foundation-dark-first",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "high",
+    "summary": "",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Implement the locked token hierarchy and dark-first semantic defaults, including typography, motion, and breakpoint tokens.",
+    "constraints": [
+      "Follow only approved token prefixes.",
+      "Semantic tokens must map to primitives via `var(--dm-...)`.",
+      "`:root` must hold dark defaults; do not add theme override selectors in this task.",
+      "Typography tokens must use only approved included fonts and no font-family fallbacks.",
+      "Manual visual checklist evidence is required in task result."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/app/styles/tokens-primitives.css`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/styles/tokens-semantic.css`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/styles/typography-tokens.css`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/styles/motion-tokens.css`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/styles/breakpoint-tokens.css`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/app/styles/base.css`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "In `tokens-primitives.css`, define the primitive token sets for color, space, radius, shadow, z-index, motion, and breakpoint scales using approved prefixes.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In `tokens-semantic.css`, map semantic tokens to primitives using `var(--dm-...)` and establish dark-first defaults in `:root`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In `typography-tokens.css`, define full typography tokens and ensure font-family tokens use only approved included fonts with no fallback families.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In `motion-tokens.css` and `breakpoint-tokens.css`, define stable motion and breakpoint tokens used by component modules.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "In `base.css`, consume typography and semantic tokens for global text/body defaults without introducing component selectors.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Record manual visual checklist evidence for directives screens and core top-level navigation text styles.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n -- \"--dm-(color|space|radius|font|shadow|z|motion|breakpoint)-\" apps/web/app/styles/*.css",
+        "rg -n -- \"--dm-[a-z0-9-]+:\\s*var\\(--dm-\" apps/web/app/styles/tokens-semantic.css",
+        "! rg -n \"\\[data-theme=\" apps/web/app/styles/*.css",
+        "! rg -n \"font-family:.*,\" apps/web/app/styles/typography-tokens.css apps/web/app/styles/base.css",
+        "npm --prefix apps/web run typecheck",
+        "npm --prefix apps/web run lint"
+      ]
+    },
+    "expected_output": [
+      "Primitive and semantic token hierarchy is implemented with dark-first defaults.",
+      "Breakpoint and motion tokens exist and are available for module usage.",
+      "Typography tokens are fully defined with approved included fonts and no fallback families."
+    ],
+    "stop_conditions": [
+      "Stop and request direction if existing required fonts cannot be represented with no-fallback token values."
+    ],
+    "notes": []
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Template normalization batch 2",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T15:05:41.000Z",
+    "updated": "2026-02-12T15:05:41.000Z",
+    "tags": [
+      "storybook",
+      "ui",
+      "components",
+      "normalization",
+      "batch"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "TASK_01-template-normalization-batch-1.md"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Normalize second template cohort to canonical Overview + VisibleBaseline structure.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "collection_id": "sb-normalization-20260212",
+    "collection_title": "Storybook normalization full run",
+    "collection_order": 3,
+    "collection_commit_label": "storybook-normalization-full-run",
+    "collection_merge_ready": false,
+    "id": "770a29d8-59ed-4932-b992-d30c73d807db"
+  },
+  "task": {
+    "objective": "Normalize template-story structure for batch 2 modules.",
+    "constraints": [
+      "Edit only listed story files.",
+      "Keep module export surface unchanged."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/components/ui/alert-dialog.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/carousel.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/dialog.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/hover-card.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/menubar.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/resizable.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/skeleton.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/tabs.stories.tsx`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Ensure each file uses `tags: [\"autodocs\"]` and has component-specific `parameters.docs.description.component` text.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Ensure each file includes only canonical baseline stories:",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Ensure each file includes `ModuleDocsPage` docs page with exports table and no placeholder scaffold text.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Keep story IDs deterministic when explicit IDs are used.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "for f in \\",
+        "apps/web/components/ui/alert-dialog.stories.tsx \\",
+        "apps/web/components/ui/carousel.stories.tsx \\",
+        "apps/web/components/ui/dialog.stories.tsx \\",
+        "apps/web/components/ui/hover-card.stories.tsx \\",
+        "apps/web/components/ui/menubar.stories.tsx \\",
+        "apps/web/components/ui/resizable.stories.tsx \\",
+        "apps/web/components/ui/skeleton.stories.tsx \\",
+        "apps/web/components/ui/tabs.stories.tsx; do",
+        "rg -q 'tags: \\[\"autodocs\"\\]' \"$f\" || { echo \"missing autodocs in $f\"; exit 1; }",
+        "rg -q 'export const Overview' \"$f\" || { echo \"missing Overview in $f\"; exit 1; }",
+        "rg -q 'export const VisibleBaseline' \"$f\" || { echo \"missing VisibleBaseline in $f\"; exit 1; }",
+        "rg -q 'ModuleDocsPage' \"$f\" || { echo \"missing ModuleDocsPage in $f\"; exit 1; }",
+        "rg -q 'ModulePlayground' \"$f\" || { echo \"missing ModulePlayground in $f\"; exit 1; }",
+        "rg -q 'ModuleVisibleBaseline' \"$f\" || { echo \"missing ModuleVisibleBaseline in $f\"; exit 1; }",
+        "rg --pcre2 -U -q 'export const VisibleBaseline: Story = \\{[\\s\\S]{0,900}ModulePlayground' \"$f\" && { echo \"VisibleBaseline uses ModulePlayground in $f\"; exit 1; } || true",
+        "done"
+      ]
+    },
+    "expected_output": [
+      "Batch 2 files follow identical template normalization contract."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if any file requires non-template composition beyond `ModulePlayground` and `ModuleVisibleBaseline`."
+    ],
+    "notes": []
+  }
+}

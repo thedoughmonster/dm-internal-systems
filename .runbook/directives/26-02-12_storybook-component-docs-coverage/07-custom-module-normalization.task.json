@@ -1,0 +1,128 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Custom interactive module normalization",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-12T15:05:41.000Z",
+    "updated": "2026-02-12T15:05:41.000Z",
+    "tags": [
+      "storybook",
+      "ui",
+      "components",
+      "normalization",
+      "custom"
+    ],
+    "effort": "medium",
+    "depends_on": [
+      "TASK_06-template-normalization-batch-6.md"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Normalize high-variance interactive modules while preserving meaningful scenario coverage.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high",
+    "collection_id": "sb-normalization-20260212",
+    "collection_title": "Storybook normalization full run",
+    "collection_order": 8,
+    "collection_commit_label": "storybook-normalization-full-run",
+    "collection_merge_ready": false,
+    "id": "4838d667-31c5-4892-b4d0-b465f720d263"
+  },
+  "task": {
+    "objective": "Normalize the six custom non-template modules and preserve only meaningful scenario stories.",
+    "constraints": [
+      "Edit only listed story files.",
+      "Preserve interactive scenario value; remove only redundant stories."
+    ],
+    "allowed_files": [
+      {
+        "path": "`apps/web/components/ui/badge.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/breadcrumb.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/button.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/card.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/input.stories.tsx`",
+        "access": "edit"
+      },
+      {
+        "path": "`apps/web/components/ui/label.stories.tsx`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Ensure each file includes `Overview` and `VisibleBaseline` and keeps `VisibleBaseline` as concrete render.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Keep `Variants` only where side-by-side differences are visually clear.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "For `breadcrumb` ensure deep hierarchy and collapsed/ellipsis scenarios remain present.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "For `button` ensure variants and size coverage exists in one scenario canvas with deterministic `sb-` IDs.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Remove redundant stories that duplicate `Overview` without adding coverage signal.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "for f in \\",
+        "apps/web/components/ui/badge.stories.tsx \\",
+        "apps/web/components/ui/breadcrumb.stories.tsx \\",
+        "apps/web/components/ui/button.stories.tsx \\",
+        "apps/web/components/ui/card.stories.tsx \\",
+        "apps/web/components/ui/input.stories.tsx \\",
+        "apps/web/components/ui/label.stories.tsx; do",
+        "rg -q 'export const Overview' \"$f\" || { echo \"missing Overview in $f\"; exit 1; }",
+        "rg -q 'export const VisibleBaseline' \"$f\" || { echo \"missing VisibleBaseline in $f\"; exit 1; }",
+        "rg --pcre2 -U -q 'export const VisibleBaseline: Story = \\{[\\s\\S]{0,900}ModulePlayground' \"$f\" && { echo \"VisibleBaseline uses ModulePlayground in $f\"; exit 1; } || true",
+        "done",
+        "rg -q 'export const DeepHierarchy' apps/web/components/ui/breadcrumb.stories.tsx",
+        "rg -q 'export const Collapsed' apps/web/components/ui/breadcrumb.stories.tsx",
+        "rg -q 'export const Variants' apps/web/components/ui/button.stories.tsx",
+        "rg -n 'id:\\s*\"sb-' apps/web/components/ui/button.stories.tsx"
+      ]
+    },
+    "expected_output": [
+      "Custom modules keep high-value scenarios with no redundant baseline duplication."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if any scenario removal could reduce coverage needed for product behavior review."
+    ],
+    "notes": []
+  }
+}

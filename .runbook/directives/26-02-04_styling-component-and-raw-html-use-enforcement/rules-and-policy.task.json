@@ -1,0 +1,122 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "status": "archived",
+    "priority": "high",
+    "owner": "operator",
+    "assignee": null,
+    "created": "2026-02-04T16:00:30.000Z",
+    "updated": "2026-02-11T10:29:39.000Z",
+    "title": "rules and policy updates",
+    "summary": "Update web UI rules to define raw HTML restrictions, allowed",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "medium exceptions, and required id usage in UI components.",
+    "tags": [],
+    "effort": "medium",
+    "session_priority": "high",
+    "bucket": "archived",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "id": "8cdfb976-b82d-4cd7-bae8-f1c413530fc4"
+  },
+  "task": {
+    "objective": "Update the web UI rules so the approved policy is explicit and unambiguous, including the raw HTML restrictions, allowed exceptions, and ID requirements for UI components.",
+    "constraints": [
+      "Follow the approved policy recorded in the session README.",
+      "Do not introduce new behavior beyond the policy.",
+      "No product code changes in this task.",
+      "No em dash characters in generated writing."
+    ],
+    "allowed_files": [
+      {
+        "path": "Read: `docs/AGENT_RULES_WEB_UI.MD`",
+        "access": "edit"
+      },
+      {
+        "path": "Write: `docs/AGENT_RULES_WEB_UI.MD`",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Pause and confirm you are running `gpt-5.2-codex` (agentic) at medium reasoning. If not, stop and ask the operator to switch models before editing policy docs.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Update the UI primitive usage rule to state that raw interactive and form elements are only allowed inside `apps/web/components/ui/*`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "Define the interactive and form elements in the rule text. Include `button`, `input`, `select`, `textarea`, `option`, and `a`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "Add an explicit exception allowing `input type=\"hidden\"` outside `apps/web/components/ui/*`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Clarify that raw layout elements like `div`, `section`, `span`, `ul`, `li`, `ol`, `header`, `footer`, `main`, and `nav` are allowed outside `apps/web/components/ui/*`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Add a rule that UI components in `apps/web/components/ui/*` must accept an `id` prop and apply it to their root element. Reference `RequireId` and `ComponentIdProps` from `apps/web/lib/types/component-id.ts` and require the id to be stable and unique per instance. Specify the naming format in the rule: `<route-or-feature>-<context>-<element>` with suffixes like `-input`, `-button`, `-select`, `-textarea`, `-toggle`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "Add a link rule that requires `DmLink` from `@/components/ui/dm/link` for app code and restricts `next/link` imports to `apps/web/components/ui/dm/link.tsx`. Include the external new tab and safe `rel` defaults.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_8",
+        "instruction": "Add a short enforcement note that points to `apps/web/eslint.config.mjs` and `apps/web/lib/eslint` for raw element enforcement, and `apps/web/lib/types/component-id.ts` for compile time id enforcement via `RequireId`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_9",
+        "instruction": "Audit `apps/web/components/ui/*` to understand the current `id` prop pattern. Summarize any gaps in the task Notes if the rule will require future remediation.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_10",
+        "instruction": "Re read the rules and confirm they match the policy in the session README without ambiguity.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "- None required. Do not run commands."
+      ]
+    },
+    "expected_output": [
+      "`docs/AGENT_RULES_WEB_UI.MD` updated with the approved policy and ID requirement.",
+      "Updated rules clearly list the interactive elements, the hidden input exception, and the allowed layout elements.",
+      "The id requirement is documented in a way that can be enforced by lint."
+    ],
+    "stop_conditions": [
+      "Stop if you find conflicting rules in other docs that would need updates.",
+      "Stop if changes would require product code updates."
+    ],
+    "notes": [
+      "Audit summary: `RequireId` is already used broadly across `apps/web/components/ui/*` (including core form and interactive primitives like `button`, `input`, `select`, `textarea`, and `label`). `ComponentIdProps` is used by `apps/web/components/ui/card.tsx`, `apps/web/components/ui/loader.tsx`, and `apps/web/components/ui/dm/*`. A follow up audit may still be needed to find any UI primitives that do not accept `id` yet."
+    ]
+  }
+}

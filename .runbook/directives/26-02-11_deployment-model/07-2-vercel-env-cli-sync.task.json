@@ -1,0 +1,101 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "583a95fe-2fdf-43e5-9bbe-f5126d1ec76a",
+    "title": "07-2-vercel-env-cli-sync",
+    "status": "todo",
+    "priority": "medium",
+    "session_priority": "medium",
+    "summary": "",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Create repeatable CLI scripts to push local secret source files to the correct Vercel environment scopes.",
+    "constraints": [
+      "Scripts must not echo secret values.",
+      "Preview and development scopes must source test file only.",
+      "Production scope must source prod file only."
+    ],
+    "allowed_files": [
+      {
+        "path": "`scripts/env/sync-vercel-env.sh` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`scripts/env/load-env-file.sh` (create or edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/ENVIRONMENT_SETUP.md` (edit)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `scripts/env/load-env-file.sh` to parse key names and values from a provided env file without printing values.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "Create `scripts/env/sync-vercel-env.sh` with required arguments `--scope` and `--source-file`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In `scripts/env/sync-vercel-env.sh`, enforce mapping so `preview` and `development` only accept `.env.test.local`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In `scripts/env/sync-vercel-env.sh`, enforce mapping so `production` only accepts `.env.prod.local`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "In `scripts/env/sync-vercel-env.sh`, call Vercel CLI to upsert each key for the target scope while suppressing secret value output.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "Edit `docs/ENVIRONMENT_SETUP.md` and add exact example commands for each scope.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_7",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_07.2` as completed and record UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -s scripts/env/sync-vercel-env.sh",
+        "test -s scripts/env/load-env-file.sh",
+        "rg -n \"preview|development|production|\\\\.env\\\\.test\\\\.local|\\\\.env\\\\.prod\\\\.local\" scripts/env/sync-vercel-env.sh",
+        "rg -n \"parse|load|env file\" scripts/env/load-env-file.sh",
+        "rg -n \"sync-vercel-env\\\\.sh\" docs/ENVIRONMENT_SETUP.md"
+      ]
+    },
+    "expected_output": [
+      "Vercel env sync is script-driven and safe.",
+      "Target-to-source mapping rules are enforced."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if Vercel CLI auth is unavailable in the execution environment."
+    ],
+    "notes": []
+  }
+}

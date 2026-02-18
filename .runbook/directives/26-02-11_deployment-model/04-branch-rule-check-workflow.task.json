@@ -1,0 +1,103 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "c18939b7-246a-45a4-9e53-2dd8e13d1104",
+    "title": "Add CI check for branch naming and merge path",
+    "status": "todo",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "created": "2026-02-11T08:30:31.000Z",
+    "updated": "2026-02-11T09:46:52.000Z",
+    "tags": [
+      "ci",
+      "branching",
+      "github-actions"
+    ],
+    "effort": "small",
+    "depends_on": [
+      "325d66d4-b1fb-4281-a3dc-95436f671109"
+    ],
+    "blocked_by": [],
+    "related": [],
+    "summary": "Add automated PR checks enforcing feature branch naming and approved base branches.",
+    "execution_model": "gpt-5.2-codex",
+    "thinking_level": "high"
+  },
+  "task": {
+    "objective": "Create an automated check that validates branch naming and allowed base branches.",
+    "constraints": [
+      "Keep check deterministic and fast.",
+      "Only enforce rules approved in this session."
+    ],
+    "allowed_files": [
+      {
+        "path": "`.github/workflows/branch-rules.yml` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`scripts/ci/check-branch-rules.sh` (create)",
+        "access": "edit"
+      },
+      {
+        "path": "`docs/DEPLOYMENT_INFRA_STATUS.md` (edit)",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Create `scripts/ci/check-branch-rules.sh` that reads PR source and target branches from CI environment variables.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_2",
+        "instruction": "In `scripts/ci/check-branch-rules.sh`, fail if source branch does not match `feat/*`, `fix/*`, or `chore/*`, except for release PR source `dev`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_3",
+        "instruction": "In `scripts/ci/check-branch-rules.sh`, fail if source branch `feat/*`, `fix/*`, or `chore/*` targets anything other than `dev`.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_4",
+        "instruction": "In `scripts/ci/check-branch-rules.sh`, fail if `dev` targets anything other than `prod` for release promotion.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_5",
+        "instruction": "Create `.github/workflows/branch-rules.yml` to run this script on pull request events.",
+        "files": [],
+        "artifact": ""
+      },
+      {
+        "id": "step_6",
+        "instruction": "In `docs/DEPLOYMENT_INFRA_STATUS.md`, mark `TASK_04` as completed with command path and UTC timestamp.",
+        "files": [],
+        "artifact": ""
+      }
+    ],
+    "validation": {
+      "commands": [
+        "test -s .github/workflows/branch-rules.yml",
+        "test -s scripts/ci/check-branch-rules.sh",
+        "rg -n \"feat/\\\\*|fix/\\\\*|chore/\\\\*|dev|prod\" scripts/ci/check-branch-rules.sh"
+      ]
+    },
+    "expected_output": [
+      "Branch rule CI check exists and runs on PRs."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if current repo branching practice conflicts with these checks."
+    ],
+    "notes": []
+  }
+}
