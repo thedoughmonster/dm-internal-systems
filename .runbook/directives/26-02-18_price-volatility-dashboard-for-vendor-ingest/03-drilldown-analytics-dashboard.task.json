@@ -4,22 +4,27 @@
   "meta": {
     "title": "Advanced drill-down analytics dashboard",
     "summary": "Specify drill-down experience when selecting a vendor-item, including expanded metrics, charts, and contextual filters.",
-    "status": "todo",
+    "status": "done",
     "created": "2026-02-18T13:36:36.715Z",
-    "updated": "2026-02-18T13:36:37.343Z",
+    "updated": "2026-02-18T15:04:00.372Z",
     "id": "fccc294a-c39a-498d-9109-1a78d1937d54",
     "priority": "high",
     "session_priority": "medium",
     "owner": "operator",
     "assignee": "executor",
     "bucket": "todo",
-    "tags": "authoring",
+    "tags": [],
     "effort": "medium",
     "depends_on": [],
     "blocked_by": [],
     "related": [],
     "execution_model": "gpt-5.3-codex",
-    "thinking_level": "medium"
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Added deep-linkable drilldown analytics selection with reversible item state, expanded metrics, and detail-range recomputation controls.",
+      "validation": "PASS: rg drilldown/detail/granularity/range/volatility checks; PASS: npm --prefix apps/web run typecheck.",
+      "updated": "2026-02-18T15:04:00Z"
+    }
   },
   "task": {
     "objective": "Implement an advanced drill-down dashboard opened from a selected vendor-item row, with expanded metrics, charts, and contextual filters for detailed volatility analysis.",
