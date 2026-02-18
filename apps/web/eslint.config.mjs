@@ -8,6 +8,30 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "no-var": "error",
+      "prefer-const": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: "variable",
+          format: ["camelCase", "UPPER_CASE", "PascalCase", "snake_case"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "function",
+          format: ["camelCase", "PascalCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "typeLike",
+          format: ["PascalCase"],
+        },
+      ],
+    },
+  },
+  {
     files: ["components/ui/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
