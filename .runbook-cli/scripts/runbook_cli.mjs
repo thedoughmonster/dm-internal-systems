@@ -258,6 +258,7 @@ async function main() {
   if (section.id === "architect-session") {
     const cmd = ["launch", "codex", "--role", "architect"];
     if (directive && directive !== "__create_new_directive__") cmd.push("--directive", directive);
+    if (directive === "__create_new_directive__") cmd.push("--create-directive-chat");
     if (profile) cmd.push("--profile", profile);
     runDc(root, cmd, section.phase);
     return;

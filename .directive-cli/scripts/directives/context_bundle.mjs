@@ -821,6 +821,11 @@ async function requireStartTask(args, root) {
 }
 
 async function requireStartDirective(args, root) {
+  if (args["create-directive-chat"]) {
+    args["__create_directive_chat"] = true;
+    return null;
+  }
+
   const explicit = String(args.directive || args.session || "").trim();
   const directives = listAvailableDirectives(root);
   if (explicit) {
