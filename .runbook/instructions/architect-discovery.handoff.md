@@ -16,6 +16,7 @@ Execution gate:
   - validation result,
   - explicit next step (`runbook --phase architect-authoring --directive <session>`).
 - Do not produce RFC/ticket/freeform directive prose in this subphase unless operator explicitly requests text-only output.
+- Inside an active Codex session, do NOT run `runbook --phase ...` (that launches a new Codex process). Execute only the CRUD commands listed above.
 
 Outcome for this subphase:
 - Discovery decisions are persisted and architect-authoring handoff artifact exists.
