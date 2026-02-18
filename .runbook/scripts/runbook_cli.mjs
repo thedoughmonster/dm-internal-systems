@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { stdin, stdout } from "node:process";
+import { spawnSync } from "node:child_process";
 import { printList, selectFromList, toPhaseOptions } from "./_list_component.mjs";
 
 function repoRoot() {
@@ -20,12 +21,44 @@ function usage() {
     "Usage:",
     "  runbook",
     "  runbook --phase <phase-id>",
+    "  runbook --phase <phase-id> --dry-run",
     "  runbook --help",
     "",
     "Notes:",
     "  Reads phases from .runbook/phases.json",
     "  In non-interactive mode, pass --phase <phase-id>",
   ].join("\n");
+}
+
+function architectDiscoveryPrompt() {
+  return [
+    "Runbook phase: architect-discovery.",
+    "Start a normal conversational discovery chat with the operator.",
+    "Goal: determine what they want built, constraints, and definition of done.",
+    "Ask one natural question at a time; do not use rigid checklists unless requested.",
+    "Summarize understanding periodically and refine with operator feedback.",
+    "Do not run commands or edit files until the operator explicitly asks.",
+  ].join("\n");
+}
+
+function launchCodexForPhase(phase, { dryRun = false } = {}) {
+  if (phase !== "architect-discovery") return false;
+  const prompt = architectDiscoveryPrompt();
+  const args = [prompt];
+  if (dryRun) {
+    stdout.write(`[RUNBOOK] dry-run launch: codex <architect-discovery prompt>\n`);
+    return true;
+  }
+  if (!(stdin.isTTY && stdout.isTTY)) {
+    throw new Error("Cannot launch interactive codex from non-interactive shell.");
+  }
+  const result = spawnSync("codex", args, {
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (result.error) throw result.error;
+  if (typeof result.status === "number" && result.status !== 0) process.exit(result.status);
+  return true;
 }
 
 function parseArgs(argv) {
@@ -100,6 +133,10 @@ async function main() {
   const found = phases.find((p) => p.id === selected);
   if (!found) {
     throw new Error(`Unknown phase '${selected}'.`);
+  }
+
+  if (launchCodexForPhase(found.id, { dryRun: Boolean(args["dry-run"]) })) {
+    return;
   }
 
   const payload = {
