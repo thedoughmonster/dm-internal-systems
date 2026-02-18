@@ -51,7 +51,7 @@ function truncateToColumns(input, maxCols) {
   return `${plain.slice(0, Math.max(0, limit - 1)).trimEnd()}…`;
 }
 
-function renderMenu(label, options, selected, columns) {
+function renderMenu(label, options, selected, columns, selectedStyle = "text") {
   const out = [label];
   const cols = Math.max(40, Number(columns || 80));
   const labelMax = Math.max(10, cols - 10);
@@ -60,7 +60,7 @@ function renderMenu(label, options, selected, columns) {
     const idx = color(`${i + 1})`, "33");
     const plain = truncateToColumns(options[i].label, labelMax);
     const styled = i === selected
-      ? color(plain, "36")
+      ? (selectedStyle === "bg" ? color(` ${plain} `, "100;97") : color(plain, "36"))
       : (options[i].color ? color(plain, options[i].color) : plain);
     const text = styled;
     out.push(`${prefix} ${idx} ${text}`);
@@ -93,7 +93,7 @@ function renderMultiMenu(label, options, selected, toggled, columns) {
   return out.join("\n");
 }
 
-export async function selectOption({ input, output, label, options, defaultIndex = 0 }) {
+export async function selectOption({ input, output, label, options, defaultIndex = 0, selectedStyle = "text" }) {
   if (!Array.isArray(options) || options.length === 0) throw new Error("selectOption requires non-empty options");
   const safeDefault = Math.max(0, Math.min(defaultIndex, options.length - 1));
 
@@ -120,7 +120,7 @@ export async function selectOption({ input, output, label, options, defaultIndex
   return await new Promise((resolve, reject) => {
     function redraw() {
       clearMenu(lines, output);
-      const frame = renderMenu(label, options, selected, output.columns);
+      const frame = renderMenu(label, options, selected, output.columns, selectedStyle);
       output.write(`${frame}\n`);
       // +1 for the trailing cursor line after printing '\n'
       lines = countRenderedLines(frame, output.columns) + 1;

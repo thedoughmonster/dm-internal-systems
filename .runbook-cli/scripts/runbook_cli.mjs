@@ -164,22 +164,35 @@ async function selectSectionInteractive() {
       color: section.color,
     })),
     defaultIndex: 0,
+    selectedStyle: "bg",
   });
 }
 
-async function selectDirectiveInteractive(root) {
+async function selectDirectiveInteractive(root, { includeCreateNew = false } = {}) {
   const directives = listDirectiveSessions(directivesRoot(root), { includeArchived: false });
-  if (directives.length === 0) throw new Error("No non-archived directives found.");
-  return selectOption({
-    input: stdin,
-    output: stdout,
-    label: "Select directive:",
-    options: directives.map((directive) => ({
+  if (directives.length === 0 && !includeCreateNew) throw new Error("No non-archived directives found.");
+  const options = [];
+  if (includeCreateNew) {
+    options.push({
+      value: "__create_new_directive__",
+      label: "Create new directive",
+      color: "green",
+    });
+  }
+  options.push(
+    ...directives.map((directive) => ({
       value: directive.session,
       label: directiveListLabel(directive),
       color: statusColor(directive.status),
     })),
+  );
+  return selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select directive:",
+    options,
     defaultIndex: 0,
+    selectedStyle: "bg",
   });
 }
 
@@ -196,6 +209,7 @@ async function selectTaskInteractive(root, session) {
       color: statusColor(task.task_status),
     })),
     defaultIndex: 0,
+    selectedStyle: "bg",
   });
 }
 
@@ -231,7 +245,8 @@ async function main() {
 
   const sectionId = String(args.section || (await selectSectionInteractive())).trim();
   const section = requireSection(sectionId);
-  const directive = String(args.directive || (await selectDirectiveInteractive(root))).trim();
+  const includeCreateNew = section.id === "architect-session";
+  const directive = String(args.directive || (await selectDirectiveInteractive(root, { includeCreateNew }))).trim();
   const task = section.needsTask
     ? String(args.task || (await selectTaskInteractive(root, directive))).trim()
     : String(args.task || "").trim();
@@ -241,7 +256,8 @@ async function main() {
   process.stdout.write(`${colorize("yellow", `[RUNBOOK] directive=${directive}${task ? ` task=${task}` : ""}`)}\n`);
 
   if (section.id === "architect-session") {
-    const cmd = ["launch", "codex", "--role", "architect", "--directive", directive];
+    const cmd = ["launch", "codex", "--role", "architect"];
+    if (directive && directive !== "__create_new_directive__") cmd.push("--directive", directive);
     if (profile) cmd.push("--profile", profile);
     runDc(root, cmd, section.phase);
     return;
