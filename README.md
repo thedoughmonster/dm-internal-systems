@@ -51,6 +51,16 @@ npm run runbook:doctor
 export RUNBOOK_ENFORCE_CONVENTIONAL_COMMITS=1
 ```
 
+### Full-suite QA scan
+- Run all baseline checks and produce a report:
+```bash
+npm run qa:all
+```
+- Run from runbook and auto-create remediation directive on failures:
+```bash
+runbook qa scan --create-directive
+```
+
 ### Environment variables
 - Create `apps/web/.env` if local variables are required by the app.
 

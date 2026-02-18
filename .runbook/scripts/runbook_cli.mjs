@@ -38,6 +38,7 @@ function usage() {
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
     "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
     "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
+    "  runbook qa scan [--create-directive] [--force]",
     "  runbook doctor",
     "",
     "  runbook validate [--session <id>]",
@@ -98,6 +99,15 @@ function commandUsage(group = "", action = "") {
   }
   if (g === "validate") {
     return "Usage:\n  runbook validate [--session <id>]";
+  }
+  if (g === "qa" && (!a || a === "scan")) {
+    return "Usage:\n  runbook qa scan [--create-directive] [--force]";
+  }
+  if (g === "qa") {
+    return [
+      "Usage:",
+      "  runbook qa scan [--create-directive] [--force]",
+    ].join("\n");
   }
   if (g === "doctor") {
     return "Usage:\n  runbook doctor";
@@ -1444,6 +1454,62 @@ function cmdDoctor(root) {
   if (!out.ok) process.exit(1);
 }
 
+function cmdQaScan(root, args) {
+  const createDirective = Boolean(args["create-directive"]);
+  const forceCreate = Boolean(args.force);
+  const scan = spawnSync("node", ["ops_tooling/scripts/qa/run_qa_checks.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+    env: process.env,
+  });
+  const stdoutText = String(scan.stdout || "").trim();
+  if (!stdoutText) {
+    throw new Error("QA scan produced no output");
+  }
+  let report;
+  try {
+    report = JSON.parse(stdoutText);
+  } catch {
+    throw new Error("QA scan output was not valid JSON");
+  }
+
+  let directive = null;
+  const failures = Array.isArray(report.failures) ? report.failures : [];
+  const shouldCreate = createDirective && (forceCreate || failures.length > 0);
+  if (shouldCreate) {
+    const now = new Date();
+    const datePrefix = utcDatePrefix();
+    const title = `QA remediation ${datePrefix}`;
+    const slug = slugify(title);
+    const session = `${datePrefix}_${slug}-${timestampCompact(now).toLowerCase()}`;
+    const summary = failures.length > 0
+      ? `Resolve ${failures.length} failing QA check(s) from automated full-suite scan.`
+      : "Review and harden QA baseline from full-suite scan.";
+    const goals = failures.length > 0
+      ? failures.map((f) => `Fix failing QA check: ${String(f.id || "unknown")} (${String(f.command || "").trim()})`)
+      : ["Review full QA report and create remediation tasks for robustness improvements."];
+
+    cmdDirectiveCreate(root, {
+      session,
+      title,
+      summary,
+      branch: `chore/${slug}`,
+      goal: goals,
+    });
+    directive = { session, title, summary, goals_count: goals.length };
+  }
+
+  const out = {
+    kind: "runbook_qa_scan_result",
+    ok: Boolean(report.ok),
+    report_file: report.report_file || null,
+    failures,
+    directive_created: directive,
+  };
+  stdout.write(`${JSON.stringify(out, null, 2)}\n`);
+  if (!out.ok) process.exit(1);
+}
+
 function dispatchCommand(root, args) {
   const [group, action] = args._;
   if (args.help || args.h) {
@@ -1467,8 +1533,9 @@ function dispatchCommand(root, args) {
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "git" && action === "closeout") result = cmdGitCloseout(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
+    else if (group === "qa" && action === "scan") result = cmdQaScan(root, args);
     else if (group === "doctor") result = cmdDoctor(root, args);
-    else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate" || group === "doctor") {
+    else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate" || group === "qa" || group === "doctor") {
       throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${commandUsage(group)}`);
     } else {
       throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${usage()}`);
@@ -1495,7 +1562,7 @@ function dispatchCommand(root, args) {
 
 function isCommandMode(args) {
   const first = String(args._[0] || "").trim();
-  return ["directive", "task", "handoff", "meta", "git", "validate", "doctor"].includes(first);
+  return ["directive", "task", "handoff", "meta", "git", "validate", "qa", "doctor"].includes(first);
 }
 
 async function main() {

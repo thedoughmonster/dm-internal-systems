@@ -43,6 +43,7 @@ function main() {
     "docs/policies/engineering/testing-and-validation.md",
     "docs/policies/engineering/definition-of-done.md",
     ".runbook/scripts/runbook_cli.mjs",
+    "ops_tooling/scripts/qa/run_qa_checks.mjs",
   ];
 
   const errors = [];
