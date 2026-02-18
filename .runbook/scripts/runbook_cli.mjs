@@ -957,7 +957,7 @@ function cmdGitPrepare(root, args) {
 
   const actions = [];
   const guidanceCandidates = [
-    path.join(root, ".directive-cli", "AGENTS.md"),
+    path.join(root, ".repo-agent", "AGENTS.md"),
     path.join(root, "AGENTS.md"),
     path.join(root, ".runbook", "instructions", "executor-start.active.md"),
   ];
