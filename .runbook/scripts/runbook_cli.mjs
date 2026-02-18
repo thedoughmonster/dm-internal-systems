@@ -855,8 +855,17 @@ function gitHasOrigin(root) {
   return r.code === 0;
 }
 
-function assertCleanTree(root, context = "operation") {
-  const status = gitRun(root, ["status", "--porcelain"]).stdout;
+const RUNBOOK_LIVE_LOG_EXCLUDES = [
+  ":(exclude).runbook/codex-logs/**",
+  ":(exclude).runbook/session-logs/**",
+];
+
+function assertCleanTree(root, context = "operation", { excludeRunbookLiveLogs = false } = {}) {
+  const argv = ["status", "--porcelain"];
+  if (excludeRunbookLiveLogs) {
+    argv.push("--", ".", ...RUNBOOK_LIVE_LOG_EXCLUDES);
+  }
+  const status = gitRun(root, argv).stdout;
   if (status) {
     const lines = status.split("\n").filter(Boolean).slice(0, 20);
     throw new Error(`Working tree must be clean before ${context}.\n${lines.join("\n")}`);
@@ -893,7 +902,7 @@ function cmdGitPrepare(root, args) {
   const needsBranchSwitch = currentBranch !== directiveBranch;
   const mayRebase = !noRebase && branchExists;
   if (!dryRun && (needsBranchSwitch || mayRebase)) {
-    assertCleanTree(root, "runbook git prepare");
+    assertCleanTree(root, "runbook git prepare", { excludeRunbookLiveLogs: true });
   }
 
   const hasOrigin = gitHasOrigin(root);
@@ -997,7 +1006,7 @@ function cmdGitCloseout(root, args) {
     if (gitRefExists(root, `origin/${baseBranch}`)) baseRef = `origin/${baseBranch}`;
   }
 
-  if (!dryRun) assertCleanTree(root, "runbook git closeout");
+  if (!dryRun) assertCleanTree(root, "runbook git closeout", { excludeRunbookLiveLogs: true });
 
   const currentBranch = gitRun(root, ["rev-parse", "--abbrev-ref", "HEAD"]).stdout;
   if (!directiveExists) {
