@@ -14,6 +14,13 @@ import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { directiveListLabel, statusColor, taskListLabel } from "./_list_view_component.mjs";
 
 const ROLES = ["architect", "executor", "pair", "auditor"];
+const RUNBOOK_PHASES = [
+  "architect-discovery",
+  "architect-authoring",
+  "executor-start",
+  "executor-task",
+  "executor-closeout",
+];
 const COLORS = {
   reset: "\x1b[0m",
   dim: "\x1b[2m",
@@ -99,6 +106,7 @@ function usage() {
     "  --handoff-required-reading <p> Required reading for handoff receiver",
     "  --handoff-worktree-mode <m> clean_required|known_dirty_allowlist",
     "  --handoff-allowlist-path <p> Repeatable allowlist path when worktree mode uses allowlist",
+    "  --phase <name>          Runbook phase scope (architect-discovery|architect-authoring|executor-start|executor-task|executor-closeout)",
     "  --bootstrap             With start/switch/handoff, write/update profile wiring before launch (default: off)",
     "  --write-profile         Alias for --bootstrap",
     "  --no-bootstrap          Compatibility alias; bootstrap is already off by default",
@@ -211,6 +219,16 @@ function roleBundleDefaults(role) {
   };
 }
 
+function phaseBundleDefaults(phase) {
+  const p = String(phase || "").trim();
+  if (!p) return { out: "", meta: "", policy: "" };
+  return {
+    out: `.codex/context/${p}.compiled.md`,
+    meta: `.codex/context/${p}.compiled.meta.json`,
+    policy: `.codex/context/${p}.policy.compiled.json`,
+  };
+}
+
 function resolveRolePaths(root, args, role) {
   const defaults = roleBundleDefaults(role);
   const allRolesMode = Boolean(args["all-roles-mode"]);
@@ -255,6 +273,16 @@ function resolvePolicyOutPath(root, args, role) {
   if (args["policy-out"]) return resolvePath(root, args["policy-out"], "");
   const { outPath } = resolveRolePaths(root, args, role);
   return derivePolicyOutPath(outPath);
+}
+
+function applyPhaseBundleDefaults(args, runbookPhase) {
+  const phaseDefaults = phaseBundleDefaults(runbookPhase);
+  if (!phaseDefaults.out) return { ...args };
+  const next = { ...args };
+  if (!next.out) next.out = phaseDefaults.out;
+  if (!next.meta) next.meta = phaseDefaults.meta;
+  if (!next["policy-out"]) next["policy-out"] = phaseDefaults.policy;
+  return next;
 }
 
 function compileBundle(root, sourceFiles) {
@@ -1171,18 +1199,20 @@ function writeStartupInstructionsFile(startupFilePath, startupContextPath, comma
 
 async function runBootstrap(root, args) {
   const role = await requireBundleRole(args);
+  const runbookPhase = sanitizeRunbookPhase(args.phase || process.env.DC_RUNBOOK_PHASE || "");
+  const bundleArgs = applyPhaseBundleDefaults(args, runbookPhase);
   const launchConfig = readDcConfig(root, args);
   const codexHome = resolveCodexHome(args, launchConfig, role);
   const configPath = path.join(codexHome, "config.toml");
   const profileName = await requireBootstrapProfile(args, configPath);
-  const commandRefPath = writeDcCommandReference(root, args, role);
-  const includePaths = Array.isArray(args.include) ? args.include.slice() : [];
+  const commandRefPath = writeDcCommandReference(root, bundleArgs, role);
+  const includePaths = Array.isArray(bundleArgs.include) ? bundleArgs.include.slice() : [];
   includePaths.push(relative(root, commandRefPath));
 
-  const bundle = runBuild(root, { ...args, role, include: includePaths, json: false });
+  const bundle = runBuild(root, { ...bundleArgs, role, include: includePaths, json: false });
   let startupContextPath = String(args["__startup_context_path"] || "").trim();
   if (!startupContextPath) {
-    startupContextPath = writeStartupContext(root, args, role, profileName, null, null, launchConfig);
+    startupContextPath = writeStartupContext(root, args, bundleArgs, role, profileName, null, null, launchConfig, "", null, runbookPhase);
   }
   const startupFilePath = startupInstructionsPathFromBundle(bundle.outPath);
   writeStartupInstructionsFile(startupFilePath, startupContextPath, commandRefPath, bundle.outPath, role, profileName);
@@ -1226,6 +1256,23 @@ function inferRunbookPhase(role, selectedDirective, selectedTask) {
     return "executor-start";
   }
   return "";
+}
+
+function sanitizeRunbookPhase(value) {
+  const phase = String(value || "").trim().toLowerCase();
+  if (!phase) return "";
+  if (!RUNBOOK_PHASES.includes(phase)) {
+    throw new Error(`Invalid runbook phase '${phase}'. Expected one of: ${RUNBOOK_PHASES.join(", ")}`);
+  }
+  return phase;
+}
+
+function resolveRunbookPhase(args, role, selectedDirective, selectedTask) {
+  const explicitArg = sanitizeRunbookPhase(args.phase);
+  if (explicitArg) return explicitArg;
+  const envPhase = sanitizeRunbookPhase(process.env.DC_RUNBOOK_PHASE || "");
+  if (envPhase) return envPhase;
+  return inferRunbookPhase(role, selectedDirective, selectedTask);
 }
 
 function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition, runbookPhase) {
@@ -1341,9 +1388,10 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
   return lines.join("\n");
 }
 
-function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig, roleTransition, sessionLogPath, runbookPhase) {
-  const { outPath } = resolveRolePaths(root, args, role || undefined);
-  const startupPath = path.join(path.dirname(outPath), `${role || "all"}.startup.json`);
+function writeStartupContext(root, args, bundleArgs, role, profileName, selectedDirective, selectedTask, launchConfig, roleTransition, sessionLogPath, runbookPhase) {
+  const { outPath } = resolveRolePaths(root, bundleArgs, role || undefined);
+  const startupBase = runbookPhase ? `${runbookPhase}.startup.json` : `${role || "all"}.startup.json`;
+  const startupPath = path.join(path.dirname(outPath), startupBase);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
   const taskSelectionState = selectedTask
     ? "selected"
@@ -1483,7 +1531,8 @@ async function runStart(root, args) {
   const selectedDirective = await requireStartDirective(args, root);
   const directiveKey = selectedDirective ? selectedDirective.session : String(args.directive || args.session || "").trim();
   const selectedTask = await requireStartTask({ ...args, directive: directiveKey, session: directiveKey }, root);
-  const runbookPhase = inferRunbookPhase(role, selectedDirective, selectedTask);
+  const runbookPhase = resolveRunbookPhase(args, role, selectedDirective, selectedTask);
+  const bundleArgs = applyPhaseBundleDefaults(args, runbookPhase);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
   const codexBin = String(args["codex-bin"] || "codex");
   const previousRole = readLastRole(codexHome);
@@ -1501,6 +1550,7 @@ async function runStart(root, args) {
   const startupContextPath = writeStartupContext(
     root,
     args,
+    bundleArgs,
     role,
     profileName,
     selectedDirective,
@@ -1516,7 +1566,7 @@ async function runStart(root, args) {
     const includes = Array.isArray(args.include) ? args.include.slice() : [];
     includes.push(relative(root, startupContextPath));
     await runBootstrap(root, {
-      ...args,
+      ...bundleArgs,
       role,
       profile: profileName,
       include: includes,
@@ -1527,6 +1577,13 @@ async function runStart(root, args) {
     throw new Error(
       `Profile '${profileName}' is not configured in ${configPath}. Run launch once with --bootstrap to write profile wiring.`,
     );
+  } else {
+    const commandRefPath = writeDcCommandReference(root, bundleArgs, role);
+    const includePaths = Array.isArray(bundleArgs.include) ? bundleArgs.include.slice() : [];
+    includePaths.push(relative(root, commandRefPath), relative(root, startupContextPath));
+    const bundle = runBuild(root, { ...bundleArgs, role, include: includePaths, json: false });
+    const startupFilePath = startupInstructionsPathFromBundle(bundle.outPath);
+    writeStartupInstructionsFile(startupFilePath, startupContextPath, commandRefPath, bundle.outPath, role, profileName);
   }
 
   output(args, {

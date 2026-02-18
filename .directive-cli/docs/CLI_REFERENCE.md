@@ -124,6 +124,7 @@ Phase scoping:
 - Agent sessions may include `DC_RUNBOOK_PHASE` (set by `dc launch codex/handoff`) to hard-scope allowed `dc` commands.
 - If command is out-of-phase, `dc` blocks and prints allowed commands for the current phase.
 - Use `dc runbook` to continue within the active phase.
+- Launch now compiles phase-specific bundles under `.codex/context/<phase>.compiled.md` (with matching `.meta.json`, `.policy.compiled.json`, and `<phase>.startup.json`).
 
 ## Required invariants
 

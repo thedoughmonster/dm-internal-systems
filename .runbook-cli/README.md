@@ -24,3 +24,4 @@ Operator-first control plane for directive lifecycle sessions.
 
 - This is additive and keeps `.directive-cli` intact for rollback.
 - `DC_RUNBOOK_PHASE` is set on dispatched commands for scoped enforcement.
+- Launch artifacts are phase-scoped (`.codex/context/<phase>.compiled.md` + `<phase>.startup.json`).

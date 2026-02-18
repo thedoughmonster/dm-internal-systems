@@ -546,6 +546,26 @@ test("runbook phase guard allows directive new in architect-discovery", () => {
   assert.match(output, /Created|Would create|Session:/i);
 });
 
+test("context start uses phase-scoped bundle artifacts", () => {
+  const tag = randomTag();
+  const tmpCodex = path.join("/tmp", `dc-phase-start-home-${tag}`);
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "context",
+    "start",
+    "--role",
+    "architect",
+    "--profile",
+    `itest_phase_scope_${tag}`,
+    "--phase",
+    "architect-discovery",
+    "--codex-home",
+    tmpCodex,
+    "--bootstrap",
+    "--dry-run",
+  ]);
+  assert.match(output, /Built context bundle: .*architect-discovery\.compiled\.md/);
+});
+
 test("architect authoring phase enforces directive branch alignment", (t) => {
   const tag = randomTag();
   const session = `itest-arch-branch-${tag}`;
@@ -1552,7 +1572,7 @@ test("cli launch codex bootstraps profile and launches configured binary", (t) =
   assert.ok(fs.existsSync(commandRefPath), "Expected dc command reference file to be created");
   assert.ok(fs.existsSync(outPath), "Expected context bundle file to be created");
   assert.ok(fs.existsSync(metaPath), "Expected context bundle metadata file to be created");
-  const startupPath = path.join(tmpBundleDir, "architect.startup.json");
+  const startupPath = path.join(tmpBundleDir, "architect-discovery.startup.json");
   assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
   const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
   assert.equal(startupDoc.kind, "dc_startup_context");
@@ -1560,7 +1580,7 @@ test("cli launch codex bootstraps profile and launches configured binary", (t) =
   assert.equal(startupDoc.operator_discovery.required, true);
   const bundleMeta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
   assert.ok(
-    Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("architect.startup.json")),
+    Array.isArray(bundleMeta.sources) && bundleMeta.sources.some((s) => String(s).endsWith("architect-discovery.startup.json")),
     "Expected startup context to be included in bundle sources",
   );
   assert.ok(
@@ -1994,7 +2014,7 @@ test("cli launch codex marks selected directive with no tasks as none_available"
   assert.match(output, /has no tasks yet/);
   const startupInstructionsPath = path.join(tmpBundleDir, "startup.md");
   assert.ok(fs.existsSync(startupInstructionsPath), "Expected startup instructions file to be created");
-  const startupPath = path.join(tmpBundleDir, "architect.startup.json");
+  const startupPath = path.join(tmpBundleDir, "architect-discovery.startup.json");
   assert.ok(fs.existsSync(startupPath), "Expected startup context file to be created");
   const startupDoc = JSON.parse(fs.readFileSync(startupPath, "utf8"));
   assert.equal(startupDoc.startup_rules.task_selection_state, "none_available");
