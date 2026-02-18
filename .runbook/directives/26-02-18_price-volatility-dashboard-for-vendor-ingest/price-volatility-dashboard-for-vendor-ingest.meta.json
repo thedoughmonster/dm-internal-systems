@@ -5,14 +5,14 @@
     "directive_slug": "price-volatility-dashboard-for-vendor-ingest",
     "title": "Price Volatility Dashboard for Vendor Ingest",
     "summary": "Add per-vendor item price-over-time charts with advanced volatility drill-down analytics in vendor ingest.",
-    "status": "todo",
+    "status": "done",
     "directive_branch": "feature/vendor-ingest-price-volatility-dashboard",
     "goals": [
       "Confirm discovery decisions are persisted for architect authoring.",
       "Provide a validated handoff package for the selected directive."
     ],
     "created": "2026-02-18T13:30:45.464Z",
-    "updated": "2026-02-18T14:13:29.087Z",
+    "updated": "2026-02-18T15:07:23.016Z",
     "id": "e583217d-3433-43af-9f9e-591c3324c25e",
     "session": "26-02-18_price-volatility-dashboard-for-vendor-ingest",
     "owner": "operator",
@@ -31,10 +31,10 @@
     "blocked_by": [],
     "related": [],
     "directive_base_branch": "dev",
-    "directive_merge_status": "open",
+    "directive_merge_status": "merged",
     "commit_policy": "end_of_directive",
-    "runbook_phase": "executor-start",
-    "runbook_subphase": "active",
+    "runbook_phase": "executor-closeout",
+    "runbook_subphase": "handoff",
     "delivery": {
       "mode": "enabled_by_default"
     },
@@ -48,8 +48,8 @@
       "Metrics recompute correctly for selected range and granularity.",
       "Sparse/incomplete data handling is robust and performance is acceptable for default window."
     ],
-    "phase": "architect-discovery",
+    "phase": "executor-closeout",
     "subphase": "handoff",
-    "directive_status": "todo"
+    "directive_status": "done"
   }
 }
