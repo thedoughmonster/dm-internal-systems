@@ -16,6 +16,10 @@ function phasesPath(root) {
   return path.join(root, ".runbook", "phases.json");
 }
 
+function phaseInstructionPath(root, phaseId) {
+  return path.join(root, ".runbook", "instructions", `${phaseId}.md`);
+}
+
 function usage() {
   return [
     "Usage:",
@@ -30,20 +34,23 @@ function usage() {
   ].join("\n");
 }
 
-function architectDiscoveryPrompt() {
+function loadPhasePrompt(root, phaseId) {
+  const p = phaseInstructionPath(root, phaseId);
+  if (!fs.existsSync(p)) {
+    throw new Error(`Missing runbook phase instruction file: ${p}`);
+  }
+  const body = fs.readFileSync(p, "utf8").trim();
   return [
-    "Runbook phase: architect-discovery.",
-    "Start a normal conversational discovery chat with the operator.",
-    "Goal: determine what they want built, constraints, and definition of done.",
-    "Ask one natural question at a time; do not use rigid checklists unless requested.",
-    "Summarize understanding periodically and refine with operator feedback.",
-    "Do not run commands or edit files until the operator explicitly asks.",
+    `Runbook phase: ${phaseId}`,
+    "Use this as authoritative guidance for this session:",
+    "",
+    body,
   ].join("\n");
 }
 
-function launchCodexForPhase(phase, { dryRun = false } = {}) {
+function launchCodexForPhase(root, phase, { dryRun = false } = {}) {
   if (phase !== "architect-discovery") return false;
-  const prompt = architectDiscoveryPrompt();
+  const prompt = loadPhasePrompt(root, phase);
   const args = [prompt];
   if (dryRun) {
     stdout.write(`[RUNBOOK] dry-run launch: codex <architect-discovery prompt>\n`);
@@ -135,7 +142,7 @@ async function main() {
     throw new Error(`Unknown phase '${selected}'.`);
   }
 
-  if (launchCodexForPhase(found.id, { dryRun: Boolean(args["dry-run"]) })) {
+  if (launchCodexForPhase(root, found.id, { dryRun: Boolean(args["dry-run"]) })) {
     return;
   }
 
