@@ -3,9 +3,9 @@
 This directory is organized by purpose.
 
 ## Active sections
-- `.directive-cli/docs/agent-rules/`: role-specific operating rules and shared role protocol.
-- `.directive-cli/docs/flows/`: canonical machine-readable directive workflow definitions.
-- `.directive-cli/policies/`: canonical machine-enforced directive CLI operational policies.
+- `docs/repo-rules.md`: canonical tool-agnostic repository rules (applies to all actors and tooling).
+- `.repo-agent/AGENTS.md`: canonical agent charter entrypoint for this repository.
+- `.runbook/phases.json` + `.runbook/instructions/*.md`: canonical runbook phase model and phase instructions.
 - `docs/architecture/`: system and deployment architecture references.
 - `docs/operations/`: operational procedures and status docs.
 - `docs/policies/`: cross-cutting policy docs.
@@ -19,5 +19,5 @@ This directory is organized by purpose.
 - `.archive/docs/agent-rules-monolith/`: archived monolithic agent rule snapshots.
 
 ## Notes
-- Role bindings are defined in `.directive-cli/AGENTS.md`.
+- Role bindings and startup behavior are defined in `.repo-agent/AGENTS.md`.
 - UI paradigm required reading pointer is `apps/web/docs/guides/component-paradigm.md`.

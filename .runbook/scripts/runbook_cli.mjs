@@ -585,6 +585,7 @@ function loadPhasePrompt(root, phaseId, { subphase = "active", directiveContext 
   const subphaseFile = path.join(root, ".runbook", "instructions", `${phaseId}.${subphaseName}.md`);
   if (!fs.existsSync(subphaseFile)) throw new Error(`Missing runbook phase instruction file: ${subphaseFile}`);
   const body = fs.readFileSync(subphaseFile, "utf8").trim();
+  const repoRules = loadRepoRulesBundle(root);
   const contextLines = directiveContext
     ? [
       `Selected directive session: ${directiveContext.session}`,
@@ -601,8 +602,29 @@ function loadPhasePrompt(root, phaseId, { subphase = "active", directiveContext 
     "Use this as authoritative guidance for this session:",
     "",
     ...contextLines,
+    ...(repoRules ? ["Repository rules bundle (authoritative):", "", repoRules, ""] : []),
     body,
   ].join("\n");
+}
+
+function repoRulesBundleCandidates(root) {
+  return [
+    path.join(root, "docs", "repo-rules.md"),
+    path.join(root, "docs", "policies", "branch-policy.md"),
+  ];
+}
+
+function loadRepoRulesBundle(root) {
+  const bundleCandidates = repoRulesBundleCandidates(root);
+  const parts = [];
+  for (const file of bundleCandidates) {
+    if (!fs.existsSync(file)) continue;
+    const body = String(fs.readFileSync(file, "utf8") || "").trim();
+    if (!body) continue;
+    const rel = path.relative(root, file) || file;
+    parts.push(`## Source: ${rel}\n\n${body}`);
+  }
+  return parts.join("\n\n");
 }
 
 function launchCodexForPhase(root, phase, { dryRun = false, subphase = "active", directiveContext = null } = {}) {
@@ -957,8 +979,7 @@ function cmdGitPrepare(root, args) {
 
   const actions = [];
   const guidanceCandidates = [
-    path.join(root, ".repo-agent", "AGENTS.md"),
-    path.join(root, "AGENTS.md"),
+    ...repoRulesBundleCandidates(root),
     path.join(root, ".runbook", "instructions", "executor-start.active.md"),
   ];
   const presentGuidance = guidanceCandidates.filter((f) => fs.existsSync(f));
@@ -1223,6 +1244,41 @@ function validateDirectiveSession(sessionDir) {
   return errors;
 }
 
+function validateRepoRulesBundle(root) {
+  const files = repoRulesBundleCandidates(root);
+  const errors = [];
+  const checks = [];
+
+  const forbiddenTokens = [
+    { name: "legacy_dc_command", re: /\bdc\b/i },
+    { name: "runbook_command_literal", re: /`runbook\b/i },
+    { name: "runbook_internal_paths", re: /\.runbook\//i },
+    { name: "workflow_phase_language", re: /\bphase\b|\bsubphase\b/i },
+    { name: "role_handoff_language", re: /\bhandoff\b|\barchitect\b|\bexecutor\b/i },
+  ];
+
+  for (const file of files) {
+    const rel = path.relative(root, file) || file;
+    if (!fs.existsSync(file)) {
+      errors.push(`missing repo rules file: ${rel}`);
+      checks.push({ file: rel, ok: false, errors: ["missing"] });
+      continue;
+    }
+    const body = String(fs.readFileSync(file, "utf8") || "");
+    const fileErrors = [];
+    if (!body.trim()) fileErrors.push("empty file");
+    if (file.endsWith(path.join("docs", "repo-rules.md"))) {
+      for (const token of forbiddenTokens) {
+        if (token.re.test(body)) fileErrors.push(`forbidden_token:${token.name}`);
+      }
+    }
+    checks.push({ file: rel, ok: fileErrors.length === 0, errors: fileErrors });
+    for (const e of fileErrors) errors.push(`${rel}: ${e}`);
+  }
+
+  return { ok: errors.length === 0, files: checks, errors };
+}
+
 function cmdValidate(root, args) {
   const dirRoot = directivesRoot(root);
   if (!fs.existsSync(dirRoot)) {
@@ -1249,7 +1305,10 @@ function cmdValidate(root, args) {
     rows.push({ session, ok: errors.length === 0, errors });
   }
 
-  const out = { kind: "runbook_validation", ok, sessions: rows };
+  const repoRules = validateRepoRulesBundle(root);
+  if (!repoRules.ok) ok = false;
+
+  const out = { kind: "runbook_validation", ok, repo_rules: repoRules, sessions: rows };
   stdout.write(`${JSON.stringify(out, null, 2)}\n`);
   if (!ok) process.exit(1);
 }

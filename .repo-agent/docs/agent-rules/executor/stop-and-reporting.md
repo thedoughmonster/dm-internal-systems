@@ -1,3 +1,5 @@
+> Legacy notice: This file belongs to the archived pre-runbook ruleset. It is not authoritative for current sessions. Use `.repo-agent/AGENTS.md`, `docs/repo-rules.md`, and `.runbook/instructions/*.md`.
+
 # Stop And Reporting
 
 ## Stop conditions

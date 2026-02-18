@@ -22,5 +22,6 @@ Do not use legacy `dc` commands.
 - Phase instructions: `.runbook/instructions/*.md`
 - Runbook CLI: `.runbook/scripts/runbook_cli.mjs`
 - Directive artifacts: `.runbook/directives/<session>/`
+- Repository rules bundle: `docs/repo-rules.md` (injected by runbook into every launched session prompt)
 
 If docs conflict with script behavior, `runbook` script behavior wins.
