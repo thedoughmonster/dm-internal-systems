@@ -4,22 +4,27 @@
   "meta": {
     "title": "Volatility ranking and filter computation",
     "summary": "Define ranking/filter behavior for percent swing, absolute swing, volatility score, recent movers, freshness, and minimum observations.",
-    "status": "todo",
+    "status": "done",
     "created": "2026-02-18T13:36:36.603Z",
-    "updated": "2026-02-18T13:36:37.227Z",
+    "updated": "2026-02-18T15:01:14.288Z",
     "id": "77a3eedd-7191-4e0b-b8a4-a489ac02b81d",
     "priority": "high",
     "session_priority": "medium",
     "owner": "operator",
     "assignee": "executor",
     "bucket": "todo",
-    "tags": "authoring",
+    "tags": [],
     "effort": "medium",
     "depends_on": [],
     "blocked_by": [],
     "related": [],
     "execution_model": "gpt-5.3-codex",
-    "thinking_level": "medium"
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Implemented deterministic ranking and filters for percent swing, absolute swing, volatility, recent movers, freshness, and minimum observations.",
+      "validation": "PASS: rg semantics checks for ranking/filter terms; PASS: npm --prefix apps/web run typecheck.",
+      "updated": "2026-02-18T15:01:14Z"
+    }
   },
   "task": {
     "objective": "Implement deterministic ranking/filter computations for percent swing, absolute swing, volatility, recent movers, freshness, and minimum observations over selected windows.",

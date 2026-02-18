@@ -4,22 +4,27 @@
   "meta": {
     "title": "Quality, sparse-data robustness, and performance gates",
     "summary": "Define validation gates for sparse/incomplete data handling, performance expectations, and completion evidence.",
-    "status": "todo",
+    "status": "done",
     "created": "2026-02-18T13:36:36.765Z",
-    "updated": "2026-02-18T13:36:37.409Z",
+    "updated": "2026-02-18T15:04:36.205Z",
     "id": "5a1c0c7c-2a0d-434d-9b81-97a8ee70e742",
     "priority": "medium",
     "session_priority": "medium",
     "owner": "operator",
     "assignee": "executor",
     "bucket": "todo",
-    "tags": "authoring",
+    "tags": [],
     "effort": "small",
     "depends_on": [],
     "blocked_by": [],
     "related": [],
     "execution_model": "gpt-5.3-codex",
-    "thinking_level": "medium"
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Validated sparse/incomplete safety states, default 90-day behavior, and directive readiness after ranking and drilldown integration.",
+      "validation": "PASS: rg sparse/default/error checks in page/view; PASS: npm --prefix apps/web run lint; PASS: npm --prefix apps/web run typecheck; PASS: runbook validate --session 26-02-18_price-volatility-dashboard-for-vendor-ingest.",
+      "updated": "2026-02-18T15:04:36Z"
+    }
   },
   "task": {
     "objective": "Complete quality gates for sparse/incomplete data handling and performance expectations, then prepare executor completion evidence for directive closeout.",

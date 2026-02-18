@@ -4,22 +4,27 @@
   "meta": {
     "title": "Price tracking overview UI with charts",
     "summary": "Specify overview UI behavior for per-vendor item price-over-time charts and sortable/filterable list surfaces.",
-    "status": "todo",
+    "status": "done",
     "created": "2026-02-18T13:36:36.657Z",
-    "updated": "2026-02-18T13:36:37.282Z",
+    "updated": "2026-02-18T15:02:10.303Z",
     "id": "5c5ae376-0d34-45be-bdf3-3a3a441d5af2",
     "priority": "medium",
     "session_priority": "medium",
     "owner": "operator",
     "assignee": "executor",
     "bucket": "todo",
-    "tags": "authoring",
+    "tags": [],
     "effort": "medium",
     "depends_on": [],
     "blocked_by": [],
     "related": [],
     "execution_model": "gpt-5.3-codex",
-    "thinking_level": "medium"
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Delivered overview UI with 90-day default route behavior, ranking/filter controls, and resilient sparse/empty/error states.",
+      "validation": "PASS: rg default-window and UI-state checks; PASS: npm --prefix apps/web run lint; PASS: npm --prefix apps/web run typecheck.",
+      "updated": "2026-02-18T15:02:10Z"
+    }
   },
   "task": {
     "objective": "Deliver the price tracking overview UI showing per-vendor item price-over-time charts and a sortable/filterable list aligned to the new volatility metrics.",

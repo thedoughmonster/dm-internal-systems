@@ -4,22 +4,27 @@
   "meta": {
     "title": "Price series data contract and backend plumbing",
     "summary": "Define backend/API contract for per-vendor item price-over-time data with 90-day default window and granularity controls.",
-    "status": "todo",
+    "status": "done",
     "created": "2026-02-18T13:36:36.534Z",
-    "updated": "2026-02-18T13:36:37.137Z",
+    "updated": "2026-02-18T14:57:09.461Z",
     "id": "fd14946d-fe3a-4072-bbad-7758478d34fe",
     "priority": "high",
     "session_priority": "medium",
     "owner": "operator",
     "assignee": "executor",
     "bucket": "todo",
-    "tags": "authoring",
+    "tags": [],
     "effort": "medium",
     "depends_on": [],
     "blocked_by": [],
     "related": [],
     "execution_model": "gpt-5.3-codex",
-    "thinking_level": "medium"
+    "thinking_level": "medium",
+    "result": {
+      "summary": "Implemented_90-day_default_vendor_price-series_contract_with_granularity-range_support_and_metadata-rich_response.",
+      "validation": "PASS_rg_and_typecheck_for_task_00_contract_changes.",
+      "updated": "2026-02-18T14:57:09Z"
+    }
   },
   "task": {
     "objective": "Implement and document a backend contract that returns per-vendor item price time-series data with a 90-day default window, selectable date range, and granularity options required by dashboard consumers.",
