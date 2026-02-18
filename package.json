@@ -1,5 +1,9 @@
 {
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
+    "runbook:doctor": "node .runbook/scripts/runbook_cli.mjs doctor",
     "validate:runbook": "node .runbook/scripts/runbook_cli.mjs validate",
     "validate:repo-standards": "node ops_tooling/scripts/policy/validate_repo_standards.mjs",
     "hooks:install": "bash ops_tooling/scripts/policy/install_git_hooks.sh"

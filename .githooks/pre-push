@@ -8,6 +8,10 @@ node ops_tooling/scripts/policy/validate_repo_standards.mjs >/dev/null
 node .runbook/scripts/runbook_cli.mjs validate >/dev/null
 
 needs_web_checks=0
+needs_root_changelog=0
+needs_web_changelog=0
+all_files=""
+all_commits=""
 
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [[ -z "${local_sha:-}" ]]; then
@@ -18,21 +22,71 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     continue
   fi
 
+  if [[ "$local_ref" == refs/heads/* ]]; then
+    branch="${local_ref#refs/heads/}"
+    if ! [[ "$branch" =~ ^(dev|prod|feat/|fix/|chore/) ]]; then
+      echo "Blocked: branch '$branch' must match dev|prod|feat/*|fix/*|chore/*" >&2
+      exit 1
+    fi
+  fi
+
   if [[ -n "${remote_sha:-}" && ! "$remote_sha" =~ ^0+$ ]]; then
     range_files="$(git diff --name-only "$remote_sha" "$local_sha" || true)"
+    range_commits="$(git rev-list "$remote_sha..$local_sha" || true)"
   else
     base="$(git merge-base "$local_sha" dev 2>/dev/null || true)"
     if [[ -n "$base" ]]; then
       range_files="$(git diff --name-only "$base" "$local_sha" || true)"
+      range_commits="$(git rev-list "$base..$local_sha" || true)"
     else
       range_files="$(git diff-tree --no-commit-id --name-only -r "$local_sha" || true)"
+      range_commits="$(printf "%s\n" "$local_sha")"
     fi
+  fi
+
+  if [[ -n "$range_files" ]]; then
+    all_files="${all_files}"$'\n'"${range_files}"
+  fi
+  if [[ -n "$range_commits" ]]; then
+    all_commits="${all_commits}"$'\n'"${range_commits}"
   fi
 
   if echo "$range_files" | rg -q '^apps/web/'; then
     needs_web_checks=1
   fi
 done
+
+uniq_files="$(printf "%s\n" "$all_files" | sed '/^$/d' | sort -u)"
+if echo "$uniq_files" | rg -q '^apps/web/' && ! echo "$uniq_files" | rg -q '^apps/web/changelog/'; then
+  needs_web_changelog=1
+fi
+if echo "$uniq_files" | rg -qv '^(apps/web/|apps/web/changelog/|changelog/|\.runbook/|\.gitignore$)' && ! echo "$uniq_files" | rg -q '^changelog/'; then
+  needs_root_changelog=1
+fi
+
+if [[ "$needs_web_changelog" -eq 1 ]]; then
+  echo "Blocked: web changes require a changelog entry in apps/web/changelog/" >&2
+  exit 1
+fi
+if [[ "$needs_root_changelog" -eq 1 ]]; then
+  echo "Blocked: non-web changes require a changelog entry in changelog/" >&2
+  exit 1
+fi
+
+if [[ "${RUNBOOK_ENFORCE_CONVENTIONAL_COMMITS:-0}" == "1" ]]; then
+  while read -r sha; do
+    [[ -z "${sha:-}" ]] && continue
+    subject="$(git log -1 --pretty=%s "$sha")"
+    if [[ "$subject" =~ ^Merge[[:space:]] ]] || [[ "$subject" =~ ^Revert[[:space:]] ]]; then
+      continue
+    fi
+    if ! [[ "$subject" =~ ^(feat|fix|chore|docs|refactor|test|build|ci|perf|style)(\([[:alnum:]_.-]+\))?:[[:space:]].+ ]]; then
+      echo "Blocked: commit '$sha' is not conventional: $subject" >&2
+      echo "Set RUNBOOK_ENFORCE_CONVENTIONAL_COMMITS=0 to disable this optional check." >&2
+      exit 1
+    fi
+  done < <(printf "%s\n" "$all_commits" | sed '/^$/d' | sort -u)
+fi
 
 if [[ "$needs_web_checks" -eq 1 ]]; then
   npm --prefix apps/web run lint

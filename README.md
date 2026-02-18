@@ -37,6 +37,20 @@ npm --prefix apps/web run dev
 ```
 3. Open `http://localhost:3000`.
 
+### Repo guardrails
+- Install repository git hooks:
+```bash
+npm run hooks:install
+```
+- Run baseline governance diagnostics:
+```bash
+npm run runbook:doctor
+```
+- Optional conventional commit enforcement in pre-push:
+```bash
+export RUNBOOK_ENFORCE_CONVENTIONAL_COMMITS=1
+```
+
 ### Environment variables
 - Create `apps/web/.env` if local variables are required by the app.
 

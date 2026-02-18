@@ -38,6 +38,7 @@ function usage() {
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
     "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
     "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
+    "  runbook doctor",
     "",
     "  runbook validate [--session <id>]",
     "  runbook --help",
@@ -97,6 +98,9 @@ function commandUsage(group = "", action = "") {
   }
   if (g === "validate") {
     return "Usage:\n  runbook validate [--session <id>]";
+  }
+  if (g === "doctor") {
+    return "Usage:\n  runbook doctor";
   }
   return usage();
 }
@@ -380,6 +384,8 @@ function exportRunbookLogs(root, session) {
     copied_files: copied,
   };
   writeJson(path.join(exportRoot, "manifest.json"), manifest, false);
+  ensureDir(path.join(root, ".runbook", "exports", safeName(session)));
+  fs.writeFileSync(path.join(root, ".runbook", "exports", safeName(session), "LATEST"), `${path.basename(exportRoot)}\n`, "utf8");
   return manifest;
 }
 
@@ -1402,6 +1408,42 @@ function cmdValidate(root, args) {
   if (!ok) process.exit(1);
 }
 
+function cmdDoctor(root) {
+  const checks = [];
+
+  const hooksPath = gitRun(root, ["config", "--get", "core.hooksPath"], { allowNonZero: true }).stdout;
+  checks.push({
+    check: "hooks_path",
+    expected: ".githooks",
+    actual: hooksPath || "",
+    ok: hooksPath === ".githooks",
+  });
+
+  for (const file of repoRulesBundleCandidates(root)) {
+    const rel = path.relative(root, file) || file;
+    checks.push({ check: "repo_rule_file_present", file: rel, ok: fs.existsSync(file) });
+  }
+
+  const repoRules = validateRepoRulesBundle(root);
+  checks.push({ check: "repo_rules_bundle_valid", ok: repoRules.ok });
+
+  let clean = true;
+  try {
+    assertCleanTree(root, "runbook doctor", { excludeRunbookLiveLogs: true });
+  } catch {
+    clean = false;
+  }
+  checks.push({ check: "git_clean_tree_excluding_live_logs", ok: clean });
+
+  const out = {
+    kind: "runbook_doctor",
+    ok: checks.every((c) => c.ok),
+    checks,
+  };
+  stdout.write(`${JSON.stringify(out, null, 2)}\n`);
+  if (!out.ok) process.exit(1);
+}
+
 function dispatchCommand(root, args) {
   const [group, action] = args._;
   if (args.help || args.h) {
@@ -1425,7 +1467,8 @@ function dispatchCommand(root, args) {
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "git" && action === "closeout") result = cmdGitCloseout(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
-    else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate") {
+    else if (group === "doctor") result = cmdDoctor(root, args);
+    else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate" || group === "doctor") {
       throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${commandUsage(group)}`);
     } else {
       throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${usage()}`);
@@ -1452,7 +1495,7 @@ function dispatchCommand(root, args) {
 
 function isCommandMode(args) {
   const first = String(args._[0] || "").trim();
-  return ["directive", "task", "handoff", "meta", "git", "validate"].includes(first);
+  return ["directive", "task", "handoff", "meta", "git", "validate", "doctor"].includes(first);
 }
 
 async function main() {

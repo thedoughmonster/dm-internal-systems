@@ -7,16 +7,28 @@ on:
       - prod
 
 jobs:
+  docs-policy-drift:
+    name: docs-policy-drift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Block legacy directive-cli docs references
+        run: |
+          ! rg -n "\.directive-cli/" README.md docs/README.md
+
   repo-standards:
     name: repo-standards
     runs-on: ubuntu-latest
+    needs:
+      - docs-policy-drift
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Validate runbook artifacts
         run: node .runbook/scripts/runbook_cli.mjs validate
       - name: Validate repository standards
@@ -33,7 +45,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install dependencies
         run: npm --prefix apps/web ci
       - name: Run lint
@@ -50,7 +62,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install dependencies
         run: npm --prefix apps/web ci
       - name: Run typecheck
@@ -71,7 +83,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install dependencies
         run: npm --prefix apps/web ci
       - name: Run visual regression (Chromatic)
@@ -104,7 +116,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install dependencies
         run: npm --prefix apps/web ci
       - name: Guard test environment

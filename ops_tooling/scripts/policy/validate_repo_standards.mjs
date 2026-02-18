@@ -20,6 +20,7 @@ function read(file) {
 function main() {
   const root = repoRoot();
   const required = [
+    ".github/CODEOWNERS",
     ".editorconfig",
     ".gitattributes",
     ".githooks/pre-commit",
@@ -60,6 +61,14 @@ function main() {
     const legacy = body.includes(".directive-cli/docs/agent-rules");
     checks.push({ check: "readme_no_legacy_directive_cli_reference", file: "README.md", ok: !legacy });
     if (legacy) errors.push("README.md still references legacy .directive-cli/docs/agent-rules guidance");
+  }
+
+  const docsReadmeFile = path.join(root, "docs", "README.md");
+  if (exists(docsReadmeFile)) {
+    const body = read(docsReadmeFile);
+    const legacy = body.includes(".directive-cli/");
+    checks.push({ check: "docs_readme_no_legacy_directive_cli_reference", file: "docs/README.md", ok: !legacy });
+    if (legacy) errors.push("docs/README.md still references legacy .directive-cli paths");
   }
 
   const hookFile = path.join(root, ".githooks", "pre-commit");
