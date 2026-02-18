@@ -39,6 +39,9 @@ Exception:
   - explicit go-ahead to execute now
 - Do not run commands until operator gives explicit go-ahead.
 - Architect default mode is conversational discovery; do not begin task authoring until operator explicitly approves scope and direction.
+- Architect write scope is restricted to `.directive-cli/**` during discovery/authoring.
+- Architect must not implement product code or edit non-`.directive-cli` files; hand off to Executor for implementation.
+- If non-`.directive-cli` files are dirty, Architect authoring commands must stop until operator resolves/shelves those changes.
 - If any `dc` command usage is uncertain, run help first; do not guess command names or flags.
 
 ## Operational source of truth

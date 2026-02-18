@@ -374,6 +374,107 @@ is_agent_namespace() {
   [[ "$(effective_namespace)" == "agent" ]]
 }
 
+collect_dirty_files() {
+  local -a entries=()
+  while IFS= read -r -d '' entry; do
+    entries+=("$entry")
+  done < <(git -C "${ROOT_DIR}" status --porcelain=1 -z 2>/dev/null || true)
+
+  local -a paths=()
+  local item code payload p1 p2
+  for item in "${entries[@]}"; do
+    code="${item:0:2}"
+    payload="${item:3}"
+    case "$code" in
+      R*|C*)
+        p1="${payload%% -> *}"
+        p2="${payload##* -> }"
+        [[ -n "$p1" ]] && paths+=("$p1")
+        [[ -n "$p2" ]] && paths+=("$p2")
+        ;;
+      *)
+        [[ -n "$payload" ]] && paths+=("$payload")
+        ;;
+    esac
+  done
+
+  if (( ${#paths[@]} == 0 )); then
+    return 0
+  fi
+
+  printf "%s\n" "${paths[@]}" | awk 'NF{print}' | sort -u
+}
+
+is_architect_write_command() {
+  local cmd="$1"
+  local sub="$2"
+  case "$cmd:$sub" in
+    directive:task|directive:handoff|meta:architect|meta:update|runbook:architect-authoring)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+architect_write_scope_guard() {
+  local cmd="$1"
+  local sub="$2"
+  local role_now
+  role_now="$(effective_role)"
+  [[ "$role_now" == "architect" ]] || return 0
+  is_architect_write_command "$cmd" "$sub" || return 0
+
+  local -a allowed_prefixes=(
+    ".directive-cli/"
+    ".codex/context/"
+    "directive-cli/"
+    "codex/context/"
+  )
+  local -a disallowed=()
+  local path_value allowed prefix
+  while IFS= read -r path_value; do
+    [[ -z "$path_value" ]] && continue
+    allowed=0
+    for prefix in "${allowed_prefixes[@]}"; do
+      if [[ "$path_value" == "$prefix"* ]]; then
+        allowed=1
+        break
+      fi
+    done
+    if [[ "$allowed" -eq 0 ]]; then
+      disallowed+=("$path_value")
+    fi
+  done < <(collect_dirty_files)
+
+  if (( ${#disallowed[@]} == 0 )); then
+    return 0
+  fi
+
+  printf "%s\n" "$(color "${C_RED}" "+====================================================================+")" >&2
+  printf "%s\n" "$(color "${C_RED}" "|  BLOCKED: Architect Write Scope Guard                             |")" >&2
+  printf "%s\n" "$(color "${C_RED}" "+--------------------------------------------------------------------+")" >&2
+  printf "%s\n" "$(color "${C_RED}" "| Architect authoring may only proceed when dirty files are limited  |")" >&2
+  printf "%s\n" "$(color "${C_RED}" "| to .directive-cli/ (plus generated .codex/context artifacts).      |")" >&2
+  printf "%s\n" "$(color "${C_RED}" "+====================================================================+")" >&2
+  printf "%s\n" "$(color "${C_YELLOW}" "Disallowed dirty files:")" >&2
+  local shown=0
+  for path_value in "${disallowed[@]}"; do
+    printf "  - %s\n" "$path_value" >&2
+    shown=$((shown + 1))
+    if (( shown >= 20 )); then
+      local remaining=$(( ${#disallowed[@]} - shown ))
+      if (( remaining > 0 )); then
+        printf "  ... (%d more)\n" "$remaining" >&2
+      fi
+      break
+    fi
+  done
+  printf "%s\n" "Resolve or stash non-directive changes before architect authoring commands." >&2
+  exit 1
+}
+
 auto_pin_agent_namespace() {
   local role="${1:-executor}"
   if ! role_is_valid "$role"; then
@@ -477,6 +578,7 @@ enforce_namespace_policy() {
   local cmd="$1"
   local sub="$2"
   enforce_architect_authoring_lock "$cmd" "$sub"
+  architect_write_scope_guard "$cmd" "$sub"
   if ! is_agent_namespace; then
     return 0
   fi

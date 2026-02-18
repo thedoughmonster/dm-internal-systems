@@ -450,6 +450,41 @@ test("architect authoring lock allows launch handoff transition command", () => 
   assert.match(output, /Creating handoff artifact for role transition architect -> executor/);
 });
 
+test("architect write scope guard blocks authoring when non-directive files are dirty", (t) => {
+  const sessions = listOpenSessions();
+  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const dirtyFile = path.join(repoRoot, "apps/web/.architect-scope-guard-itest.tmp");
+
+  t.after(() => {
+    if (fs.existsSync(dirtyFile)) fs.rmSync(dirtyFile, { force: true });
+  });
+
+  fs.mkdirSync(path.dirname(dirtyFile), { recursive: true });
+  fs.writeFileSync(dirtyFile, "itest\n", "utf8");
+
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "task",
+    "--session",
+    sessions[0],
+    "--title",
+    "itest guard",
+    "--summary",
+    "itest guard",
+    "--dry-run",
+    "--no-prompt",
+  ], {
+    env: {
+      DC_NAMESPACE: "agent",
+      DC_ROLE: "architect",
+      DC_DIRECTIVE_SESSION: sessions[0],
+      DC_TASK_SLUG: "",
+    },
+  });
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /Architect Write Scope Guard/i);
+});
+
 test("launch handoff is allowed in agent namespace", () => {
   const target = firstRunnableSession();
   assert.ok(target, "Expected at least one non-archived directive session with a task");

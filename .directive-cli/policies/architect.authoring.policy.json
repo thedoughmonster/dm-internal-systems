@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "summary": "Architect policy for directive authoring and handoff.",
   "authoring": {
+    "write_scope": {
+      "mode": "prefix_allowlist",
+      "allowed_prefixes": [
+        ".directive-cli/",
+        ".codex/context/"
+      ]
+    },
+    "forbidden_actions": [
+      "product_code_implementation"
+    ],
     "scaffold_commands": [
       "dc directive new",
       "dc directive task",

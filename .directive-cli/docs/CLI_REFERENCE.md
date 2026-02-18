@@ -24,6 +24,10 @@ Rationale:
 
 ### Architect flow
 
+Scope guard:
+- Architect authoring commands enforce write scope to `.directive-cli/**` (and generated `.codex/context/**` artifacts).
+- If non-scope files are dirty, authoring commands are blocked until cleaned/shelved.
+
 1. `dc directive new`
 2. `dc directive task` (repeat per task)
 3. `dc meta architect ...` (set directive/task metadata)

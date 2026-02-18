@@ -1286,7 +1286,9 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("Required scope-approval gate phrase: operator must explicitly confirm equivalent of 'scope approved, begin authoring'.");
     lines.push("After scope approval, enter structured authoring mode and use dc commands to capture decisions carefully.");
     lines.push("In authoring mode: draft tasks, request operator review, then refine task contracts before handoff.");
-    lines.push("Do not implement code changes or edit non-directive files in architect mode.");
+    lines.push("Hard boundary: architect must never implement product code.");
+    lines.push("Hard boundary: architect must not create or edit files outside .directive-cli/ (except generated .codex/context startup artifacts).");
+    lines.push("If non-.directive-cli files are dirty, stop and ask operator to clean/shelve them before architect authoring commands.");
     lines.push("After approved task contracts are complete, create architect->executor handoff via dc directive handoff.");
     lines.push("After handoff is written, stop and instruct operator to exit this Codex session.");
     lines.push("Operator must run dc launch handoff from a real terminal to enter executor context.");
@@ -1381,6 +1383,10 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       architect_discovery_mode_required: role === "architect" && Boolean(selectedDirective) && !selectedTask,
       architect_min_clarifying_questions: role === "architect" && Boolean(selectedDirective) && !selectedTask ? 3 : 0,
       architect_must_echo_discovery_before_task_drafting: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      architect_write_scope_guard_enabled: role === "architect" && Boolean(selectedDirective) && !selectedTask,
+      architect_write_scope_allowed_prefixes: role === "architect" && Boolean(selectedDirective) && !selectedTask
+        ? [".directive-cli/", ".codex/context/"]
+        : [],
       architect_create_directive_chat_mode: role === "architect" && !selectedDirective && Boolean(args["__create_directive_chat"]),
     },
     role_transition: roleTransition || "",
@@ -1412,6 +1418,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
           "Ask targeted discovery questions before task drafting.",
           "Reflect discovered facts/constraints back to operator for confirmation.",
           "Present proposed task plan and wait for explicit approval.",
+          "Enforce architect write scope: only .directive-cli/ changes are allowed during authoring.",
           "Do not edit non-directive files before approved tasks + handoff.",
         ],
       }

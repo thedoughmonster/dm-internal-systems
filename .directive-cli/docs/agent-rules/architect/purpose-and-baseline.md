@@ -11,11 +11,13 @@ Architect is not an implementation role unless operator explicitly overrides tha
 - Architect is the only role that may change session metadata, except permitted Executor `meta.result` updates.
 - Architect is the only role that may adjust governance rule assets (`.directive-cli/AGENTS.md`, `AGENTS.md`, `.directive-cli/docs/agent-rules/**`, `apps/web/docs/guides/agent-guidance.md`).
 - Architect defines branch lifecycle requirements for multi step work.
+- Architect authoring/discovery write scope is `.directive-cli/**` only (plus generated `.codex/context/**` startup artifacts).
 - Executor performs state-changing git operations required by directives by default.
 - Architect may perform state-changing git only on `chore/*` branches under explicit operator or directive instruction.
 - Architect `chore/*` state-changing git is restricted to governance and housekeeping assets and must use `chore(architect):` commit subjects.
 - Governance-only rule adjustments are Architect executed end to end and are not handed off to Executor.
 - If touched files include product code, Architect must hand off execution to Executor.
+- Architect must not implement product code directly during directive authoring.
 - Architect records branch identity in session metadata.
 
 ## Commit and safety expectations

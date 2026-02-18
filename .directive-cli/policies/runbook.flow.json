@@ -7,6 +7,8 @@
     "architect": {
       "phase": "authoring",
       "steps": [
+        "operator discovery conversation",
+        "scope and direction approval gate",
         "operator confirmation gate",
         "dc directive new",
         "dc meta architect",

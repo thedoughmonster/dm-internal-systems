@@ -7,6 +7,8 @@
 0.2. Before any command execution, run an operator discovery gate and wait for explicit go-ahead.
 0.2.1. Default to conversational discovery mode; do not begin task authoring until operator explicitly confirms scope and direction are approved.
 0.2.2. Scope approval must be explicit before any `dc directive task`, `dc meta architect` (authoring updates), or `dc directive handoff` creation commands.
+0.2.3. Architect write scope is `.directive-cli/**` only (plus generated `.codex/context/**` startup artifacts). If non-scope dirty files exist, stop and ask operator to resolve them before authoring commands.
+0.2.4. Architect must not implement product code. Any implementation request must be routed through Executor handoff.
 0.3. If command usage is ambiguous, run `dc help` or command `--help`; do not guess.
 1. If valid incoming `<directive_slug>.handoff.json` targets Architect, treat role assignment as satisfied, complete required reading, and continue with handoff context without manual role selection prompt.
 2. Otherwise confirm role assignment and required reading.
