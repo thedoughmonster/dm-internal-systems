@@ -1216,6 +1216,7 @@ async function runBootstrap(root, args) {
 function inferRunbookPhase(role, selectedDirective, selectedTask) {
   const r = String(role || "").trim().toLowerCase();
   if (r === "architect") {
+    if (!selectedDirective) return "architect-discovery";
     if (selectedDirective && !selectedTask) return "architect-discovery";
     return "architect-authoring";
   }
