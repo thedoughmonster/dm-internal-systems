@@ -80,12 +80,118 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function utcDatePrefix() {
+  const d = new Date();
+  const yy = String(d.getUTCFullYear()).slice(-2);
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
 function slugify(input) {
   return String(input || "")
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeDirectiveMetaDoc(doc, session = "") {
+  const next = structuredClone(doc || {});
+  if (!next || typeof next !== "object" || Array.isArray(next)) return null;
+  next.kind = "directive_session_meta";
+  next.schema_version = "1.0";
+  if (!next.meta || typeof next.meta !== "object" || Array.isArray(next.meta)) next.meta = {};
+  const m = next.meta;
+  if (!m.id) m.id = crypto.randomUUID();
+  if (session) m.session = session;
+  m.directive_slug = String(m.directive_slug || slugify(m.title || session || "directive"));
+  m.status = String(m.status || "todo");
+  if (!Object.prototype.hasOwnProperty.call(m, "owner")) m.owner = "operator";
+  if (!Object.prototype.hasOwnProperty.call(m, "assignee")) m.assignee = null;
+  m.priority = String(m.priority || "medium");
+  m.session_priority = String(m.session_priority || "medium");
+  if (!Object.prototype.hasOwnProperty.call(m, "auto_run")) m.auto_run = false;
+  if (!Array.isArray(m.tags)) m.tags = ["needs-triage"];
+  m.created = String(m.created || nowIso());
+  m.updated = String(m.updated || nowIso());
+  m.bucket = String(m.bucket || "active");
+  m.scope = String(m.scope || "directives");
+  m.source = String(m.source || "architect");
+  m.effort = String(m.effort || "medium");
+  if (!Array.isArray(m.depends_on)) m.depends_on = [];
+  if (!Array.isArray(m.blocked_by)) m.blocked_by = [];
+  if (!Array.isArray(m.related)) m.related = [];
+  m.title = String(m.title || "");
+  m.summary = String(m.summary || "");
+  if (!Array.isArray(m.goals)) m.goals = [];
+  m.directive_branch = String(m.directive_branch || `feature/${m.directive_slug}`);
+  m.directive_base_branch = String(m.directive_base_branch || "dev");
+  m.directive_merge_status = String(m.directive_merge_status || "open");
+  m.commit_policy = String(m.commit_policy || "end_of_directive");
+  return next;
+}
+
+function normalizeTaskDoc(doc) {
+  const next = structuredClone(doc || {});
+  if (!next || typeof next !== "object" || Array.isArray(next)) return null;
+  next.kind = "directive_task";
+  next.schema_version = "1.0";
+  if (!next.meta || typeof next.meta !== "object" || Array.isArray(next.meta)) next.meta = {};
+  const m = next.meta;
+  if (!m.id) m.id = crypto.randomUUID();
+  m.title = String(m.title || "");
+  m.status = String(m.status || "todo");
+  m.priority = String(m.priority || "medium");
+  m.session_priority = String(m.session_priority || "medium");
+  if (!Object.prototype.hasOwnProperty.call(m, "owner")) m.owner = "operator";
+  if (!Object.prototype.hasOwnProperty.call(m, "assignee")) m.assignee = "executor";
+  m.bucket = String(m.bucket || "todo");
+  m.created = String(m.created || nowIso());
+  m.updated = String(m.updated || nowIso());
+  if (!Array.isArray(m.tags)) m.tags = [];
+  m.effort = String(m.effort || "medium");
+  if (!Array.isArray(m.depends_on)) m.depends_on = [];
+  if (!Array.isArray(m.blocked_by)) m.blocked_by = [];
+  if (!Array.isArray(m.related)) m.related = [];
+  m.summary = String(m.summary || "");
+  m.execution_model = String(m.execution_model || "gpt-5.3-codex");
+  m.thinking_level = String(m.thinking_level || "medium");
+
+  if (!next.task || typeof next.task !== "object" || Array.isArray(next.task)) next.task = {};
+  const t = next.task;
+  t.objective = String(t.objective || "");
+  if (!Array.isArray(t.constraints)) t.constraints = [];
+  if (!Array.isArray(t.allowed_files)) t.allowed_files = [];
+  if (!Array.isArray(t.steps)) t.steps = [];
+  if (!t.validation || typeof t.validation !== "object" || Array.isArray(t.validation)) t.validation = {};
+  if (!Array.isArray(t.validation.commands)) t.validation.commands = [];
+  if (!Array.isArray(t.expected_output)) t.expected_output = [];
+  if (!Array.isArray(t.stop_conditions)) t.stop_conditions = [];
+  if (!Array.isArray(t.notes)) t.notes = [];
+  return next;
+}
+
+function buildHandoffPayload(meta, args) {
+  const fromRole = String(args["from-role"] || "architect").trim();
+  const toRole = String(args["to-role"] || "executor").trim();
+  const objective = String(args.objective || "").trim();
+  if (!objective) throw new Error("handoff create requires --objective");
+  return {
+    handoff: {
+      from_role: fromRole,
+      to_role: toRole,
+      trigger: String(args.trigger || "architect_to_executor_handoff_v1"),
+      session_id: String(args["session-id"] || meta.id || crypto.randomUUID()),
+      task_file: String(args["task-file"] || "null"),
+      directive_branch: String(meta.directive_branch || `feature/${String(meta.directive_slug || "directive")}`),
+      required_reading: String(args["required-reading"] || "apps/web/docs/guides/component-paradigm.md"),
+      objective,
+      blocking_rule: String(args["blocking-rule"] || "Architect must stop and transfer execution to executor after handoff creation"),
+      worktree_mode: String(args["worktree-mode"] || "clean_required"),
+      worktree_allowlist_paths: [],
+    },
+  };
 }
 
 function ensureDir(dir) {
@@ -240,7 +346,7 @@ function cmdDirectiveCreate(root, args) {
   const summary = String(args.summary || "").trim();
   const dryRun = Boolean(args["dry-run"]);
   const branch = String(args.branch || "").trim() || `feature/${slugify(title)}`;
-  const session = String(args.session || "").trim() || `${nowIso().slice(2, 10).replace(/-/g, "-")}_${slugify(title)}`;
+  const session = String(args.session || "").trim() || `${utcDatePrefix()}_${slugify(title)}`;
   if (!title || !summary) throw new Error("directive create requires --title and --summary");
   const { sessionDir } = requireSession(root, session);
   const directiveSlug = slugify(title);
@@ -248,22 +354,20 @@ function cmdDirectiveCreate(root, args) {
   const metaPath = path.join(sessionDir, metaFile);
   if (fs.existsSync(metaPath) && !dryRun) throw new Error(`Directive already exists: ${metaPath}`);
   const ts = nowIso();
-  const payload = {
-    kind: "runbook_directive_meta",
+  const payload = normalizeDirectiveMetaDoc({
+    kind: "directive_session_meta",
     schema_version: "1.0",
     meta: {
-      id: crypto.randomUUID(),
-      session,
       directive_slug: directiveSlug,
       title,
       summary,
       status: "todo",
-      branch,
+      directive_branch: branch,
       goals: Array.isArray(args.goal) ? args.goal.map((g) => String(g).trim()).filter(Boolean) : [],
       created: ts,
       updated: ts,
     },
-  };
+  }, session);
   writeJson(metaPath, payload, dryRun);
 }
 
@@ -271,8 +375,8 @@ function cmdDirectiveSetGoals(root, args) {
   const dryRun = Boolean(args["dry-run"]);
   const { metaPath, doc } = requireMetaDoc(root, args.session);
   const goals = Array.isArray(args.goal) ? args.goal.map((g) => String(g).trim()).filter(Boolean) : [];
-  const next = structuredClone(doc);
-  if (!next.meta || typeof next.meta !== "object") next.meta = {};
+  const next = normalizeDirectiveMetaDoc(doc, args.session);
+  if (!next) throw new Error("Invalid directive meta JSON");
   if (args.clear) next.meta.goals = [];
   if (goals.length > 0) next.meta.goals = goals;
   next.meta.updated = nowIso();
@@ -290,11 +394,10 @@ function cmdTaskCreate(root, args) {
   const taskPath = path.join(sessionDir, `${slug}.task.json`);
   if (fs.existsSync(taskPath) && !dryRun) throw new Error(`Task already exists: ${taskPath}`);
   const ts = nowIso();
-  const payload = {
-    kind: "runbook_task",
+  const payload = normalizeTaskDoc({
+    kind: "directive_task",
     schema_version: "1.0",
     meta: {
-      id: crypto.randomUUID(),
       title,
       summary,
       status: "todo",
@@ -311,7 +414,7 @@ function cmdTaskCreate(root, args) {
       stop_conditions: [],
       notes: [],
     },
-  };
+  });
   writeJson(taskPath, payload, dryRun);
 }
 
@@ -329,9 +432,10 @@ function cmdTaskSetContract(root, args) {
     throw new Error("task set-contract requires --json <object> or --from-file <path>");
   }
 
-  const next = structuredClone(doc);
+  const next = normalizeTaskDoc(doc);
+  if (!next) throw new Error(`Invalid task JSON: ${taskPath}`);
   next.task = { ...(next.task && typeof next.task === "object" ? next.task : {}), ...contract };
-  if (!next.meta || typeof next.meta !== "object") next.meta = {};
+  normalizeTaskDoc(next);
   next.meta.updated = nowIso();
   writeJson(taskPath, next, dryRun);
 }
@@ -343,22 +447,8 @@ function cmdHandoffCreate(root, args) {
   const { doc } = requireMetaDoc(root, session);
   const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
   const slug = String(meta.directive_slug || "directive");
-  const fromRole = String(args["from-role"] || "architect").trim();
-  const toRole = String(args["to-role"] || "executor").trim();
-  const objective = String(args.objective || "").trim();
-  if (!objective) throw new Error("handoff create requires --objective");
   const handoffPath = path.join(sessionDir, `${slug}.handoff.json`);
-  const payload = {
-    kind: "runbook_handoff",
-    schema_version: "1.0",
-    handoff: {
-      from_role: fromRole,
-      to_role: toRole,
-      objective,
-      task_file: String(args["task-file"] || "null"),
-      created: nowIso(),
-    },
-  };
+  const payload = buildHandoffPayload(meta, args);
   writeJson(handoffPath, payload, dryRun);
 }
 
@@ -373,7 +463,11 @@ function cmdMetaSet(root, args) {
   if (args.task) {
     const taskFile = resolveTaskFile(sessionDir, args.task);
     targetPath = path.join(sessionDir, taskFile);
-    next = readJson(targetPath);
+    next = normalizeTaskDoc(readJson(targetPath));
+    if (!next) throw new Error(`Invalid task JSON: ${targetPath}`);
+  } else {
+    next = normalizeDirectiveMetaDoc(next, args.session);
+    if (!next) throw new Error(`Invalid meta JSON: ${targetPath}`);
   }
 
   if (!next.meta || typeof next.meta !== "object") next.meta = {};
@@ -396,15 +490,16 @@ function validateDirectiveSession(sessionDir) {
     return errors;
   }
   const metaDoc = readJson(path.join(sessionDir, metaFile));
-  if (String(metaDoc.kind || "") !== "runbook_directive_meta") errors.push("meta.kind must be runbook_directive_meta");
+  if (String(metaDoc.kind || "") !== "directive_session_meta") errors.push("meta.kind must be directive_session_meta");
   const meta = metaDoc && metaDoc.meta && typeof metaDoc.meta === "object" ? metaDoc.meta : {};
   if (!String(meta.title || "").trim()) errors.push("meta.title required");
   if (!String(meta.summary || "").trim()) errors.push("meta.summary required");
+  if (!String(meta.directive_slug || "").trim()) errors.push("meta.directive_slug required");
 
   const taskFiles = listSessionFiles(sessionDir, ".task.json");
   for (const taskFile of taskFiles) {
     const taskDoc = readJson(path.join(sessionDir, taskFile));
-    if (String(taskDoc.kind || "") !== "runbook_task") errors.push(`${taskFile}: kind must be runbook_task`);
+    if (String(taskDoc.kind || "") !== "directive_task") errors.push(`${taskFile}: kind must be directive_task`);
     const taskMeta = taskDoc && taskDoc.meta && typeof taskDoc.meta === "object" ? taskDoc.meta : {};
     if (!String(taskMeta.title || "").trim()) errors.push(`${taskFile}: meta.title required`);
     const task = taskDoc && taskDoc.task && typeof taskDoc.task === "object" ? taskDoc.task : null;
@@ -414,7 +509,9 @@ function validateDirectiveSession(sessionDir) {
   const handoffFiles = listSessionFiles(sessionDir, ".handoff.json");
   for (const handoffFile of handoffFiles) {
     const handoffDoc = readJson(path.join(sessionDir, handoffFile));
-    if (String(handoffDoc.kind || "") !== "runbook_handoff") errors.push(`${handoffFile}: kind must be runbook_handoff`);
+    if (!handoffDoc || typeof handoffDoc !== "object" || Array.isArray(handoffDoc) || !handoffDoc.handoff) {
+      errors.push(`${handoffFile}: handoff object required`);
+    }
   }
   return errors;
 }
