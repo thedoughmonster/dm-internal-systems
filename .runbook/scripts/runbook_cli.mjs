@@ -388,6 +388,15 @@ async function selectDirectiveInteractive(root) {
   });
 }
 
+async function selectDirectiveForPhase(root, phaseId) {
+  const choice = await selectDirectiveInteractive(root);
+  if (choice === "__create_new__") {
+    if (phaseId === "architect-discovery") return "";
+    throw new Error(`Phase '${phaseId}' requires an existing directive. Re-run and select an existing directive.`);
+  }
+  return choice;
+}
+
 function taskStatusCounts(sessionDir) {
   const files = listSessionFiles(sessionDir, ".task.json");
   const counts = { todo: 0, in_progress: 0, done: 0, other: 0, total: files.length };
@@ -1223,30 +1232,8 @@ async function main() {
     return dispatchCommand(root, args);
   }
 
-  if (!args.phase && args._.length === 0) {
-    const selectedDirective = await selectDirectiveInteractive(root);
-    if (selectedDirective === "__create_new__") {
-      const phase = "architect-discovery";
-      const subphase = "active";
-      if (launchCodexForPhase(root, phase, { dryRun: Boolean(args["dry-run"]), subphase, directiveContext: null })) return;
-      stdout.write(`${JSON.stringify({ kind: "runbook_phase_selection", phase }, null, 2)}\n`);
-      return;
-    }
-    const resume = detectResumeState(root, selectedDirective, phases);
-    const phase = resume.phase;
-    const subphase = normalizeSubphaseForPhase(phases, phase, resume.subphase);
-    const dryRun = Boolean(args["dry-run"]);
-    ensureDirectiveExists(root, selectedDirective);
-    if (!dryRun) persistRunbookState(root, selectedDirective, phase, subphase, false);
-    const directiveContext = loadDirectiveContext(root, selectedDirective);
-    if (launchCodexForPhase(root, phase, { dryRun, subphase, directiveContext })) return;
-    stdout.write(
-      `${JSON.stringify({ kind: "runbook_phase_selection", phase, subphase, directive: selectedDirective }, null, 2)}\n`,
-    );
-    return;
-  }
-
   let selected = String(args.phase || "").trim();
+  const implicitInteractive = !args.phase && args._.length === 0;
   if (!selected) {
     printPhaseList(phases);
     if (!(stdin.isTTY && stdout.isTTY)) return;
@@ -1256,7 +1243,10 @@ async function main() {
   const found = phases.find((p) => p.id === selected);
   if (!found) throw new Error(`Unknown phase '${selected}'.`);
   const subphase = normalizeSubphaseForPhase(phases, found.id, args.subphase);
-  const directive = String(args.directive || "").trim();
+  let directive = String(args.directive || "").trim();
+  if (!directive && implicitInteractive && stdin.isTTY && stdout.isTTY) {
+    directive = await selectDirectiveForPhase(root, found.id);
+  }
   const dryRun = Boolean(args["dry-run"]);
   if (directive) ensureDirectiveExists(root, directive);
   const directiveContext = directive ? loadDirectiveContext(root, directive) : null;
