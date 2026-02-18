@@ -4,15 +4,5 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-mapfile -t staged < <(git diff --cached --name-only --diff-filter=ACMRT -- 'apps/web/.local/directives/*' 'apps/web/.local/directives/**/*')
-
-if [ "${#staged[@]}" -eq 0 ]; then
-  exit 0
-fi
-
-args=()
-for f in "${staged[@]}"; do
-  args+=(--file "$f")
-done
-
-node .directive-cli/scripts/directives/validate_directives_frontmatter.mjs --strict "${args[@]}"
+node ops_tooling/scripts/policy/validate_repo_standards.mjs
+node .runbook/scripts/runbook_cli.mjs validate

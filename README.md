@@ -16,7 +16,7 @@ Start here:
 - Root changes use `changelog/` and web changes use `apps/web/changelog/`.
 
 ## Docs policy
-- `.directive-cli/docs/agent-rules` contains active role guidance.
+- `.repo-agent/AGENTS.md` contains the active repository agent charter.
 - `docs/reference` contains domain reference docs.
 - `docs/operations` and `docs/policies` contain operational and policy docs.
 - Legacy JSON contracts now live in `contracts/`.

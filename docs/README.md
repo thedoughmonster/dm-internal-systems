@@ -5,6 +5,7 @@ This directory is organized by purpose.
 ## Active sections
 - `docs/repo-rules.md`: canonical tool-agnostic repository rules (applies to all actors and tooling).
 - `docs/policies/`: canonical repository policy set (branching, deployment safety, validation, contracts, docs/changelog, env/secrets).
+- `docs/policies/engineering/`: codebase consistency standards (architecture boundaries, naming, quality, contracts, DB, UI, observability, validation, DoD).
 - `.repo-agent/AGENTS.md`: canonical agent charter entrypoint for this repository.
 - `.runbook/phases.json` + `.runbook/instructions/*.md`: canonical runbook phase model and phase instructions.
 - `docs/architecture/`: system and deployment architecture references.

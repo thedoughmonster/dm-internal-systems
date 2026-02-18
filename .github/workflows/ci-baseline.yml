@@ -7,9 +7,26 @@ on:
       - prod
 
 jobs:
+  repo-standards:
+    name: repo-standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate runbook artifacts
+        run: node .runbook/scripts/runbook_cli.mjs validate
+      - name: Validate repository standards
+        run: node ops_tooling/scripts/policy/validate_repo_standards.mjs
+
   lint:
     name: lint
     runs-on: ubuntu-latest
+    needs:
+      - repo-standards
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,6 +42,8 @@ jobs:
   typecheck:
     name: typecheck
     runs-on: ubuntu-latest
+    needs:
+      - repo-standards
     steps:
       - name: Checkout
         uses: actions/checkout@v4

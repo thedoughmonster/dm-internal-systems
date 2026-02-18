@@ -44,3 +44,4 @@ This file defines repository-wide rules that apply to any actor (human, agent, s
 - Place architecture/reference material under `docs/architecture/` and `docs/reference/`.
 - Keep operational procedures in `docs/operations/`; avoid mixing workflow mechanics into repository policy docs.
 - Keep changelog and documentation requirements aligned with `docs/policies/documentation-and-changelog-policy.md`.
+- Follow engineering consistency standards in `docs/policies/engineering/README.md`.

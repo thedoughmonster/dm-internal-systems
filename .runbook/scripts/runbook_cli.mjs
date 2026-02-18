@@ -616,6 +616,7 @@ function repoRulesBundleCandidates(root) {
     path.join(root, "docs", "policies", "validation-policy.md"),
     path.join(root, "docs", "policies", "contracts-and-schema-policy.md"),
     path.join(root, "docs", "policies", "documentation-and-changelog-policy.md"),
+    path.join(root, "docs", "policies", "engineering", "README.md"),
   ];
 }
 
