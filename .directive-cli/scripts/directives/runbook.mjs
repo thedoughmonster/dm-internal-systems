@@ -8,6 +8,8 @@ import { stdin, stdout } from "node:process";
 import { loadRunbookFlowPolicy } from "./_policy_helpers.mjs";
 import { getDirectivesRoot } from "./_session_resolver.mjs";
 import { selectOption } from "./_prompt_helpers.mjs";
+import { listDirectiveSessions } from "./_directive_listing.mjs";
+import { directiveListLabel, statusColor, taskListLabel } from "./_list_view_component.mjs";
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -51,6 +53,156 @@ function usage() {
     "    executor-directive-closeout --confirm executor-directive-closeout",
     "    executor-directive-cleanup  --confirm executor-directive-cleanup",
   ].join("\n");
+}
+
+function listTasksForSession(session) {
+  const sessionDir = path.join(getDirectivesRoot(), session);
+  if (!fs.existsSync(sessionDir)) return [];
+  const files = fs
+    .readdirSync(sessionDir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.endsWith(".task.json"))
+    .map((d) => d.name)
+    .sort();
+  const out = [];
+  for (const file of files) {
+    const full = path.join(sessionDir, file);
+    try {
+      const doc = JSON.parse(fs.readFileSync(full, "utf8"));
+      const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+      out.push({
+        task_file: file,
+        task_slug: file.replace(/\.task\.json$/u, ""),
+        task_title: String(meta.title || file.replace(/\.task\.json$/u, "")),
+        task_status: String(meta.status || "todo"),
+      });
+    } catch {
+      out.push({
+        task_file: file,
+        task_slug: file.replace(/\.task\.json$/u, ""),
+        task_title: file.replace(/\.task\.json$/u, ""),
+        task_status: "todo",
+      });
+    }
+  }
+  return out;
+}
+
+async function askText(question, fallback = "") {
+  if (!(stdin.isTTY && stdout.isTTY)) return String(fallback || "").trim();
+  const rl = createInterface({ input: stdin, output: stdout });
+  try {
+    const answer = String(await rl.question(question)).trim();
+    if (!answer) return String(fallback || "").trim();
+    return answer;
+  } finally {
+    rl.close();
+  }
+}
+
+async function interactiveRunbookSelection() {
+  const options = [
+    { value: "executor-task-cycle", label: "executor task cycle", color: "magenta" },
+    { value: "executor-directive-closeout", label: "executor directive closeout", color: "green" },
+    { value: "executor-directive-cleanup", label: "executor directive cleanup", color: "yellow" },
+    { value: "architect-authoring", label: "architect authoring", color: "cyan" },
+  ];
+  return selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select runbook:",
+    options,
+    defaultIndex: 0,
+  });
+}
+
+async function interactiveDirectiveSelection() {
+  const directives = listDirectiveSessions(getDirectivesRoot(), { includeArchived: false });
+  if (directives.length === 0) throw new Error("No non-archived directives found.");
+  const picked = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select directive:",
+    options: directives.map((d) => ({
+      value: d.session,
+      label: directiveListLabel(d),
+      color: statusColor(d.status),
+    })),
+    defaultIndex: 0,
+  });
+  return String(picked || "").trim();
+}
+
+async function interactiveTaskSelection(session) {
+  const tasks = listTasksForSession(session);
+  if (tasks.length === 0) throw new Error(`No tasks found for directive '${session}'.`);
+  const picked = await selectOption({
+    input: stdin,
+    output: stdout,
+    label: "Select task:",
+    options: tasks.map((t) => ({
+      value: t.task_slug,
+      label: taskListLabel(t),
+      color: statusColor(t.task_status),
+    })),
+    defaultIndex: 0,
+  });
+  return String(picked || "").trim();
+}
+
+async function resolveInteractiveArgs(name, args) {
+  const isTty = stdin.isTTY && stdout.isTTY;
+  if (!isTty) return { name, args };
+
+  let resolvedName = String(name || "").trim();
+  const resolved = { ...args };
+
+  if (!resolvedName) {
+    resolvedName = await interactiveRunbookSelection();
+  }
+
+  if (!resolved.session) {
+    resolved.session = await interactiveDirectiveSelection();
+  }
+
+  if (resolvedName === "executor-task-cycle") {
+    if (!resolved.task) resolved.task = await interactiveTaskSelection(resolved.session);
+    if (!resolved.phase) {
+      resolved.phase = await selectOption({
+        input: stdin,
+        output: stdout,
+        label: "Select phase:",
+        options: [
+          { value: "pre", label: "pre", color: "cyan" },
+          { value: "post", label: "post", color: "green" },
+        ],
+        defaultIndex: 0,
+      });
+    }
+    const phase = String(resolved.phase || "pre").toLowerCase();
+    if (!resolved.confirm && !resolved["dry-run"]) {
+      resolved.confirm = phase === "pre" ? "executor-task-cycle-pre" : "executor-task-cycle-post";
+    }
+    if (phase === "post" && !resolved.summary) {
+      resolved.summary = await askText("Summary for task finish: ");
+      if (!resolved.summary) throw new Error("Summary is required for executor-task-cycle post phase.");
+    }
+  } else if (resolvedName === "executor-directive-closeout") {
+    if (!resolved.confirm && !resolved["dry-run"]) {
+      resolved.confirm = "executor-directive-closeout";
+    }
+  } else if (resolvedName === "executor-directive-cleanup") {
+    if (!resolved.confirm && !resolved["dry-run"]) {
+      resolved.confirm = "executor-directive-cleanup";
+    }
+  } else if (resolvedName === "architect-authoring") {
+    if (!resolved.confirm && !resolved["dry-run"]) {
+      resolved.confirm = "architect-authoring";
+    }
+    if (!resolved.title) resolved.title = await askText("Directive title: ");
+    if (!resolved.summary) resolved.summary = await askText("Directive summary: ");
+  }
+
+  return { name: resolvedName, args: resolved };
 }
 
 function scriptDir() {
@@ -240,11 +392,16 @@ function runbookArchitectAuthoring(args) {
 
 async function main() {
   loadRunbookFlowPolicy();
-  const args = parseArgs(process.argv.slice(2));
-  const name = String(args._[0] || "").trim();
-  if (!name || args.help) {
+  const parsed = parseArgs(process.argv.slice(2));
+  if (parsed.help) {
     process.stdout.write(`${usage()}\n`);
-    process.exit(name ? 0 : 1);
+    process.exit(0);
+  }
+  const requestedName = String(parsed._[0] || "").trim();
+  const { name, args } = await resolveInteractiveArgs(requestedName, parsed);
+  if (!name) {
+    process.stdout.write(`${usage()}\n`);
+    process.exit(1);
   }
 
   if (name === "executor-task-cycle") return runbookExecutorTaskCycle(args);
