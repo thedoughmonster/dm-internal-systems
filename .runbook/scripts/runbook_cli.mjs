@@ -47,6 +47,60 @@ function usage() {
   ].join("\n");
 }
 
+function commandUsage(group = "", action = "") {
+  const g = String(group || "").trim();
+  const a = String(action || "").trim();
+  if (g === "directive" && (!a || a === "create")) {
+    return "Usage:\n  runbook directive create --session <id> --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]";
+  }
+  if (g === "directive" && a === "set-goals") {
+    return "Usage:\n  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]";
+  }
+  if (g === "directive") {
+    return [
+      "Usage:",
+      "  runbook directive create --session <id> --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]",
+      "  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]",
+    ].join("\n");
+  }
+  if (g === "task" && (!a || a === "create")) {
+    return "Usage:\n  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]";
+  }
+  if (g === "task" && a === "set-contract") {
+    return "Usage:\n  runbook task set-contract --session <id> --task <slug|file> (--json <json> | --from-file <path>) [--dry-run]";
+  }
+  if (g === "task") {
+    return [
+      "Usage:",
+      "  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]",
+      "  runbook task set-contract --session <id> --task <slug|file> (--json <json> | --from-file <path>) [--dry-run]",
+    ].join("\n");
+  }
+  if (g === "handoff") {
+    return "Usage:\n  runbook handoff create --session <id> [--kind authoring|executor] --objective <text> [--from-role <role> --to-role <role> --task-file <name|null>] [--dry-run]";
+  }
+  if (g === "meta") {
+    return "Usage:\n  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]";
+  }
+  if (g === "git" && (!a || a === "prepare")) {
+    return "Usage:\n  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]";
+  }
+  if (g === "git" && a === "closeout") {
+    return "Usage:\n  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--dry-run]";
+  }
+  if (g === "git") {
+    return [
+      "Usage:",
+      "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
+      "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--dry-run]",
+    ].join("\n");
+  }
+  if (g === "validate") {
+    return "Usage:\n  runbook validate [--session <id>]";
+  }
+  return usage();
+}
+
 function parseArgs(argv) {
   const args = { _: [], goal: [], set: [] };
   for (let i = 0; i < argv.length; i += 1) {
@@ -1202,6 +1256,10 @@ function cmdValidate(root, args) {
 
 function dispatchCommand(root, args) {
   const [group, action] = args._;
+  if (args.help || args.h) {
+    stdout.write(`${commandUsage(group, action)}\n`);
+    return;
+  }
   const session = String(args.session || "").trim();
   appendEventLog(root, {
     directiveSession: session,
@@ -1219,7 +1277,11 @@ function dispatchCommand(root, args) {
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "git" && action === "closeout") result = cmdGitCloseout(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
-    else throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}`);
+    else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate") {
+      throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${commandUsage(group)}`);
+    } else {
+      throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${usage()}`);
+    }
     appendEventLog(root, {
       directiveSession: session,
       event: "command_end",
@@ -1249,13 +1311,12 @@ async function main() {
   const root = repoRoot();
   const phases = loadPhases(root);
   const args = parseArgs(process.argv.slice(2));
+  if (isCommandMode(args)) {
+    return dispatchCommand(root, args);
+  }
   if (args.help || args.h) {
     stdout.write(`${usage()}\n`);
     return;
-  }
-
-  if (isCommandMode(args)) {
-    return dispatchCommand(root, args);
   }
 
   let selected = String(args.phase || "").trim();
