@@ -1208,10 +1208,25 @@ async function runBootstrap(root, args) {
   });
 }
 
-function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition) {
+function inferRunbookPhase(role, selectedDirective, selectedTask) {
+  const r = String(role || "").trim().toLowerCase();
+  if (r === "architect") {
+    if (selectedDirective && !selectedTask) return "architect-discovery";
+    return "architect-authoring";
+  }
+  if (r === "executor") {
+    if (selectedTask) return "executor-task";
+    if (selectedDirective) return "executor-start";
+    return "executor-start";
+  }
+  return "";
+}
+
+function launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition, runbookPhase) {
   const env = { ...process.env };
   env.DC_NAMESPACE = "agent";
   if (role) env.DC_ROLE = String(role);
+  if (runbookPhase) env.DC_RUNBOOK_PHASE = String(runbookPhase);
   if (sessionLogPath) env.DC_SESSION_LOG = String(sessionLogPath);
   if (roleTransition) env.DC_ROLE_TRANSITION = String(roleTransition);
   if (launchConfig && launchConfig.agent) env.DC_AGENT = launchConfig.agent;
@@ -1225,7 +1240,7 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
     env.DC_TASK_SLUG = selectedTask.task_slug;
     env.DC_TASK_FILE = selectedTask.task_file;
   }
-  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role);
+  const initialPrompt = buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role, runbookPhase);
   const codexArgs = ["--profile", profileName];
   if (initialPrompt) codexArgs.push(initialPrompt);
   const result = spawnSync(codexBin, codexArgs, {
@@ -1245,13 +1260,14 @@ function launchCodex(codexBin, profileName, selectedDirective, selectedTask, lau
   }
 }
 
-function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role) {
+function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleTransition, role, runbookPhase) {
   const autoExecuteExecutorTask = role === "executor" && Boolean(selectedDirective) && Boolean(selectedTask);
   const lines = [
     "Startup context is preselected by dc launch codex (dc context start). Use it as authoritative.",
     "Do not ask for role selection.",
   ];
   if (roleTransition) lines.push(`Role transition: ${roleTransition}`);
+  if (runbookPhase) lines.push(`Runbook phase: ${runbookPhase}`);
   if (launchConfig && launchConfig.model) lines.push(`Configured model: ${launchConfig.model}`);
   if (selectedDirective) {
     lines.push(
@@ -1277,6 +1293,10 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
     lines.push("Do not execute any lifecycle command until operator confirms execution.");
   }
   lines.push("Use repository lifecycle scripts for actions (dc directive/task/meta/runbook/validate) instead of ad-hoc commands.");
+  if (runbookPhase) {
+    lines.push("Phase scope is enforced by dc command guards. Do not run out-of-phase commands.");
+    lines.push("If blocked by phase scope, use 'dc runbook' to continue the current lifecycle phase.");
+  }
   if (role === "architect" && selectedDirective && !selectedTask) {
     lines.push("Architect authoring gate is active.");
     lines.push("Operate in conversational discovery mode by default; do not rush to task authoring.");
@@ -1302,7 +1322,7 @@ function buildInitialPrompt(selectedDirective, selectedTask, launchConfig, roleT
   return lines.join("\n");
 }
 
-function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig, roleTransition, sessionLogPath) {
+function writeStartupContext(root, args, role, profileName, selectedDirective, selectedTask, launchConfig, roleTransition, sessionLogPath, runbookPhase) {
   const { outPath } = resolveRolePaths(root, args, role || undefined);
   const startupPath = path.join(path.dirname(outPath), `${role || "all"}.startup.json`);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
@@ -1359,6 +1379,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
       agent: launchConfig.agent || "codex",
       model: launchConfig.model || null,
       session_log_file: sessionLogPath || null,
+      runbook_phase: runbookPhase || null,
     },
     startup_rules: {
       role_assignment_already_satisfied: true,
@@ -1388,6 +1409,7 @@ function writeStartupContext(root, args, role, profileName, selectedDirective, s
         ? [".directive-cli/", ".codex/context/"]
         : [],
       architect_create_directive_chat_mode: role === "architect" && !selectedDirective && Boolean(args["__create_directive_chat"]),
+      runbook_phase_enforced: Boolean(runbookPhase),
     },
     role_transition: roleTransition || "",
     operator_discovery: {
@@ -1442,6 +1464,7 @@ async function runStart(root, args) {
   const selectedDirective = await requireStartDirective(args, root);
   const directiveKey = selectedDirective ? selectedDirective.session : String(args.directive || args.session || "").trim();
   const selectedTask = await requireStartTask({ ...args, directive: directiveKey, session: directiveKey }, root);
+  const runbookPhase = inferRunbookPhase(role, selectedDirective, selectedTask);
   const directiveTasks = selectedDirective ? listTasksForDirective(root, selectedDirective.session) : [];
   const codexBin = String(args["codex-bin"] || "codex");
   const previousRole = readLastRole(codexHome);
@@ -1466,6 +1489,7 @@ async function runStart(root, args) {
     launchConfig,
     roleTransition,
     sessionLogPath,
+    runbookPhase,
   );
 
   const shouldBootstrap = args["no-bootstrap"] ? false : Boolean(args.bootstrap || args["write-profile"]);
@@ -1497,6 +1521,7 @@ async function runStart(root, args) {
     model: launchConfig.model || null,
     codex_bin: codexBin,
     role_transition: roleTransition,
+    runbook_phase: runbookPhase || null,
     session_log_file: sessionLogPath,
     observe_log_command: `tail -f ${sessionLogPath}`,
   });
@@ -1512,6 +1537,15 @@ async function runStart(root, args) {
     role,
     profile: profileName,
   });
+  if (runbookPhase) {
+    output(args, {
+      message: `Runbook phase scope: ${runbookPhase}`,
+      status: "info",
+      role,
+      profile: profileName,
+      runbook_phase: runbookPhase,
+    });
+  }
   output(args, {
     message: "Model/thinking gate: confirm desired model and thinking depth with operator before any execution.",
     status: "info",
@@ -1540,7 +1574,7 @@ async function runStart(root, args) {
     });
     return;
   }
-  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition);
+  launchCodex(codexBin, profileName, selectedDirective, selectedTask, launchConfig, role, sessionLogPath, roleTransition, runbookPhase);
 }
 
 async function runSwitch(root, args) {

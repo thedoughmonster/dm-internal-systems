@@ -374,6 +374,96 @@ is_agent_namespace() {
   [[ "$(effective_namespace)" == "agent" ]]
 }
 
+current_phase() {
+  printf "%s" "${DC_RUNBOOK_PHASE:-}" | tr '[:upper:]' '[:lower:]' | xargs
+}
+
+phase_command_key() {
+  local cmd="$1"
+  local sub="$2"
+  if [[ -z "$sub" ]]; then
+    printf "%s" "$cmd"
+    return 0
+  fi
+  printf "%s %s" "$cmd" "$sub"
+}
+
+phase_allowed_commands() {
+  local phase="$1"
+  case "$phase" in
+    architect-discovery)
+      printf "%s\n" \
+        "help" "repo map" "context show" "context check" \
+        "directive list" "directive view" "validate" "policy validate" "runbook"
+      ;;
+    architect-authoring)
+      printf "%s\n" \
+        "help" "repo map" "context show" "context check" \
+        "directive list" "directive view" "directive task" "directive handoff" \
+        "meta architect" "meta update" "validate" "policy validate" "runbook"
+      ;;
+    executor-start)
+      printf "%s\n" \
+        "help" "context show" "context check" \
+        "directive list" "directive view" "directive start" "task start" \
+        "validate" "runbook"
+      ;;
+    executor-task)
+      printf "%s\n" \
+        "help" "context show" "context check" \
+        "directive list" "directive view" "directive start" "task start" "task finish" \
+        "validate" "runbook"
+      ;;
+    executor-closeout)
+      printf "%s\n" \
+        "help" "context show" "context check" \
+        "directive list" "directive view" "runbook" \
+        "directive finish" "directive merge" "directive archive" "directive cleanup" \
+        "validate"
+      ;;
+    *)
+      ;;
+  esac
+}
+
+enforce_phase_scope() {
+  local cmd="$1"
+  local sub="$2"
+  if ! is_agent_namespace; then
+    return 0
+  fi
+  local phase
+  phase="$(current_phase)"
+  if [[ -z "$phase" ]]; then
+    return 0
+  fi
+
+  local key
+  key="$(phase_command_key "$cmd" "$sub")"
+  local matched=0
+  local allowed
+  while IFS= read -r allowed; do
+    [[ -z "$allowed" ]] && continue
+    if [[ "$allowed" == "$key" || ( "$allowed" == "help" && "$cmd" == "help" ) ]]; then
+      matched=1
+      break
+    fi
+  done < <(phase_allowed_commands "$phase")
+
+  if [[ "$matched" -eq 1 ]]; then
+    return 0
+  fi
+
+  printf "%s\n" "$(color "${C_RED}" "Blocked by runbook phase guard: '${cmd}${sub:+ ${sub}}' is not allowed in phase '${phase}'.")" >&2
+  printf "%s\n" "$(color "${C_YELLOW}" "Allowed commands in this phase:")" >&2
+  while IFS= read -r allowed; do
+    [[ -z "$allowed" ]] && continue
+    printf "  - %s\n" "$allowed" >&2
+  done < <(phase_allowed_commands "$phase")
+  printf "%s\n" "Use 'dc runbook' to continue with phase-scoped flow." >&2
+  exit 1
+}
+
 collect_dirty_files() {
   local -a entries=()
   while IFS= read -r -d '' entry; do
@@ -579,6 +669,7 @@ enforce_namespace_policy() {
   local sub="$2"
   enforce_architect_authoring_lock "$cmd" "$sub"
   architect_write_scope_guard "$cmd" "$sub"
+  enforce_phase_scope "$cmd" "$sub"
   if ! is_agent_namespace; then
     return 0
   fi

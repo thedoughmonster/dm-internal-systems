@@ -5,7 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { loadArchitectAuthoringPolicy, loadCorePolicy, loadExecutorLifecyclePolicy, loadRunbookFlowPolicy } from "./_policy_helpers.mjs";
+import { loadArchitectAuthoringPolicy, loadCorePolicy, loadExecutorLifecyclePolicy, loadRunbookFlowPolicy, loadRunbookPhasePolicy } from "./_policy_helpers.mjs";
 
 function repoRoot() {
   const scriptFile = fileURLToPath(import.meta.url);
@@ -143,6 +143,7 @@ function main() {
     loadExecutorLifecyclePolicy(),
     loadArchitectAuthoringPolicy(),
     loadRunbookFlowPolicy(),
+    loadRunbookPhasePolicy(),
   ];
   validateRoleRuleFiles(root, Boolean(args.verbose));
 

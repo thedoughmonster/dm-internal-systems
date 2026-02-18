@@ -485,6 +485,47 @@ test("architect write scope guard blocks authoring when non-directive files are 
   assert.match(text, /Architect Write Scope Guard/i);
 });
 
+test("runbook phase guard blocks out-of-phase commands", () => {
+  const sessions = listOpenSessions();
+  assert.ok(sessions.length > 0, "Expected at least one non-archived directive session");
+  const result = runExpectFailure(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "task",
+    "--session",
+    sessions[0],
+    "--title",
+    "itest phase guard",
+    "--summary",
+    "itest phase guard",
+    "--dry-run",
+    "--no-prompt",
+  ], {
+    env: {
+      DC_NAMESPACE: "agent",
+      DC_ROLE: "architect",
+      DC_RUNBOOK_PHASE: "architect-discovery",
+    },
+  });
+  const text = `${result.stdout}\n${result.stderr}`;
+  assert.match(text, /runbook phase guard/i);
+});
+
+test("runbook phase guard allows in-phase commands", () => {
+  const output = run(path.join(directivesBinRoot, "cli"), [
+    "directive",
+    "list",
+    "--json",
+  ], {
+    env: {
+      DC_NAMESPACE: "agent",
+      DC_ROLE: "architect",
+      DC_RUNBOOK_PHASE: "architect-discovery",
+    },
+  });
+  const doc = JSON.parse(output);
+  assert.ok(Array.isArray(doc.rows) || Array.isArray(doc.directives));
+});
+
 test("launch handoff is allowed in agent namespace", () => {
   const target = firstRunnableSession();
   assert.ok(target, "Expected at least one non-archived directive session with a task");

@@ -1,0 +1,102 @@
+{
+  "kind": "directive_cli_policy",
+  "policy_id": "runbook_phase",
+  "version": "1.0.0",
+  "summary": "Phase-scoped command and write-scope policy for runbook-driven sessions.",
+  "phases": {
+    "architect-discovery": {
+      "allowed_commands": [
+        "help",
+        "repo map",
+        "context show",
+        "context check",
+        "directive list",
+        "directive view",
+        "validate",
+        "policy validate",
+        "runbook"
+      ],
+      "write_scope_prefixes": [
+        ".directive-cli/",
+        ".codex/context/"
+      ]
+    },
+    "architect-authoring": {
+      "allowed_commands": [
+        "help",
+        "repo map",
+        "context show",
+        "context check",
+        "directive list",
+        "directive view",
+        "directive task",
+        "directive handoff",
+        "meta architect",
+        "meta update",
+        "validate",
+        "policy validate",
+        "runbook"
+      ],
+      "write_scope_prefixes": [
+        ".directive-cli/",
+        ".codex/context/"
+      ]
+    },
+    "executor-start": {
+      "allowed_commands": [
+        "help",
+        "context show",
+        "context check",
+        "directive list",
+        "directive view",
+        "directive start",
+        "task start",
+        "validate",
+        "runbook"
+      ],
+      "write_scope_prefixes": [
+        ".directive-cli/",
+        "apps/web/",
+        ".codex/context/"
+      ]
+    },
+    "executor-task": {
+      "allowed_commands": [
+        "help",
+        "context show",
+        "context check",
+        "directive list",
+        "directive view",
+        "directive start",
+        "task start",
+        "task finish",
+        "validate",
+        "runbook"
+      ],
+      "write_scope_prefixes": [
+        ".directive-cli/",
+        "apps/web/",
+        ".codex/context/"
+      ]
+    },
+    "executor-closeout": {
+      "allowed_commands": [
+        "help",
+        "context show",
+        "context check",
+        "directive list",
+        "directive view",
+        "runbook",
+        "directive finish",
+        "directive merge",
+        "directive archive",
+        "directive cleanup",
+        "validate"
+      ],
+      "write_scope_prefixes": [
+        ".directive-cli/",
+        ".codex/context/"
+      ]
+    }
+  }
+}

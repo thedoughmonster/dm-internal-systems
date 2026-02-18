@@ -64,3 +64,7 @@ export function loadArchitectAuthoringPolicy() {
 export function loadRunbookFlowPolicy() {
   return loadPolicyFile("runbook.flow.json", "runbook_flow");
 }
+
+export function loadRunbookPhasePolicy() {
+  return loadPolicyFile("runbook.phase.policy.json", "runbook_phase");
+}

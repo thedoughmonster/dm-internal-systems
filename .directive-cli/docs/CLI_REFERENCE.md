@@ -108,10 +108,17 @@ Role-home mapping:
 
 ### Runbook
 
+- `dc runbook` (interactive selector for runbook -> directive -> task/phase)
 - `dc runbook executor-task-cycle --session <s> --task <t> --phase pre|post ...`
 - `dc runbook executor-directive-closeout --session <s> --confirm executor-directive-closeout [--qa-command "..."] [--qa-status pass|fail|skip]`
 - `dc runbook executor-directive-cleanup --session <s> ...`
 - `dc runbook architect-authoring ...`
+
+Phase scoping:
+
+- Agent sessions may include `DC_RUNBOOK_PHASE` (set by `dc launch codex/handoff`) to hard-scope allowed `dc` commands.
+- If command is out-of-phase, `dc` blocks and prints allowed commands for the current phase.
+- Use `dc runbook` to continue within the active phase.
 
 ## Required invariants
 

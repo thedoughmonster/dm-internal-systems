@@ -29,6 +29,7 @@ Exception:
 - If no compiled bundle is active, read `apps/web/docs/guides/component-paradigm.md` and selected role `README.md`.
 - If compiled bundle is active, treat included files as already read. Do not re-open bundle source files unless operator requests deep audit or specific source verification.
 - If startup context includes selected directive/task, use them as active execution context and skip manual repository-wide session/task discovery.
+- If startup context includes `runtime.runbook_phase`, treat it as a hard command-scope boundary for this session.
 
 ## Operator discovery gate
 
