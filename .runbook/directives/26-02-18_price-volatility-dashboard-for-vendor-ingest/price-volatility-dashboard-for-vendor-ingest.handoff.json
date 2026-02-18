@@ -1,0 +1,15 @@
+{
+  "handoff": {
+    "from_role": "architect",
+    "to_role": "executor",
+    "trigger": "architect_to_executor_handoff_v1",
+    "session_id": "e583217d-3433-43af-9f9e-591c3324c25e",
+    "task_file": "04-quality-performance-and-handoff.task.json",
+    "directive_branch": "feature/vendor-ingest-price-volatility-dashboard",
+    "required_reading": "apps/web/docs/guides/component-paradigm.md",
+    "objective": "Complete quality checks, performance validation, and finalize executor handoff package for task 04-quality-performance-and-handoff.task.json",
+    "blocking_rule": "Architect must stop and transfer execution to executor after handoff creation",
+    "worktree_mode": "clean_required",
+    "worktree_allowlist_paths": []
+  }
+}

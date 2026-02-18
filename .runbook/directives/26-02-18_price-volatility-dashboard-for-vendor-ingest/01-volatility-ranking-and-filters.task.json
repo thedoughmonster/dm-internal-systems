@@ -1,0 +1,99 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Volatility ranking and filter computation",
+    "summary": "Define ranking/filter behavior for percent swing, absolute swing, volatility score, recent movers, freshness, and minimum observations.",
+    "status": "todo",
+    "created": "2026-02-18T13:36:36.603Z",
+    "updated": "2026-02-18T13:36:37.227Z",
+    "id": "77a3eedd-7191-4e0b-b8a4-a489ac02b81d",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "tags": "authoring",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Implement deterministic ranking/filter computations for percent swing, absolute swing, volatility, recent movers, freshness, and minimum observations over selected windows.",
+    "constraints": [
+      "Ranking semantics must be explicit and stable for repeated inputs.",
+      "Computed metrics must recompute when date range or granularity changes.",
+      "Do not silently include items below minimum observation threshold unless explicitly configured.",
+      "Maintain clear separation between computation logic and UI presentation."
+    ],
+    "allowed_files": [
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/lib/types.ts",
+        "access": "edit",
+        "note": "Filter/sort option contracts and metric payload types."
+      },
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/lib/api.ts",
+        "access": "edit",
+        "note": "Query wiring for ranking/filter parameters."
+      },
+      {
+        "path": "supabase/functions/vendor_price_change_series_read_v1/index.ts",
+        "access": "edit",
+        "note": "Server-side metric computations or helpers if performed in function layer."
+      },
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx",
+        "access": "edit",
+        "note": "Client-side integration for ranking/filter controls and result ordering."
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Define metric formulas and option enums for required ranking/filter dimensions.",
+        "files": [
+          "apps/web/app/vendors/ingest/price-changes/lib/types.ts"
+        ],
+        "artifact": "Typed metric/filter contract with deterministic parameter names."
+      },
+      {
+        "id": "step_2",
+        "instruction": "Implement metric calculations and threshold handling in the chosen computation layer.",
+        "files": [
+          "supabase/functions/vendor_price_change_series_read_v1/index.ts",
+          "apps/web/app/vendors/ingest/price-changes/lib/api.ts"
+        ],
+        "artifact": "Sorted/filtered results reflect selected metric and constraints."
+      },
+      {
+        "id": "step_3",
+        "instruction": "Bind controls in overview UI and ensure recompute on filter/range changes.",
+        "files": [
+          "apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx"
+        ],
+        "artifact": "User-visible ordering/filtering updates without page reload."
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"percent|absolute|volatility|freshness|min(imum)? observations|recent\" apps/web/app/vendors/ingest/price-changes/lib/types.ts apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx supabase/functions/vendor_price_change_series_read_v1/index.ts",
+        "npm --prefix apps/web run typecheck"
+      ]
+    },
+    "expected_output": [
+      "All required ranking/filter dimensions are implemented and selectable.",
+      "Metric values and ordering recompute correctly for range/granularity updates.",
+      "Types and API contracts remain internally consistent."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if ranking semantics conflict with business definitions not captured in directive metadata."
+    ],
+    "notes": [
+      "Document any tie-break order in code comments or type docs to preserve deterministic sorting."
+    ]
+  }
+}

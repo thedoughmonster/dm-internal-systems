@@ -1,0 +1,100 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Advanced drill-down analytics dashboard",
+    "summary": "Specify drill-down experience when selecting a vendor-item, including expanded metrics, charts, and contextual filters.",
+    "status": "todo",
+    "created": "2026-02-18T13:36:36.715Z",
+    "updated": "2026-02-18T13:36:37.343Z",
+    "id": "fccc294a-c39a-498d-9109-1a78d1937d54",
+    "priority": "high",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "tags": "authoring",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Implement an advanced drill-down dashboard opened from a selected vendor-item row, with expanded metrics, charts, and contextual filters for detailed volatility analysis.",
+    "constraints": [
+      "Selection flow from overview to drill-down must be explicit and reversible.",
+      "Drill-down metrics must recompute for selected range and granularity inputs.",
+      "Avoid duplicate computation paths that can diverge from overview metric definitions.",
+      "Keep URL/state handling deterministic to support deep links where feasible."
+    ],
+    "allowed_files": [
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx",
+        "access": "edit",
+        "note": "Selection and drill-down launch mechanics."
+      },
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/lib/types.ts",
+        "access": "edit",
+        "note": "Drill-down metric/chart contracts."
+      },
+      {
+        "path": "apps/web/app/vendors/ingest/price-changes/lib/api.ts",
+        "access": "edit",
+        "note": "Detail query endpoints and parameters."
+      },
+      {
+        "path": "supabase/functions/vendor_price_change_series_read_v1/index.ts",
+        "access": "edit",
+        "note": "Backend support for detailed metric windows where needed."
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Define drill-down state model and selected item+vendor identity contract.",
+        "files": [
+          "apps/web/app/vendors/ingest/price-changes/lib/types.ts",
+          "apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx"
+        ],
+        "artifact": "Stable selection state powering detailed analytics panel."
+      },
+      {
+        "id": "step_2",
+        "instruction": "Implement detailed metrics/charts/filters and wire recomputation on control changes.",
+        "files": [
+          "apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx",
+          "apps/web/app/vendors/ingest/price-changes/lib/api.ts"
+        ],
+        "artifact": "Drill-down surface updates correctly as analysis controls change."
+      },
+      {
+        "id": "step_3",
+        "instruction": "Ensure backend responses include any additional fields required by drill-down computations.",
+        "files": [
+          "supabase/functions/vendor_price_change_series_read_v1/index.ts"
+        ],
+        "artifact": "No client-side guesswork for detailed metric derivation."
+      }
+    ],
+    "validation": {
+      "commands": [
+        "rg -n \"selected|drill|detail|granularity|range|volatility\" apps/web/app/vendors/ingest/price-changes/composites/PriceChangesView.tsx apps/web/app/vendors/ingest/price-changes/lib/types.ts apps/web/app/vendors/ingest/price-changes/lib/api.ts",
+        "npm --prefix apps/web run typecheck"
+      ]
+    },
+    "expected_output": [
+      "Selecting an overview row opens a detailed analytics context for that vendor-item.",
+      "Expanded metrics/charts/filters are visible and recompute with controls.",
+      "Detail data contract is aligned across backend and UI."
+    ],
+    "stop_conditions": [
+      "Stop and ask operator if drill-down requires a separate route architecture beyond current directive scope."
+    ],
+    "notes": [
+      "Reuse existing vendor ingest interaction patterns for panel/dialog/state transitions where possible."
+    ]
+  }
+}
