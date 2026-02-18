@@ -48,6 +48,7 @@ Exception:
 ## Operational source of truth
 
 Operational procedure is script-owned:
+- Operator control plane: `runbook` (wrapper under `.runbook-cli/`)
 - `dc runbook ...`
 - `dc directive start|finish ...`
 - `dc task start|finish ...`

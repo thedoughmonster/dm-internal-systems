@@ -502,8 +502,8 @@ test("runbook phase guard blocks out-of-phase commands", () => {
   ], {
     env: {
       DC_NAMESPACE: "agent",
-      DC_ROLE: "architect",
-      DC_RUNBOOK_PHASE: "architect-discovery",
+      DC_ROLE: "executor",
+      DC_RUNBOOK_PHASE: "executor-start",
     },
   });
   const text = `${result.stdout}\n${result.stderr}`;

@@ -2,6 +2,11 @@
 
 This is the canonical operator and agent reference for `dc`.
 
+Operator entrypoint:
+
+- Preferred operator command is `runbook` (wrapper under `.runbook-cli/`).
+- `dc` remains the agent execution surface used within runbook phases.
+
 ## Core answers
 
 ### Does executor commit and merge back to `dev` automatically?
@@ -195,6 +200,7 @@ Fix:
 
 ### Operator-first commands
 
+- `runbook` (preferred operator control plane)
 - `dc launch codex`
 - `dc launch switch`
 - `dc directive new`
