@@ -477,11 +477,28 @@ function loadDirectiveContext(root, session) {
     const updated = Date.parse(String(doc?.meta?.updated || "")) || 0;
     return { file, status, updated };
   });
+  const taskOrder = (name) => {
+    const m = String(name || "").match(/^(\d+)[-_]/);
+    if (!m) return Number.MAX_SAFE_INTEGER;
+    return Number(m[1]);
+  };
   let selectedTask = null;
-  const inProgress = rows.filter((r) => r.status === "in_progress").sort((a, b) => b.updated - a.updated);
+  const inProgress = rows
+    .filter((r) => r.status === "in_progress")
+    .sort((a, b) => {
+      const byOrder = taskOrder(a.file) - taskOrder(b.file);
+      if (byOrder !== 0) return byOrder;
+      return b.updated - a.updated;
+    });
   if (inProgress.length > 0) selectedTask = inProgress[0].file;
   if (!selectedTask) {
-    const todo = rows.filter((r) => r.status === "todo").sort((a, b) => b.updated - a.updated);
+    const todo = rows
+      .filter((r) => r.status === "todo")
+      .sort((a, b) => {
+        const byOrder = taskOrder(a.file) - taskOrder(b.file);
+        if (byOrder !== 0) return byOrder;
+        return a.file.localeCompare(b.file);
+      });
     if (todo.length > 0) selectedTask = todo[0].file;
   }
   return {
