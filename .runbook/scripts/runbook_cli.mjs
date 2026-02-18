@@ -177,7 +177,7 @@ function normalizeDirectiveMetaDoc(doc, session = "") {
   m.title = String(m.title || "");
   m.summary = String(m.summary || "");
   if (!Array.isArray(m.goals)) m.goals = [];
-  m.directive_branch = String(m.directive_branch || `feature/${m.directive_slug}`);
+  m.directive_branch = String(m.directive_branch || `feat/${m.directive_slug}`);
   m.directive_base_branch = String(m.directive_base_branch || "dev");
   m.directive_merge_status = String(m.directive_merge_status || "open");
   m.commit_policy = String(m.commit_policy || "end_of_directive");
@@ -236,7 +236,7 @@ function buildHandoffPayload(meta, args) {
       trigger: String(args.trigger || "architect_to_executor_handoff_v1"),
       session_id: String(args["session-id"] || meta.id || crypto.randomUUID()),
       task_file: String(args["task-file"] || "null"),
-      directive_branch: String(meta.directive_branch || `feature/${String(meta.directive_slug || "directive")}`),
+      directive_branch: String(meta.directive_branch || `feat/${String(meta.directive_slug || "directive")}`),
       required_reading: String(args["required-reading"] || "apps/web/docs/guides/component-paradigm.md"),
       objective,
       blocking_rule: String(args["blocking-rule"] || "Architect must stop and transfer execution to executor after handoff creation"),
@@ -611,6 +611,11 @@ function repoRulesBundleCandidates(root) {
   return [
     path.join(root, "docs", "repo-rules.md"),
     path.join(root, "docs", "policies", "branch-policy.md"),
+    path.join(root, "docs", "policies", "deployment-safety-policy.md"),
+    path.join(root, "docs", "policies", "environment-and-secrets-policy.md"),
+    path.join(root, "docs", "policies", "validation-policy.md"),
+    path.join(root, "docs", "policies", "contracts-and-schema-policy.md"),
+    path.join(root, "docs", "policies", "documentation-and-changelog-policy.md"),
   ];
 }
 
@@ -763,7 +768,7 @@ function cmdDirectiveCreate(root, args) {
   const title = String(args.title || "").trim();
   const summary = String(args.summary || "").trim();
   const dryRun = Boolean(args["dry-run"]);
-  const branch = String(args.branch || "").trim() || `feature/${slugify(title)}`;
+  const branch = String(args.branch || "").trim() || `feat/${slugify(title)}`;
   const session = String(args.session || "").trim() || `${utcDatePrefix()}_${slugify(title)}`;
   if (!title || !summary) throw new Error("directive create requires --title and --summary");
   const { sessionDir } = requireSession(root, session);

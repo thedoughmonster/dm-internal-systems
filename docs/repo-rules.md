@@ -18,21 +18,29 @@ This file defines repository-wide rules that apply to any actor (human, agent, s
 - Follow branch policy in `docs/policies/branch-policy.md`.
 - Use dedicated working branches for non-trivial changes; merge to integration branch only after validation gates pass.
 - Keep branch closeout hygiene (local and remote cleanup) after merge completion.
+- Follow deployment safety constraints in `docs/policies/deployment-safety-policy.md`.
 
 ## Change quality requirements
 
 - Keep edits deterministic, minimal, and scoped to intended files.
 - Run and pass required validation gates for changed surfaces (lint, typecheck, tests, or documented equivalents).
 - Do not commit generated noise or unrelated local state changes.
+- Follow validation requirements in `docs/policies/validation-policy.md`.
 
 ## Safety and security
 
 - Never print or commit secrets.
 - Redact sensitive values when uncertain.
 - Stop and report unexpected repository drift or policy conflicts before proceeding.
+- Follow environment and secrets handling in `docs/policies/environment-and-secrets-policy.md`.
+
+## Contracts and metadata
+
+- Follow contract/schema requirements in `docs/policies/contracts-and-schema-policy.md`.
 
 ## Documentation hygiene
 
 - Place stable policy under `docs/policies/`.
 - Place architecture/reference material under `docs/architecture/` and `docs/reference/`.
 - Keep operational procedures in `docs/operations/`; avoid mixing workflow mechanics into repository policy docs.
+- Keep changelog and documentation requirements aligned with `docs/policies/documentation-and-changelog-policy.md`.
