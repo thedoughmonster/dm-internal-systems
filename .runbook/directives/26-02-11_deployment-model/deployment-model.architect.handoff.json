@@ -4,8 +4,8 @@
   "handoff": {
     "from_phase": "architect-discovery",
     "to_phase": "architect-authoring",
-    "created": "2026-02-19T11:40:29.748Z",
-    "objective": "Legacy session migration: resume with runbook-compliant authoring flow."
+    "created": "2026-02-19T11:43:24.595Z",
+    "objective": "Complete authoring with explicit task contracts and readiness for executor handoff on deployment model directive."
   },
   "directive": {
     "session": "26-02-11_deployment-model",
@@ -21,10 +21,19 @@
     "priority": "medium",
     "session_priority": "medium",
     "effort": "large",
-    "goals": [],
-    "definition_of_done": "",
+    "goals": [
+      "Establish and document branch controls for dev/prod release safety.",
+      "Standardize environment and secret management for test and production scopes.",
+      "Enforce CI and release guardrails so prod promotion only occurs through validated PR flow."
+    ],
+    "definition_of_done": "Branch protections, CI guardrails, environment setup docs, and release runbook are implemented and validated for safe dev-to-prod promotion.",
     "constraints": [],
-    "acceptance_criteria": [],
+    "acceptance_criteria": [
+      "Branch policies and protections are documented and verifiable",
+      "CI lint/typecheck and integration test-env checks exist and pass",
+      "Production promotion path is constrained to dev->prod PR flow with approvals",
+      "Operational docs and closeout artifacts are present and current"
+    ],
     "non_goals": [],
     "tags": [
       "deployment",
@@ -36,7 +45,7 @@
     "depends_on": [],
     "blocked_by": [],
     "related": [],
-    "updated": "2026-02-19T11:40:29.710Z"
+    "updated": "2026-02-19T11:43:24.556Z"
   },
   "authoring_requirements": {
     "required_commands": [

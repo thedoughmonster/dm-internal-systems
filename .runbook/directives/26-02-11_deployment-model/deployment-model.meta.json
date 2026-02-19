@@ -16,7 +16,7 @@
       "guardrails"
     ],
     "created": "2026-02-11T08:13:44.875Z",
-    "updated": "2026-02-19T11:40:29.749Z",
+    "updated": "2026-02-19T11:43:24.595Z",
     "bucket": "open",
     "scope": "directives",
     "source": "user",
@@ -34,12 +34,16 @@
     "commit_policy": "end_of_directive",
     "directive_slug": "deployment-model",
     "session": "26-02-11_deployment-model",
-    "goals": [],
+    "goals": [
+      "Establish and document branch controls for dev/prod release safety.",
+      "Standardize environment and secret management for test and production scopes.",
+      "Enforce CI and release guardrails so prod promotion only occurs through validated PR flow."
+    ],
     "phase_completion": {
       "architect-discovery": {
         "active_complete": true,
         "handoff_complete": true,
-        "completed_at": "2026-02-19T11:40:29.749Z"
+        "completed_at": "2026-02-19T11:43:24.595Z"
       },
       "architect-authoring": {
         "active_complete": false,
@@ -63,6 +67,13 @@
       }
     },
     "runbook_phase": "architect-discovery",
-    "runbook_subphase": "active"
+    "runbook_subphase": "active",
+    "definition_of_done": "Branch protections, CI guardrails, environment setup docs, and release runbook are implemented and validated for safe dev-to-prod promotion.",
+    "acceptance_criteria": [
+      "Branch policies and protections are documented and verifiable",
+      "CI lint/typecheck and integration test-env checks exist and pass",
+      "Production promotion path is constrained to dev->prod PR flow with approvals",
+      "Operational docs and closeout artifacts are present and current"
+    ]
   }
 }
