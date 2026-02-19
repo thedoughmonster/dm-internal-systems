@@ -9,3 +9,8 @@ Primary behavior:
 
 Outcome for this subphase:
 - Task is ready to execute with clear scope and validation expectations.
+
+Boundaries:
+- This session is phase-locked.
+- Do not start implementation in this subphase.
+- After start handoff is complete, tell operator to exit and relaunch `runbook` in `executor-task`.

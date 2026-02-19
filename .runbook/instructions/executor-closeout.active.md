@@ -9,3 +9,7 @@ Primary behavior:
 
 Outcome for this subphase:
 - Directive is ready for final operator-controlled completion steps.
+
+Boundaries:
+- This session is phase-locked.
+- Complete closeout/handoff reporting only; do not continue into a new phase in this same session.

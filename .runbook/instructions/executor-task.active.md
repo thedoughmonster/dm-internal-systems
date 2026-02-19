@@ -9,3 +9,7 @@ Primary behavior:
 
 Outcome for this subphase:
 - Task implementation and validation are complete.
+
+Boundaries:
+- This session is phase-locked.
+- Do not run closeout flow in this same session; complete task handoff and stop.

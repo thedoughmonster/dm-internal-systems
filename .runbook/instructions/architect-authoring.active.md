@@ -13,3 +13,6 @@ Outcome for this subphase:
 
 Boundary:
 - Do not substitute freeform task/directive drafts for required artifact commands unless the operator explicitly asks for text-only drafting.
+- Do not read or edit product code in this phase.
+- Do not run git branch switching or implementation commands in this phase.
+- This session is phase-locked: complete authoring artifacts only, then handoff and stop.

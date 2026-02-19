@@ -16,3 +16,5 @@ Boundaries:
 - Do not transition phases without explicit operator approval.
 - If the operator says to move to authoring, stop conversational drafting and switch to `architect-discovery` subphase `handoff`.
 - After transition approval, do not generate freeform directive drafts unless the operator explicitly asks for "draft text only".
+- This session is phase-locked: do not run the next phase in this same Codex session.
+- After handoff artifacts and validation are complete, tell operator to exit and relaunch `runbook` for the next phase.
