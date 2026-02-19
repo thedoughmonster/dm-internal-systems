@@ -186,6 +186,7 @@ function usage() {
     "",
     "  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]",
     "  runbook task set-contract --session <id> --task <slug|file> (--json <json> | --from-file <path>) [--dry-run]",
+    "  runbook task finish --session <id> --task <slug|file> --summary <text> [--dry-run]",
     "",
     "  runbook handoff create --session <id> [--kind authoring|executor] --objective <text> [--from-role <role> --to-role <role> --task-file <name|null>] [--dry-run]",
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
@@ -226,11 +227,15 @@ function commandUsage(group = "", action = "") {
   if (g === "task" && a === "set-contract") {
     return "Usage:\n  runbook task set-contract --session <id> --task <slug|file> (--json <json> | --from-file <path>) [--dry-run]";
   }
+  if (g === "task" && a === "finish") {
+    return "Usage:\n  runbook task finish --session <id> --task <slug|file> --summary <text> [--dry-run]";
+  }
   if (g === "task") {
     return [
       "Usage:",
       "  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]",
       "  runbook task set-contract --session <id> --task <slug|file> (--json <json> | --from-file <path>) [--dry-run]",
+      "  runbook task finish --session <id> --task <slug|file> --summary <text> [--dry-run]",
     ].join("\n");
   }
   if (g === "handoff") {
@@ -1400,6 +1405,34 @@ function cmdTaskSetContract(root, args) {
   writeJson(taskPath, next, dryRun);
 }
 
+function cmdTaskFinish(root, args) {
+  const dryRun = Boolean(args["dry-run"]);
+  const summary = String(args.summary || "").trim();
+  if (!summary) throw new Error("task finish requires --summary");
+  const session = String(args.session || "").trim();
+  const { sessionDir, metaPath } = requireMetaDoc(root, session);
+  const taskFile = resolveTaskFile(sessionDir, args.task);
+  const taskPath = path.join(sessionDir, taskFile);
+  const taskDoc = normalizeTaskDoc(readJson(taskPath));
+  if (!taskDoc) throw new Error(`Invalid task JSON: ${taskPath}`);
+
+  if (!taskDoc.meta || typeof taskDoc.meta !== "object") taskDoc.meta = {};
+  taskDoc.meta.status = "done";
+  taskDoc.meta.bucket = "done";
+  taskDoc.meta.completion_summary = summary;
+  taskDoc.meta.updated = nowIso();
+  writeJson(taskPath, taskDoc, dryRun);
+
+  if (!dryRun) {
+    const directiveNext = normalizeDirectiveMetaDoc(readJson(metaPath), session);
+    if (directiveNext && directiveNext.meta && typeof directiveNext.meta === "object") {
+      markPhaseCompletion(directiveNext.meta, "executor-task", "active");
+      directiveNext.meta.updated = nowIso();
+      writeJson(metaPath, directiveNext, false);
+    }
+  }
+}
+
 function cmdHandoffCreate(root, args) {
   const dryRun = Boolean(args["dry-run"]);
   const { sessionDir, session } = requireSession(root, args.session);
@@ -2273,6 +2306,7 @@ async function dispatchCommand(root, args) {
     else if (group === "directive" && action === "set-goals") result = cmdDirectiveSetGoals(root, args);
     else if (group === "task" && action === "create") result = cmdTaskCreate(root, args);
     else if (group === "task" && action === "set-contract") result = cmdTaskSetContract(root, args);
+    else if (group === "task" && action === "finish") result = cmdTaskFinish(root, args);
     else if (group === "handoff" && action === "create") result = cmdHandoffCreate(root, args);
     else if (group === "meta" && action === "set") result = cmdMetaSet(root, args);
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);

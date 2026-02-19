@@ -4,7 +4,7 @@ You are in runbook phase `executor-task` subphase `handoff`.
 
 Required completion flow:
 1. Run contract validation commands.
-2. Update metadata with completion summary.
+2. Run `runbook task finish --session <id> --task <slug|file> --summary <text>`.
 3. Report explicit next step command for either next task run or `runbook --phase executor-closeout --directive <session>`.
 
 Execution gate:
