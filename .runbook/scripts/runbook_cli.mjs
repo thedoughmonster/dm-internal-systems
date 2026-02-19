@@ -243,7 +243,23 @@ const PHASE_PROMPT_CONTRACTS = {
   },
 };
 
+function findRepoRootFromCwd(start = process.cwd()) {
+  let cur = path.resolve(String(start || process.cwd()));
+  while (true) {
+    const marker = path.join(cur, ".runbook", "phases.json");
+    if (fs.existsSync(marker)) return cur;
+    const parent = path.dirname(cur);
+    if (parent === cur) break;
+    cur = parent;
+  }
+  return "";
+}
+
 function repoRoot() {
+  const override = String(process.env.RUNBOOK_REPO_ROOT || "").trim();
+  if (override) return path.resolve(override);
+  const fromCwd = findRepoRootFromCwd(process.cwd());
+  if (fromCwd) return fromCwd;
   const file = fileURLToPath(import.meta.url);
   return path.resolve(path.dirname(file), "../..");
 }

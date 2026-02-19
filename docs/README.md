@@ -19,6 +19,7 @@ This directory is organized by purpose.
 - `.archive/docs/`: archived and deprecated governance artifacts.
 - `.archive/docs/docs-audits/`: historical docs audit snapshots.
 - `.archive/docs/agent-rules-monolith/`: archived monolithic agent rule snapshots.
+- `~/.runbook-cli/`: user-installed runbook runtime (outside repo) used by `/usr/local/bin/runbook`.
 
 ## Notes
 - Role bindings and startup behavior are defined in `.repo-agent/AGENTS.md`.
