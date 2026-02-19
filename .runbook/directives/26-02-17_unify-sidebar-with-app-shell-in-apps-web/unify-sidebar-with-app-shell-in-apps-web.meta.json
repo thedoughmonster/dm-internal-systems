@@ -4,7 +4,7 @@
   "meta": {
     "id": "048d088f-9e37-4fce-b11a-48eb29b4d885",
     "directive_slug": "unify-sidebar-with-app-shell-in-apps-web",
-    "status": "done",
+    "status": "archived",
     "owner": "operator",
     "assignee": null,
     "priority": "medium",
@@ -14,8 +14,8 @@
       "needs-triage"
     ],
     "created": "2026-02-17T17:29:28Z",
-    "updated": "2026-02-19T09:36:43.578Z",
-    "bucket": "active",
+    "updated": "2026-02-19T11:39:30.157Z",
+    "bucket": "archived",
     "scope": "directives",
     "source": "architect",
     "effort": "medium",
@@ -63,7 +63,7 @@
         "completed_at": null
       }
     },
-    "runbook_phase": "architect-discovery",
+    "runbook_phase": "executor-closeout",
     "runbook_subphase": "handoff",
     "definition_of_done": "Global sidebar unified in layout with shared header, viewport-contained shell, independent scroll regions, fixed sidebar footer, collapsible unique-icon mode, and deterministic single active route highlighting.",
     "updated_by": "runbook"

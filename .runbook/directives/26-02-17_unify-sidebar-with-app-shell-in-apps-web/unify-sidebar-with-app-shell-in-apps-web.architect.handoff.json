@@ -4,15 +4,15 @@
   "handoff": {
     "from_phase": "architect-discovery",
     "to_phase": "architect-authoring",
-    "created": "2026-02-19T09:36:43.578Z",
-    "objective": "Convert approved sidebar scope into architect-authoring task artifacts."
+    "created": "2026-02-19T11:39:30.158Z",
+    "objective": "Convert approved discovery scope into directive/task artifacts for execution."
   },
   "directive": {
     "session": "26-02-17_unify-sidebar-with-app-shell-in-apps-web",
     "directive_slug": "unify-sidebar-with-app-shell-in-apps-web",
     "title": "Unify Sidebar With App Shell in apps/web",
     "summary": "Redesign the Next.js apps/web sidebar so it feels integrated with the main UI: move from edge-pinned layout to an inset, contained rail within a shared shell; improve spacing, visual hierarchy, active states, and responsive behavior.",
-    "status": "done",
+    "status": "archived",
     "directive_branch": "feature/unify-sidebar-with-app-shell-in-apps-web",
     "directive_base_branch": "dev",
     "commit_policy": "end_of_directive",
@@ -38,7 +38,7 @@
     "depends_on": [],
     "blocked_by": [],
     "related": [],
-    "updated": "2026-02-19T09:36:43.520Z"
+    "updated": "2026-02-19T11:39:30.157Z"
   },
   "authoring_requirements": {
     "required_commands": [

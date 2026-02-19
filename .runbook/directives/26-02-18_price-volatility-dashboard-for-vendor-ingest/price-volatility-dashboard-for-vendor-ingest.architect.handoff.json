@@ -4,7 +4,7 @@
   "handoff": {
     "from_phase": "architect-discovery",
     "to_phase": "architect-authoring",
-    "created": "2026-02-18T15:07:23.016Z",
+    "created": "2026-02-19T11:39:30.207Z",
     "objective": "Convert approved discovery scope into directive/task artifacts for execution."
   },
   "directive": {
@@ -12,7 +12,7 @@
     "directive_slug": "price-volatility-dashboard-for-vendor-ingest",
     "title": "Price Volatility Dashboard for Vendor Ingest",
     "summary": "Add per-vendor item price-over-time charts with advanced volatility drill-down analytics in vendor ingest.",
-    "status": "done",
+    "status": "archived",
     "directive_branch": "feature/vendor-ingest-price-volatility-dashboard",
     "directive_base_branch": "dev",
     "commit_policy": "end_of_directive",
@@ -35,7 +35,7 @@
     "depends_on": [],
     "blocked_by": [],
     "related": [],
-    "updated": "2026-02-18T15:07:23.016Z"
+    "updated": "2026-02-19T11:39:30.206Z"
   },
   "authoring_requirements": {
     "required_commands": [
