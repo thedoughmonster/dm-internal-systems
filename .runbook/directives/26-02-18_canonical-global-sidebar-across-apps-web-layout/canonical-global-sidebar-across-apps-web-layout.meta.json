@@ -14,7 +14,7 @@
       "needs-triage"
     ],
     "created": "2026-02-18T10:12:22Z",
-    "updated": "2026-02-18T10:12:22Z",
+    "updated": "2026-02-19T11:40:30.051Z",
     "bucket": "active",
     "scope": "directives",
     "source": "architect",
@@ -31,9 +31,39 @@
       "Same canonical behavior across desktop sidebar and mobile drawer",
       "Storybook sidebar story consumes canonical config and behavior"
     ],
-    "directive_branch": "architect/canonical-global-sidebar",
+    "directive_branch": "feat/canonical-global-sidebar",
     "directive_base_branch": "dev",
     "directive_merge_status": "open",
-    "commit_policy": "end_of_directive"
+    "commit_policy": "end_of_directive",
+    "session": "26-02-18_canonical-global-sidebar-across-apps-web-layout",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T11:40:30.051Z"
+      },
+      "architect-authoring": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-start": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    },
+    "runbook_phase": "architect-discovery",
+    "runbook_subphase": "active"
   }
 }

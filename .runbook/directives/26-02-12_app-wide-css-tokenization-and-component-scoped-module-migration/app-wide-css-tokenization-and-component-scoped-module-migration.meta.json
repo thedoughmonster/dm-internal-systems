@@ -2,7 +2,7 @@
   "kind": "directive_session_meta",
   "schema_version": "1.0",
   "meta": {
-    "status": "open",
+    "status": "todo",
     "owner": "operator",
     "assignee": "architect",
     "priority": "high",
@@ -16,7 +16,7 @@
       "app-wide"
     ],
     "created": "2026-02-12T23:35:00.000Z",
-    "updated": "2026-02-12T23:35:00.000Z",
+    "updated": "2026-02-19T11:40:29.862Z",
     "bucket": "open",
     "scope": "directives",
     "source": "user",
@@ -32,6 +32,37 @@
     "directive_base_branch": "dev",
     "directive_merge_status": "open",
     "commit_policy": "end_of_directive",
-    "directive_slug": "app-wide-css-tokenization-and-component-scoped-module-migration"
+    "directive_slug": "app-wide-css-tokenization-and-component-scoped-module-migration",
+    "session": "26-02-12_app-wide-css-tokenization-and-component-scoped-module-migration",
+    "goals": [],
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T11:40:29.862Z"
+      },
+      "architect-authoring": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-start": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    },
+    "runbook_phase": "architect-discovery",
+    "runbook_subphase": "active"
   }
 }

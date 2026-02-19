@@ -1,0 +1,36 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "Legacy migration bootstrap",
+    "summary": "Bootstrap this legacy directive into runbook-compliant task flow.",
+    "status": "todo",
+    "created": "2026-02-19T11:40:30.014Z",
+    "updated": "2026-02-19T11:40:30.014Z",
+    "id": "743bad3b-705d-4b9a-b46e-ec057e799e22",
+    "priority": "medium",
+    "session_priority": "medium",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "tags": [],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "",
+    "constraints": [],
+    "allowed_files": [],
+    "steps": [],
+    "validation": {
+      "commands": []
+    },
+    "expected_output": [],
+    "stop_conditions": [],
+    "notes": []
+  }
+}
