@@ -4,9 +4,160 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { createInterface } from "node:readline";
 import { stdin, stdout } from "node:process";
 import { spawnSync } from "node:child_process";
 import { printList, selectFromList, toPhaseOptions } from "./_list_component.mjs";
+
+const RUNBOOK_PHASE_IDS = [
+  "architect-discovery",
+  "architect-authoring",
+  "executor-start",
+  "executor-task",
+  "executor-closeout",
+];
+
+const PHASE_PROMPT_CONTRACTS = {
+  "architect-discovery": {
+    active: {
+      containment: [
+        "Conversational discovery only; do not start authoring or execution work.",
+        "Do not create tasks in this subphase.",
+      ],
+      completion_criteria: [
+        "Directive title, branch plan, goals, and definition of done are agreed.",
+        "Operator explicitly approves transition to handoff.",
+      ],
+      git_instructions: [
+        "No branch switching, rebasing, committing, or merging in this subphase.",
+      ],
+    },
+    handoff: {
+      containment: [
+        "Persist only discovery artifacts and handoff metadata.",
+        "Do not start architect-authoring in the same session.",
+      ],
+      completion_criteria: [
+        "Directive artifact created and goals/meta persisted.",
+        "Architect handoff created and `runbook validate --session <id>` passes.",
+      ],
+      git_instructions: [
+        "Artifact-only writes are allowed.",
+        "No product-code git operations in this subphase.",
+      ],
+    },
+  },
+  "architect-authoring": {
+    active: {
+      containment: [
+        "Author directive/task artifacts only.",
+        "No product-code edits in this subphase.",
+      ],
+      completion_criteria: [
+        "Task files exist with complete contracts and operator-approved scope.",
+      ],
+      git_instructions: [
+        "Artifact-only writes are allowed.",
+        "No branch switching, rebasing, committing, or merging in this subphase.",
+      ],
+    },
+    handoff: {
+      containment: [
+        "Create executor handoff and stop.",
+        "Do not start executor-start in the same session.",
+      ],
+      completion_criteria: [
+        "Executor handoff artifact exists and validates cleanly.",
+      ],
+      git_instructions: [
+        "Artifact-only writes are allowed.",
+        "No product-code git operations in this subphase.",
+      ],
+    },
+  },
+  "executor-start": {
+    active: {
+      containment: [
+        "Prepare execution context only; do not implement task code yet.",
+      ],
+      completion_criteria: [
+        "Prerequisites and selected task are explicit.",
+        "Operator confirms readiness to hand off to executor-task.",
+      ],
+      git_instructions: [
+        "Run `runbook git prepare --session <id>` before any code edits.",
+      ],
+    },
+    handoff: {
+      containment: [
+        "Finalize execution bootstrap and stop.",
+        "Do not start implementation in this session.",
+      ],
+      completion_criteria: [
+        "`runbook git prepare --session <id>` succeeds.",
+        "Next command is `runbook --phase executor-task --directive <session>`.",
+      ],
+      git_instructions: [
+        "Directive branch must be current after prepare.",
+      ],
+    },
+  },
+  "executor-task": {
+    active: {
+      containment: [
+        "Implement only the selected task contract scope.",
+        "Do not run directive closeout in this subphase.",
+      ],
+      completion_criteria: [
+        "Task implementation complete.",
+        "Task validation commands pass.",
+      ],
+      git_instructions: [
+        "Work on the directive branch only.",
+        "Use normal task-scoped commits if commit policy requires.",
+      ],
+    },
+    handoff: {
+      containment: [
+        "Persist task completion evidence and stop.",
+        "Do not run closeout in this session.",
+      ],
+      completion_criteria: [
+        "Task metadata updated with completion summary and validation status.",
+        "Next command is either next executor-task run or executor-closeout.",
+      ],
+      git_instructions: [
+        "No merge-to-base actions in this subphase.",
+      ],
+    },
+  },
+  "executor-closeout": {
+    active: {
+      containment: [
+        "Finalize acceptance and closeout readiness only.",
+      ],
+      completion_criteria: [
+        "All tasks and required validations are complete.",
+        "Operator approves final closeout.",
+      ],
+      git_instructions: [
+        "Prepare only closeout actions; no new feature scope.",
+      ],
+    },
+    handoff: {
+      containment: [
+        "Perform final closeout and stop session.",
+      ],
+      completion_criteria: [
+        "`runbook git closeout --session <id>` succeeds.",
+        "Next-step completion command is reported to operator.",
+      ],
+      git_instructions: [
+        "Merge/cleanup actions are allowed only in this subphase.",
+      ],
+    },
+  },
+};
 
 function repoRoot() {
   const file = fileURLToPath(import.meta.url);
@@ -28,7 +179,7 @@ function usage() {
     "  runbook --phase <phase-id> [--subphase active|handoff] [--directive <session>]",
     "  runbook --phase <phase-id> [--subphase active|handoff] [--directive <session>] --dry-run",
     "",
-    "  runbook directive create --session <id> --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]",
+    "  runbook directive create [--session <id> | --folder <name>] --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]",
     "  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]",
     "",
     "  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]",
@@ -53,7 +204,7 @@ function commandUsage(group = "", action = "") {
   const g = String(group || "").trim();
   const a = String(action || "").trim();
   if (g === "directive" && (!a || a === "create")) {
-    return "Usage:\n  runbook directive create --session <id> --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]";
+    return "Usage:\n  runbook directive create [--session <id> | --folder <name>] --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]";
   }
   if (g === "directive" && a === "set-goals") {
     return "Usage:\n  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]";
@@ -61,7 +212,7 @@ function commandUsage(group = "", action = "") {
   if (g === "directive") {
     return [
       "Usage:",
-      "  runbook directive create --session <id> --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]",
+      "  runbook directive create [--session <id> | --folder <name>] --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]",
       "  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]",
     ].join("\n");
   }
@@ -162,6 +313,74 @@ function slugify(input) {
     .replace(/^-+|-+$/g, "");
 }
 
+function defaultPhaseCompletionMap() {
+  const map = {};
+  for (const id of RUNBOOK_PHASE_IDS) {
+    map[id] = {
+      active_complete: false,
+      handoff_complete: false,
+      completed_at: null,
+    };
+  }
+  return map;
+}
+
+function normalizePhaseCompletionMap(raw) {
+  const base = defaultPhaseCompletionMap();
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return base;
+  for (const id of RUNBOOK_PHASE_IDS) {
+    const row = raw[id];
+    if (!row || typeof row !== "object" || Array.isArray(row)) continue;
+    base[id] = {
+      active_complete: Boolean(row.active_complete),
+      handoff_complete: Boolean(row.handoff_complete),
+      completed_at: row.completed_at ? String(row.completed_at) : null,
+    };
+  }
+  return base;
+}
+
+function markPhaseCompletion(meta, phaseId, subphase) {
+  if (!meta || typeof meta !== "object") return;
+  const phase = String(phaseId || "").trim();
+  const step = String(subphase || "").trim();
+  if (!RUNBOOK_PHASE_IDS.includes(phase)) return;
+  if (!["active", "handoff"].includes(step)) return;
+  meta.phase_completion = normalizePhaseCompletionMap(meta.phase_completion);
+  if (!meta.phase_completion[phase]) {
+    meta.phase_completion[phase] = {
+      active_complete: false,
+      handoff_complete: false,
+      completed_at: null,
+    };
+  }
+  const row = meta.phase_completion[phase];
+  if (step === "active") row.active_complete = true;
+  if (step === "handoff") {
+    row.active_complete = true;
+    row.handoff_complete = true;
+  }
+  if (row.active_complete && row.handoff_complete) row.completed_at = nowIso();
+}
+
+function renderPhasePromptContract(phaseId, subphase) {
+  const phase = String(phaseId || "").trim();
+  const step = validSubphase(subphase) ? subphase : "active";
+  const contract = PHASE_PROMPT_CONTRACTS[phase]?.[step];
+  if (!contract) return "";
+  const asLines = (title, rows) => {
+    const list = Array.isArray(rows) ? rows : [];
+    if (list.length === 0) return [];
+    return [title, ...list.map((line) => `- ${line}`), ""];
+  };
+  return [
+    "Phase containment contract (explicit):",
+    ...asLines("Containment:", contract.containment),
+    ...asLines("Completion criteria:", contract.completion_criteria),
+    ...asLines("Git instructions:", contract.git_instructions),
+  ].join("\n").trim();
+}
+
 function normalizeDirectiveMetaDoc(doc, session = "") {
   const next = structuredClone(doc || {});
   if (!next || typeof next !== "object" || Array.isArray(next)) return null;
@@ -195,6 +414,7 @@ function normalizeDirectiveMetaDoc(doc, session = "") {
   m.directive_base_branch = String(m.directive_base_branch || "dev");
   m.directive_merge_status = String(m.directive_merge_status || "open");
   m.commit_policy = String(m.commit_policy || "end_of_directive");
+  m.phase_completion = normalizePhaseCompletionMap(m.phase_completion);
   return next;
 }
 
@@ -443,6 +663,46 @@ function loadPhases(root) {
   return phases;
 }
 
+async function promptText(question) {
+  const q = String(question || "").trim();
+  if (!(stdin.isTTY && stdout.isTTY)) return "";
+  const rl = createInterface({ input: stdin, output: stdout });
+  try {
+    const response = await rl.question(q.endsWith(" ") ? q : `${q} `);
+    return String(response || "").trim();
+  } finally {
+    rl.close();
+  }
+}
+
+function sessionExists(root, session) {
+  return fs.existsSync(path.join(directivesRoot(root), String(session || "").trim()));
+}
+
+function nextDeterministicSession(root, folderSlug) {
+  const base = `${utcDatePrefix()}_${String(folderSlug || "").trim()}`;
+  if (!sessionExists(root, base)) return base;
+  let n = 2;
+  while (sessionExists(root, `${base}-${n}`)) n += 1;
+  return `${base}-${n}`;
+}
+
+async function resolveDirectiveSessionForCreate(root, {
+  session,
+  folder,
+  title,
+} = {}) {
+  const explicitSession = String(session || "").trim();
+  if (explicitSession) return explicitSession;
+  let folderSource = String(folder || "").trim();
+  if (!folderSource && stdin.isTTY && stdout.isTTY) {
+    folderSource = await promptText("Directive folder name (used in YY-MM-DD_<slug>):");
+  }
+  const folderSlug = slugify(folderSource || title || "");
+  if (!folderSlug) throw new Error("directive create requires --session or a valid folder/title slug source");
+  return nextDeterministicSession(root, folderSlug);
+}
+
 function phaseMap(phases) {
   const map = new Map();
   for (const row of phases || []) map.set(row.id, row);
@@ -526,6 +786,25 @@ async function selectDirectiveForPhase(root, phaseId) {
     throw new Error(`Phase '${phaseId}' requires an existing directive. Re-run and select an existing directive.`);
   }
   return choice;
+}
+
+async function confirmResumePhase(root, directive, detectedPhase, detectedSubphase, selectedPhase, selectedSubphase) {
+  if (!(stdin.isTTY && stdout.isTTY)) return true;
+  const choice = await selectFromList({
+    input: stdin,
+    output: stdout,
+    title:
+      `Directive: ${directive}\n` +
+      `Detected phase from meta: ${detectedPhase}/${detectedSubphase}\n` +
+      `Current selection: ${selectedPhase}/${selectedSubphase}\n` +
+      "Continue with detected phase?",
+    options: [
+      { value: "detected", label: `continue ${detectedPhase}/${detectedSubphase}`, color: "green" },
+      { value: "selected", label: `keep ${selectedPhase}/${selectedSubphase}`, color: "yellow" },
+    ],
+    defaultIndex: 0,
+  });
+  return choice === "detected";
 }
 
 function taskStatusCounts(sessionDir) {
@@ -663,6 +942,7 @@ function loadPhasePrompt(root, phaseId, { subphase = "active", directiveContext 
   if (!fs.existsSync(subphaseFile)) throw new Error(`Missing runbook phase instruction file: ${subphaseFile}`);
   const body = fs.readFileSync(subphaseFile, "utf8").trim();
   const repoRules = loadRepoRulesBundle(root);
+  const phaseContract = renderPhasePromptContract(phaseId, subphaseName);
   const contextLines = directiveContext
     ? [
       `Selected directive session: ${directiveContext.session}`,
@@ -684,6 +964,7 @@ function loadPhasePrompt(root, phaseId, { subphase = "active", directiveContext 
     "",
     ...contextLines,
     ...(repoRules ? ["Repository rules bundle (authoritative):", "", repoRules, ""] : []),
+    ...(phaseContract ? [phaseContract, ""] : []),
     body,
   ].join("\n");
 }
@@ -846,12 +1127,16 @@ function setPath(target, dotted, value) {
   cur[keys[keys.length - 1]] = value;
 }
 
-function cmdDirectiveCreate(root, args) {
+async function cmdDirectiveCreate(root, args) {
   const title = String(args.title || "").trim();
   const summary = String(args.summary || "").trim();
   const dryRun = Boolean(args["dry-run"]);
   const branch = String(args.branch || "").trim() || `feat/${slugify(title)}`;
-  const session = String(args.session || "").trim() || `${utcDatePrefix()}_${slugify(title)}`;
+  const session = await resolveDirectiveSessionForCreate(root, {
+    session: args.session,
+    folder: args.folder,
+    title,
+  });
   if (!title || !summary) throw new Error("directive create requires --title and --summary");
   const { sessionDir } = requireSession(root, session);
   const directiveSlug = slugify(title);
@@ -956,8 +1241,10 @@ function cmdHandoffCreate(root, args) {
   const dryRun = Boolean(args["dry-run"]);
   const { sessionDir, session } = requireSession(root, args.session);
   if (!fs.existsSync(sessionDir)) throw new Error(`Session not found: ${session}`);
-  const { doc } = requireMetaDoc(root, session);
-  const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+  const { doc, metaPath } = requireMetaDoc(root, session);
+  const next = normalizeDirectiveMetaDoc(doc, session);
+  if (!next) throw new Error(`Invalid directive meta JSON: ${metaPath}`);
+  const meta = next.meta && typeof next.meta === "object" ? next.meta : {};
   const slug = String(meta.directive_slug || "directive");
   const kindRaw = String(args.kind || "").trim().toLowerCase();
   const inferredKind = kindRaw || ((args["to-role"] || args["from-role"]) ? "executor" : "authoring");
@@ -970,6 +1257,10 @@ function cmdHandoffCreate(root, args) {
   const payload = inferredKind === "authoring"
     ? buildArchitectAuthoringHandoff(meta, args, session)
     : buildHandoffPayload(meta, args);
+  const completedPhase = inferredKind === "authoring" ? "architect-discovery" : "architect-authoring";
+  markPhaseCompletion(meta, completedPhase, "handoff");
+  next.meta.updated = nowIso();
+  writeJson(metaPath, next, dryRun);
   writeJson(handoffPath, payload, dryRun);
 }
 
@@ -992,15 +1283,29 @@ function cmdMetaSet(root, args) {
   }
 
   if (!next.meta || typeof next.meta !== "object") next.meta = {};
+  const appliedSets = [];
   for (const row of sets) {
     const idx = String(row).indexOf("=");
     if (idx <= 0) throw new Error(`Invalid --set '${row}', expected key=value`);
     const key = String(row).slice(0, idx).trim();
     const valueRaw = String(row).slice(idx + 1);
-    setPath(next.meta, key, parseValue(valueRaw));
+    const value = parseValue(valueRaw);
+    setPath(next.meta, key, value);
+    appliedSets.push({ key, value });
   }
   next.meta.updated = nowIso();
   writeJson(targetPath, next, dryRun);
+  if (args.task) {
+    const statusSet = appliedSets.find((row) => row.key === "status");
+    if (!dryRun && statusSet && String(statusSet.value) === "done") {
+      const directiveNext = normalizeDirectiveMetaDoc(readJson(metaPath), args.session);
+      if (directiveNext && directiveNext.meta && typeof directiveNext.meta === "object") {
+        markPhaseCompletion(directiveNext.meta, "executor-task", "active");
+        directiveNext.meta.updated = nowIso();
+        writeJson(metaPath, directiveNext, false);
+      }
+    }
+  }
   if (!args.task) {
     writeJson(
       architectHandoffPath(sessionDir, String(next.meta.directive_slug || slugify(next.meta.title || args.session))),
@@ -1057,7 +1362,7 @@ function cmdGitPrepare(root, args) {
   const noRebase = Boolean(args["no-rebase"]);
   const doFetch = Boolean(args.fetch);
   const session = String(args.session || "").trim();
-  const { sessionDir, doc } = requireMetaDoc(root, session);
+  const { sessionDir, doc, metaPath } = requireMetaDoc(root, session);
   if (!fs.existsSync(sessionDir)) throw new Error(`Session not found: ${session}`);
   const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
   const directiveBranch = String(meta.directive_branch || "").trim();
@@ -1157,6 +1462,14 @@ function cmdGitPrepare(root, args) {
     dry_run: dryRun,
     actions,
   };
+  if (!dryRun) {
+    const next = normalizeDirectiveMetaDoc(doc, session);
+    if (next && next.meta && typeof next.meta === "object") {
+      markPhaseCompletion(next.meta, "executor-start", "active");
+      next.meta.updated = nowIso();
+      writeJson(metaPath, next, false);
+    }
+  }
   stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
 }
 
@@ -1167,7 +1480,7 @@ function cmdGitCloseout(root, args) {
   const doFetch = Boolean(args.fetch);
   const exportLogs = !Boolean(args["no-log-export"]);
   const session = String(args.session || "").trim();
-  const { sessionDir, doc } = requireMetaDoc(root, session);
+  const { sessionDir, doc, metaPath } = requireMetaDoc(root, session);
   if (!fs.existsSync(sessionDir)) throw new Error(`Session not found: ${session}`);
   const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
   const directiveBranch = String(meta.directive_branch || "").trim();
@@ -1273,6 +1586,14 @@ function cmdGitCloseout(root, args) {
     dry_run: dryRun,
     actions,
   };
+  if (!dryRun) {
+    const next = normalizeDirectiveMetaDoc(doc, session);
+    if (next && next.meta && typeof next.meta === "object") {
+      markPhaseCompletion(next.meta, "executor-closeout", "handoff");
+      next.meta.updated = nowIso();
+      writeJson(metaPath, next, false);
+    }
+  }
   stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
 }
 
@@ -1289,6 +1610,20 @@ function validateDirectiveSession(sessionDir) {
   if (!String(meta.title || "").trim()) errors.push("meta.title required");
   if (!String(meta.summary || "").trim()) errors.push("meta.summary required");
   if (!String(meta.directive_slug || "").trim()) errors.push("meta.directive_slug required");
+  const phaseCompletion = normalizePhaseCompletionMap(meta.phase_completion);
+  if (!phaseCompletion || typeof phaseCompletion !== "object") {
+    errors.push("meta.phase_completion required");
+  } else {
+    for (const id of RUNBOOK_PHASE_IDS) {
+      const row = phaseCompletion[id];
+      if (!row || typeof row !== "object") {
+        errors.push(`meta.phase_completion.${id} required`);
+        continue;
+      }
+      if (typeof row.active_complete !== "boolean") errors.push(`meta.phase_completion.${id}.active_complete must be boolean`);
+      if (typeof row.handoff_complete !== "boolean") errors.push(`meta.phase_completion.${id}.handoff_complete must be boolean`);
+    }
+  }
 
   const taskFiles = listSessionFiles(sessionDir, ".task.json");
   for (const taskFile of taskFiles) {
@@ -1458,7 +1793,7 @@ function cmdDoctor(root) {
   if (!out.ok) process.exit(1);
 }
 
-function cmdQaScan(root, args) {
+async function cmdQaScan(root, args) {
   const createDirective = Boolean(args["create-directive"]);
   const forceCreate = Boolean(args.force);
   const scan = spawnSync("node", ["ops_tooling/scripts/qa/run_qa_checks.mjs"], {
@@ -1493,7 +1828,7 @@ function cmdQaScan(root, args) {
       ? failures.map((f) => `Fix failing QA check: ${String(f.id || "unknown")} (${String(f.command || "").trim()})`)
       : ["Review full QA report and create remediation tasks for robustness improvements."];
 
-    cmdDirectiveCreate(root, {
+    await cmdDirectiveCreate(root, {
       session,
       title,
       summary,
@@ -1514,7 +1849,7 @@ function cmdQaScan(root, args) {
   if (!out.ok) process.exit(1);
 }
 
-function dispatchCommand(root, args) {
+async function dispatchCommand(root, args) {
   const [group, action] = args._;
   if (args.help || args.h) {
     stdout.write(`${commandUsage(group, action)}\n`);
@@ -1528,7 +1863,7 @@ function dispatchCommand(root, args) {
   });
   try {
     let result;
-    if (group === "directive" && action === "create") result = cmdDirectiveCreate(root, args);
+    if (group === "directive" && action === "create") result = await cmdDirectiveCreate(root, args);
     else if (group === "directive" && action === "set-goals") result = cmdDirectiveSetGoals(root, args);
     else if (group === "task" && action === "create") result = cmdTaskCreate(root, args);
     else if (group === "task" && action === "set-contract") result = cmdTaskSetContract(root, args);
@@ -1537,7 +1872,7 @@ function dispatchCommand(root, args) {
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "git" && action === "closeout") result = cmdGitCloseout(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
-    else if (group === "qa" && action === "scan") result = cmdQaScan(root, args);
+    else if (group === "qa" && action === "scan") result = await cmdQaScan(root, args);
     else if (group === "doctor") result = cmdDoctor(root, args);
     else if (group === "directive" || group === "task" || group === "handoff" || group === "meta" || group === "git" || group === "validate" || group === "qa" || group === "doctor") {
       throw new Error(`Unknown command: ${[group, action].filter(Boolean).join(" ")}\n${commandUsage(group)}`);
@@ -1589,12 +1924,24 @@ async function main() {
     selected = await selectPhaseInteractive(phases);
   }
 
-  const found = phases.find((p) => p.id === selected);
+  let found = phases.find((p) => p.id === selected);
   if (!found) throw new Error(`Unknown phase '${selected}'.`);
-  const subphase = normalizeSubphaseForPhase(phases, found.id, args.subphase);
+  let subphase = normalizeSubphaseForPhase(phases, found.id, args.subphase);
   let directive = String(args.directive || "").trim();
   if (!directive && implicitInteractive && stdin.isTTY && stdout.isTTY) {
     directive = await selectDirectiveForPhase(root, found.id);
+  }
+  if (directive && implicitInteractive) {
+    const resumed = detectResumeState(root, directive, phases);
+    const detectedPhase = resumed.phase;
+    const detectedSubphase = normalizeSubphaseForPhase(phases, resumed.phase, resumed.subphase);
+    const useDetected = await confirmResumePhase(root, directive, detectedPhase, detectedSubphase, found.id, subphase);
+    if (useDetected) {
+      selected = detectedPhase;
+      found = phases.find((p) => p.id === selected);
+      if (!found) throw new Error(`Unknown phase '${selected}'.`);
+      subphase = detectedSubphase;
+    }
   }
   const dryRun = Boolean(args["dry-run"]);
   if (directive) ensureDirectiveExists(root, directive);
