@@ -15,7 +15,7 @@
 | TASK_07.3 | executor | completed | 2026-02-11T09:54:38Z | Added local secret readiness gate script and documented sync prerequisite. Operator-approved deviation moved script path to `ops_tooling/scripts/env`. |
 | TASK_08 | executor | todo |  |  |
 | TASK_09 | executor | completed | 2026-02-11T09:57:58Z | Added CI baseline workflow with `lint` and `typecheck` PR checks for `dev` and `prod`. |
-| TASK_10 | executor | completed | 2026-02-11T09:59:27Z | Added `integration-test-testenv` CI job and `ops_tooling/scripts/ci/check-test-env.sh` to enforce test-only integration context. |
+| TASK_10 | executor | completed | 2026-02-11T09:59:27Z | Added `integration-test-testenv` CI job and `ops_tooling/scripts/ci/check-test-env.sh` guard; current workflow run step targets `npm --prefix apps/web run test:integration`, but `apps/web/package.json` does not currently define `test:integration`, so integration run wiring is present but not yet operable. |
 | TASK_11 | executor | todo |  |  |
 | TASK_11.1 | executor | todo |  |  |
 | TASK_12 | executor | todo |  |  |

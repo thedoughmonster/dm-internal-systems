@@ -1,0 +1,94 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "canonical directive-path normalization",
+    "summary": "Normalize deployment directive and task path references to canonical runbook-era locations and remove stale path drift.",
+    "status": "done",
+    "created": "2026-02-19T14:24:34.335Z",
+    "updated": "2026-02-19T14:53:53.422Z",
+    "id": "38c639ee-d458-4d23-b934-4d110abf1ec5",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "done",
+    "tags": [
+      "runbook",
+      "contracts",
+      "paths"
+    ],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium",
+    "completion_summary": "Normalized directive handoff task_file to canonical .runbook path for task 01; validated with runbook validate (ok) and stale-term grep (instructional-only hits)."
+  },
+  "task": {
+    "objective": "Normalize stale deployment directive and task path references to canonical runbook-era artifact locations so internal contracts no longer point to legacy paths.",
+    "constraints": [
+      "Do not modify product application code in this task.",
+      "Keep edits minimal and limited to directive/task artifacts and supporting runbook-facing documentation.",
+      "Do not bypass required schema fields in structured artifacts.",
+      "Preserve existing directive intent while correcting path targets."
+    ],
+    "allowed_files": [
+      {
+        "path": ".runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile/*.json",
+        "access": "edit"
+      },
+      {
+        "path": "docs/operations/deployment/*.md",
+        "access": "edit"
+      },
+      {
+        "path": "docs/reference/**/*.md",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Inventory directive/task path references tied to deployment reconciliation work and identify legacy or broken locations.",
+        "files": [],
+        "artifact": "Path reference inventory notes"
+      },
+      {
+        "id": "step_2",
+        "instruction": "Update directive/task contracts and related structured artifacts to canonical runbook-era paths.",
+        "files": [],
+        "artifact": "Updated task/directive JSON artifacts"
+      },
+      {
+        "id": "step_3",
+        "instruction": "Align affected docs references with corrected canonical paths where drift exists.",
+        "files": [],
+        "artifact": "Documentation reference fixes"
+      },
+      {
+        "id": "step_4",
+        "instruction": "Run repository and session validation to confirm artifact integrity after normalization edits.",
+        "files": [],
+        "artifact": "Validation output"
+      }
+    ],
+    "validation": {
+      "commands": [
+        "./runbook validate --session 26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile",
+        "rg -n \"legacy|deprecated|old-path\" .runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile docs/operations docs/reference -S"
+      ]
+    },
+    "expected_output": [
+      "Deployment reconciliation directive/task artifacts point only to canonical runbook-era paths.",
+      "No stale path references remain in updated scope.",
+      "Runbook/session validation passes."
+    ],
+    "stop_conditions": [
+      "Stop if canonical target path is ambiguous or conflicts with repository policy.",
+      "Stop if required normalization would force product-code edits outside artifact/doc scope."
+    ],
+    "notes": []
+  }
+}

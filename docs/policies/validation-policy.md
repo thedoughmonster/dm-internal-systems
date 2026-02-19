@@ -20,4 +20,5 @@ Defines repository-wide validation expectations for changes before merge.
 ## Required behavior
 
 - Do not claim completion without reporting validation status.
+- Validation commands documented in task contracts and operations docs must resolve to existing repository command entrypoints; when an entrypoint is missing, record an explicit command-existence check and unresolved state instead of implying operability.
 - If unrelated pre-existing failures block progress, report them explicitly and do not mask them as task failures.
