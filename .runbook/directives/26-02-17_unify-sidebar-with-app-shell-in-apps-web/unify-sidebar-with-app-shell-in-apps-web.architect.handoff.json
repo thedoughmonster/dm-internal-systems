@@ -1,0 +1,53 @@
+{
+  "kind": "runbook_architect_handoff",
+  "schema_version": "1.0",
+  "handoff": {
+    "from_phase": "architect-discovery",
+    "to_phase": "architect-authoring",
+    "created": "2026-02-19T09:36:43.578Z",
+    "objective": "Convert approved sidebar scope into architect-authoring task artifacts."
+  },
+  "directive": {
+    "session": "26-02-17_unify-sidebar-with-app-shell-in-apps-web",
+    "directive_slug": "unify-sidebar-with-app-shell-in-apps-web",
+    "title": "Unify Sidebar With App Shell in apps/web",
+    "summary": "Redesign the Next.js apps/web sidebar so it feels integrated with the main UI: move from edge-pinned layout to an inset, contained rail within a shared shell; improve spacing, visual hierarchy, active states, and responsive behavior.",
+    "status": "done",
+    "directive_branch": "feature/unify-sidebar-with-app-shell-in-apps-web",
+    "directive_base_branch": "dev",
+    "commit_policy": "end_of_directive",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "effort": "medium",
+    "goals": [
+      "Place sidebar and main content in one centered app shell with shared gutters/alignment.",
+      "Convert sidebar to a contained rail (rounded corners, subtle border/background, soft elevation).",
+      "Improve navigation readability with clear active states, spacing rhythm, and optional icons.",
+      "Set responsive behavior: persistent rail on desktop, collapsible drawer/sheet on smaller viewports.",
+      "Add subtle, consistent motion for rail transitions and active-item feedback."
+    ],
+    "definition_of_done": "Global sidebar unified in layout with shared header, viewport-contained shell, independent scroll regions, fixed sidebar footer, collapsible unique-icon mode, and deterministic single active route highlighting.",
+    "constraints": [],
+    "acceptance_criteria": [],
+    "non_goals": [],
+    "tags": [
+      "needs-triage"
+    ],
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "updated": "2026-02-19T09:36:43.520Z"
+  },
+  "authoring_requirements": {
+    "required_commands": [
+      "runbook task create",
+      "runbook task set-contract",
+      "runbook meta set --task ...",
+      "runbook handoff create --kind executor",
+      "runbook validate --session ..."
+    ],
+    "completion_gate": "All task contracts complete and validated; executor handoff created."
+  }
+}

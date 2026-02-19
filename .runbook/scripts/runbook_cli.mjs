@@ -191,6 +191,8 @@ function usage() {
     "  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]",
     "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
     "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
+    "  runbook git cycle-commit [--message <text>] [--dry-run]",
+    "  runbook git helper [--session <id>] [--dry-run]",
     "  runbook qa scan [--create-directive] [--force]",
     "  runbook doctor",
     "",
@@ -205,7 +207,7 @@ function usage() {
 function commandUsage(group = "", action = "") {
   const g = String(group || "").trim();
   const a = String(action || "").trim();
-  if (g === "directive" && (!a || a === "create")) {
+  if (g === "directive" && a === "create") {
     return "Usage:\n  runbook directive create [--session <id> | --folder <name>] --title <text> --summary <text> [--branch <name>] [--goal <text> ...] [--dry-run]";
   }
   if (g === "directive" && a === "set-goals") {
@@ -218,7 +220,7 @@ function commandUsage(group = "", action = "") {
       "  runbook directive set-goals --session <id> [--goal <text> ...] [--clear] [--dry-run]",
     ].join("\n");
   }
-  if (g === "task" && (!a || a === "create")) {
+  if (g === "task" && a === "create") {
     return "Usage:\n  runbook task create --session <id> --title <text> --summary <text> [--slug <slug>] [--dry-run]";
   }
   if (g === "task" && a === "set-contract") {
@@ -237,23 +239,31 @@ function commandUsage(group = "", action = "") {
   if (g === "meta") {
     return "Usage:\n  runbook meta set --session <id> [--task <slug|file>] --set <key=value> [--set <key=value> ...] [--dry-run]";
   }
-  if (g === "git" && (!a || a === "prepare")) {
+  if (g === "git" && a === "prepare") {
     return "Usage:\n  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]";
   }
   if (g === "git" && a === "closeout") {
     return "Usage:\n  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]";
+  }
+  if (g === "git" && a === "cycle-commit") {
+    return "Usage:\n  runbook git cycle-commit [--message <text>] [--dry-run]";
+  }
+  if (g === "git" && a === "helper") {
+    return "Usage:\n  runbook git helper [--session <id>] [--dry-run]";
   }
   if (g === "git") {
     return [
       "Usage:",
       "  runbook git prepare --session <id> [--no-rebase] [--fetch] [--dry-run]",
       "  runbook git closeout --session <id> [--delete-branch] [--delete-remote] [--fetch] [--no-log-export] [--dry-run]",
+      "  runbook git cycle-commit [--message <text>] [--dry-run]",
+      "  runbook git helper [--session <id>] [--dry-run]",
     ].join("\n");
   }
   if (g === "validate") {
     return "Usage:\n  runbook validate [--session <id>]";
   }
-  if (g === "qa" && (!a || a === "scan")) {
+  if (g === "qa" && a === "scan") {
     return "Usage:\n  runbook qa scan [--create-directive] [--force]";
   }
   if (g === "qa") {
@@ -771,12 +781,38 @@ function directiveOptions(root) {
   return [createNew, ...existing];
 }
 
+function directiveExistingOptions(root) {
+  const rows = listDirectiveSessions(root)
+    .map((session) => loadDirectiveSummary(root, session))
+    .filter((row) => {
+      const status = String(row.status || "").toLowerCase();
+      return status !== "archived";
+    });
+  return rows.map((row) => ({
+    value: row.session,
+    label: `[${row.status}] ${row.title}`,
+    color: "dim",
+  }));
+}
+
 async function selectDirectiveInteractive(root) {
   return selectFromList({
     input: stdin,
     output: stdout,
     title: "Select directive:",
     options: directiveOptions(root),
+    defaultIndex: 0,
+  });
+}
+
+async function selectExistingDirectiveInteractive(root) {
+  const options = directiveExistingOptions(root);
+  if (options.length === 0) throw new Error("No existing directives available.");
+  return selectFromList({
+    input: stdin,
+    output: stdout,
+    title: "Select existing directive:",
+    options,
     defaultIndex: 0,
   });
 }
@@ -788,6 +824,32 @@ async function selectDirectiveForPhase(root, phaseId) {
     throw new Error(`Phase '${phaseId}' requires an existing directive. Re-run and select an existing directive.`);
   }
   return choice;
+}
+
+async function selectRunbookEntryMode() {
+  return selectFromList({
+    input: stdin,
+    output: stdout,
+    title: "Runbook entry:",
+    options: [
+      { value: "new_discovery", label: "create a new directive via discovery", color: "cyan" },
+      { value: "continue_existing", label: "continue an existing directive", color: "green" },
+    ],
+    defaultIndex: 0,
+  });
+}
+
+async function confirmDetectedPhase(session, phase, subphase) {
+  return selectFromList({
+    input: stdin,
+    output: stdout,
+    title: `Directive: ${session}\nDetected phase: ${phase}/${subphase}\nContinue?`,
+    options: [
+      { value: "continue", label: "continue with detected phase", color: "green" },
+      { value: "cancel", label: "cancel", color: "yellow" },
+    ],
+    defaultIndex: 0,
+  });
 }
 
 async function confirmResumePhase(root, directive, detectedPhase, detectedSubphase, selectedPhase, selectedSubphase) {
@@ -1054,6 +1116,70 @@ function launchCodexForPhase(root, phase, { dryRun = false, subphase = "active",
     directiveSession,
     event: "phase_launch_end",
     payload: { exit_status: typeof result.status === "number" ? result.status : null },
+  });
+  if (result.error) throw result.error;
+  if (typeof result.status === "number" && result.status !== 0) process.exit(result.status);
+  return true;
+}
+
+function launchCodexWithPrompt(root, prompt, {
+  dryRun = false,
+  directiveContext = null,
+  launchLabel = "manual",
+} = {}) {
+  const logs = runbookLogTargets(root, directiveContext);
+  const directiveSession = directiveContext?.session || "";
+  if (dryRun) {
+    const withDirective = directiveContext ? ` directive=${directiveContext.session}` : "";
+    stdout.write(
+      `[RUNBOOK] dry-run launch: codex <${launchLabel} prompt>${withDirective} log=${logs.transcriptPath}\n`,
+    );
+    appendEventLog(root, {
+      directiveSession,
+      event: "manual_launch_dry_run",
+      payload: { launch_label: launchLabel, transcript: logs.transcriptPath, codex_log_dir: logs.codexLogDir },
+    });
+    return true;
+  }
+  if (!(stdin.isTTY && stdout.isTTY)) {
+    throw new Error("Cannot launch interactive codex from non-interactive shell.");
+  }
+  ensureDir(logs.sessionLogDir);
+  ensureDir(logs.codexLogDir);
+  stdout.write(`[RUNBOOK] Observe live session log: tail -f ${logs.transcriptPath}\n`);
+  stdout.write(`[RUNBOOK] Observe clean events log: tail -f ${logs.eventPath}\n`);
+  appendEventLog(root, {
+    directiveSession,
+    event: "manual_launch_start",
+    payload: {
+      launch_label: launchLabel,
+      transcript: logs.transcriptPath,
+      events: logs.eventPath,
+      codex_log_dir: logs.codexLogDir,
+    },
+  });
+
+  const codexCmd = `codex --no-alt-screen -c ${shQuote(`log_dir=${JSON.stringify(logs.codexLogDir)}`)} ${shQuote(prompt)}`;
+  let result = spawnSync("script", ["-q", "-f", "-a", logs.transcriptPath, "-c", codexCmd], {
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (result.error && String(result.error.message || "").toLowerCase().includes("enoent")) {
+    stdout.write("[RUNBOOK] 'script' command not found; falling back to direct codex launch.\n");
+    appendEventLog(root, {
+      directiveSession,
+      event: "manual_launch_fallback",
+      payload: { launch_label: launchLabel, reason: "script_not_found" },
+    });
+    result = spawnSync("codex", ["--no-alt-screen", "-c", `log_dir=${logs.codexLogDir}`, prompt], {
+      stdio: "inherit",
+      env: process.env,
+    });
+  }
+  appendEventLog(root, {
+    directiveSession,
+    event: "manual_launch_end",
+    payload: { launch_label: launchLabel, exit_status: typeof result.status === "number" ? result.status : null },
   });
   if (result.error) throw result.error;
   if (typeof result.status === "number" && result.status !== 0) process.exit(result.status);
@@ -1599,6 +1725,213 @@ function cmdGitCloseout(root, args) {
   stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
 }
 
+function cmdGitCycleCommit(root, args) {
+  const dryRun = Boolean(args["dry-run"]);
+  const message = String(args.message || "runbook: phase checkpoint").trim();
+  const originBranch = gitRun(root, ["rev-parse", "--abbrev-ref", "HEAD"]).stdout;
+
+  const sessions = listDirectiveSessions(root)
+    .map((session) => {
+      try {
+        const { doc } = requireMetaDoc(root, session);
+        const meta = doc && doc.meta && typeof doc.meta === "object" ? doc.meta : {};
+        return {
+          session,
+          status: String(meta.status || "todo"),
+          branch: String(meta.directive_branch || "").trim(),
+          base: String(meta.directive_base_branch || "dev").trim(),
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .filter((row) => {
+      const status = String(row.status || "").toLowerCase();
+      return status !== "archived" && status !== "done";
+    });
+
+  const actions = [];
+  for (const row of sessions) {
+    const session = row.session;
+    const directivePath = `.runbook/directives/${session}`;
+    const status = gitRun(root, ["status", "--porcelain", "--", directivePath], { allowNonZero: true }).stdout;
+    const hasChanges = Boolean(String(status || "").trim());
+
+    if (!hasChanges) {
+      actions.push({ session, branch: row.branch, step: "scan", changed: false, committed: false });
+      continue;
+    }
+    if (!row.branch) {
+      actions.push({ session, branch: "", step: "scan", changed: true, committed: false, error: "missing directive_branch in meta" });
+      continue;
+    }
+
+    const commitMsg = `${message} ${session}`;
+    const rowActions = [{ step: "stash_path", path: directivePath }];
+    try {
+      if (!dryRun) {
+        gitRun(root, ["stash", "push", "-u", "-m", `runbook-cycle-${session}`, "--", directivePath], { allowNonZero: true });
+      }
+
+      const branchExists = gitRefExists(root, row.branch);
+      if (!branchExists && !dryRun) {
+        gitRun(root, ["checkout", "-b", row.branch, row.base]);
+      } else if (!dryRun) {
+        gitRun(root, ["checkout", row.branch]);
+      }
+      rowActions.push({ step: "checkout", branch: row.branch, created: !branchExists });
+
+      if (!dryRun) {
+        const pop = gitRun(root, ["stash", "pop"], { allowNonZero: true });
+        rowActions.push({ step: "stash_pop", code: pop.code });
+        if (pop.code !== 0) throw new Error(`stash pop failed for ${session}: ${pop.stderr || pop.stdout}`);
+        gitRun(root, ["add", "--", directivePath], { allowNonZero: true });
+        const staged = gitRun(root, ["diff", "--cached", "--quiet", "--", directivePath], { allowNonZero: true });
+        if (staged.code !== 0) {
+          gitRun(root, ["commit", "-m", commitMsg]);
+          rowActions.push({ step: "commit", message: commitMsg, committed: true });
+        } else {
+          rowActions.push({ step: "commit", skipped: true, reason: "no_staged_changes" });
+        }
+      } else {
+        rowActions.push({ step: "checkout", branch: row.branch });
+        rowActions.push({ step: "stash_pop" });
+        rowActions.push({ step: "commit", message: commitMsg, planned: true });
+      }
+      actions.push({ session, branch: row.branch, changed: true, committed: !dryRun, planned: dryRun, steps: rowActions });
+    } catch (error) {
+      actions.push({
+        session,
+        branch: row.branch,
+        changed: true,
+        committed: false,
+        steps: rowActions,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      if (!dryRun) {
+        try { gitRun(root, ["checkout", originBranch]); } catch {}
+      }
+    }
+  }
+
+  const payload = {
+    kind: "runbook_git_cycle_commit",
+    ok: !actions.some((a) => a.error),
+    dry_run: dryRun,
+    origin_branch: originBranch,
+    actions,
+  };
+  stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+  if (!payload.ok) process.exit(1);
+}
+
+function buildGitDirectiveHealth(root, { sessionFilter = "" } = {}) {
+  const currentBranch = gitRun(root, ["rev-parse", "--abbrev-ref", "HEAD"]).stdout;
+  const hasOrigin = gitHasOrigin(root);
+  const sessions = listDirectiveSessions(root)
+    .filter((s) => !sessionFilter || s === sessionFilter)
+    .map((session) => {
+      let meta = null;
+      try {
+        const { doc } = requireMetaDoc(root, session);
+        meta = doc?.meta || {};
+      } catch {
+        return {
+          session,
+          error: "missing_meta",
+        };
+      }
+      const status = String(meta.status || "todo");
+      if (String(status).toLowerCase() === "archived") return null;
+      const directiveBranch = String(meta.directive_branch || "").trim();
+      const baseBranch = String(meta.directive_base_branch || "dev").trim();
+      const directivePath = `.runbook/directives/${session}`;
+      const dirty = Boolean(gitRun(root, ["status", "--porcelain", "--", directivePath], { allowNonZero: true }).stdout);
+      const branchExists = directiveBranch ? gitRefExists(root, directiveBranch) : false;
+      const baseExists = baseBranch ? gitRefExists(root, baseBranch) : false;
+      let ahead = null;
+      let behind = null;
+      if (branchExists && baseExists) {
+        const divergence = gitRun(root, ["rev-list", "--left-right", "--count", `${baseBranch}...${directiveBranch}`], { allowNonZero: true }).stdout;
+        const [behindRaw, aheadRaw] = String(divergence || "").split(/\s+/);
+        behind = Number(behindRaw || 0);
+        ahead = Number(aheadRaw || 0);
+      }
+      return {
+        session,
+        status,
+        directive_branch: directiveBranch,
+        directive_base_branch: baseBranch,
+        branch_exists: branchExists,
+        base_exists: baseExists,
+        dirty_directive_artifacts: dirty,
+        behind_base: behind,
+        ahead_of_base: ahead,
+        needs_rebase: typeof behind === "number" ? behind > 0 : false,
+        needs_commit: dirty,
+      };
+    })
+    .filter(Boolean);
+  return {
+    generated_at: nowIso(),
+    current_branch: currentBranch,
+    has_origin: hasOrigin,
+    sessions,
+  };
+}
+
+function buildGitHelperPrompt(report, { sessionFilter = "" } = {}) {
+  const reportJson = JSON.stringify(report, null, 2);
+  const scopeLine = sessionFilter
+    ? `Scope: single directive session '${sessionFilter}'.`
+    : "Scope: all active directives in this repository.";
+  return [
+    "Runbook git-helper mode.",
+    "Use this as authoritative guidance for this session:",
+    "",
+    scopeLine,
+    "Goal: help operator decide which directive branches need rebasing from base (usually dev), which directives need commits, and what runbook commands to run next.",
+    "",
+    "Rules:",
+    "- Use runbook commands as the operational interface; avoid ad-hoc git unless operator explicitly asks.",
+    "- Do not perform destructive actions without explicit operator approval.",
+    "- First response should summarize risk and provide a prioritized action plan.",
+    "- Ask for go-ahead before executing any write action.",
+    "",
+    "Preferred command set:",
+    "- runbook git prepare --session <id>",
+    "- runbook git cycle-commit",
+    "- runbook git closeout --session <id>",
+    "- runbook validate --session <id>",
+    "",
+    "Decision guidance:",
+    "- If needs_rebase=true, suggest runbook git prepare for that session.",
+    "- If needs_commit=true, suggest runbook git cycle-commit (or targeted commit flow if operator prefers).",
+    "- If branch is missing, suggest runbook git prepare for branch materialization.",
+    "",
+    "Repository branch health report (live snapshot):",
+    "```json",
+    reportJson,
+    "```",
+  ].join("\n");
+}
+
+function cmdGitHelper(root, args) {
+  const dryRun = Boolean(args["dry-run"]);
+  const session = String(args.session || "").trim();
+  if (session) ensureDirectiveExists(root, session);
+  const directiveContext = session ? loadDirectiveContext(root, session) : null;
+  const report = buildGitDirectiveHealth(root, { sessionFilter: session });
+  const prompt = buildGitHelperPrompt(report, { sessionFilter: session });
+  return launchCodexWithPrompt(root, prompt, {
+    dryRun,
+    directiveContext,
+    launchLabel: "git-helper",
+  });
+}
+
 function validateDirectiveSession(sessionDir) {
   const errors = [];
   const metaFile = findMetaFile(sessionDir);
@@ -1873,6 +2206,8 @@ async function dispatchCommand(root, args) {
     else if (group === "meta" && action === "set") result = cmdMetaSet(root, args);
     else if (group === "git" && action === "prepare") result = cmdGitPrepare(root, args);
     else if (group === "git" && action === "closeout") result = cmdGitCloseout(root, args);
+    else if (group === "git" && action === "cycle-commit") result = cmdGitCycleCommit(root, args);
+    else if (group === "git" && action === "helper") result = cmdGitHelper(root, args);
     else if (group === "validate") result = cmdValidate(root, args);
     else if (group === "qa" && action === "scan") result = await cmdQaScan(root, args);
     else if (group === "doctor") result = cmdDoctor(root, args);
@@ -1920,30 +2255,37 @@ async function main() {
 
   let selected = String(args.phase || "").trim();
   const implicitInteractive = !args.phase && args._.length === 0;
+  let directive = String(args.directive || "").trim();
+
+  if (implicitInteractive) {
+    if (!(stdin.isTTY && stdout.isTTY)) return;
+    const mode = await selectRunbookEntryMode();
+    if (mode === "new_discovery") {
+      selected = "architect-discovery";
+      directive = "";
+    } else {
+      directive = await selectExistingDirectiveInteractive(root);
+      const resumed = detectResumeState(root, directive, phases);
+      const detectedPhase = resumed.phase;
+      const detectedSubphase = normalizeSubphaseForPhase(phases, resumed.phase, resumed.subphase);
+      const decision = await confirmDetectedPhase(directive, detectedPhase, detectedSubphase);
+      if (decision !== "continue") throw new Error("Selection cancelled.");
+      selected = detectedPhase;
+      args.subphase = detectedSubphase;
+    }
+  }
+
   if (!selected) {
     printPhaseList(phases);
     if (!(stdin.isTTY && stdout.isTTY)) return;
     selected = await selectPhaseInteractive(phases);
   }
 
-  let found = phases.find((p) => p.id === selected);
+  const found = phases.find((p) => p.id === selected);
   if (!found) throw new Error(`Unknown phase '${selected}'.`);
-  let subphase = normalizeSubphaseForPhase(phases, found.id, args.subphase);
-  let directive = String(args.directive || "").trim();
-  if (!directive && implicitInteractive && stdin.isTTY && stdout.isTTY) {
+  const subphase = normalizeSubphaseForPhase(phases, found.id, args.subphase);
+  if (!directive && !implicitInteractive && stdin.isTTY && stdout.isTTY) {
     directive = await selectDirectiveForPhase(root, found.id);
-  }
-  if (directive && implicitInteractive) {
-    const resumed = detectResumeState(root, directive, phases);
-    const detectedPhase = resumed.phase;
-    const detectedSubphase = normalizeSubphaseForPhase(phases, resumed.phase, resumed.subphase);
-    const useDetected = await confirmResumePhase(root, directive, detectedPhase, detectedSubphase, found.id, subphase);
-    if (useDetected) {
-      selected = detectedPhase;
-      found = phases.find((p) => p.id === selected);
-      if (!found) throw new Error(`Unknown phase '${selected}'.`);
-      subphase = detectedSubphase;
-    }
   }
   const dryRun = Boolean(args["dry-run"]);
   if (directive) ensureDirectiveExists(root, directive);
