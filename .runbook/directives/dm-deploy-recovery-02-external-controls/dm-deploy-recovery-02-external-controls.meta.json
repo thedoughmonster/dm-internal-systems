@@ -1,0 +1,65 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "directive_slug": "dm-deploy-recovery-02-external-controls",
+    "title": "dm-deploy-recovery-02-external-controls",
+    "summary": "Apply and verify external deployment controls in GitHub, Vercel, and Supabase with non-secret auditable evidence aligned to deployment policy.",
+    "status": "todo",
+    "directive_branch": "feat/dm-deploy-recovery-02-external-controls",
+    "goals": [
+      "Enforce and verify GitHub branch protections, default branch policy, and production environment approval controls.",
+      "Verify Supabase and Vercel environment separation between test/preview/development and production.",
+      "Capture complete non-secret evidence for external control state in repository operations docs."
+    ],
+    "created": "2026-02-19T13:16:18.332Z",
+    "updated": "2026-02-19T13:16:18.411Z",
+    "id": "caf8a220-3a62-422f-8c87-c9c2432b42b5",
+    "session": "dm-deploy-recovery-02-external-controls",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T13:16:18.411Z"
+      },
+      "architect-authoring": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-start": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    }
+  }
+}
