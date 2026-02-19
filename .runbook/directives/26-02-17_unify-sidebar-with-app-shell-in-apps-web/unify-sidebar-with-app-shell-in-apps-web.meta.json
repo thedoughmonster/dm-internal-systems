@@ -14,7 +14,7 @@
       "needs-triage"
     ],
     "created": "2026-02-17T17:29:28Z",
-    "updated": "2026-02-17T18:20:32Z",
+    "updated": "2026-02-19T09:36:43.578Z",
     "bucket": "active",
     "scope": "directives",
     "source": "architect",
@@ -34,6 +34,38 @@
     "directive_branch": "feature/unify-sidebar-with-app-shell-in-apps-web",
     "directive_base_branch": "dev",
     "directive_merge_status": "merged",
-    "commit_policy": "end_of_directive"
+    "commit_policy": "end_of_directive",
+    "session": "26-02-17_unify-sidebar-with-app-shell-in-apps-web",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T09:36:43.578Z"
+      },
+      "architect-authoring": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-start": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    },
+    "runbook_phase": "architect-discovery",
+    "runbook_subphase": "handoff",
+    "definition_of_done": "Global sidebar unified in layout with shared header, viewport-contained shell, independent scroll regions, fixed sidebar footer, collapsible unique-icon mode, and deterministic single active route highlighting.",
+    "updated_by": "runbook"
   }
 }

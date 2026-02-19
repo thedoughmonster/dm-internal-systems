@@ -38,8 +38,10 @@ const PHASE_PROMPT_CONTRACTS = {
         "Do not start architect-authoring in the same session.",
       ],
       completion_criteria: [
-        "Directive artifact created and goals/meta persisted.",
-        "Architect handoff created and `runbook validate --session <id>` passes.",
+        "Directive artifact is created with explicit branch metadata (`--branch` on directive create).",
+        "Goals/meta are persisted for the selected session.",
+        "Architect handoff file is created (`runbook handoff create --kind authoring`).",
+        "`runbook validate --session <id>` passes.",
       ],
       git_instructions: [
         "Artifact-only writes are allowed.",
@@ -94,7 +96,7 @@ const PHASE_PROMPT_CONTRACTS = {
         "Do not start implementation in this session.",
       ],
       completion_criteria: [
-        "`runbook git prepare --session <id>` succeeds.",
+        "`runbook git prepare --session <id>` succeeds and materializes the directive branch.",
         "Next command is `runbook --phase executor-task --directive <session>`.",
       ],
       git_instructions: [
