@@ -895,6 +895,9 @@ function detectResumeState(root, session, phases) {
   const rememberedPhase = String(meta.runbook_phase || "").trim();
   const rememberedSubphase = String(meta.runbook_subphase || "").trim();
   const completion = normalizePhaseCompletionMap(meta.phase_completion);
+  const slug = String(meta.directive_slug || slugify(meta.title || session));
+  const authoringHandoff = architectHandoffPath(sessionDir, slug);
+  const executorHandoff = path.join(sessionDir, `${slug}.handoff.json`);
 
   const ordered = Array.isArray(phases) ? phases.map((p) => p.id) : [];
   function nextPhase(current) {
@@ -903,12 +906,25 @@ function detectResumeState(root, session, phases) {
     return ordered[idx + 1];
   }
 
+  function hasPhaseHandoffArtifact(phase) {
+    const p = String(phase || "").trim();
+    if (p === "architect-discovery") return fs.existsSync(authoringHandoff);
+    if (p === "architect-authoring") return fs.existsSync(executorHandoff);
+    if (p === "executor-start") return fs.existsSync(executorHandoff);
+    return false;
+  }
+
   function advanceIfCompleted(phase, subphase) {
     const p = String(phase || "").trim();
     const s = String(subphase || "active").trim();
     const row = completion[p] || { active_complete: false, handoff_complete: false };
+    const handoffArtifactPresent = hasPhaseHandoffArtifact(p);
+    if (s === "active" && (row.handoff_complete || (row.active_complete && handoffArtifactPresent))) {
+      const nxt = nextPhase(p);
+      if (nxt) return { phase: nxt, subphase: "active" };
+    }
     if (s === "active" && row.active_complete) return { phase: p, subphase: "handoff" };
-    if (s === "handoff" && row.handoff_complete) {
+    if (s === "handoff" && (row.handoff_complete || handoffArtifactPresent)) {
       const nxt = nextPhase(p);
       if (nxt) return { phase: nxt, subphase: "active" };
     }
@@ -922,9 +938,6 @@ function detectResumeState(root, session, phases) {
       subphase: normalizeSubphaseForPhase(phases, advanced.phase, advanced.subphase || "active"),
     };
   }
-  const slug = String(meta.directive_slug || slugify(meta.title || session));
-  const authoringHandoff = architectHandoffPath(sessionDir, slug);
-  const executorHandoff = path.join(sessionDir, `${slug}.handoff.json`);
   const counts = taskStatusCounts(sessionDir);
 
   if (meta.status === "archived" || meta.status === "done") return { phase: "executor-closeout", subphase: "handoff" };
