@@ -1700,7 +1700,7 @@ function cmdGitPrepare(root, args) {
   if (!dryRun && (needsBranchSwitch || mayRebase)) {
     const directiveArtifactsPrefix = path.posix.join(".runbook", "directives", session);
     assertTreeCleanExcept(root, "runbook git prepare", {
-      allowedPrefixes: [directiveArtifactsPrefix],
+      allowedPrefixes: [".runbook/directives", directiveArtifactsPrefix],
       excludeRunbookLiveLogs: true,
     });
   }
@@ -1818,7 +1818,7 @@ function cmdGitCloseout(root, args) {
   if (!dryRun) {
     const directiveArtifactsPrefix = path.posix.join(".runbook", "directives", session);
     assertTreeCleanExcept(root, "runbook git closeout", {
-      allowedPrefixes: [directiveArtifactsPrefix],
+      allowedPrefixes: [".runbook/directives", directiveArtifactsPrefix],
       excludeRunbookLiveLogs: true,
     });
   }
