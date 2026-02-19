@@ -44,6 +44,7 @@ const PHASE_PROMPT_CONTRACTS = {
       start_tasks: [
         "Confirm operator-approved title, summary, branch, goals, and session/folder value.",
         "Confirm this session will run artifact CRUD commands only.",
+        "If scope is too large, propose a multi-directive split and require explicit operator approval before creating multiple directives.",
       ],
       containment: [
         "Persist only discovery artifacts and handoff metadata.",
@@ -52,13 +53,14 @@ const PHASE_PROMPT_CONTRACTS = {
       finish_tasks: [
         "Report created/updated artifact file paths only.",
         "Report `runbook validate --session <id>` result and the exact next command.",
+        "If multiple directives were created, report a numbered next-command list, one `runbook --phase architect-authoring --directive <session>` per directive.",
         "Tell operator to exit and relaunch for architect-authoring.",
       ],
       completion_criteria: [
-        "Directive artifact is created with explicit branch metadata (`--branch` on directive create).",
-        "Goals/meta are persisted for the selected session.",
-        "Architect handoff file is created (`runbook handoff create --kind authoring`).",
-        "`runbook validate --session <id>` passes.",
+        "For each directive created, directive artifact is created with explicit branch metadata (`--branch` on directive create).",
+        "For each directive created, goals/meta are persisted.",
+        "For each directive created, architect handoff file is created (`runbook handoff create --kind authoring`).",
+        "`runbook validate --session <id>` passes for each directive created.",
       ],
       git_instructions: [
         "Artifact-only writes are allowed.",
