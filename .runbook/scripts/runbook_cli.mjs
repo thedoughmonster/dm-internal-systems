@@ -894,10 +894,32 @@ function detectResumeState(root, session, phases) {
   const phaseIndex = phaseMap(phases);
   const rememberedPhase = String(meta.runbook_phase || "").trim();
   const rememberedSubphase = String(meta.runbook_subphase || "").trim();
+  const completion = normalizePhaseCompletionMap(meta.phase_completion);
+
+  const ordered = Array.isArray(phases) ? phases.map((p) => p.id) : [];
+  function nextPhase(current) {
+    const idx = ordered.indexOf(String(current || ""));
+    if (idx < 0 || idx + 1 >= ordered.length) return "";
+    return ordered[idx + 1];
+  }
+
+  function advanceIfCompleted(phase, subphase) {
+    const p = String(phase || "").trim();
+    const s = String(subphase || "active").trim();
+    const row = completion[p] || { active_complete: false, handoff_complete: false };
+    if (s === "active" && row.active_complete) return { phase: p, subphase: "handoff" };
+    if (s === "handoff" && row.handoff_complete) {
+      const nxt = nextPhase(p);
+      if (nxt) return { phase: nxt, subphase: "active" };
+    }
+    return { phase: p, subphase: s };
+  }
+
   if (rememberedPhase && phaseIndex.has(rememberedPhase)) {
+    const advanced = advanceIfCompleted(rememberedPhase, rememberedSubphase || "active");
     return {
-      phase: rememberedPhase,
-      subphase: normalizeSubphaseForPhase(phases, rememberedPhase, rememberedSubphase || "active"),
+      phase: advanced.phase,
+      subphase: normalizeSubphaseForPhase(phases, advanced.phase, advanced.subphase || "active"),
     };
   }
   const slug = String(meta.directive_slug || slugify(meta.title || session));
