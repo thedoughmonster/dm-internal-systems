@@ -82,8 +82,8 @@ export const metadata: Metadata = {
 
 function TopNav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <Link
             href="/"
@@ -95,7 +95,6 @@ function TopNav() {
             ops console
           </span>
         </div>
-
         <nav className="flex items-center gap-1">
           {topNavItems.map((item) => (
             <Link
@@ -140,9 +139,10 @@ export default function RootLayout({
           audiowide.variable,
           shareTechMono.variable,
           tektur.variable,
+          "h-svh overflow-hidden",
         ].join(" ")}
       >
-        <div className="dm-app-bg min-h-screen">
+        <div className="dm-app-bg h-full overflow-hidden pt-14">
           <TopNav />
           <GlobalSidebarShell toggleable={SIDEBAR_TOGGLEABLE}>
             {children}
