@@ -1,0 +1,20 @@
+{
+  "kind": "runbook_repo_config",
+  "version": 1,
+  "repo_id": "dm-internal-systems",
+  "state_mode": "external_only",
+  "repo_rules_bundle": [
+    "docs/repo-rules.md",
+    "docs/policies/branch-policy.md",
+    "docs/policies/deployment-safety-policy.md",
+    "docs/policies/environment-and-secrets-policy.md",
+    "docs/policies/validation-policy.md",
+    "docs/policies/contracts-and-schema-policy.md",
+    "docs/policies/documentation-and-changelog-policy.md",
+    "docs/policies/engineering/README.md"
+  ],
+  "notes": [
+    "This repository consumes the runbook package runtime.",
+    "Runbook mutable artifacts must stay outside repo source control."
+  ]
+}

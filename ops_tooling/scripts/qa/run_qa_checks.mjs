@@ -47,7 +47,7 @@ function buildChecks(root) {
   const webScripts = loadWebScripts(root);
   const checks = [
     { id: "repo_standards", command: "node", args: ["ops_tooling/scripts/policy/validate_repo_standards.mjs"] },
-    { id: "runbook_validate", command: "node", args: [".runbook/scripts/runbook_cli.mjs", "validate"] },
+    { id: "runbook_validate", command: "runbook", args: ["validate"] },
     { id: "web_lint", command: "npm", args: ["--prefix", "apps/web", "run", "lint"] },
     { id: "web_typecheck", command: "npm", args: ["--prefix", "apps/web", "run", "typecheck"] },
   ];
@@ -73,7 +73,7 @@ function timestampCompact(date = new Date()) {
 }
 
 function writeReport(root, report) {
-  const reportsDir = path.join(root, ".runbook", "reports");
+  const reportsDir = path.join(root, "ops_tooling", "reports");
   fs.mkdirSync(reportsDir, { recursive: true });
   const file = path.join(reportsDir, `${timestampCompact()}.qa.json`);
   fs.writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`, "utf8");

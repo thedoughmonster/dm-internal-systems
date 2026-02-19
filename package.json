@@ -4,8 +4,8 @@
   },
   "scripts": {
     "qa:all": "node ops_tooling/scripts/qa/run_qa_checks.mjs",
-    "runbook:doctor": "node .runbook/scripts/runbook_cli.mjs doctor",
-    "validate:runbook": "node .runbook/scripts/runbook_cli.mjs validate",
+    "runbook:doctor": "runbook doctor",
+    "validate:runbook": "runbook validate",
     "validate:repo-standards": "node ops_tooling/scripts/policy/validate_repo_standards.mjs",
     "hooks:install": "bash ops_tooling/scripts/policy/install_git_hooks.sh"
   },

@@ -60,7 +60,7 @@ uniq_files="$(printf "%s\n" "$all_files" | sed '/^$/d' | sort -u)"
 if echo "$uniq_files" | rg -q '^apps/web/' && ! echo "$uniq_files" | rg -q '^apps/web/changelog/'; then
   needs_web_changelog=1
 fi
-if echo "$uniq_files" | rg -qv '^(apps/web/|apps/web/changelog/|changelog/|\.runbook/|\.gitignore$)' && ! echo "$uniq_files" | rg -q '^changelog/'; then
+if echo "$uniq_files" | rg -qv '^(apps/web/|apps/web/changelog/|changelog/|\.gitignore$)' && ! echo "$uniq_files" | rg -q '^changelog/'; then
   needs_root_changelog=1
 fi
 

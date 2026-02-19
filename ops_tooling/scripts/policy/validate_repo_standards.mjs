@@ -42,7 +42,7 @@ function main() {
     "docs/policies/engineering/error-handling-and-observability.md",
     "docs/policies/engineering/testing-and-validation.md",
     "docs/policies/engineering/definition-of-done.md",
-    ".runbook/scripts/runbook_cli.mjs",
+    "runbook.config.json",
     "ops_tooling/scripts/qa/run_qa_checks.mjs",
   ];
 
