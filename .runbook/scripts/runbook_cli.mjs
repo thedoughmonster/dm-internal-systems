@@ -1485,6 +1485,38 @@ function assertCleanTree(root, context = "operation", { excludeRunbookLiveLogs =
   }
 }
 
+function parsePorcelainPath(line) {
+  const row = String(line || "");
+  const trimmed = row.trim();
+  if (!trimmed) return "";
+  const body = row.slice(3).trim();
+  if (body.includes(" -> ")) return body.split(" -> ").pop().trim();
+  return body;
+}
+
+function isAllowedDirtyPath(p, allowedPrefixes = []) {
+  const rel = String(p || "").replace(/^\.\/+/, "");
+  if (!rel) return false;
+  return (allowedPrefixes || []).some((prefix) => {
+    const clean = String(prefix || "").replace(/^\.\/+/, "").replace(/\/+$/, "");
+    return rel === clean || rel.startsWith(`${clean}/`);
+  });
+}
+
+function assertTreeCleanExcept(root, context, { allowedPrefixes = [], excludeRunbookLiveLogs = false } = {}) {
+  const argv = ["status", "--porcelain"];
+  if (excludeRunbookLiveLogs) {
+    argv.push("--", ".", ...RUNBOOK_LIVE_LOG_EXCLUDES);
+  }
+  const status = gitRun(root, argv).stdout;
+  if (!status) return;
+  const lines = status.split("\n").filter(Boolean);
+  const disallowed = lines.filter((line) => !isAllowedDirtyPath(parsePorcelainPath(line), allowedPrefixes));
+  if (disallowed.length > 0) {
+    throw new Error(`Working tree must be clean before ${context}.\n${disallowed.slice(0, 20).join("\n")}`);
+  }
+}
+
 function cmdGitPrepare(root, args) {
   const dryRun = Boolean(args["dry-run"]);
   const noRebase = Boolean(args["no-rebase"]);
@@ -1514,7 +1546,11 @@ function cmdGitPrepare(root, args) {
   const needsBranchSwitch = currentBranch !== directiveBranch;
   const mayRebase = !noRebase && branchExists;
   if (!dryRun && (needsBranchSwitch || mayRebase)) {
-    assertCleanTree(root, "runbook git prepare", { excludeRunbookLiveLogs: true });
+    const directiveArtifactsPrefix = path.posix.join(".runbook", "directives", session);
+    assertTreeCleanExcept(root, "runbook git prepare", {
+      allowedPrefixes: [directiveArtifactsPrefix],
+      excludeRunbookLiveLogs: true,
+    });
   }
 
   const hasOrigin = gitHasOrigin(root);
