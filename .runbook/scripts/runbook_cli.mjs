@@ -1824,14 +1824,6 @@ function cmdGitCloseout(root, args) {
     dry_run: dryRun,
     actions,
   };
-  if (!dryRun) {
-    const next = normalizeDirectiveMetaDoc(doc, session);
-    if (next && next.meta && typeof next.meta === "object") {
-      markPhaseCompletion(next.meta, "executor-closeout", "handoff");
-      next.meta.updated = nowIso();
-      writeJson(metaPath, next, false);
-    }
-  }
   stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
 }
 
