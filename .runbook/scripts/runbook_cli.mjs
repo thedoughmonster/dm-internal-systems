@@ -268,8 +268,44 @@ function phasesPath(root) {
   return path.join(root, ".runbook", "phases.json");
 }
 
+const STATE_BOOTSTRAP_DONE = new Set();
+
+function runbookStateRoot(root) {
+  const override = String(process.env.RUNBOOK_STATE_ROOT || "").trim();
+  if (override) return path.resolve(override);
+  const repoAbs = path.resolve(root);
+  const repoName = safeName(path.basename(repoAbs), "repo");
+  const hash = crypto.createHash("sha1").update(repoAbs).digest("hex").slice(0, 8);
+  return path.join(process.env.HOME || "~", ".runbook-state", `${repoName}-${hash}`);
+}
+
+function copyTreeIfMissing(src, dst) {
+  if (!fs.existsSync(src) || fs.existsSync(dst)) return;
+  fs.cpSync(src, dst, { recursive: true });
+}
+
+function ensureRunbookStateInitialized(root) {
+  const stateRoot = runbookStateRoot(root);
+  if (STATE_BOOTSTRAP_DONE.has(stateRoot)) return stateRoot;
+
+  ensureDir(stateRoot);
+  const repoRunbook = path.join(root, ".runbook");
+  const repoDirectives = path.join(repoRunbook, "directives");
+  const repoArchive = path.join(repoRunbook, "archive");
+  const stateDirectives = path.join(stateRoot, "directives");
+  const stateArchive = path.join(stateRoot, "archive");
+
+  copyTreeIfMissing(repoDirectives, stateDirectives);
+  copyTreeIfMissing(repoArchive, stateArchive);
+  ensureDir(stateDirectives);
+
+  STATE_BOOTSTRAP_DONE.add(stateRoot);
+  return stateRoot;
+}
+
 function directivesRoot(root) {
-  return path.join(root, ".runbook", "directives");
+  const stateRoot = ensureRunbookStateInitialized(root);
+  return path.join(stateRoot, "directives");
 }
 
 function usage() {
@@ -299,7 +335,7 @@ function usage() {
     "  runbook --help",
     "",
     "Notes:",
-    "  Artifact root: .runbook/directives",
+    "  Artifact root: runbook state directives root (external by default)",
   ].join("\n");
 }
 
@@ -665,9 +701,10 @@ function shQuote(input) {
 }
 
 function runbookLogTargets(root, directiveContext) {
+  const stateRoot = ensureRunbookStateInitialized(root);
   const directiveKey = safeName(directiveContext?.session || "", "no-directive");
-  const sessionLogDir = path.join(root, ".runbook", "session-logs");
-  const codexLogDir = path.join(root, ".runbook", "codex-logs", directiveKey);
+  const sessionLogDir = path.join(stateRoot, "session-logs");
+  const codexLogDir = path.join(stateRoot, "codex-logs", directiveKey);
   const transcriptPath = path.join(sessionLogDir, `${directiveKey}.log`);
   const eventPath = path.join(sessionLogDir, `${directiveKey}.events.log`);
   return { directiveKey, sessionLogDir, codexLogDir, transcriptPath, eventPath };
@@ -691,8 +728,9 @@ function copyIfExists(from, to) {
 }
 
 function exportRunbookLogs(root, session) {
+  const stateRoot = ensureRunbookStateInitialized(root);
   const targets = runbookLogTargets(root, { session });
-  const exportRoot = path.join(root, ".runbook", "exports", safeName(session), timestampCompact());
+  const exportRoot = path.join(stateRoot, "exports", safeName(session), timestampCompact());
   const sessionDir = path.join(exportRoot, "session-logs");
   const codexDir = path.join(exportRoot, "codex-logs");
   ensureDir(sessionDir);
@@ -731,8 +769,8 @@ function exportRunbookLogs(root, session) {
     copied_files: copied,
   };
   writeJson(path.join(exportRoot, "manifest.json"), manifest, false);
-  ensureDir(path.join(root, ".runbook", "exports", safeName(session)));
-  fs.writeFileSync(path.join(root, ".runbook", "exports", safeName(session), "LATEST"), `${path.basename(exportRoot)}\n`, "utf8");
+  ensureDir(path.join(stateRoot, "exports", safeName(session)));
+  fs.writeFileSync(path.join(stateRoot, "exports", safeName(session), "LATEST"), `${path.basename(exportRoot)}\n`, "utf8");
   return manifest;
 }
 
@@ -1662,6 +1700,11 @@ function parsePorcelainPath(line) {
   return body;
 }
 
+function pathIsInsideRepo(root, targetPath) {
+  const rel = path.relative(path.resolve(root), path.resolve(String(targetPath || "")));
+  return rel && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
 function isAllowedDirtyPath(p, allowedPrefixes = []) {
   const rel = String(p || "").replace(/^\.\/+/, "");
   if (!rel) return false;
@@ -1956,7 +1999,20 @@ function cmdGitCycleCommit(root, args) {
   const actions = [];
   for (const row of sessions) {
     const session = row.session;
-    const directivePath = `.runbook/directives/${session}`;
+    const sessionDir = path.join(directivesRoot(root), session);
+    if (!pathIsInsideRepo(root, sessionDir)) {
+      actions.push({
+        session,
+        branch: row.branch,
+        step: "scan",
+        changed: false,
+        committed: false,
+        skipped: true,
+        reason: "external_state",
+      });
+      continue;
+    }
+    const directivePath = path.relative(root, sessionDir).replace(/\\/g, "/");
     const status = gitRun(root, ["status", "--porcelain", "--", directivePath], { allowNonZero: true }).stdout;
     const hasChanges = Boolean(String(status || "").trim());
 
@@ -2049,8 +2105,11 @@ function buildGitDirectiveHealth(root, { sessionFilter = "" } = {}) {
       if (String(status).toLowerCase() === "archived") return null;
       const directiveBranch = String(meta.directive_branch || "").trim();
       const baseBranch = String(meta.directive_base_branch || "dev").trim();
-      const directivePath = `.runbook/directives/${session}`;
-      const dirty = Boolean(gitRun(root, ["status", "--porcelain", "--", directivePath], { allowNonZero: true }).stdout);
+      const sessionDir = path.join(directivesRoot(root), session);
+      const directivePath = path.relative(root, sessionDir).replace(/\\/g, "/");
+      const dirty = pathIsInsideRepo(root, sessionDir)
+        ? Boolean(gitRun(root, ["status", "--porcelain", "--", directivePath], { allowNonZero: true }).stdout)
+        : false;
       const branchExists = directiveBranch ? gitRefExists(root, directiveBranch) : false;
       const baseExists = baseBranch ? gitRefExists(root, baseBranch) : false;
       let ahead = null;

@@ -5,4 +5,4 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 node ops_tooling/scripts/policy/validate_repo_standards.mjs
-node .runbook/scripts/runbook_cli.mjs validate
+runbook validate

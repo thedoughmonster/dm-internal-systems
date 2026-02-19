@@ -5,7 +5,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 node ops_tooling/scripts/policy/validate_repo_standards.mjs >/dev/null
-node .runbook/scripts/runbook_cli.mjs validate >/dev/null
+runbook validate >/dev/null
 
 needs_web_checks=0
 needs_root_changelog=0
