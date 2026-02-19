@@ -27,6 +27,7 @@ This policy defines branch usage, naming, and release flow for this repository.
 - When `feat/*` or `chore/*` work is complete and merged to `dev`, branch closeout is mandatory.
 - Closeout sequence: switch to `dev`, then delete the completed working branch.
 - Closeout is blocked unless the working tree is clean and merge state is confirmed.
+- Clean-tree checks may allow active lifecycle operational artifacts when explicitly scoped by lifecycle tooling.
 - If remote cleanup is part of the task, delete the remote branch only after local closeout succeeds.
 
 ## Release Flow

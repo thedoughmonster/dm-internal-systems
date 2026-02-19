@@ -32,6 +32,7 @@ This file defines repository-wide rules that apply to any actor (human, agent, s
 - Never print or commit secrets.
 - Redact sensitive values when uncertain.
 - Stop and report unexpected repository drift or policy conflicts before proceeding.
+- Treat active workflow orchestration artifacts as expected operational state, not product-code drift, when they align with the current lifecycle session.
 - Follow environment and secrets handling in `docs/policies/environment-and-secrets-policy.md`.
 
 ## Contracts and metadata
