@@ -15,7 +15,7 @@
       "Fix active-route highlighting so exactly one intended route is active"
     ],
     "created": "2026-02-19T09:36:43.512Z",
-    "updated": "2026-02-19T11:15:22.086Z",
+    "updated": "2026-02-19T11:17:25.757Z",
     "id": "9b3a586e-8099-4539-bd66-7844a08cea7f",
     "session": "26-02-19_global-sidebar-layout-unification",
     "owner": "operator",
@@ -58,9 +58,9 @@
         "completed_at": null
       },
       "executor-closeout": {
-        "active_complete": false,
-        "handoff_complete": false,
-        "completed_at": null
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T11:17:25.757Z"
       }
     },
     "runbook_phase": "executor-closeout",
