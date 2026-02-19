@@ -1,0 +1,15 @@
+{
+  "handoff": {
+    "from_role": "architect",
+    "to_role": "executor",
+    "trigger": "architect_to_executor_handoff_v1",
+    "session_id": "c6752b6d-abd2-49f7-a355-2b8e72415af9",
+    "task_file": ".runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile/01-canonical-directive-path-normalization.task.json",
+    "directive_branch": "feat/dm-deploy-recovery-01-internal-reconcile",
+    "required_reading": "apps/web/docs/guides/component-paradigm.md",
+    "objective": "Execute authored tasks in order: path normalization, CI/guardrail command wiring repair, and infra status/evidence truthfulness reconciliation within task allowlists and validation gates.",
+    "blocking_rule": "Architect must stop and transfer execution to executor after handoff creation",
+    "worktree_mode": "clean_required",
+    "worktree_allowlist_paths": []
+  }
+}

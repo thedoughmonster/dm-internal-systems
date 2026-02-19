@@ -1,0 +1,102 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "internal ci-guardrail operability repair",
+    "summary": "Repair internal CI and guardrail operability, including integration test command wiring and runbook-facing checks.",
+    "status": "done",
+    "created": "2026-02-19T14:25:20.723Z",
+    "updated": "2026-02-19T15:07:47.859Z",
+    "id": "f6252d27-167b-4fdf-8ce1-1e98546f372f",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "done",
+    "tags": [
+      "runbook",
+      "ci",
+      "guardrails",
+      "validation"
+    ],
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium",
+    "completion_summary": "Reconciled CI/guardrail contract wiring to executable entrypoints, added explicit integration command-existence checks for missing test:integration, aligned validation policy wording, and corrected infra status to reflect non-operable integration run step."
+  },
+  "task": {
+    "objective": "Define and enforce internal CI and guardrail contract corrections so integration test command wiring and validation expectations are executable, deterministic, and aligned with current repository command surfaces.",
+    "constraints": [
+      "Contain changes to directive/task artifacts and runbook-facing policy/operations documentation.",
+      "Do not edit product implementation code in this task.",
+      "Validation commands must reference real, existing command entrypoints.",
+      "Maintain compatibility with repository validation policy requirements."
+    ],
+    "allowed_files": [
+      {
+        "path": ".runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile/*.json",
+        "access": "edit"
+      },
+      {
+        "path": "docs/policies/*.md",
+        "access": "edit"
+      },
+      {
+        "path": "docs/operations/**/*.md",
+        "access": "edit"
+      },
+      {
+        "path": "README.md",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Inventory current CI and guardrail validation command references tied to deployment reconciliation and identify broken or stale command wiring.",
+        "files": [],
+        "artifact": "Command wiring inventory"
+      },
+      {
+        "id": "step_2",
+        "instruction": "Update task/directive contracts to reference canonical validation commands and explicit expected outcomes, using command-existence checks when an integration entrypoint is missing.",
+        "files": [],
+        "artifact": "Updated task contract command sections"
+      },
+      {
+        "id": "step_3",
+        "instruction": "Align relevant policy/operations docs where command wiring drift exists, keeping language consistent with validation policy.",
+        "files": [],
+        "artifact": "Doc alignment edits"
+      },
+      {
+        "id": "step_4",
+        "instruction": "Run runbook/session validation and perform command-existence spot checks for referenced entrypoints.",
+        "files": [],
+        "artifact": "Validation and spot-check results"
+      }
+    ],
+    "validation": {
+      "commands": [
+        "./runbook validate --session 26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile",
+        "./runbook --help",
+        "npm --prefix apps/web run | rg -n \"lint|typecheck|test:integration\" -S",
+        "rg -n \"integration-test-testenv|check-test-env\\.sh|test:integration\" .github/workflows/ci-baseline.yml ops_tooling/scripts/ci/check-test-env.sh apps/web/package.json -S",
+        "rg -n \"runbook validate|integration|guardrail|lint|typecheck|test\" docs .runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile -S"
+      ]
+    },
+    "expected_output": [
+      "CI/guardrail-related task contracts reference executable command entrypoints only.",
+      "Integration test command wiring references are consistent across updated artifacts/docs and explicitly mark missing integration npm entrypoint state.",
+      "Runbook/session validation passes after contract updates."
+    ],
+    "stop_conditions": [
+      "Stop if required command entrypoints are missing and no canonical replacement is discoverable in-repo.",
+      "Stop if resolving command wiring would require product-code implementation changes in this phase."
+    ],
+    "notes": []
+  }
+}

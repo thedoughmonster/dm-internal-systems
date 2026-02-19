@@ -1,0 +1,100 @@
+{
+  "kind": "directive_task",
+  "schema_version": "1.0",
+  "meta": {
+    "title": "infra status-evidence truthfulness reconciliation",
+    "summary": "Reconcile deployment infra status and evidence docs to repo-verifiable truth and remove unsupported assertions.",
+    "status": "todo",
+    "created": "2026-02-19T14:25:52.015Z",
+    "updated": "2026-02-19T14:26:07.844Z",
+    "id": "c7f15e1e-6e45-4e6b-afda-1b5e1207b4ca",
+    "priority": "high",
+    "session_priority": "high",
+    "owner": "operator",
+    "assignee": "executor",
+    "bucket": "todo",
+    "tags": [
+      "runbook",
+      "docs",
+      "infra",
+      "evidence"
+    ],
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "execution_model": "gpt-5.3-codex",
+    "thinking_level": "medium"
+  },
+  "task": {
+    "objective": "Reconcile deployment infrastructure status and evidence documentation so all statements are truthful, internally consistent, and directly supported by repo-verifiable artifacts.",
+    "constraints": [
+      "Limit edits to directive/task artifacts and deployment operations/reference documentation.",
+      "Do not introduce claims that cannot be validated from repository artifacts or explicit command output.",
+      "Do not edit product implementation code in this task.",
+      "Keep status/evidence language explicit about certainty level when evidence is partial."
+    ],
+    "allowed_files": [
+      {
+        "path": ".runbook/directives/26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile/*.json",
+        "access": "edit"
+      },
+      {
+        "path": "docs/operations/deployment/infra-status.md",
+        "access": "edit"
+      },
+      {
+        "path": "docs/operations/deployment/infra-evidence.md",
+        "access": "edit"
+      },
+      {
+        "path": "docs/architecture/deployment-model.md",
+        "access": "edit"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step_1",
+        "instruction": "Review current infra status and evidence documents; enumerate statements that require direct repository evidence.",
+        "files": [],
+        "artifact": "Assertion-to-evidence inventory"
+      },
+      {
+        "id": "step_2",
+        "instruction": "Cross-check each statement against available repo artifacts and command-verifiable facts; mark unsupported assertions for correction or removal.",
+        "files": [],
+        "artifact": "Verified assertion matrix"
+      },
+      {
+        "id": "step_3",
+        "instruction": "Update status/evidence documents to reflect verified truth only, including explicit unknown/pending markers where evidence is incomplete.",
+        "files": [],
+        "artifact": "Reconciled infra status/evidence docs"
+      },
+      {
+        "id": "step_4",
+        "instruction": "Validate document consistency against deployment model references and runbook session validation requirements.",
+        "files": [],
+        "artifact": "Consistency check results"
+      }
+    ],
+    "validation": {
+      "commands": [
+        "./runbook validate --session 26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile",
+        "rg -n \"TODO|TBD|unknown|unverified|pending|evidence\" docs/operations/deployment/infra-status.md docs/operations/deployment/infra-evidence.md -S",
+        "rg -n \"infra-status|infra-evidence\" docs/architecture/deployment-model.md docs/operations/deployment/infra-status.md docs/operations/deployment/infra-evidence.md -S"
+      ]
+    },
+    "expected_output": [
+      "Infra status and evidence docs contain only repo-verifiable claims or explicitly marked unknowns.",
+      "Unsupported or stale assertions are removed or corrected.",
+      "Cross-document references are internally consistent.",
+      "Runbook/session validation passes."
+    ],
+    "stop_conditions": [
+      "Stop if required factual claims depend on external systems not observable from repository context.",
+      "Stop if reconciling documentation truth would require performing production mutations or deployment actions."
+    ],
+    "notes": []
+  }
+}

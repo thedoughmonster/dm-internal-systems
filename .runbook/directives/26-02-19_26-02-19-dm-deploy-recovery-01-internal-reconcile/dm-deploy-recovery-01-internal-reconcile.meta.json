@@ -1,0 +1,67 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "directive_slug": "dm-deploy-recovery-01-internal-reconcile",
+    "title": "dm-deploy-recovery-01-internal-reconcile",
+    "summary": "Recover deployment model internal integrity by reconciling drift, restoring broken operational checks, and normalizing directive contracts to current repository paths.",
+    "status": "todo",
+    "directive_branch": "feat/dm-deploy-recovery-01-internal-reconcile",
+    "goals": [
+      "Normalize deployment directive/task paths to canonical runbook-era locations.",
+      "Repair and validate internal CI/guardrail operability including integration test command wiring.",
+      "Reconcile infra status/evidence docs to truthful repo-verifiable state."
+    ],
+    "created": "2026-02-19T13:15:36.047Z",
+    "updated": "2026-02-19T15:07:50.686Z",
+    "id": "c6752b6d-abd2-49f7-a355-2b8e72415af9",
+    "session": "26-02-19_26-02-19-dm-deploy-recovery-01-internal-reconcile",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "high",
+    "session_priority": "high",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "large",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T13:16:18.252Z"
+      },
+      "architect-authoring": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T14:26:55.147Z"
+      },
+      "executor-start": {
+        "active_complete": true,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": true,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    },
+    "runbook_phase": "executor-task",
+    "runbook_subphase": "handoff"
+  }
+}
