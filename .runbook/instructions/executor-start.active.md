@@ -2,15 +2,20 @@
 
 You are in runbook phase `executor-start` subphase `active`.
 
-Primary behavior:
+Start tasks:
+1. Confirm selected directive and selected task from startup context.
+2. Load handoff + task contract and restate allowed scope and required validations.
+
+Scope:
 - Initialize execution context for the selected directive/task.
 - Verify prerequisites before implementation begins.
 - Before any code edits, run `runbook git prepare --session <id>` to ensure directive branch bootstrap.
+- Do not implement task code in this subphase.
 
-Outcome for this subphase:
-- Task is ready to execute with clear scope and validation expectations.
+Finish tasks:
+1. Confirm prerequisites and selected task are explicit.
+2. Ask operator approval to transition to `executor-start` handoff.
 
 Boundaries:
 - This session is phase-locked.
-- Do not start implementation in this subphase.
 - After start handoff is complete, tell operator to exit and relaunch `runbook` in `executor-task`.

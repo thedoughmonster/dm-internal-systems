@@ -20,9 +20,17 @@ const RUNBOOK_PHASE_IDS = [
 const PHASE_PROMPT_CONTRACTS = {
   "architect-discovery": {
     active: {
+      start_tasks: [
+        "Restate current phase/subphase and confirm discovery-only mode.",
+        "Ask one natural intent question to start discovery.",
+      ],
       containment: [
         "Conversational discovery only; do not start authoring or execution work.",
         "Do not create tasks in this subphase.",
+      ],
+      finish_tasks: [
+        "Summarize agreed directive title, branch plan, goals, and definition of done.",
+        "Ask for explicit approval to transition to architect-discovery handoff.",
       ],
       completion_criteria: [
         "Directive title, branch plan, goals, and definition of done are agreed.",
@@ -33,9 +41,18 @@ const PHASE_PROMPT_CONTRACTS = {
       ],
     },
     handoff: {
+      start_tasks: [
+        "Confirm operator-approved title, summary, branch, goals, and session/folder value.",
+        "Confirm this session will run artifact CRUD commands only.",
+      ],
       containment: [
         "Persist only discovery artifacts and handoff metadata.",
         "Do not start architect-authoring in the same session.",
+      ],
+      finish_tasks: [
+        "Report created/updated artifact file paths only.",
+        "Report `runbook validate --session <id>` result and the exact next command.",
+        "Tell operator to exit and relaunch for architect-authoring.",
       ],
       completion_criteria: [
         "Directive artifact is created with explicit branch metadata (`--branch` on directive create).",
@@ -51,9 +68,17 @@ const PHASE_PROMPT_CONTRACTS = {
   },
   "architect-authoring": {
     active: {
+      start_tasks: [
+        "Load selected directive meta + architect handoff and confirm authoring scope.",
+        "Enumerate existing tasks and agree authoring order with operator.",
+      ],
       containment: [
         "Author directive/task artifacts only.",
         "No product-code edits in this subphase.",
+      ],
+      finish_tasks: [
+        "Confirm each task contract is complete (objective, allowed_files, steps, validation, expected_output, stop_conditions).",
+        "Ask explicit approval to move to architect-authoring handoff.",
       ],
       completion_criteria: [
         "Task files exist with complete contracts and operator-approved scope.",
@@ -64,9 +89,17 @@ const PHASE_PROMPT_CONTRACTS = {
       ],
     },
     handoff: {
+      start_tasks: [
+        "Confirm authoring is complete and executor handoff inputs are explicit (objective, roles, task-file selection).",
+      ],
       containment: [
         "Create executor handoff and stop.",
         "Do not start executor-start in the same session.",
+      ],
+      finish_tasks: [
+        "Report executor handoff artifact path.",
+        "Report validation result and exact next command.",
+        "Tell operator to exit and relaunch for executor-start.",
       ],
       completion_criteria: [
         "Executor handoff artifact exists and validates cleanly.",
@@ -79,8 +112,15 @@ const PHASE_PROMPT_CONTRACTS = {
   },
   "executor-start": {
     active: {
+      start_tasks: [
+        "Confirm selected directive + task from startup context.",
+        "Load handoff/task contract and restate allowed scope + required validations.",
+      ],
       containment: [
         "Prepare execution context only; do not implement task code yet.",
+      ],
+      finish_tasks: [
+        "Confirm operator readiness to run executor-start handoff.",
       ],
       completion_criteria: [
         "Prerequisites and selected task are explicit.",
@@ -91,9 +131,18 @@ const PHASE_PROMPT_CONTRACTS = {
       ],
     },
     handoff: {
+      start_tasks: [
+        "Run `runbook git prepare --session <id>` and confirm directive branch is current.",
+        "Confirm selected task and execution go-ahead.",
+      ],
       containment: [
         "Finalize execution bootstrap and stop.",
         "Do not start implementation in this session.",
+      ],
+      finish_tasks: [
+        "Report branch/bootstrap result and any blockers.",
+        "Report exact next command: `runbook --phase executor-task --directive <session>`.",
+        "Tell operator to exit and relaunch for executor-task.",
       ],
       completion_criteria: [
         "`runbook git prepare --session <id>` succeeds and materializes the directive branch.",
@@ -106,9 +155,17 @@ const PHASE_PROMPT_CONTRACTS = {
   },
   "executor-task": {
     active: {
+      start_tasks: [
+        "Confirm selected task file and restate task objective/scope before edits.",
+        "Confirm validation commands that must pass for this task.",
+      ],
       containment: [
         "Implement only the selected task contract scope.",
         "Do not run directive closeout in this subphase.",
+      ],
+      finish_tasks: [
+        "Run task validation commands and gather evidence.",
+        "Prepare concise completion summary for `runbook task finish`.",
       ],
       completion_criteria: [
         "Task implementation complete.",
@@ -120,9 +177,17 @@ const PHASE_PROMPT_CONTRACTS = {
       ],
     },
     handoff: {
+      start_tasks: [
+        "Run required validations and then run `runbook task finish --session <id> --task <slug|file> --summary <text>`.",
+      ],
       containment: [
         "Persist task completion evidence and stop.",
         "Do not run closeout in this session.",
+      ],
+      finish_tasks: [
+        "Report task finish result + validation status.",
+        "Report exact next command for next task or executor-closeout.",
+        "Tell operator to exit and relaunch for next phase/session.",
       ],
       completion_criteria: [
         "Task metadata updated with completion summary and validation status.",
@@ -135,8 +200,15 @@ const PHASE_PROMPT_CONTRACTS = {
   },
   "executor-closeout": {
     active: {
+      start_tasks: [
+        "Confirm all tasks are done and required validations are complete.",
+        "Confirm operator intent for closeout options (delete branch/remote or keep).",
+      ],
       containment: [
         "Finalize acceptance and closeout readiness only.",
+      ],
+      finish_tasks: [
+        "Ask explicit approval to run closeout handoff command.",
       ],
       completion_criteria: [
         "All tasks and required validations are complete.",
@@ -147,8 +219,16 @@ const PHASE_PROMPT_CONTRACTS = {
       ],
     },
     handoff: {
+      start_tasks: [
+        "Run `runbook git closeout --session <id>` with only operator-approved flags.",
+      ],
       containment: [
         "Perform final closeout and stop session.",
+      ],
+      finish_tasks: [
+        "Report merge/closeout result (branch, merge outcome, cleanup actions).",
+        "Report explicit next-step completion command(s).",
+        "Tell operator this session is complete and must end.",
       ],
       completion_criteria: [
         "`runbook git closeout --session <id>` succeeds.",
@@ -392,7 +472,9 @@ function renderPhasePromptContract(phaseId, subphase) {
   };
   return [
     "Phase containment contract (explicit):",
+    ...asLines("Start tasks:", contract.start_tasks),
     ...asLines("Containment:", contract.containment),
+    ...asLines("Finish tasks:", contract.finish_tasks),
     ...asLines("Completion criteria:", contract.completion_criteria),
     ...asLines("Git instructions:", contract.git_instructions),
   ].join("\n").trim();
