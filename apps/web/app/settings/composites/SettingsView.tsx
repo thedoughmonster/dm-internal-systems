@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { SlidersHorizontal, Type } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -140,7 +141,8 @@ export default function SettingsView({
                     isActive={activeSection === "general"}
                     onClick={() => setActiveSection("general")}
                   >
-                    General
+                    <SlidersHorizontal className="h-4 w-4" />
+                    <span>General</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem id="settings-sidebar-menu-type">
@@ -150,7 +152,8 @@ export default function SettingsView({
                     isActive={activeSection === "type"}
                     onClick={() => setActiveSection("type")}
                   >
-                    Type
+                    <Type className="h-4 w-4" />
+                    <span>Type</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

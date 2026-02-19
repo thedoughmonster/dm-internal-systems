@@ -1,0 +1,69 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "directive_slug": "global-layout-sidebar-unification-and-active-route-state-fix",
+    "title": "Global Layout Sidebar Unification and Active Route State Fix",
+    "summary": "Unify sidebar into one global layout-bound component inside the main container with shared fixed header, independent scroll regions, collapsible icon mode with unique icons, fixed sidebar footer, and deterministic single active-route highlighting.",
+    "status": "todo",
+    "directive_branch": "feat/global-sidebar-layout-unification",
+    "goals": [
+      "Use one global layout-bound sidebar across apps/web",
+      "Place sidebar inside main container next to content with shared fixed header",
+      "Constrain shell to viewport height with independent sidebar/content scrolling",
+      "Support collapsible icon-column sidebar with unique icons per item",
+      "Fix active-route highlighting so exactly one intended route is active"
+    ],
+    "created": "2026-02-19T09:36:43.512Z",
+    "updated": "2026-02-19T11:15:22.086Z",
+    "id": "9b3a586e-8099-4539-bd66-7844a08cea7f",
+    "session": "26-02-19_global-sidebar-layout-unification",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T09:41:08.605Z"
+      },
+      "architect-authoring": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T10:07:14.744Z"
+      },
+      "executor-start": {
+        "active_complete": true,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": true,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    },
+    "runbook_phase": "executor-closeout",
+    "runbook_subphase": "active"
+  }
+}
