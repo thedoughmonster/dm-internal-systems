@@ -1,0 +1,65 @@
+{
+  "kind": "directive_session_meta",
+  "schema_version": "1.0",
+  "meta": {
+    "directive_slug": "dm-deploy-recovery-03-release-closeout",
+    "title": "dm-deploy-recovery-03-release-closeout",
+    "summary": "Finalize deployment-model release safety by aligning runbooks and policy docs to implemented controls and completing closeout validation artifacts.",
+    "status": "todo",
+    "directive_branch": "feat/dm-deploy-recovery-03-release-closeout",
+    "goals": [
+      "Align deployment model and release runbook docs to implemented and verified controls.",
+      "Resolve any remaining policy/implementation drift discovered in directives 01 and 02.",
+      "Complete closeout artifacts, validation narrative, and changelog requirements for release safety."
+    ],
+    "created": "2026-02-19T13:16:18.492Z",
+    "updated": "2026-02-19T13:16:18.569Z",
+    "id": "165e429d-3ccf-4e11-9a35-8101ee84d05c",
+    "session": "dm-deploy-recovery-03-release-closeout",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "auto_run": false,
+    "tags": [
+      "needs-triage"
+    ],
+    "bucket": "active",
+    "scope": "directives",
+    "source": "architect",
+    "effort": "medium",
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "directive_base_branch": "dev",
+    "directive_merge_status": "open",
+    "commit_policy": "end_of_directive",
+    "phase_completion": {
+      "architect-discovery": {
+        "active_complete": true,
+        "handoff_complete": true,
+        "completed_at": "2026-02-19T13:16:18.569Z"
+      },
+      "architect-authoring": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-start": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-task": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      },
+      "executor-closeout": {
+        "active_complete": false,
+        "handoff_complete": false,
+        "completed_at": null
+      }
+    }
+  }
+}

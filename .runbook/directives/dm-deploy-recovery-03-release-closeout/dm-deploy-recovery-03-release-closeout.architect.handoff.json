@@ -1,0 +1,51 @@
+{
+  "kind": "runbook_architect_handoff",
+  "schema_version": "1.0",
+  "handoff": {
+    "from_phase": "architect-discovery",
+    "to_phase": "architect-authoring",
+    "created": "2026-02-19T13:16:18.569Z",
+    "objective": "Author closeout-focused task contracts that finalize documentation alignment, validations, and release-safe completion artifacts after directives 01 and 02 pass."
+  },
+  "directive": {
+    "session": "dm-deploy-recovery-03-release-closeout",
+    "directive_slug": "dm-deploy-recovery-03-release-closeout",
+    "title": "dm-deploy-recovery-03-release-closeout",
+    "summary": "Finalize deployment-model release safety by aligning runbooks and policy docs to implemented controls and completing closeout validation artifacts.",
+    "status": "todo",
+    "directive_branch": "feat/dm-deploy-recovery-03-release-closeout",
+    "directive_base_branch": "dev",
+    "commit_policy": "end_of_directive",
+    "owner": "operator",
+    "assignee": null,
+    "priority": "medium",
+    "session_priority": "medium",
+    "effort": "medium",
+    "goals": [
+      "Align deployment model and release runbook docs to implemented and verified controls.",
+      "Resolve any remaining policy/implementation drift discovered in directives 01 and 02.",
+      "Complete closeout artifacts, validation narrative, and changelog requirements for release safety."
+    ],
+    "definition_of_done": "",
+    "constraints": [],
+    "acceptance_criteria": [],
+    "non_goals": [],
+    "tags": [
+      "needs-triage"
+    ],
+    "depends_on": [],
+    "blocked_by": [],
+    "related": [],
+    "updated": "2026-02-19T13:16:18.531Z"
+  },
+  "authoring_requirements": {
+    "required_commands": [
+      "runbook task create",
+      "runbook task set-contract",
+      "runbook meta set --task ...",
+      "runbook handoff create --kind executor",
+      "runbook validate --session ..."
+    ],
+    "completion_gate": "All task contracts complete and validated; executor handoff created."
+  }
+}
