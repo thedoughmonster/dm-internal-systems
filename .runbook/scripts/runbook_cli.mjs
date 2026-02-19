@@ -1731,7 +1731,13 @@ function cmdGitCloseout(root, args) {
     if (gitRefExists(root, `origin/${baseBranch}`)) baseRef = `origin/${baseBranch}`;
   }
 
-  if (!dryRun) assertCleanTree(root, "runbook git closeout", { excludeRunbookLiveLogs: true });
+  if (!dryRun) {
+    const directiveArtifactsPrefix = path.posix.join(".runbook", "directives", session);
+    assertTreeCleanExcept(root, "runbook git closeout", {
+      allowedPrefixes: [directiveArtifactsPrefix],
+      excludeRunbookLiveLogs: true,
+    });
+  }
 
   const currentBranch = gitRun(root, ["rev-parse", "--abbrev-ref", "HEAD"]).stdout;
   if (!directiveExists) {
@@ -1852,7 +1858,7 @@ function cmdGitCycleCommit(root, args) {
     .filter(Boolean)
     .filter((row) => {
       const status = String(row.status || "").toLowerCase();
-      return status !== "archived" && status !== "done";
+      return status !== "archived";
     });
 
   const actions = [];
@@ -2029,6 +2035,66 @@ function cmdGitHelper(root, args) {
   const directiveContext = session ? loadDirectiveContext(root, session) : null;
   const report = buildGitDirectiveHealth(root, { sessionFilter: session });
   const prompt = buildGitHelperPrompt(report, { sessionFilter: session });
+  if (!dryRun && !(stdin.isTTY && stdout.isTTY)) {
+    const actions = (report.sessions || []).map((row) => {
+      const branch = String(row.directive_branch || "");
+      if (!branch) {
+        return {
+          session: row.session,
+          priority: "high",
+          action: "fix_meta",
+          command: `runbook meta set --session ${row.session} --set directive_branch=feat/<slug>`,
+          reason: "directive_branch missing",
+        };
+      }
+      if (!row.branch_exists) {
+        return {
+          session: row.session,
+          priority: "high",
+          action: "prepare_branch",
+          command: `runbook git prepare --session ${row.session}`,
+          reason: "branch missing locally",
+        };
+      }
+      if (row.needs_commit) {
+        return {
+          session: row.session,
+          priority: "high",
+          action: "commit_artifacts",
+          command: "runbook git cycle-commit",
+          reason: "directive artifacts dirty",
+        };
+      }
+      if (row.needs_rebase) {
+        return {
+          session: row.session,
+          priority: "medium",
+          action: "rebase_branch",
+          command: `runbook git prepare --session ${row.session}`,
+          reason: `behind base by ${row.behind_base}`,
+        };
+      }
+      return {
+        session: row.session,
+        priority: "low",
+        action: "none",
+        command: "",
+        reason: "no action required",
+      };
+    });
+    const out = {
+      kind: "runbook_git_helper_report",
+      ok: true,
+      interactive_launch: false,
+      reason: "non_tty",
+      session: session || null,
+      next_actions: actions,
+      report,
+      prompt,
+    };
+    stdout.write(`${JSON.stringify(out, null, 2)}\n`);
+    return;
+  }
   return launchCodexWithPrompt(root, prompt, {
     dryRun,
     directiveContext,
